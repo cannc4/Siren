@@ -1,0 +1,186 @@
+.Home {
+  padding: 15px;
+  display: flex;
+  flex-direction: row;
+}
+#SCmsg{
+
+  font-size: 10px;
+  vertical-align: center;
+  line-height: 80px;
+  max-width: 120px;
+  text-align: center;
+}
+/*.Player {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+}
+
+.playbox {
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+  width: 100px;
+  background: #f00;
+}*/
+
+.Commands {
+  display: flex;
+    margin: 5px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  max-width: 300px;
+}
+
+.Command {
+
+  margin: 5px;
+  background: #CCC;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 250px;
+}
+
+.Tidal {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  margin: 5px;
+  max-width: 180px;
+
+}
+
+.Player-holder {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+  background: #333!important;
+
+}
+
+.Player {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  line-height: 20px;
+  min-height: 30px;
+  padding: 0;
+}
+
+.playbox {
+  box-sizing: border-box;
+  flex-grow: 1;
+  width: 100%;
+  padding: 0;
+  text-align: center;
+  overflow: hidden;
+  list-style: none;
+  display: flex;
+  font-size: 14px;
+  line-height: 24px;
+  vertical-align: center;
+  background: none!important;
+}
+
+.playbox > input {
+  font-size: 12px;
+  background: none!important;
+  border-bottom: 2px solid #999;
+  flex-grow: 1;
+}
+
+.playbox > div {
+  background: none!important;
+  /*background: #333!important;*/
+}
+
+.playbox-active {
+  background-color: #933!important;
+}
+
+.playbox-cycle {
+  font-size: 20px;
+  vertical-align: center;
+  line-height: 20px;
+  max-width: 70px;
+  text-align: center;
+}
+
+.easter:hover textarea {
+
+  display: flex;
+  overflow:auto;
+  font-size: 12px;
+
+}
+
+.textarea {
+
+  display: flex;
+  overflow:auto;
+  line-height: 20px;
+  max-width: 70px;
+  font-size: 12px;
+
+}
+
+fieldset {
+    border: none;
+}
+
+.flex-wrapper {
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.flex-wrapper > div {
+    flex: 1 1 auto;
+}
+
+.flex-container {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+    width: 400px;
+    height: 250px;
+    background-color: lightgrey;
+}
+label {
+    display: none;
+}
+
+legend {
+    display: block;
+    width: 100%;
+}
+
+input {
+    width: 100%;
+}
+/* Table column sizing
+================================== */
+.Player--2cols > .playbox  { width: 50%; }
+.Player--3cols > .playbox  { width: 33.33%; }
+.Player--4cols > .playbox  { width: 25%; }
+.Player--5cols > .playbox  { width: 20%; }
+.Player--6cols > .playbox  { width: 16.6%; }
+.Player--7cols > .playbox  { width: 14.27%; }
+.Player--8cols > .playbox  { width: 12.5%; }
+.Player--17cols > .playbox  { width: 5.88%; }

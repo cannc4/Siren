@@ -1,0 +1,42 @@
+.fg {
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+}
+
+.font-motto {
+  font-family: 'Rokkitt', serif;
+}
+
+.comp-title {
+  width: 98%;
+  margin: 25px 0;
+  text-align: center;
+  font-size: 36px;
+  line-height: 36px;
+  font-weight: 100;
+}
+
+*::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 5px rgba(25,77,110, 0.3);
+	background-color: #EEEEEE;
+}
+
+*::-webkit-scrollbar
+{
+  width: 5px;
+  height: 5px;
+	background-color: #EEEEEE;
+  z-index: 999;
+}
+
+::-webkit-scrollbar:hover
+{
+	width: 8px;
+  height: 16px;
+}
+
+*::-webkit-scrollbar-thumb
+{
+	background-color: #aaa;
+}

@@ -1,0 +1,22 @@
+ToDO:
+
+- Command line interface
+- Increase channel number to (16 || Dynamic)
+- Server socket for info
+- Text box for supercollider/sclang messages
+- get clock from Haskell
+- Server stop button/stop all
+- Sequencer/timer interface(!)
+- Loop the selected sequence
+- Individual clock for channels
+- bounded randomness functions (all possible parameters)
+- Individual cycle visual representation (e.g Color Scheme)
+- Save current workstation as a preset to Firebase
+- Preset sequencing functions (Composing with workstations)
+- By-pass Tidal with Javascript
+
+Future:
+
+- write a functional programming language with Javascript
+- Standalone application
+- Hardware/Module implementation
