@@ -1,0 +1,36 @@
+.MenuBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  color: #737373;
+  z-index: 1;
+  border-bottom: 2px solid #737373;
+  padding: 0 30px;
+}
+.pullleft {
+  float: left;
+}
+.pullright {
+  float: right;
+}
+
+.MenuBar > a {
+  padding: 5px;
+  height: 50px;
+  line-height: 50px;
+  vertical-align: middle;
+  color: #999999;
+  font-weight: 400;
+  font-size: 18px;
+}
+
+.MenuBar > a:hover {
+  color: #737373;
+  text-decoration: underline;
+}
+
+.MenuBar > a.active {
+  color: #303030;
+  text-decoration: none;
+}

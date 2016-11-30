@@ -1,0 +1,183 @@
+body, .fill, .cont {
+  position: fixed;
+  top: 62px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+  z-index: 0;
+  font-size: 12px;
+}
+* {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+}
+body {
+  /*background: url('http://sut.la/tcab/background.png');*/
+  /*background-position: bottom;;
+  background-repeat: no-repeat;
+  background-size: cover;
+  max-height: 100%;*/
+}
+
+.logo {
+  background: url('http://tcab.biz/assets/logo.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 100px;
+  height: 100%;
+}
+
+*:focus {
+    outline: none;
+}
+
+* > button, input {
+  padding: 6px;
+  font-size: 14px;
+  border: none;
+}
+
+* >input {
+  background: white;
+  color: rgb(25,77,110);
+  border-bottom: 2px solid rgb(25,77,110);
+  font-size: 12px;
+}
+
+
+* > input .light {
+  border-bottom: 2px solid #fff;
+}
+
+button:hover {
+  cursor: pointer;
+  color: #fff;
+}
+
+.action {
+  background: none;
+  border-bottom: 2px solid rgb(25,77,110);
+  color: rgb(25,77,110);
+}
+
+.action:hover {
+  background: rgb(25,77,110);
+  color: #eee;
+}
+
+
+.view {
+  background: none;
+  border-bottom: 2px solid #a00;
+  color: #a00;
+}
+
+.view:hover {
+  background: #a00;
+  color: #eee;
+}
+
+b, p {
+  padding: 0;
+  margin: 0;
+}
+
+
+
+.Section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.Section-title {
+  margin: 0;
+  padding: 15px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Section-description {
+  margin: 0;
+  padding: 40px;
+  width: 100%;
+  text-align: center;
+  text-transform: lowercase;
+  background: #303030;
+  color: #cacaca;
+  font-size: 22px;
+}
+
+.Section-body {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.Section-body > h5 {
+  padding: 10px;
+  font-size: 16px;
+  margin: 5px;
+}
+
+.Section-body > input {
+  font-size: 16px;
+  margin: 0;
+  width: 300px;
+  align-self: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.primary-button {
+  background: #234053;
+  color: #FFF;
+  font-weight: 200;
+}
+
+.primary-button:hover {
+  background: #F9DADB;
+  color: #234053;
+}
+
+.secondary-button {
+  background: #FFF;
+  color: #234053;
+  font-weight: 400;
+}
+
+.secondary-button:hover {
+  background: #eee;
+  color: #234053;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.boxshadow {
+  -webkit-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+  -moz-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+}
+
+.boxshadowr {
+  -webkit-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+  -moz-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 2px 0px 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+}
+
+.boxshadown {
+  -webkit-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+  -moz-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+}
