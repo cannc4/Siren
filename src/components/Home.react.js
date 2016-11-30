@@ -14,7 +14,7 @@ class Home extends Component {
       tidalServerLink: 'localhost:3001',
       duration: 16,
       steps: 24,
-      channels: ['d1','d2','d3', 'd4', 'd5', 'd6', 'd7'],
+      channels: ['d1','d2','d3', 'd4', 'd5', 'd6', 'sendOSC processing'],
       timer: { isActive: false, current: null },
       values: {},
       scCommand: ''
@@ -41,25 +41,14 @@ class Home extends Component {
             console.log("command: ", channelcommands);
             if (channelcommands[k] !== undefined) {
               if (channelcommands[k] !== k + ' $ ' + cmd.command) {
-				if(!channelcommands[k].includes("sendOSC")){
-					store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
-					ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
-				}
-				else{
-					store.dispatch(setCommand(k, cmd.command));
-					ctx.sendCommand(tidalServerLink, cmd.command);
-				}
-			  }
-            } else 
-			{
-              if(!channelcommands[k].includes("sendOSC")){
-				store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
-				ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
-			  }
-			  else {
-				store.dispatch(setCommand(k, cmd.command));
-				ctx.sendCommand(tidalServerLink, cmd.command);
-			  }
+        					store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
+        					ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
+        			}
+            }
+            else
+		        {
+        				store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
+        				ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
             }
           }
         })
@@ -163,16 +152,9 @@ class Home extends Component {
             if (cmds.indexOf(value) > -1){
               const cmd = _.find(commands, c => c.name === value);
               if (cmd !== undefined && cmd !== null) {
-				  if(!cmd.command.includes("sendOSC"))
-				  {
-					  store.dispatch(setCommand(c, c + ' $ '  + cmd.command));
-					  ctx.sendCommand(ctx.state.tidalServerLink, c + ' $ ' + cmd.command);
-				  }
-				  else{
-					  store.dispatch(setCommand(c, cmd.command));
-					  ctx.sendCommand(ctx.state.tidalServerLink, cmd.command);
-				  }
-			  }
+    					  store.dispatch(setCommand(c, c + ' $ '  + cmd.command));
+    					  ctx.sendCommand(ctx.state.tidalServerLink, c + ' $ ' + cmd.command);
+			        }
             }
         }
 
