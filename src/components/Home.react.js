@@ -14,7 +14,7 @@ class Home extends Component {
       tidalServerLink: 'localhost:3001',
       duration: 16,
       steps: 24,
-      channels: ['d1','d2','d3', 'd4', 'd5', 'd6', 'sendOSC processing'],
+      channels: ['d1','d2','d3', 'd4', 'sendOSC procF_t', 'sendOSC procF_v', 'sendOSC procS'],
       timer: { isActive: false, current: null },
       values: {},
       scCommand: ''
@@ -26,7 +26,7 @@ class Home extends Component {
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values } = state;
     if (timer.isActive) {
-      const runNo = (timer.current % steps) + 1;
+      const runNo = (timer.current % steps) +1;
       const vals = values[runNo];
       const texts = []
       if (vals === undefined) {
@@ -38,7 +38,6 @@ class Home extends Component {
         _.each(vals, (v,k)=> {
           const cmd = _.find(commands, c => c.name === v);
           if (cmd !== undefined && cmd !== null) {
-            console.log("command: ", channelcommands);
             if (channelcommands[k] !== undefined) {
               if (channelcommands[k] !== k + ' $ ' + cmd.command) {
         					store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));

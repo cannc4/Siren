@@ -1,6 +1,6 @@
 {
   "userpath": "C:\\Users\\Mert",
-  "debug": true,
+  "debug": false,
   "ghcipath": "C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe",
   "sclang": "C:\\Program Files\\SuperCollider-3.8.0\\sclang.exe",
   "scsynth": "C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe",

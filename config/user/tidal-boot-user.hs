@@ -2,7 +2,9 @@
 :module Sound.Tidal.Context
 
 import Sound.OSC.FD
-processing <- openUDP "169.231.16.14" 12000
+procF_t <- openUDP "169.231.16.14" 12000
+procF_v <- openUDP "169.231.16.14" 12000
+procS <- openUDP "169.231.16.14" 12000
 
 (cps, getNow) <- bpsUtils
 
