@@ -1,9 +1,10 @@
 :set prompt ""
 :module Sound.Tidal.Context
 import Sound.Tidal.MIDI.Context
-import Sound.Tidal.MIDI.RMController
-
-displayOutputDevices >>= putStrLn
+import Sound.Tidal.MIDI.RMControllerMIDI
+import Sound.Tidal.Scales
+displayOutputDevices >>= putStrL
+n
 devices <- midiDevices
 m1 <- midiStream devices "Analog Rytm Elektron MIDI" 1 rmController
 m2 <- midiStream devices "Analog Rytm Elektron MIDI" 2 rmController

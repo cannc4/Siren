@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
 // import { renderFormElement } from '../lib/forms';
 import FormElement from './FormElement.react';
-class Commands extends Component {
+class SC_Commands extends Component {
   constructor() {
     super()
     this.state = {
@@ -48,7 +48,7 @@ class Commands extends Component {
     // parameters can be added
     return item.key && (
       <li key={item.key} className="easter" style={{display: 'flex', flexDirection: 'column',
-        flexWrap: 'wrap', padding: '0px', width: '100%', height: '150%' }}>
+        flexWrap: 'wrap', padding: '0px', width: '100%', height: '100%' }}>
         {_.map(model, (field, name) => {
           // console.log('field:', field, name)
 //if()
@@ -94,10 +94,10 @@ class Commands extends Component {
       <div>
         <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-            <b></b>
+            <b>{items && (_.size(items) + ' ')} {modelName}</b>
             <div>
               <input type="text" placeholder={modelName } value={name} onChange={changeName}/>
-              <button onClick={addItem}>Add</button>
+              <button onClick={addItem}>Add to {modelName}</button>
             </div>
           </div>
         </div>

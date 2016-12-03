@@ -2,6 +2,7 @@
 :module Sound.Tidal.Context
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.RMControllerMIDI
+import Sound.Tidal.Scales
 
 displayOutputDevices >>= putStrLn
 devices <- midiDevices

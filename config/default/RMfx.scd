@@ -8,14 +8,10 @@
 SynthDef(\eightdels, {arg ibs, maxDelay=10, ofBool=1;
 
 	var in, out, env, phasor, delayIn, out0, out1, out2, out3, out4, out5, out6, out7, length;
-
 	length = rrand(2.0, 4.0);
 	env = EnvGen.ar(Env.new([0,1,1,0],[length/4, length/4, length/2]), 1, doneAction: 2);
-
 	in = In.ar(ibs);
 	delayIn = In.kr(ibs);
-
-
 	out0 = Pan2.ar(DelayC.ar(in, maxDelay, delayIn*(1/8)), -1);
 	out1 = Pan2.ar(DelayC.ar(in, maxDelay, delayIn*(2/8)), -0.75);
 	out2 = Pan2.ar(DelayC.ar(in, maxDelay, delayIn*(3/8)), -0.5);
@@ -70,7 +66,6 @@ SynthDef(\dubecho,{ arg ibs, length = 0.1, fb = 0.6, sep = 0.00012, hpFreq = 400
 	magic = (defNum).dbamp * magic;
 	DetectSilence.ar(magic+ DC.ar(ofBool),0.1,doneAction:2);
 	ReplaceOut.ar(ibs,magic);
-
 }).add;
 ///////////////////////////////////////////////////////////////////////////
 

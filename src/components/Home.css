@@ -85,6 +85,7 @@
   flex-grow: 1;
   width: 100%;
   padding: 0;
+  opacity: 0.6;
   text-align: center;
   overflow: hidden;
   list-style: none;

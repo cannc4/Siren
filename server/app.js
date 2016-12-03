@@ -1,5 +1,4 @@
-// import _ from 'lodash';
-
+import _ from 'lodash';
 import config from '../config/index.js'
 console.log(config.path)
 
@@ -123,9 +122,18 @@ const myApp = () => {
     }
   };
 
-  const sendCommand = (expr, reply) => {
-    TidalData.myTidal.tidalSendExpression(expr);
-    TidalData.myTidal.myCommands.values.push(expr);
+  // const sendCommand = (expr, reply) => {
+  //   console.log("mesjageldiSERVERCVERSVERVERE")
+  //   TidalData.myTidal.tidalSendExpression(expr);
+  //   TidalData.myTidal.myCommands.values.push(expr);
+  //   reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
+  // };
+
+  const sendCommands = (commands, reply) => {
+    _.each(commands, c => {
+      TidalData.myTidal.tidalSendExpression(c);
+      TidalData.myTidal.myCommands.values.push(c);
+    })
     reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
   };
 
@@ -140,6 +148,12 @@ const myApp = () => {
     const { command } = req.body;
     console.log('Command inbound:', command);
     sendCommand(command, reply);
+  });
+
+  app.post('/commands', (req, reply) => {
+    const { commands } = req.body;
+    console.log('Command inbound:', commands);
+    sendCommands(commands, reply);
   });
 
   app.post('/sccommand', (req, reply) => {

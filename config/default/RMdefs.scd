@@ -1,4 +1,4 @@
-
+ 	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,8 +139,20 @@ SynthDef(\AR8Diskout, {arg  out=0,bufnum;
 	Out.ar(out, input.dup);
 }).add;
 
+~recBus9 = Bus.audio(s,2);
+SynthDef(\QCap, { arg in=10;
+	var input;
+	input = SoundIn.ar(in,2);
+	input = (-3).dbamp * input;
+	OffsetOut.ar(~recBus8, input);
 
-0.2.wait;
+}).add;
+SynthDef(\QCapDiskout, {arg  out=0,bufnum;
+	var input = In.ar(~recBus9);
+	DiskOut.ar(bufnum, input);
+	Out.ar(out, input.dup);
+}).add;
+
 
 /////////////////////////////////////////////// /////////////////////////////
 ~gr1 = Group.new;
@@ -151,6 +163,7 @@ SynthDef(\AR8Diskout, {arg  out=0,bufnum;
 ~gr6 = Group.new;
 ~gr7 = Group.new;
 ~gr8 = Group.new;
+~gr9 = Group.new;
 
 
 
@@ -162,9 +175,9 @@ SynthDef(\AR8Diskout, {arg  out=0,bufnum;
 ~ar6 = Synth.head(~gr6,\AR6);
 ~ar7 = Synth.head(~gr7,\AR7);
 ~ar8 = Synth.head(~gr8,\AR8);
+~qCap = Synth.head(~gr9,\QCap);
 
 
-0.2.wait;
 
 
 ~gfx11 = Group.new(~gr1, \addToTail);
@@ -220,9 +233,8 @@ SynthDef(\AR8Diskout, {arg  out=0,bufnum;
 ~test_DrumSmpl6 = 1;
 ~test_DrumSmpl7 = 1;
 ~test_DrumSmpl8 = 1;
+~test_DrumSmpl9 = 1;
 ~test_Master= 1;
-
-0.5.wait;
 
 "/Users/canince/Documents/Github/sq/config/default/multitrack.scd".load;
 )

@@ -56,7 +56,7 @@ class FormElement extends Component {
       {ctx.state.modal && <Modal title={ModalTitle} close={cancel}>
         {_.map(Items, item => {
           const shouldRemove = what =>  (bindings.value || []).indexOf(what) > -1
-          console.log(shouldRemove(item.key), item.name);
+
 
           const updateItem = () => {
             var newValue = bindings.value || [];
@@ -127,7 +127,6 @@ class FormElement extends Component {
   renderTextElement() {
     const ctx = this;
     const bindings = ctx.props.formProps;
-    console.log(bindings.key);
     return <div key={bindings.key} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
       <b>{bindings.key}</b>
       {bindings.key !== "command" && cloneElement(<input type="text" />, bindings)}

@@ -46,5 +46,12 @@ if ( ~test_DrumSmpl8 == 1,
 		~buf_DrumSmpl8= Buffer.alloc(s, 65536, 1);
 		~buf_DrumSmpl8.write("/Users/canince/Documents/SCmultitrack/AR8.aiff".standardizePath, "aiff", "float", 0, 0, true);
 		~trk_DrumSmpl8 = Synth(\AR8Diskout, ["bufnum", ~buf_DrumSmpl8],~gr8, addAction:\addToTail);
+
+},);
+if ( ~test_DrumSmpl9 == 1,
+	{
+		~buf_DrumSmpl9= Buffer.alloc(s, 65536, 1);
+		~buf_DrumSmpl9.write("/Users/canince/Documents/SCmultitrack/QCmaster.aiff".standardizePath, "aiff", "float", 0, 0, true);
+		~trk_DrumSmpl9 = Synth(\QCapDiskout, ["bufnum", ~buf_DrumSmpl9],~gr9, addAction:\addToTail);
 });
 )
