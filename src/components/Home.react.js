@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-import { initMyTidal, setCommand, sendScCommand, sendCommand, startTimer, stopTimer } from '../actions'
+import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer } from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -10,11 +10,11 @@ class Home extends Component {
   constructor() {
     super();
     this.state = {
-       //handleSubmit: PropTypes.func,
+
       tidalServerLink: 'localhost:3001',
       duration: 16,
-      steps: 24,
-      channels: ['d1','d2','d3', 'd4', 'sendOSC procF_t', 'sendOSC procF_v', 'sendOSC procS'],
+      steps: 16,
+      channels: ['d1','d2','d3', 'd4', 'sendOSC procF_t','sendOSC procF_v', 'sendOSC procS' ],
       timer: { isActive: false, current: null },
       values: {},
       scCommand: ''
@@ -22,45 +22,24 @@ class Home extends Component {
   }
 
   componentDidUpdate(props, state) {
+
     const ctx = this;
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values } = state;
     if (timer.isActive) {
-      const runNo = (timer.current % steps) +1;
+      const runNo = (timer.current % steps) + 1;
+
+
       const vals = values[runNo];
       const texts = []
-      if (vals === undefined) {
-        // _.each(channels, c=> {
-        //   ctx.sendCommand(tidalServerLink, c + ' $ silence');
-        // });
-        //For testing purposes,  trigger on change
-      } else {
-        _.each(vals, (v,k)=> {
-          const cmd = _.find(commands, c => c.name === v);
-          if (cmd !== undefined && cmd !== null) {
-            if (channelcommands[k] !== undefined) {
-              if (channelcommands[k] !== k + ' $ ' + cmd.command) {
-        					store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
-        					ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
-        			}
-            }
-            else
-		        {
-        				store.dispatch(setCommand(k, k+ ' $ ' +cmd.command));
-        				ctx.sendCommand(tidalServerLink,k+ ' $ ' + cmd.command);
-            }
-          }
-        })
-      }
+      if (vals !== undefined) {
 
-      _.each(texts, (tex) => {
-        // console.log('sending tex', tex);
-        ctx.sendCommand(tidalServerLink, tex)
-      });
-      // build row array
-      // send to tidal
+        ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
+
+      } //  console.log("2001");
     }
-  }
+}
+
 
   startTimer() {
     const ctx = this;
@@ -78,8 +57,10 @@ class Home extends Component {
     store.dispatch(initMyTidal(tidalServerLink));
   }
 
-  sendCommand(tidalServerLink, command) {
-    store.dispatch(sendCommand(tidalServerLink, command));
+
+  sendCommands(tidalServerLink, vals, channelcommands, commands) {
+    //console.log("2002");
+    store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
   }
 
   sendScCommand(tidalServerLink, command) {
@@ -101,11 +82,11 @@ class Home extends Component {
     const ctx = this;
     const { tidalServerLink } = ctx.state;
 
-    const sendCommand = () => {
-      // console.log('sendCommand', tidalServerLink, command.command);
-      ctx.sendCommand(tidalServerLink, command.command);
-    }
-    return (<div key={command.key} className="Command">{command.command} {ctx.props.tidal.isActive && <button onClick={sendCommand}>send <b>{command.name}</b></button>}</div>)
+    // const sendCommand = () => {
+    //   // console.log('sendCommand', tidalServerLink, command.command);
+    //   ctx.sendCommand(tidalServerLink, command.command);
+    // }
+    //return (<div key={command.key} className="Command">{command.command} {ctx.props.tidal.isActive && <button onClick={sendCommand}>send <b>{command.name}</b></button>}</div>)
   }
 
   renderCommands() {
@@ -151,9 +132,10 @@ class Home extends Component {
             if (cmds.indexOf(value) > -1){
               const cmd = _.find(commands, c => c.name === value);
               if (cmd !== undefined && cmd !== null) {
-    					  store.dispatch(setCommand(c, c + ' $ '  + cmd.command));
-    					  ctx.sendCommand(ctx.state.tidalServerLink, c + ' $ ' + cmd.command);
-			        }
+
+                  //ctx.sendCommand(ctx.state.tidalServerLink, c + " $ " + cmd.command);
+                  //store.dispatch(setCommand(c, c+' $ '+cmd.command));
+              }
             }
         }
 
@@ -188,7 +170,7 @@ class Home extends Component {
       ctx.sendScCommand(tidalServerLink, scCommand)
     }
 
-    // {ctx.renderCommands()}
+    //{ctx.renderCommands()}
     return <div className="Home cont">
       {ctx.renderPlayer()}
       <div className="Commands">
@@ -197,17 +179,16 @@ class Home extends Component {
       <div className="Tidal">
         Tidal Server Link <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
       <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>{tidal.isActive && 'Running!'}
-      {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer....</button>}
-      {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer....</button>}
+      {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
+      {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
       <pre>{JSON.stringify(timer, null, 2)}</pre>
-      <div id="SCmsg">
-       Supercollider msgs
-      <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="ScCommand" onKeyUp = {ctx.handleSubmit.bind(ctx)}/>
-        </div>
+
+      <div id="Command">
+       Interpreter
+     <input type= "textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp = {ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+      </div>
       </div>
     </div>
   }
 }
-// store.dispatch(setCommand(c, c+' $ '+cmd.command));
-// ctx.sendCommand(ctx.state.tidalServerLink, c + " $ " + cmd.command);
 export default connect(state => state)(Home);

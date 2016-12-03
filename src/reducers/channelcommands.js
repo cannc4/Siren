@@ -7,7 +7,7 @@ export default (state = INITIAL_STATE, action) => {
       if (ret[action.payload.channel] !== action.payload.command)
           ret[action.payload.channel] = action.payload.command
       return ret;
-    case 'RESET'+modelName:
+    case 'RESET_'+modelName:
       return {};
     case 'FETCH_'+modelName:
       return state;

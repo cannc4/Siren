@@ -33,7 +33,7 @@
 ::-webkit-scrollbar:hover
 {
 	width: 8px;
-  height: 16px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-thumb

@@ -179,24 +179,61 @@ export const initMyTidal = (server) => {
     });
   }
 }
-
-
-export const sendCommand = (server, expression) => {
+// export const sendCommand = (server, channel, command) => {
+//   return dispatch => {
+//     //console.log("2004");
+// axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': command })
+// .then((response) => {
+//       dispatch({ type: 'SET_CC', payload: {channel, command} })
+//       dispatch({ type: 'FETCH_TIDAL', payload: response.data })
+// }).catch(function (error) {
+//   console.log(error);
+//     });
+//   }
+// }
+export const sendCommands = (server,vals, channelcommands,commands =[]) => {
   return dispatch => {
-    if (!expression) return;
-    // console.log(server, expression)
-    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': expression })
-    .then((response) => {
-      dispatch({ type: 'FETCH_TIDAL', payload: response.data })
-    }).catch(function (error) {
-      console.log(error);
-    });
+  const x =  _.compact(_.map(vals,(v,k) => {
+      const cmd = _.find(commands, c => c.name === v);
+      if(cmd !== undefined && cmd !== null){
+        return k + ' $ ' + cmd.command
+      } else return false;
+    }))
+  //const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands';
+  axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
+  .then((response) => {
+        // dispatch({ type: 'SET_CC', payload: {channel, command} })
+  }).catch(function (error) {
+    console.log(error);
+      });
+
+
+    // //console.log("2003", server,vals, channelcommands,commands);
+    // _.each(vals, (v,k)=> {
+    //
+    //
+    //   if (cmd !== undefined && cmd !== null) {
+    //     console.log("command: ", channelcommands);
+    //     if (channelcommands[k] !== undefined) {
+    //       if (channelcommands[k] !== k + ' $ ' + cmd.command) {
+    //         .push(k, k + ' $ ' + cmd.command)
+    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
+    //       //   ctx.sendCommand(tidalServerLink, k + ' $ ' + cmd.command);
+    //       //   store.dispatch(setCommand(k, k+' $ '+cmd.command));
+    //       }
+    //     } else {
+    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
+    //       }
+    //   }
+    // })
+    // next();
   }
 }
 
 export const sendScCommand = (server, expression) => {
   return dispatch => {
     if (!expression) return;
+
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/sccommand', { 'command': expression })
     .then((response) => {
       dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
@@ -206,8 +243,9 @@ export const sendScCommand = (server, expression) => {
   }
 }
 
-export const setCommand = (channel, command) => ({ type: 'SET_CC', payload: {channel, command} });
-export const resetCommands = () => ({type: 'RESET_CC'});
+//export const setCommand = (channel, command) => ({ type: 'SET_CC', payload: {channel, command} });
+export const resetCommand = () => ({type: 'RESET_CC'});
+export const fetchCommand = () => ({type: 'FETCH_CC'});
 
 export const incTimer = (v) => {
   return {
