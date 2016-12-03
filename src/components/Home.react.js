@@ -78,7 +78,7 @@ class Home extends Component {
       }
     }
 
-  renderCommand(command) {
+  /*renderCommand(command) {
     const ctx = this;
     const { tidalServerLink } = ctx.state;
 
@@ -93,7 +93,7 @@ class Home extends Component {
     const ctx = this;
     const { commands } = ctx.props;
     return _.map(commands, ctx.renderCommand.bind(ctx))
-  }
+  }*/
 
   renderPlayer() {
     const ctx = this;
@@ -121,9 +121,12 @@ class Home extends Component {
       playerClass += " playbox-active";
     }
 
+    var colCount = 0;
+
     return <div key={i} className={playerClass}>
       <div className="playbox playbox-cycle">{i+1}</div>
       {_.map(channels, c => {
+
         const setText = ({ target: { value }}) => {
             const {values} = ctx.state;
             if (values[i+1] === undefined) values[i+1] = {}
@@ -145,12 +148,18 @@ class Home extends Component {
           return values[i+1][c];
         }
 
-        const textval = getValue()
+        const textval = getValue();
+
+        const index = channels.length*i+colCount++;
 
         return <div className="playbox" key={c+'_'+i}>
           {' . '}
-          <input type="text" value={textval} onChange={setText}/>
+          <input id={"pt_pop_"+index} type="text" value={textval} onChange={setText}/>
+          <div className={"messagepop_"+index+" pop_"+index} id="messagepop_hidden">
+            <textarea id={"pt_area_pop_"+index} type="String"></textarea>
+          </div>
         </div>
+
       })}
     </div>;
   }

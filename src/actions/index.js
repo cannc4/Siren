@@ -1,4 +1,8 @@
-//Similar interface for a
+import $ from 'jquery';
+import jquery from 'jquery';
+// export for others scripts to use
+window.$ = $;
+window.jQuery = jquery;
 
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
@@ -6,8 +10,6 @@ import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 // import store from '../store';
-
-
 
 Firebase.initializeApp({
 
@@ -270,3 +272,43 @@ export const stopTimer = () => {
     type: 'STOP_TIMER'
   }
 }
+
+/*
+  Functions for popup display on each playbox
+*/
+$(document).ready(function () {
+  $("[id^=pt_pop_]").on('change keyup paste', function() {
+     var lastNumber = new RegExp("[0-9]*$")
+     var number = $(this).attr('id').match(lastNumber)[0];
+
+     if($(this).val() === ""){
+     	$(this).removeClass('selected');
+      $(".pop_"+number).attr('id','messagepop_hidden');
+    }
+
+    if($(this).val() !== "" && $(this).hasClass('selected') === false) {
+      $(this).addClass('selected');
+      $(".pop_"+number).attr('id','messagepop_visible');
+    }
+
+    if($(this).val() /* databasede varsa*/)
+    {
+        // alıp textboxa yaz
+    }
+    else{
+        // ekle
+    }
+
+    $(document).mouseup(function (e)
+    {
+        var container = $("[id^=pt_pop_]");
+
+        if ($(".messagepop_"+number).html().trim() !== e.target.outerHTML
+        && container.has(e.target).length === 0) // ... nor a descendant of the container
+        {
+     				$("#pt_pop_"+number).removeClass('selected');
+            $(".pop_"+number).attr('id','messagepop_hidden');
+        }
+  	});
+  });
+});

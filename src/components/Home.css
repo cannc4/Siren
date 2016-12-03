@@ -1,3 +1,42 @@
+
+div > #messagepop_visible {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+  background-color: lightgrey !important;
+}
+
+div > #messagepop_hidden {
+  display: -webkit-flex;
+  display: none;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+  background-color: lightgrey ;
+}
+
+[class^="messagepop_"] {
+  background-color:#FFFFFF !important;
+  border:1px solid #999999 !important;
+  opacity: 1 !important;
+  cursor:default;
+  position:absolute;;
+  top: 20px;
+  left: 20px;
+  z-index:50;
+  text-align:left;
+  width: 400px;
+  padding: 5px 5px 5px 5px;
+}
+
+[id^="pt_area_pop_"] {
+  color: black !important;
+  background-color: white !important;
+  opacity: 1 !important;
+  width: 390px;
+  height: 200px;
+}
+
 .Home {
   padding: 15px;
   display: flex;
@@ -11,21 +50,6 @@
   max-width: 120px;
   text-align: center;
 }
-/*.Player {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  flex-grow: 1;
-  -webkit-flex-grow: 1;
-}
-
-.playbox {
-  text-align: center;
-  padding: 5px;
-  margin: 5px;
-  width: 100px;
-  background: #f00;
-}*/
 
 .Commands {
   display: flex;
@@ -104,31 +128,32 @@
 }
 
 .playbox > div {
-  background: none!important;
-  /*background: #333!important;*/
+  /*background: none!important;*/
+  background: none!important;;
 }
 
 .playbox-active {
   background-color: #933!important;
 }
 
+
 .playbox-cycle {
   font-size: 20px;
   vertical-align: center;
   line-height: 20px;
   max-width: 70px;
-  text-align: center;
+  text-align: center;flex-grow: 2;
 }
 
-.easter:hover textarea {
+/*.easter:hover textarea {
 
   display: flex;
   overflow:auto;
   font-size: 12px;
 
-}
+}*/
 
-.textarea {
+/*.textarea {
 
   display: flex;
   overflow:auto;
@@ -136,11 +161,11 @@
   max-width: 70px;
   font-size: 12px;
 
-}
+}*/
 
-fieldset {
+/*fieldset {
     border: none;
-}
+}*/
 
 .flex-wrapper {
 

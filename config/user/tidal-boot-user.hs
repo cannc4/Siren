@@ -8,10 +8,6 @@ procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
 procS <- openUDP "127.0.0.1" 12000
 
--- procF_t <- openUDP "169.231.16.14" 12000
--- procF_v <- openUDP "169.231.16.14" 12000
--- procS <- openUDP "169.231.16.14" 12000
-
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow
