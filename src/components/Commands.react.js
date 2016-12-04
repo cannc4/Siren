@@ -36,6 +36,7 @@ class Commands extends Component {
     const handleChange = ({ target: { value, name }}) => {
       const payload = { key: dbKey };
       payload[name] = value;
+      console.log('3003');
       fbupdate(ctx.state.modelName, payload);
     }
     // handle function to delete the object
@@ -48,10 +49,10 @@ class Commands extends Component {
     // parameters can be added
     return item.key && (
       <li key={item.key} className="easter" style={{display: 'flex', flexDirection: 'column',
-        flexWrap: 'wrap', padding: '0px', width: '100%', height: '150%' }}>
+        flexWrap: 'wrap', padding: '0px', width: '100%', height: '150%' }} >
         {_.map(model, (field, name) => {
-          // console.log('field:', field, name)
-//if()
+
+          console.log('3002');
           const formProps = {
             key: name,
             name: name,
@@ -59,21 +60,21 @@ class Commands extends Component {
             type: field,
             onChange: handleChange.bind(ctx)
           }
+
           return <FormElement key={name} model={ctx.state.modelName} item={item} formProps={formProps} />
 
           // return renderFormElement.bind(ctx)(ctx.state.modelName, dbKey, formProps)
         })}
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+          <button
+            onClick={handleDelete}>{'Delete'}
+          </button>
+        </div>
 
       </li>
     )
   }
-  // <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
-  //   <button
-  //     className='btn danger'
-  //     onClick={handleDelete}>{'Delete'}
-  //   </button>
-  // </div>
-  //
+
 
   renderItems(items) {
     const ctx = this;

@@ -5,10 +5,6 @@ export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
-// import store from '../store';
-
-
-
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -179,18 +175,8 @@ export const initMyTidal = (server) => {
     });
   }
 }
-// export const sendCommand = (server, channel, command) => {
-//   return dispatch => {
-//     //console.log("2004");
-// axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': command })
-// .then((response) => {
-//       dispatch({ type: 'SET_CC', payload: {channel, command} })
-//       dispatch({ type: 'FETCH_TIDAL', payload: response.data })
-// }).catch(function (error) {
-//   console.log(error);
-//     });
-//   }
-// }
+//Values [step][channel]
+//Values need to be an object instead of a string for the popup structure
 export const sendCommands = (server,vals, channelcommands,commands =[]) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -199,34 +185,13 @@ export const sendCommands = (server,vals, channelcommands,commands =[]) => {
         return k + ' $ ' + cmd.command
       } else return false;
     }))
-  //const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands';
-  axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
+  const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands'
+  axios.post(url, { 'commands': x })
   .then((response) => {
-        // dispatch({ type: 'SET_CC', payload: {channel, command} })
+        dispatch({ type: 'SET_CC', payload: {channel, command} })
   }).catch(function (error) {
     console.log(error);
       });
-
-
-    // //console.log("2003", server,vals, channelcommands,commands);
-    // _.each(vals, (v,k)=> {
-    //
-    //
-    //   if (cmd !== undefined && cmd !== null) {
-    //     console.log("command: ", channelcommands);
-    //     if (channelcommands[k] !== undefined) {
-    //       if (channelcommands[k] !== k + ' $ ' + cmd.command) {
-    //         .push(k, k + ' $ ' + cmd.command)
-    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
-    //       //   ctx.sendCommand(tidalServerLink, k + ' $ ' + cmd.command);
-    //       //   store.dispatch(setCommand(k, k+' $ '+cmd.command));
-    //       }
-    //     } else {
-    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
-    //       }
-    //   }
-    // })
-    // next();
   }
 }
 
@@ -252,21 +217,27 @@ export const incTimer = (v) => {
     type: 'INC_TIMER',
   }
 };
+export const stopTimer = () => {
 
-var timer = null;
-const x = (dispatch) => {
-  dispatch(incTimer())
-}
-
-export const startTimer = (duration, steps) => {
-  return dispatch => {
-    timer = setInterval(x, (duration / steps * 1000), dispatch);
+  return {
+    type: 'STOP_TIMER'
   }
 }
 
-export const stopTimer = () => {
-  clearInterval(timer);
-  return {
-    type: 'STOP_TIMER'
+var timer = null;
+const strT = (dispatch) => {
+  dispatch(incTimer())
+}
+const stpT = (dispatch) => {
+  dispatch(stopTimer())
+}
+export const startTimer = (duration, steps) => {
+  return dispatch => {
+    timer = setInterval(strT, (duration / steps * 1000), dispatch);
+  }
+}
+export const setStopTimer = () =>  {
+return dispatch => {
+timer = clearInterval(strt, timer, dispatch);
   }
 }

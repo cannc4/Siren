@@ -12,14 +12,30 @@ class Home extends Component {
     this.state = {
 
       tidalServerLink: 'localhost:3001',
-      duration: 16,
-      steps: 16,
-      channels: ['m1','m2','m3', 'm4', 'd5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12', 'm13', 'm14', 'm15', 'm16' ],
+      duration: 12,
+      steps: 24,
+      channels: ['d1','d2','m3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12', 'm13', 'm14', 'm15', 'm16' ],
       timer: { isActive: false, current: null },
       values: {},
       scCommand: ''
     }
+
   }
+componentDidMount() {
+      const ctx = this;
+      const { timer } = this.props;
+      document.addEventListener("keydown", function() {
+        if(event.keyCode === 32 ){
+          if(!timer.isActive){
+            ctx.startTimer();
+            console.log("4000004")
+          }
+          else {
+            ctx.stopTimer();
+        }
+      }
+      });
+    }
 
   componentDidUpdate(props, state) {
 
@@ -27,7 +43,7 @@ class Home extends Component {
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values } = state;
     if (timer.isActive) {
-      const runNo = (timer.current % steps) + 1;
+      const runNo = (timer.current % steps);
 
 
       const vals = values[runNo];
@@ -38,8 +54,7 @@ class Home extends Component {
 
       } //  console.log("2001");
     }
-}
-
+  }
 
   startTimer() {
     const ctx = this;
@@ -66,7 +81,6 @@ class Home extends Component {
   sendScCommand(tidalServerLink, command) {
     store.dispatch(sendScCommand(tidalServerLink, command));
   }
-
   handleSubmit = event => {
       const body = event.target.value
       const ctx = this;
@@ -76,25 +90,7 @@ class Home extends Component {
         ctx.sendScCommand(tidalServerLink, scCommand)
         console.log(scCommand);
       }
-    }
-
-  renderCommand(command) {
-    const ctx = this;
-    const { tidalServerLink } = ctx.state;
-
-    // const sendCommand = () => {
-    //   // console.log('sendCommand', tidalServerLink, command.command);
-    //   ctx.sendCommand(tidalServerLink, command.command);
-    // }
-    //return (<div key={command.key} className="Command">{command.command} {ctx.props.tidal.isActive && <button onClick={sendCommand}>send <b>{command.name}</b></button>}</div>)
-  }
-
-  renderCommands() {
-    const ctx = this;
-    const { commands } = ctx.props;
-    return _.map(commands, ctx.renderCommand.bind(ctx))
-  }
-
+      }
   renderPlayer() {
     const ctx = this;
     const { channels, steps } = ctx.state;
@@ -120,7 +116,8 @@ class Home extends Component {
     if (i === currentStep) {
       playerClass += " playbox-active";
     }
-
+    //Values [step][channel]
+    //Values need to be an object instead of a string for the popup structure
     return <div key={i} className={playerClass}>
       <div className="playbox playbox-cycle">{i+1}</div>
       {_.map(channels, c => {
@@ -129,15 +126,7 @@ class Home extends Component {
             if (values[i+1] === undefined) values[i+1] = {}
             values[i+1][c] = value;
             ctx.setState({values});
-            if (cmds.indexOf(value) > -1){
-              const cmd = _.find(commands, c => c.name === value);
-              if (cmd !== undefined && cmd !== null) {
-
-                  //ctx.sendCommand(ctx.state.tidalServerLink, c + " $ " + cmd.command);
-                  //store.dispatch(setCommand(c, c+' $ '+cmd.command));
-              }
-            }
-        }
+          }
 
         const getValue = () => {
           const values = ctx.state.values;
@@ -170,7 +159,6 @@ class Home extends Component {
       ctx.sendScCommand(tidalServerLink, scCommand)
     }
 
-    //{ctx.renderCommands()}
     return <div className="Home cont">
       {ctx.renderPlayer()}
       <div className="Commands">
@@ -179,8 +167,8 @@ class Home extends Component {
       <div className="Tidal">
         Tidal Server Link <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
       <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>{tidal.isActive && 'Running!'}
-      {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-      {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
+
+
       <pre>{JSON.stringify(timer, null, 2)}</pre>
 
       <div id="Command">
