@@ -8,10 +8,10 @@ export default (state = INITIAL_STATE, action) => {
       s.current++;
       return {...s};
     case 'STOP_'+modelName:
-      const rest = {...state};
-    rest.isActive= false;
-    rest.current = 0;
-      return rest;
+      const b = state;
+      b.isActive = false;
+      b.current= 0;
+      return {...b};
     default:
       return state;
   }

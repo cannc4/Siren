@@ -12,8 +12,8 @@ class Home extends Component {
     this.state = {
 
       tidalServerLink: 'localhost:3001',
-      duration: 12,
-      steps: 24,
+      duration: 64,
+      steps: 128,
       channels: ['d1','d2','m3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12', 'm13', 'm14', 'm15', 'm16' ],
       timer: { isActive: false, current: null },
       values: {},
@@ -24,14 +24,18 @@ class Home extends Component {
 componentDidMount() {
       const ctx = this;
       const { timer } = this.props;
-      document.addEventListener("keydown", function() {
-        if(event.keyCode === 32 ){
+      document.addEventListener("keyup" , function() {
+        console.log("4000003")
+        if(event.keyCode === 32){
           if(!timer.isActive){
             ctx.startTimer();
             console.log("4000004")
+            ctx.setState({timer: {isActive : true} })
           }
           else {
+            console.log("4000005")
             ctx.stopTimer();
+            ctx.setState({timer: {isActive : false} })
         }
       }
       });
@@ -90,7 +94,7 @@ componentDidMount() {
         ctx.sendScCommand(tidalServerLink, scCommand)
         console.log(scCommand);
       }
-      }
+    }
   renderPlayer() {
     const ctx = this;
     const { channels, steps } = ctx.state;
@@ -118,23 +122,28 @@ componentDidMount() {
     }
     //Values [step][channel]
     //Values need to be an object instead of a string for the popup structure
+
     return <div key={i} className={playerClass}>
       <div className="playbox playbox-cycle">{i+1}</div>
       {_.map(channels, c => {
         const setText = ({ target: { value }}) => {
             const {values} = ctx.state;
-            if (values[i+1] === undefined) values[i+1] = {}
+            if (values[i+1] === undefined) values[i+1] = ''
             values[i+1][c] = value;
+                        //console.log(values[i+1][c].isHid);
+
             ctx.setState({values});
           }
 
         const getValue = () => {
           const values = ctx.state.values;
+
           if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
-          return values[i+1][c];
+          return values[i+1][c].valuetxt;
         }
 
         const textval = getValue()
+
 
         return <div className="playbox" key={c+'_'+i}>
           {' . '}
@@ -168,7 +177,7 @@ componentDidMount() {
         Tidal Server Link <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
       <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>{tidal.isActive && 'Running!'}
 
-
+      {<button onClick={ctx.stopTimer}>Stop timer</button>}
       <pre>{JSON.stringify(timer, null, 2)}</pre>
 
       <div id="Command">

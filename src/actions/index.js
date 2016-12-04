@@ -212,11 +212,17 @@ export const sendScCommand = (server, expression) => {
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});
 
+export const setStopTimer = (v) => {
+  return {
+    type: 'STOP_TIMER'
+  }
+};
 export const incTimer = (v) => {
   return {
     type: 'INC_TIMER',
   }
 };
+
 export const stopTimer = () => {
 
   return {
@@ -224,20 +230,19 @@ export const stopTimer = () => {
   }
 }
 
-var timer = null;
-const strT = (dispatch) => {
-  dispatch(incTimer())
-}
-const stpT = (dispatch) => {
-  dispatch(stopTimer())
-}
 export const startTimer = (duration, steps) => {
   return dispatch => {
-    timer = setInterval(strT, (duration / steps * 1000), dispatch);
+    timer = setInterval(x, (duration / steps * 1000), dispatch);
   }
+};
+
+var timer = null;
+
+const x = (dispatch) => {
+  dispatch(incTimer())
 }
-export const setStopTimer = () =>  {
-return dispatch => {
-timer = clearInterval(strt, timer, dispatch);
-  }
+
+
+const xc = (dispatch) => {
+  dispatch(setStopTimer())
 }
