@@ -268,51 +268,66 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     function _countNeighbours(x, y) {
         var amount = 0,
             x = parseInt(x),
-            y_minus_1 = _.nth(channels, _.indexOf(channels, y)- 1),
-            y_plus_1 = _.nth(channels, _.indexOf(channels, y) + 1);
+            x_minus_1 = x > 1 ? x-1 : undefined,
+            x_plus_1 = x < steps ? x+1 : undefined,
+            y_minus_1 = _.indexOf(channels, y) > 0 ? _.nth(channels, _.indexOf(channels, y)- 1) : undefined,
+            y_plus_1 = _.indexOf(channels, y) < channels.length-1 ? _.nth(channels, _.indexOf(channels, y) + 1) : undefined;
 
         function _isFilled(x, y) {
-            return values[x] && values[x][y];
+            if(x === undefined || y === undefined)
+              return false;
+            if(values[x] === undefined || values[x][y] === undefined || values[x][y] === "")
+              return false;
+            return true;
         }
 
-        if (_isFilled((x-1), y_minus_1)) amount++;
-        if (_isFilled(x,     y_minus_1)) amount++;
-        if (_isFilled((x+1), y_minus_1)) amount++;
-        if (_isFilled((x-1), y  )) amount++;
-        if (_isFilled((x+1), y  )) amount++;
-        if (_isFilled((x-1), y_plus_1)) amount++;
-        if (_isFilled(x,     y_plus_1)) amount++;
-        if (_isFilled((x+1), y_plus_1)) amount++;
+        if (_isFilled(x_minus_1, y_minus_1)) amount++;
+        if (_isFilled(x,         y_minus_1)) amount++;
+        if (_isFilled(x_plus_1,  y_minus_1)) amount++;
+        if (_isFilled(x_minus_1, y  )) amount++;
+        if (_isFilled(x_plus_1,  y  )) amount++;
+        if (_isFilled(x_minus_1, y_plus_1)) amount++;
+        if (_isFilled(x,         y_plus_1)) amount++;
+        if (_isFilled(x_plus_1,  y_plus_1)) amount++;
 
         return amount;
     }
 
+    var counts = {};
+
     for (var i = 1; i <= steps; i++) {
       for (var j = 0; j < channels.length; j++) {
         var count = _countNeighbours(i, _.nth(channels, j)),
-            alive = '';
+            alive = "";
 
-        if(values[i] !== undefined && values[i][_.nth(channels, j)] !== ''){
-            alive = count === 2 || count === 3 ? pickRandom(i, j) : '';
-        }
-        else{
-            alive = count === 3 ? pickRandom(i, j) : '';
-        }
+        placeValue(i-1, _.nth(channels, j), count, counts);
 
-        placeValue(i-1, _.nth(channels, j), alive, resultVals);
+
+        if(values[i] !== undefined){
+          if(values[i][_.nth(channels, j)] === undefined || values[i][_.nth(channels, j)] === ""){
+            alive = count === 3 ? pickRandom(i, j) : "";
+          }
+          else{
+            alive = count === 2 || count === 3 ? pickRandom(i, j) : "";
+          }
+
+          placeValue(i-1, _.nth(channels, j), alive, resultVals);
+        }
       }
     }
 
     /*
      * TODO -- SOLVE THIS PROBLEM
     */
+    console.log("COUNTS_before");
+    console.log(counts);
     console.log("VALUES_before");
     console.log(values);
     console.log("RESULTS_before");
     console.log(resultVals);
     _.forEach(resultVals, function(rowValue, rowKey) {
       _.forEach(rowValue, function(cell, colKey) {
-        placeValue(rowKey, colKey, cell, values);
+        placeValue(rowKey-1, colKey, cell, values);
       });
     });
     console.log("VALUES_after");

@@ -17,7 +17,7 @@ class Home extends Component {
       timer: { isActive: false, current: null },
       values: {},
       scCommand: '',
-      density: 5
+      density: 8
     }
   }
 
@@ -167,7 +167,7 @@ class Home extends Component {
       ctx.setState({density: value});
     }
     const getValue = () => {
-        return ctx.state.density;
+        return ctx.state.density+'%';
     }
     const textval = getValue();
 
