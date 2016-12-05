@@ -17,22 +17,24 @@ class Home extends Component {
       timer: { isActive: false, current: null },
       values: {},
       scCommand: '',
-      celluarDensity: 5
+      density: 5
     }
   }
 
   componentDidUpdate(props, state) {
-
+    console.log("---------------------------");
+    console.log("componentDidUpdate -- begin");
     const ctx = this;
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values, density, duration, channels } = state;
     if (timer.isActive) {
+      console.log("componentDidUpdate // timeractive-- begin");
       const runNo = (timer.current % steps) + 1;
 
-      /*if(runNo == 1){
-        console.log("componentDidUpdate");
-        ctx.celluarFill(values, commands, density, steps, duration, channels)
-      }*/
+      if(timer.current % steps == 1){
+        console.log("componentDidUpdate // celluarFill call");
+        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+      }
 
       const vals = values[runNo];
       const texts = []
@@ -41,7 +43,10 @@ class Home extends Component {
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
 
       }
+      console.log("componentDidUpdate // timeractive-- end");
     }
+    console.log("componentDidUpdate -- end");
+    console.log("-------------------------");
   }
 
 
@@ -70,9 +75,9 @@ class Home extends Component {
     store.dispatch(sendScCommand(tidalServerLink, command));
   }
 
-  celluarFill(values, commands, density, steps, duration, channels){
+  celluarFill(values, commands, density, steps, duration, channels, timer){
     console.log("first celluarFill");
-    store.dispatch(celluarFill(values, commands, density, steps, duration, channels));
+    store.dispatch(celluarFill(values, commands, density, steps, duration, channels, timer));
   }
 
   handleSubmit = event => {
@@ -199,11 +204,11 @@ class Home extends Component {
 
       <div id="Command">
        Interpreter
-     <input type= "textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp = {ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+       <input type= "textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp = {ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
       </div>
 
-      <div id="Command">
-       Celluar Automata
+      <div id="Celluar">
+       Celluar Automata Density
        <input type= "textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
        <button onClick={celluarFill}>Run</button>
       </div>

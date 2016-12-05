@@ -211,29 +211,18 @@ export const sendCommands = (server,vals, channelcommands,commands =[]) => {
   }
 }
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {
 
-function placeValue(row, col, index, commands, values){
-  if (values[row+1] === undefined) values[row+1] = {}
-  values[row+1][col] = Object.values(commands)[index].name;
-}
+  function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-export const celluarFill = (values, commands, density, steps, duration, channels) => {
-  console.log("second celluarFill -- begin");
-  return dispatch => {
-    /*console.log("-----------------");
-    console.log(values);
-    console.log(commands);
+  function placeValue(row, col, index){
+    if (values[row+1] === undefined) values[row+1] = {}
+    values[row+1][col] = Object.values(commands)[index].name;
+  }
 
-    console.log(density);
-    console.log(steps);
-    console.log(duration);
-
-    console.log(channels);
-    console.log("-----------------");*/
-
+  function addItems(){
     var command_len = Object.keys(commands).length;
     var channel_len = channels.length;
 
@@ -254,15 +243,38 @@ export const celluarFill = (values, commands, density, steps, duration, channels
 
       placeValue(row, col, randIndex, commands, values);
     }
-    /*row = getRandomInt(0, steps);
-    col = channels[getRandomInt(0, channel_len-4)];
-    if (values[row+1] === undefined) values[row+1] = {}
-    values[row+1][col] = "s";*/
+  }
+
+  // ONE SOLUTION
+  /*
+    if(timer.current % steps == 1){
+      return dispatch => {
+        dispatch(incTimer())
+      }
+    }
+  */
+  // OTHER SOLUTION
+  if(timer.current % steps == 1){
+    addItems();
+    return dispatch => {};
+  }
+
+  return dispatch => {
+    /*console.log("-----------------");
+    console.log(values);
+    console.log(commands);
+
+    console.log(density);
+    console.log(steps);
+    console.log(duration);
+
+    console.log(channels);
+    console.log("-----------------");*/
+
+    addItems();
 
     dispatch({ type: 'FETCH_CELLUAR', payload: {values} });
-    console.log("second celluarFill -- afterdispatch");
   }
-  console.log("second celluarFill -- end");
 }
 
 export const sendScCommand = (server, expression) => {
