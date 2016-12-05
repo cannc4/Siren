@@ -216,58 +216,127 @@ export const celluarFill = (values, commands, density, steps, duration, channels
   function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-
-  function placeValue(row, col, index){
-    if (values[row+1] === undefined) values[row+1] = {}
-    values[row+1][col] = Object.values(commands)[index].name;
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
   }
-
   function addItems(){
     var command_len = Object.keys(commands).length;
     var channel_len = channels.length;
 
-    for (var i = 0; i < density; i++) {
-      var row = getRandomInt(0, steps);
+    var item_count = steps*channels.length*density/100;
+
+    for (var i = 0; i < item_count; i++) {
+      var row = getRandomInt(0, steps-1);
       var col;
       var randIndex = getRandomInt(0, command_len-1);
 
-      /*console.log(randIndex);
-      console.log(Object.values(commands)[randIndex].command);
-      console.log(_.includes(Object.values(commands)[randIndex].command, "Message"));*/
       if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[getRandomInt(channel_len-3, channel_len)];
+        col = channels[getRandomInt(channel_len-3, channel_len-1)];
       }
       else {
         col = channels[getRandomInt(0, channel_len-4)];
       }
 
-      placeValue(row, col, randIndex, commands, values);
+      placeValue(row, col, Object.values(commands)[randIndex].name, values);
     }
+    console.log("VALUES_after_AddItems");
+    console.log(values);
   }
 
-  // ONE SOLUTION
-  /*
-    if(timer.current % steps == 1){
-      return dispatch => {
-        dispatch(incTimer())
+  function update(){
+    var resultVals = {};
+
+    function pickRandom(x, y){
+      var cmd, randIndex;
+      if(y >= channels.length-3){
+        do{
+          randIndex = getRandomInt(0, Object.keys(commands).length-1);
+        }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
+        cmd = Object.values(commands)[randIndex].name;
+      }
+      else {
+        do{
+          randIndex = getRandomInt(0, Object.keys(commands).length-1);
+        }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
+        cmd = Object.values(commands)[randIndex].name;
+      }
+      return cmd;
+    }
+
+    function _countNeighbours(x, y) {
+        var amount = 0,
+            x = parseInt(x),
+            y_minus_1 = _.nth(channels, _.indexOf(channels, y)- 1),
+            y_plus_1 = _.nth(channels, _.indexOf(channels, y) + 1);
+
+        function _isFilled(x, y) {
+            return values[x] && values[x][y];
+        }
+
+        if (_isFilled((x-1), y_minus_1)) amount++;
+        if (_isFilled(x,     y_minus_1)) amount++;
+        if (_isFilled((x+1), y_minus_1)) amount++;
+        if (_isFilled((x-1), y  )) amount++;
+        if (_isFilled((x+1), y  )) amount++;
+        if (_isFilled((x-1), y_plus_1)) amount++;
+        if (_isFilled(x,     y_plus_1)) amount++;
+        if (_isFilled((x+1), y_plus_1)) amount++;
+
+        return amount;
+    }
+
+    for (var i = 1; i <= steps; i++) {
+      for (var j = 0; j < channels.length; j++) {
+        var count = _countNeighbours(i, _.nth(channels, j)),
+            alive = '';
+
+        if(values[i] !== undefined && values[i][_.nth(channels, j)] !== ''){
+            alive = count === 2 || count === 3 ? pickRandom(i, j) : '';
+        }
+        else{
+            alive = count === 3 ? pickRandom(i, j) : '';
+        }
+
+        placeValue(i-1, _.nth(channels, j), alive, resultVals);
       }
     }
-  */
+
+    console.log("VALUES_before");
+    console.log(values);
+    console.log("RESULTS_before");
+    console.log(resultVals);
+    // _.forEach(resultVals, function(rowValue, rowKey) {
+    //   _.forEach(rowValue, function(cell, colKey) {
+    //     placeValue(rowKey, colKey, cell, values);
+    //   });
+    // });
+    values = _.compact(resultVals);
+    console.log("VALUES_after");
+    console.log(values);
+  }
+
+  // ONE SOLUTION -- buggy
+  // if(timer.current % steps == 1){
+  //   return dispatch => {
+  //     update();
+  //     dispatch(incTimer());
+  //   }
+  // }
   // OTHER SOLUTION
   if(timer.current % steps == 1){
-    addItems();
-    return dispatch => {};
+    update();
+    return dispatch => {  };
   }
 
   return dispatch => {
     /*console.log("-----------------");
     console.log(values);
     console.log(commands);
-
     console.log(density);
     console.log(steps);
     console.log(duration);
-
     console.log(channels);
     console.log("-----------------");*/
 

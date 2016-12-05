@@ -21,6 +21,22 @@ class Home extends Component {
     }
   }
 
+  componentWillUpdate(props, state) {
+    console.log("############################");
+    console.log("componentWILLUpdate -- begin");
+    const ctx = this;
+    const { commands, timer } = props;
+    const { steps, values, density, duration, channels } = state;
+    if (timer.isActive) {
+      if(timer.current % steps == 1){
+        console.log("componentWILLUpdate // celluarFill call");
+        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+      }
+    }
+    console.log("componentWILLUpdate -- end");
+    console.log("############################");
+  }
+
   componentDidUpdate(props, state) {
     console.log("---------------------------");
     console.log("componentDidUpdate -- begin");
@@ -30,11 +46,6 @@ class Home extends Component {
     if (timer.isActive) {
       console.log("componentDidUpdate // timeractive-- begin");
       const runNo = (timer.current % steps) + 1;
-
-      if(timer.current % steps == 1){
-        console.log("componentDidUpdate // celluarFill call");
-        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
-      }
 
       const vals = values[runNo];
       const texts = []
@@ -76,7 +87,7 @@ class Home extends Component {
   }
 
   celluarFill(values, commands, density, steps, duration, channels, timer){
-    console.log("first celluarFill");
+    // console.log("first celluarFill");
     store.dispatch(celluarFill(values, commands, density, steps, duration, channels, timer));
   }
 
