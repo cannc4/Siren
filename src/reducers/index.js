@@ -3,6 +3,7 @@ import { combineReducers } from 'redux';
 import channelcommands from './channelcommands';
 import user from './user';
 import sccommand from './sccommand';
+import celluar from './celluar';
 import tidal from './tidal';
 import timer from './timer';
 import usererror from './usererror';
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   channelcommands,
   sccommand,
   tidal,
+  celluar,
   timer,
   user,
   usererror,

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer } from '../actions'
+import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer, celluarFill } from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -10,14 +10,14 @@ class Home extends Component {
   constructor() {
     super();
     this.state = {
-
       tidalServerLink: 'localhost:3001',
-      duration: 16,
+      duration: 8,
       steps: 16,
-      channels: ['d1','d2','d3', 'd4', 'sendOSC procF_t','sendOSC procF_v', 'sendOSC procS' ],
+      channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9', 'sendOSC procF_t','sendOSC procF_v', 'sendOSC procS' ],
       timer: { isActive: false, current: null },
       values: {},
-      scCommand: ''
+      scCommand: '',
+      celluarDensity: 5
     }
   }
 
@@ -25,10 +25,14 @@ class Home extends Component {
 
     const ctx = this;
     const { channelcommands, commands, timer } = props;
-    const { steps, tidalServerLink, values } = state;
+    const { steps, tidalServerLink, values, density, duration, channels } = state;
     if (timer.isActive) {
       const runNo = (timer.current % steps) + 1;
 
+      /*if(runNo == 1){
+        console.log("componentDidUpdate");
+        ctx.celluarFill(values, commands, density, steps, duration, channels)
+      }*/
 
       const vals = values[runNo];
       const texts = []
@@ -36,9 +40,9 @@ class Home extends Component {
 
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
 
-      } //  console.log("2001");
+      }
     }
-}
+  }
 
 
   startTimer() {
@@ -57,8 +61,7 @@ class Home extends Component {
     store.dispatch(initMyTidal(tidalServerLink));
   }
 
-
-  sendCommands(tidalServerLink, vals, channelcommands, commands) {
+  sendCommands(tidalServerLink, vals, channelcommands, commands, channels) {
     //console.log("2002");
     store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
   }
@@ -67,33 +70,20 @@ class Home extends Component {
     store.dispatch(sendScCommand(tidalServerLink, command));
   }
 
+  celluarFill(values, commands, density, steps, duration, channels){
+    console.log("first celluarFill");
+    store.dispatch(celluarFill(values, commands, density, steps, duration, channels));
+  }
+
   handleSubmit = event => {
       const body = event.target.value
       const ctx = this;
       const {scCommand, tidalServerLink } = ctx.state;
 
       if(event.keyCode === 13 && event.ctrlKey && body){
-        ctx.sendScCommand(tidalServerLink, scCommand)
-        console.log(scCommand);
+        ctx.sendScCommand(tidalServerLink, scCommand);
       }
     }
-
-  /*renderCommand(command) {
-    const ctx = this;
-    const { tidalServerLink } = ctx.state;
-
-    // const sendCommand = () => {
-    //   // console.log('sendCommand', tidalServerLink, command.command);
-    //   ctx.sendCommand(tidalServerLink, command.command);
-    // }
-    //return (<div key={command.key} className="Command">{command.command} {ctx.props.tidal.isActive && <button onClick={sendCommand}>send <b>{command.name}</b></button>}</div>)
-  }
-
-  renderCommands() {
-    const ctx = this;
-    const { commands } = ctx.props;
-    return _.map(commands, ctx.renderCommand.bind(ctx))
-  }*/
 
   renderPlayer() {
     const ctx = this;
@@ -167,7 +157,22 @@ class Home extends Component {
   render() {
     const ctx = this;
     const { tidal, timer } = ctx.props;
-    const { scCommand, tidalServerLink } = ctx.state
+    const { scCommand, tidalServerLink } = ctx.state;
+
+
+    const { commands } = ctx.props;
+    const { values, density, steps, duration, channels} = ctx.state;
+    const celluarFill = () => {
+      ctx.celluarFill(values, commands, density, steps, duration, channels, timer)
+    }
+    const updateDensity = ({ target: { value } }) => {
+      ctx.setState({density: value});
+    }
+    const getValue = () => {
+        return ctx.state.density;
+    }
+    const textval = getValue();
+
     const updateTidalServerLink = ({ target: { value } }) => {
         ctx.setState({ tidalServerLink: value });
     }
@@ -196,6 +201,13 @@ class Home extends Component {
        Interpreter
      <input type= "textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp = {ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
       </div>
+
+      <div id="Command">
+       Celluar Automata
+       <input type= "textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+       <button onClick={celluarFill}>Run</button>
+      </div>
+
       </div>
     </div>
   }

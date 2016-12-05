@@ -202,34 +202,67 @@ export const sendCommands = (server,vals, channelcommands,commands =[]) => {
       } else return false;
     }))
   //const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands';
-  axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
-  .then((response) => {
-        // dispatch({ type: 'SET_CC', payload: {channel, command} })
-  }).catch(function (error) {
-    console.log(error);
-      });
-
-
-    // //console.log("2003", server,vals, channelcommands,commands);
-    // _.each(vals, (v,k)=> {
-    //
-    //
-    //   if (cmd !== undefined && cmd !== null) {
-    //     console.log("command: ", channelcommands);
-    //     if (channelcommands[k] !== undefined) {
-    //       if (channelcommands[k] !== k + ' $ ' + cmd.command) {
-    //         .push(k, k + ' $ ' + cmd.command)
-    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
-    //       //   ctx.sendCommand(tidalServerLink, k + ' $ ' + cmd.command);
-    //       //   store.dispatch(setCommand(k, k+' $ '+cmd.command));
-    //       }
-    //     } else {
-    //         dispatch(sendCommand(server,k, k + ' $ ' + cmd.command));
-    //       }
-    //   }
-    // })
-    // next();
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
+    .then((response) => {
+      //dispatch({ type: 'SET_CC', payload: {channel, command} })
+    }).catch(function (error) {
+      console.log(error);
+    });
   }
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function placeValue(row, col, index, commands, values){
+  if (values[row+1] === undefined) values[row+1] = {}
+  values[row+1][col] = Object.values(commands)[index].name;
+}
+
+export const celluarFill = (values, commands, density, steps, duration, channels) => {
+  console.log("second celluarFill -- begin");
+  return dispatch => {
+    /*console.log("-----------------");
+    console.log(values);
+    console.log(commands);
+
+    console.log(density);
+    console.log(steps);
+    console.log(duration);
+
+    console.log(channels);
+    console.log("-----------------");*/
+
+    var command_len = Object.keys(commands).length;
+    var channel_len = channels.length;
+
+    for (var i = 0; i < density; i++) {
+      var row = getRandomInt(0, steps);
+      var col;
+      var randIndex = getRandomInt(0, command_len-1);
+
+      /*console.log(randIndex);
+      console.log(Object.values(commands)[randIndex].command);
+      console.log(_.includes(Object.values(commands)[randIndex].command, "Message"));*/
+      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
+        col = channels[getRandomInt(channel_len-3, channel_len)];
+      }
+      else {
+        col = channels[getRandomInt(0, channel_len-4)];
+      }
+
+      placeValue(row, col, randIndex, commands, values);
+    }
+    /*row = getRandomInt(0, steps);
+    col = channels[getRandomInt(0, channel_len-4)];
+    if (values[row+1] === undefined) values[row+1] = {}
+    values[row+1][col] = "s";*/
+
+    dispatch({ type: 'FETCH_CELLUAR', payload: {values} });
+    console.log("second celluarFill -- afterdispatch");
+  }
+  console.log("second celluarFill -- end");
 }
 
 export const sendScCommand = (server, expression) => {
@@ -276,12 +309,12 @@ export const stopTimer = () => {
 /*
   Functions for popup display on each playbox
 */
-$(document).ready(function () {
-  $("[id^=pt_pop_]").on('change keyup paste', function() {
+/*$(document).ready(function () {
+  $("[id^=pt_pop_]").on('change keyup paste', function(event) {
      var lastNumber = new RegExp("[0-9]*$")
      var number = $(this).attr('id').match(lastNumber)[0];
 
-     if($(this).val() === ""){
+    if($(this).val() === ""){
      	$(this).removeClass('selected');
       $(".pop_"+number).attr('id','messagepop_hidden');
     }
@@ -291,12 +324,19 @@ $(document).ready(function () {
       $(".pop_"+number).attr('id','messagepop_visible');
     }
 
-    if($(this).val() /* databasede varsa*/)
+    if(event.keyCode === 27){
+      console.log(event.keyCode+ "#pt_pop_"+number);
+      $("[id^=pt_pop_]").removeClass('selected');
+      $("[class^=messagepop_]").attr('id','messagepop_hidden');
+    }
+
+    // if databasede varsa
+    /*if(function(){
+          }
     {
         // alıp textboxa yaz
-    }
-    else{
-        // ekle
+          $(this).val()
+
     }
 
     $(document).mouseup(function (e)
@@ -308,7 +348,14 @@ $(document).ready(function () {
         {
      				$("#pt_pop_"+number).removeClass('selected');
             $(".pop_"+number).attr('id','messagepop_hidden');
+
+            // if databasede yoksa
+            //ekle
+          if($(this).val() )
+            {
+                // ekle
+            }
         }
   	});
   });
-});
+});*/

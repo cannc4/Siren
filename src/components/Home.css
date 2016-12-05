@@ -209,4 +209,5 @@ input {
 .Player--6cols > .playbox  { width: 16.6%; }
 .Player--7cols > .playbox  { width: 14.27%; }
 .Player--8cols > .playbox  { width: 12.5%; }
+.Player--13cols > .playbox  { width: 7.5%; }
 .Player--17cols > .playbox  { width: 5.88%; }
