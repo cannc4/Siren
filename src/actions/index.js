@@ -303,16 +303,18 @@ export const celluarFill = (values, commands, density, steps, duration, channels
       }
     }
 
+    /*
+     * TODO -- SOLVE THIS PROBLEM
+    */
     console.log("VALUES_before");
     console.log(values);
     console.log("RESULTS_before");
     console.log(resultVals);
-    // _.forEach(resultVals, function(rowValue, rowKey) {
-    //   _.forEach(rowValue, function(cell, colKey) {
-    //     placeValue(rowKey, colKey, cell, values);
-    //   });
-    // });
-    values = _.compact(resultVals);
+    _.forEach(resultVals, function(rowValue, rowKey) {
+      _.forEach(rowValue, function(cell, colKey) {
+        placeValue(rowKey, colKey, cell, values);
+      });
+    });
     console.log("VALUES_after");
     console.log(values);
   }

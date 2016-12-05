@@ -21,31 +21,16 @@ class Home extends Component {
     }
   }
 
-  componentWillUpdate(props, state) {
-    console.log("############################");
-    console.log("componentWILLUpdate -- begin");
-    const ctx = this;
-    const { commands, timer } = props;
-    const { steps, values, density, duration, channels } = state;
-    if (timer.isActive) {
-      if(timer.current % steps == 1){
-        console.log("componentWILLUpdate // celluarFill call");
-        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
-      }
-    }
-    console.log("componentWILLUpdate -- end");
-    console.log("############################");
-  }
-
   componentDidUpdate(props, state) {
-    console.log("---------------------------");
-    console.log("componentDidUpdate -- begin");
     const ctx = this;
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values, density, duration, channels } = state;
     if (timer.isActive) {
-      console.log("componentDidUpdate // timeractive-- begin");
       const runNo = (timer.current % steps) + 1;
+
+      if(timer.current % steps == 1){
+        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+      }
 
       const vals = values[runNo];
       const texts = []
@@ -54,10 +39,7 @@ class Home extends Component {
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
 
       }
-      console.log("componentDidUpdate // timeractive-- end");
     }
-    console.log("componentDidUpdate -- end");
-    console.log("-------------------------");
   }
 
 
