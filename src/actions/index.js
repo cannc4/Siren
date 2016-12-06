@@ -417,15 +417,12 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
       });
       countArr[c_key] = count;
     });
-    console.log(countArr);
     var tempArr = [-1, 1];
     _.forEach(countArr, function(item, key) {
       countArr[key] = _.clamp(_.nth(tempArr, _.random(0, 1))+item, 1, steps/2);
     })
-    console.log(countArr);
 
     var channel_len = channels.length;
-
     // Euclidean Rythm
     for (var i = 0; i < channel_len; i++) {
       //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
@@ -487,7 +484,7 @@ export const addBjorkValues = (values, commands, density, steps, duration, chann
     // Euclidean Rythm
     for (var i = 0; i < channel_len; i++) {
       //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
-      var str = bjork(_.random(steps/8, steps/2 + 1), steps);
+      var str = bjork(_.random(parseInt(steps/8), parseInt(steps/3)), steps);
 
       for (var j = 0; j < str.length; j++) {
         var row = j;

@@ -14,8 +14,8 @@ class Home extends Component {
     super();
     this.state={
       tidalServerLink: 'localhost:3001',
-      duration: 64,
-      steps: 16,
+      duration: 6,
+      steps: 12,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2',
@@ -162,10 +162,7 @@ class Home extends Component {
 
         return <div className="playbox" key={c+'_'+i}>
           {' . '}
-          <input id={"pt_pop_"+index} type="text" value={textval} onChange={setText}/>
-          <div className={"messagepop_"+index+" pop_"+index} id="messagepop_hidden">
-            <textarea id={"pt_area_pop_"+index} type="String"></textarea>
-          </div>
+          <input type="text" value={textval} onChange={setText}/>
         </div>
       })}
     </div>;

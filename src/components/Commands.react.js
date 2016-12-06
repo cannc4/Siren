@@ -28,7 +28,7 @@ class Commands extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
-    const model = fetchModel(ctx.state.modelName)
+    const model = fetchModel(ctx.state.modelName);
     // Item Action Handlers
     // handle function when any field of the object is modified
     const handleChange = ({ target: { value, name }}) => {
@@ -45,8 +45,7 @@ class Commands extends Component {
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <li key={item.key} className="easter" style={{display: 'flex', flexDirection: 'column',
-        flexWrap: 'wrap', padding: '0px', width: '100%', height: '150%' }} >
+      <li key={item.key} className="easter" >
         {_.map(model, (field, name) => {
           const formProps = {
             key: name,

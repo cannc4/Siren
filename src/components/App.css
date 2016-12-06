@@ -9,7 +9,7 @@ body, .fill, .cont {
   font-size: 12px;
 }
 * {
-  font-family: 'Raleway', sans-serif;
+  font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
   font-weight: 400;
 }
 body {

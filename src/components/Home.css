@@ -3,44 +3,6 @@
   padding-bottom: 10px;
 }
 
-div > #messagepop_visible {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: flex-end;
-  justify-content: flex-end;
-  background-color: lightgrey !important;
-}
-
-div > #messagepop_hidden {
-  display: -webkit-flex;
-  display: none;
-  -webkit-justify-content: flex-end;
-  justify-content: flex-end;
-  background-color: lightgrey ;
-}
-
-[class^="messagepop_"] {
-  background-color:#FFFFFF !important;
-  border:1px solid #999999 !important;
-  opacity: 1 !important;
-  cursor:default;
-  position:absolute;;
-  top: 20px;
-  left: 20px;
-  z-index:50;
-  text-align:left;
-  width: 400px;
-  padding: 5px 5px 5px 5px;
-}
-
-[id^="pt_area_pop_"] {
-  color: black !important;
-  background-color: white !important;
-  opacity: 1 !important;
-  width: 390px;
-  height: 200px;
-}
-
 .Home {
   padding: 15px;
   display: flex;
@@ -57,12 +19,24 @@ div > #messagepop_hidden {
 
 .Commands {
   display: flex;
-    margin: 5px;
+  padding: 15px;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
 
-  max-width: 300px;
+  max-width: 2000px;
+  max-height: 960px;
+
+  overflow-y: scroll;
+}
+
+.easter {
+  display: flex;
+  flex-direction: column;
+
+  flex-wrap: wrap;
+  width: 100%;
+  height: 150%;
 }
 
 .Command {
@@ -118,14 +92,14 @@ div > #messagepop_hidden {
   overflow: hidden;
   list-style: none;
   display: flex;
-  font-size: 14px;
+  font-size: 1vw;
   line-height: 24px;
   vertical-align: center;
   background: none!important;
 }
 
 .playbox > input {
-  font-size: 12px;
+  font-size: 1vw;
   background: none!important;
   border-bottom: 2px solid #999;
   flex-grow: 1;
@@ -148,58 +122,6 @@ div > #messagepop_hidden {
   text-align: center;flex-grow: 2;
 }
 
-/*.easter:hover textarea {
-  display: flex;
-  overflow:auto;
-  font-size: 12px;
-}*/
-
-/*.textarea {
-
-  display: flex;
-  overflow:auto;
-  line-height: 20px;
-  max-width: 70px;
-  font-size: 12px;
-}
-
-fieldset {
-    border: none;
-}
-
-.flex-wrapper {
-
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: stretch;
-}
-
-.flex-wrapper > div {
-    flex: 1 1 auto;
-}
-
-.flex-container {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-justify-content: flex-end;
-    justify-content: flex-end;
-    width: 400px;
-    height: 250px;
-    background-color: lightgrey;
-}
-label {
-    display: none;
-}
-
-legend {
-    display: block;
-    width: 100%;
-}
-
-input {
-    width: 100%;
-}
 /* Table column sizing
 ================================== */
 .Player--2cols > .playbox  { width: 50%; }
