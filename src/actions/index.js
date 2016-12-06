@@ -336,7 +336,6 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     dispatch({ type: 'FETCH_TIMER'});
   }
 }
-
 export const addValues = (values, commands, density, steps, duration, channels, timer) => {
   function scale(value, r_min, r_max, o_min, o_max) {
     return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
@@ -375,12 +374,12 @@ export const addValues = (values, commands, density, steps, duration, channels, 
     dispatch({ type: 'ADD_TIMER'});
   }
 }
-
 export const celluarFillStop = () => {
   return dispatch => {
     dispatch({ type: 'FETCH_STOP_TIMER'});
   }
 }
+
 
 export const bjorkFill = (values, commands, density, steps, duration, channels, timer) => {
   function placeValue(row, col, item, container){
@@ -455,7 +454,6 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
     dispatch({ type: 'FETCH_2_TIMER'});
   }
 }
-
 export const addBjorkValues = (values, commands, density, steps, duration, channels, timer) => {
   function scale(value, r_min, r_max, o_min, o_max) {
     return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
@@ -506,14 +504,11 @@ export const addBjorkValues = (values, commands, density, steps, duration, chann
     dispatch({ type: 'ADD_TIMER'});
   }
 }
-
 export const bjorkFillStop = () => {
   return dispatch => {
     dispatch({ type: 'FETCH_STOP_2_TIMER'});
   }
 }
-
-
 
 export const sendScCommand = (server, expression) => {
   return dispatch => {
