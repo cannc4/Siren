@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "userpath": "C:\\Users\\Mert",
   "debug": false,
   "ghcipath": "C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe",
@@ -8,14 +7,4 @@
   "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
   "port":3001,
   "samples_path": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\downloaded-quarks\\Dirt-Samples\\*"
-=======
-  "userpath": "/Users/canince",
-  "debug": true,
-  "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.0.1-x86_64/usr/bin/ghci-8.0.1",
-  "sclang": "~/Documents/Github/sq/deps/SuperCollider.app/Contents/MacOS/sclang",
-  "scsynth": "~/Documents/Github/sq/deps/SuperCollider.app/Contents/Resources/scsynth",
-  "sclang_conf": "~/Library/Application Support/SuperCollider/sclang_conf.yaml",
-  "port":3001,
-  "samples_path": "/Users/canince/Dropbox/Tidal Sample Bank/*"
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 }

@@ -8,8 +8,4 @@ export default (state = INITIAL_STATE, action) => {
     default:
       return state;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1

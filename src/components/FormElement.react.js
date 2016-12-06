@@ -1,17 +1,9 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 import _ from 'lodash';
 import React, { Component, cloneElement } from 'react';
 import { connect } from 'react-redux';
 import { fbupdate, fetchModels } from '../actions';
 import Modal from './Modal.react';
-<<<<<<< HEAD
 
-=======
-//Format of the DOM element
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 class FormElement extends Component {
   constructor() {
     super()

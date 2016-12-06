@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-
-
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -39,10 +34,6 @@ class Commands extends Component {
     const handleChange = ({ target: { value, name }}) => {
       const payload = { key: dbKey };
       payload[name] = value;
-<<<<<<< HEAD
-=======
-      console.log('3003');
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
       fbupdate(ctx.state.modelName, payload);
     }
     // handle function to delete the object
@@ -57,11 +48,6 @@ class Commands extends Component {
       <li key={item.key} className="easter" style={{display: 'flex', flexDirection: 'column',
         flexWrap: 'wrap', padding: '0px', width: '100%', height: '150%' }} >
         {_.map(model, (field, name) => {
-
-<<<<<<< HEAD
-=======
-          console.log('3002');
->>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
           const formProps = {
             key: name,
             name: name,
