@@ -1,16 +1,23 @@
+<<<<<<< HEAD
 import $ from 'jquery';
 import jquery from 'jquery';
 // export for others scripts to use
 window.$ = $;
 window.jQuery = jquery;
+=======
+//Similar interface for a
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
+<<<<<<< HEAD
 // import store from '../store';
 
+=======
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -181,6 +188,7 @@ export const initMyTidal = (server) => {
     });
   }
 }
+<<<<<<< HEAD
 // export const sendCommand = (server, channel, command) => {
 //   return dispatch => {
 //     //console.log("2004");
@@ -194,10 +202,16 @@ export const initMyTidal = (server) => {
 //   }
 // }
 export const sendCommands = (server,vals, channelcommands, commands =[]) => {
+=======
+//Values [step][channel]
+//Values need to be an object instead of a string for the popup structure
+export const sendCommands = (server,vals, channelcommands,commands =[]) => {
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cmd = _.find(commands, c => c.name === v);
       if(cmd !== undefined && cmd !== null){
+<<<<<<< HEAD
         var append = "";
         switch (k) {
           case "d1":
@@ -408,6 +422,18 @@ export const addValues = (values, commands, density, steps, duration, channels, 
 export const celluarFillStop = () => {
   return dispatch => {
     dispatch({ type: 'FETCH_STOP_TIMER'});
+=======
+        return k + ' $ ' + cmd.command
+      } else return false;
+    }))
+  const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands'
+  axios.post(url, { 'commands': x })
+  .then((response) => {
+        dispatch({ type: 'SET_CC', payload: {channel, command} })
+  }).catch(function (error) {
+    console.log(error);
+      });
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
   }
 }
 
@@ -428,6 +454,7 @@ export const sendScCommand = (server, expression) => {
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});
 
+<<<<<<< HEAD
 export const incTimer = () => {
   return { type: 'INC_TIMER'}
 };
@@ -445,11 +472,27 @@ export const startTimer = (duration, steps) => {
 
 export const stopTimer = () => {
   clearInterval(timer);
+=======
+export const setStopTimer = (v) => {
+  return {
+    type: 'STOP_TIMER'
+  }
+};
+export const incTimer = (v) => {
+  return {
+    type: 'INC_TIMER',
+  }
+};
+
+export const stopTimer = () => {
+
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
   return {
     type: 'STOP_TIMER'
   }
 }
 
+<<<<<<< HEAD
 /*
   Functions for popup display on each playbox
 */
@@ -503,3 +546,21 @@ export const stopTimer = () => {
   	});
   });
 });*/
+=======
+export const startTimer = (duration, steps) => {
+  return dispatch => {
+    timer = setInterval(x, (duration / steps * 1000), dispatch);
+  }
+};
+
+var timer = null;
+
+const x = (dispatch) => {
+  dispatch(incTimer())
+}
+
+
+const xc = (dispatch) => {
+  dispatch(setStopTimer())
+}
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1

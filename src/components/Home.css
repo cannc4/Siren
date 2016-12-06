@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 div > #messagepop_visible {
   display: -webkit-flex;
@@ -37,6 +38,8 @@ div > #messagepop_hidden {
   height: 200px;
 }
 
+=======
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 .Home {
   padding: 15px;
   display: flex;
@@ -50,6 +53,24 @@ div > #messagepop_hidden {
   max-width: 120px;
   text-align: center;
 }
+<<<<<<< HEAD
+=======
+/*.Player {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+}
+
+.playbox {
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+  width: 100px;
+  background: #f00;
+}*/
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 
 .Commands {
   display: flex;
@@ -128,32 +149,53 @@ div > #messagepop_hidden {
 }
 
 .playbox > div {
+<<<<<<< HEAD
   /*background: none!important;*/
   background: none!important;;
+=======
+  background: none!important;
+  /*background: #333!important;*/
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 }
 
 .playbox-active {
   background-color: #933!important;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 .playbox-cycle {
   font-size: 20px;
   vertical-align: center;
   line-height: 20px;
   max-width: 70px;
+<<<<<<< HEAD
   text-align: center;flex-grow: 2;
 }
 
 /*.easter:hover textarea {
+=======
+  text-align: center;
+}
+
+.easter:hover textarea {
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 
   display: flex;
   overflow:auto;
   font-size: 12px;
 
+<<<<<<< HEAD
 }*/
 
 /*.textarea {
+=======
+}
+
+.textarea {
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 
   display: flex;
   overflow:auto;
@@ -161,11 +203,19 @@ div > #messagepop_hidden {
   max-width: 70px;
   font-size: 12px;
 
+<<<<<<< HEAD
 }*/
 
 /*fieldset {
     border: none;
 }*/
+=======
+}
+
+fieldset {
+    border: none;
+}
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 
 .flex-wrapper {
 
@@ -209,6 +259,9 @@ input {
 .Player--6cols > .playbox  { width: 16.6%; }
 .Player--7cols > .playbox  { width: 14.27%; }
 .Player--8cols > .playbox  { width: 12.5%; }
+<<<<<<< HEAD
 .Player--13cols > .playbox  { width: 7.5%; }
 .Player--16cols > .playbox  { width: 6%; }
+=======
+>>>>>>> f11274bc050684cbf718294e778b1fb450c37ce1
 .Player--17cols > .playbox  { width: 5.88%; }
