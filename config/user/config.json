@@ -1,5 +1,10 @@
 {
+<<<<<<< HEAD
   "tidal_boot": "/Users/canince/Documents/Github/sq/config/user/tidal-boot-user.hs",
   "scd_start": "/Users/canince/Documents/Github/sq/config/default/scd-start-default.scd"
 
+=======
+  "tidal_boot": "C:\\GitHub\\sq\\config\\user\\tidal-boot-user.hs",
+  "scd_start": "C:\\GitHub\\sq\\config\\default\\scd-start-default.scd"
+>>>>>>> origin/master
 }

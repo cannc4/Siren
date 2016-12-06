@@ -1,4 +1,5 @@
 (
+<<<<<<< HEAD
 Server.supernova;
 
 s.audioBusAllocator.reserve(12,1);
@@ -25,4 +26,7 @@ s.options.verbosity = -2;
 //MIDIIn.connectAll;
 SuperDirt.start;
 
+=======
+SuperDirt.start;
+>>>>>>> origin/master
 )

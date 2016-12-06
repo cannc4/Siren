@@ -1,5 +1,6 @@
 :set prompt ""
 :module Sound.Tidal.Context
+<<<<<<< HEAD
 import Sound.Tidal.Scales
 import Sound.OSC.FD
 
@@ -11,6 +12,8 @@ procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
 
+=======
+>>>>>>> origin/master
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow

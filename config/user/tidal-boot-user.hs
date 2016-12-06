@@ -10,8 +10,11 @@ procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
+<<<<<<< HEAD
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.Scales
+=======
+>>>>>>> origin/master
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow

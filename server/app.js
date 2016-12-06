@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import config from '../config/index.js'
-console.log(config.path)
+//console.log(config.path)
 
 import fs from 'fs';
 import { spawn } from 'child_process';
@@ -12,8 +12,6 @@ const bootFilePath = `${__dirname}/BootTidal.hs`;
 const startSCD = `${__dirname}/start.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require ('socket.io');
-//
-
 
 // REPL is an GHCI Instance
 class REPL {
@@ -32,7 +30,7 @@ class REPL {
 
   initTidal() {
     this.myCommands = { values: [] };
-    console.log(config)
+    //console.log(config)
     const commands = fs.readFileSync(config.tidal_boot).toString().split('\n');
     for (let i = 0; i < commands.length; i++) {
       this.tidalSendLine(commands[i]);
@@ -60,8 +58,8 @@ class REPL {
 
   initSC() {
     const self = this;
-    console.log('1 REMOVE LATER')
-    console.log('config.path', config.path);
+    //console.log('1 REMOVE LATER')
+    //console.log('config.path', config.path);
     supercolliderjs.resolveOptions(config.path).then((options) => {
       // console.log(options);
       const SCLang = supercolliderjs.sclang.SCLang;

@@ -4,6 +4,8 @@ import jquery from 'jquery';
 window.$ = $;
 window.jQuery = jquery;
 
+var bjork = require('bjorklund');
+
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
@@ -224,10 +226,6 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
 }
 
 export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {
-
-  function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
@@ -241,13 +239,13 @@ export const celluarFill = (values, commands, density, steps, duration, channels
       var cmd, randIndex;
       if(y >= channels.length-6){
         do{
-          randIndex = getRandomInt(0, Object.keys(commands).length-1);
+          randIndex = _.random(0, Object.keys(commands).length-1);
         }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
         cmd = Object.values(commands)[randIndex].name;
       }
       else {
         do{
-          randIndex = getRandomInt(0, Object.keys(commands).length-1);
+          randIndex = _.random(0, Object.keys(commands).length-1);
         }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
         cmd = Object.values(commands)[randIndex].name;
       }
@@ -255,8 +253,8 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     }
 
     function _countNeighbours(x, y) {
+        x = parseInt(x);
         var amount = 0,
-            x = parseInt(x),
             x_minus_1 = x > 1 ? x-1 : undefined,
             x_plus_1 = x < steps ? x+1 : undefined,
             y_minus_1 = _.indexOf(channels, y) > 0 ? _.nth(channels, _.indexOf(channels, y)- 1) : undefined,
@@ -312,7 +310,7 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     });
   }
 
-  if(timer.current % steps == 1 && timer.isCelluarActive)
+  if(timer.current % steps === 1 && timer.isCelluarActive)
   {
     update();
     return dispatch => {
@@ -325,34 +323,67 @@ export const celluarFill = (values, commands, density, steps, duration, channels
 }
 
 export const addValues = (values, commands, density, steps, duration, channels, timer) => {
-  function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
+  function scale(value, r_min, r_max, o_min, o_max) {
+    return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
   }
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
     container[parseInt(row)+1][col] = item;
   }
+  function pickRandom(x, y){
+    var cmd, randIndex;
+    if(y >= channels.length-6){
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    else {
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    return cmd;
+  }
+
   function addItems(){
     var command_len = Object.keys(commands).length;
     var channel_len = channels.length;
 
+    // Euclidean Rythm
+    for (var i = 0; i < channel_len; i++) {
+      //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
+      var str = bjork(_.random(3,7), steps);
+
+      for (var j = 0; j < str.length; j++) {
+        var row = j;
+        var col = _.nth(channels, i);
+        if(str[j] === '1'){
+          placeValue(row, col, pickRandom(row, i), values);
+        }
+      }
+    }
+
+    // Add random
+    /*
     var item_count = steps*channels.length*density/100;
 
     for (var i = 0; i < item_count; i++) {
-      var row = getRandomInt(0, steps-1);
+      var row = _.random(0, steps-1);
       var col;
-      var randIndex = getRandomInt(0, command_len-1);
+      var randIndex = _.random(0, command_len-1);
 
       if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[getRandomInt(channel_len-6, channel_len-1)];
+        col = channels[_.random(channel_len-6, channel_len-1)];
       }
       else {
-        col = channels[getRandomInt(0, channel_len-7)];
+        col = channels[_.random(0, channel_len-7)];
       }
 
       placeValue(row, col, Object.values(commands)[randIndex].name, values);
-    }
+    }*/
   }
 
   return dispatch => {
