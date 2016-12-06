@@ -1,6 +1,9 @@
 :set prompt ""
 :module Sound.Tidal.Context
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 import Sound.Tidal.Scales
 import Sound.OSC.FD
 
@@ -11,6 +14,11 @@ procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow

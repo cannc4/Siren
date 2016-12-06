@@ -192,22 +192,22 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         switch (k) {
           case "d1":
             append = " |+| nudge rand"; break;
-          case "d2":
-            append = " # cut \"4\""; break;
-          case "d3":
-            append = " # room \"1\""; break;
-          case "d4":
-            append = " # delay \"0.6\" # delayfeedback \"12\" # delaytime \"0.3\""; break;
-          case "d5":
-            append = " # cut \"5\""; break;
-          case "d6":
-            append = " # cutoff (scale 0 16000 $ slow 2 sinewave1)"; break;
-          case "d7":
-            append = ""; break;
-          case "d8":
-            append = " # room \"0.5\""; break;
-          case "d9":
-            append = ""; break;
+          // case "d2":
+          //   append = " # cut \"4\""; break;
+          // case "d3":
+          //   append = " # room \"0.05\""; break;
+          // case "d4":
+          //   append = " # room \"0.44\" # size \"12\" # gain \"0.3\""; break;
+          // case "d5":
+          //   append = " # cut \"5\""; break;
+          // case "d6":
+          //   append = " # cutoff (scale 0 16000 $ slow 2 sinewave1)"; break;
+          // case "d7":
+          //   append = ""; break;
+          // case "d8":
+          //   append = " # room \"0.23\""; break;
+          // case "d9":
+          //   append = ""; break;
           default:
             break;
         }
