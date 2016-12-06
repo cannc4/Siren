@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
 
-import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer, celluarFill, celluarFillStop, addValues} from '../actions'
+import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer,
+          celluarFill, celluarFillStop, addValues,
+          bjorkFill, bjorkFillStop, addBjorkValues} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -12,13 +14,16 @@ class Home extends Component {
     super();
     this.state={
       tidalServerLink: 'localhost:3001',
-      duration: 8,
-      steps: 16,
+      duration: 1,
+      steps: 8,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2',
               'sendOSC procS3', 'sendOSC procS4' ],
-      timer: { isActive: false, current: null, isCelluarActive: false },
+      timer: { isActive: false,
+               current: null,
+               isCelluarActive: false,
+               isBjorkActive: false },
       values: {},
       scCommand: '',
       density: 8
@@ -32,8 +37,11 @@ class Home extends Component {
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
-      if(timer.current % steps === 1 && timer.isCelluarActive){
-        ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+      if(timer.current % steps === 1 && (timer.isCelluarActive || timer.isBjorkActive)){
+        if(timer.isCelluarActive)
+          ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+        else
+          ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
       }
 
       const vals=values[runNo];
@@ -71,15 +79,21 @@ class Home extends Component {
   addValues(values, commands, density, steps, duration, channels, timer){
     store.dispatch(addValues(values, commands, density, steps, duration, channels, timer));
   }
-
   celluarFill(values, commands, density, steps, duration, channels, timer){
-    //this.stopTimer();
     store.dispatch(celluarFill(values, commands, density, steps, duration, channels, timer));
-    //this.startTimer();
   }
-
   celluarFillStop(){
     store.dispatch(celluarFillStop());
+  }
+
+  addBjorkValues(values, commands, density, steps, duration, channels, timer){
+    store.dispatch(addBjorkValues(values, commands, density, steps, duration, channels, timer));
+  }
+  bjorkFill(values, commands, density, steps, duration, channels, timer){
+    store.dispatch(bjorkFill(values, commands, density, steps, duration, channels, timer));
+  }
+  bjorkFillStop(){
+    store.dispatch(bjorkFillStop());
   }
 
   handleSubmit=event => {
@@ -164,6 +178,17 @@ class Home extends Component {
 
     const { commands }=ctx.props;
     const { values, density, steps, duration, channels}=ctx.state;
+
+    const bjorkFillStop=() => {
+      ctx.bjorkFillStop();
+    }
+    const bjorkFill=() => {
+      ctx.bjorkFill(values, commands, density, steps, duration, channels, timer)
+    }
+    const addBjorkValues =() => {
+      ctx.addBjorkValues(values, commands, density, steps, duration, channels, timer)
+    }
+
     const celluarFillStop=() => {
       ctx.celluarFillStop();
     }
@@ -216,7 +241,17 @@ class Home extends Component {
        {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
        <button onClick={addValues}>Add Values</button>
       </div>
+
+      <div id="Celluar">
+       Bjork
+       {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+       {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+       <button onClick={addBjorkValues}>Add Values</button>
       </div>
+
+      </div>
+
+
     </div>
   }
 }

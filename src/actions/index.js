@@ -231,8 +231,23 @@ export const celluarFill = (values, commands, density, steps, duration, channels
       container[parseInt(row)+1] = {};
     container[parseInt(row)+1][col] = item;
   }
-
-  function update(){
+  function pickRandom(x, y){
+    var cmd, randIndex;
+    if(y >= channels.length-6){
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    else {
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    return cmd;
+  }
+  function updateCelluar(){
     var resultVals = {};
 
     function pickRandom(x, y){
@@ -312,7 +327,7 @@ export const celluarFill = (values, commands, density, steps, duration, channels
 
   if(timer.current % steps === 1 && timer.isCelluarActive)
   {
-    update();
+    updateCelluar();
     return dispatch => {
     };
   }
@@ -323,6 +338,125 @@ export const celluarFill = (values, commands, density, steps, duration, channels
 }
 
 export const addValues = (values, commands, density, steps, duration, channels, timer) => {
+  function scale(value, r_min, r_max, o_min, o_max) {
+    return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
+  }
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
+  }
+
+  function addItems(){
+    var command_len = Object.keys(commands).length;
+    var channel_len = channels.length;
+
+    // Add random
+    var item_count = steps*channels.length*density/100;
+
+    for (var i = 0; i < item_count; i++) {
+      var row = _.random(0, steps-1);
+      var col;
+      var randIndex = _.random(0, command_len-1);
+
+      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
+        col = channels[_.random(channel_len-6, channel_len-1)];
+      }
+      else {
+        col = channels[_.random(0, channel_len-7)];
+      }
+
+      placeValue(row, col, Object.values(commands)[randIndex].name, values);
+    }
+  }
+
+  return dispatch => {
+    addItems();
+    dispatch({ type: 'ADD_TIMER'});
+  }
+}
+
+export const celluarFillStop = () => {
+  return dispatch => {
+    dispatch({ type: 'FETCH_STOP_TIMER'});
+  }
+}
+
+export const bjorkFill = (values, commands, density, steps, duration, channels, timer) => {
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
+  }
+  function pickRandom(x, y){
+    var cmd, randIndex;
+    if(y >= channels.length-6){
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    else {
+      do{
+        randIndex = _.random(0, Object.keys(commands).length-1);
+      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
+      cmd = Object.values(commands)[randIndex].name;
+    }
+    return cmd;
+  }
+
+  function updateBjork() {
+    var countArr = [];
+    _.forEach(channels, function(channel, c_key){
+      var count = 0;
+      // console.log("CHANNEL"+channel);
+      _.forEach(values, function(rowValue, rowKey) {
+        // console.log(values[rowKey][channel]);
+        if(values[rowKey] !== undefined && values[rowKey][channel]) {
+          count++;
+        }
+      });
+      countArr[c_key] = count;
+    });
+    console.log(countArr);
+    var tempArr = [-1, 1];
+    _.forEach(countArr, function(item, key) {
+      countArr[key] = _.clamp(_.nth(tempArr, _.random(0, 1))+item, 1, steps/2);
+    })
+    console.log(countArr);
+
+    var channel_len = channels.length;
+
+    // Euclidean Rythm
+    for (var i = 0; i < channel_len; i++) {
+      //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
+      var str = bjork(_.nth(countArr, i), steps);
+
+      for (var j = 0; j < str.length; j++) {
+        var row = j;
+        var col = _.nth(channels, i);
+        if(str[j] === '1'){
+          placeValue(row, col, pickRandom(row, i), values);
+        }else {
+          placeValue(row, col, '', values);
+        }
+      }
+    }
+
+  }
+
+  if(timer.current % steps === 1 && timer.isBjorkActive)
+  {
+    updateBjork();
+    return dispatch => {};
+  }
+
+  return dispatch => {
+    dispatch({ type: 'FETCH_2_TIMER'});
+  }
+}
+
+export const addBjorkValues = (values, commands, density, steps, duration, channels, timer) => {
   function scale(value, r_min, r_max, o_min, o_max) {
     return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
   }
@@ -355,7 +489,7 @@ export const addValues = (values, commands, density, steps, duration, channels, 
     // Euclidean Rythm
     for (var i = 0; i < channel_len; i++) {
       //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
-      var str = bjork(_.random(3,7), steps);
+      var str = bjork(_.random(steps/8, steps/2 + 1), steps);
 
       for (var j = 0; j < str.length; j++) {
         var row = j;
@@ -365,25 +499,6 @@ export const addValues = (values, commands, density, steps, duration, channels, 
         }
       }
     }
-
-    // Add random
-    /*
-    var item_count = steps*channels.length*density/100;
-
-    for (var i = 0; i < item_count; i++) {
-      var row = _.random(0, steps-1);
-      var col;
-      var randIndex = _.random(0, command_len-1);
-
-      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[_.random(channel_len-6, channel_len-1)];
-      }
-      else {
-        col = channels[_.random(0, channel_len-7)];
-      }
-
-      placeValue(row, col, Object.values(commands)[randIndex].name, values);
-    }*/
   }
 
   return dispatch => {
@@ -392,11 +507,13 @@ export const addValues = (values, commands, density, steps, duration, channels, 
   }
 }
 
-export const celluarFillStop = () => {
+export const bjorkFillStop = () => {
   return dispatch => {
-    dispatch({ type: 'FETCH_STOP_TIMER'});
+    dispatch({ type: 'FETCH_STOP_2_TIMER'});
   }
 }
+
+
 
 export const sendScCommand = (server, expression) => {
   return dispatch => {
@@ -436,57 +553,3 @@ export const stopTimer = () => {
     type: 'STOP_TIMER'
   }
 }
-
-/*
-  Functions for popup display on each playbox
-*/
-/*$(document).ready(function () {
-  $("[id^=pt_pop_]").on('change keyup paste', function(event) {
-     var lastNumber = new RegExp("[0-9]*$")
-     var number = $(this).attr('id').match(lastNumber)[0];
-
-    if($(this).val() === ""){
-     	$(this).removeClass('selected');
-      $(".pop_"+number).attr('id','messagepop_hidden');
-    }
-
-    if($(this).val() !== "" && $(this).hasClass('selected') === false) {
-      $(this).addClass('selected');
-      $(".pop_"+number).attr('id','messagepop_visible');
-    }
-
-    if(event.keyCode === 27){
-      console.log(event.keyCode+ "#pt_pop_"+number);
-      $("[id^=pt_pop_]").removeClass('selected');
-      $("[class^=messagepop_]").attr('id','messagepop_hidden');
-    }
-
-    // if databasede varsa
-    /*if(function(){
-          }
-    {
-        // alıp textboxa yaz
-          $(this).val()
-
-    }
-
-    $(document).mouseup(function (e)
-    {
-        var container = $("[id^=pt_pop_]");
-
-        if ($(".messagepop_"+number).html().trim() !== e.target.outerHTML
-        && container.has(e.target).length === 0) // ... nor a descendant of the container
-        {
-     				$("#pt_pop_"+number).removeClass('selected');
-            $(".pop_"+number).attr('id','messagepop_hidden');
-
-            // if databasede yoksa
-            //ekle
-          if($(this).val() )
-            {
-                // ekle
-            }
-        }
-  	});
-  });
-});*/
