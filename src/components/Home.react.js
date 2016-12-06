@@ -235,18 +235,18 @@ class Home extends Component {
       </div>
 
       <div id="Celluar">
-       Celluar Automata Density
+       <p>Celluar Automata Updates</p>
        <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
        {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
        {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-       <button onClick={addValues}>Add Values</button>
+       <button onClick={addValues}>  Add  </button>
       </div>
 
       <div id="Celluar">
-       Bjork
+       <p>Bjorklund Algorithm Updates</p>
        {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
        {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-       <button onClick={addBjorkValues}>Add Values</button>
+       <button onClick={addBjorkValues}>  Add  </button>
       </div>
 
       </div>
