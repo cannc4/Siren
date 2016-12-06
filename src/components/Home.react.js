@@ -13,7 +13,7 @@ class Home extends Component {
     this.state = {
       tidalServerLink: 'localhost:3001',
       duration: 8,
-      steps: 16,
+      steps: 24,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2',

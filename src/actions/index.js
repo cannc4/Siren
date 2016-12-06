@@ -191,7 +191,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           case "d1":
             append = " |+| nudge rand"; break;
           case "d2":
-            append = " # cut \"1\""; break;
+            append = " # cut \"4\""; break;
           case "d3":
             append = " # room \"1\""; break;
           case "d4":
@@ -199,11 +199,11 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           case "d5":
             append = " # cut \"5\""; break;
           case "d6":
-            append = " # cutoff (scale 0 16000 $ slow 4 sinewave1)"; break;
+            append = " # cutoff (scale 0 16000 $ slow 2 sinewave1)"; break;
           case "d7":
             append = ""; break;
           case "d8":
-            append = " # room \"10\""; break;
+            append = " # room \"0.5\""; break;
           case "d9":
             append = ""; break;
           default:
