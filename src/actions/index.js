@@ -193,12 +193,36 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, channelcommands,commands =[]) => {
+export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cmd = _.find(commands, c => c.name === v);
       if(cmd !== undefined && cmd !== null){
-        return k + ' $ ' + cmd.command
+        var append = "";
+        switch (k) {
+          case "d1":
+            append = " |+| nudge rand"; break;
+          case "d2":
+            append = " # cut \"1\""; break;
+          case "d3":
+            append = " # room \"1\""; break;
+          case "d4":
+            append = " # delay \"0.6\" # delayfeedback \"12\" # delaytime \"0.3\""; break;
+          case "d5":
+            append = " # cut \"5\""; break;
+          case "d6":
+            append = " # cutoff (scale 0 16000 $ slow 4 sinewave1)"; break;
+          case "d7":
+            append = ""; break;
+          case "d8":
+            append = " # room \"10\""; break;
+          case "d9":
+            append = ""; break;
+          default:
+            break;
+        }
+
+        return k + ' $ ' + cmd.command + append;
       } else return false;
     }))
   //const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands';
@@ -221,36 +245,34 @@ export const celluarFill = (values, commands, density, steps, duration, channels
       container[parseInt(row)+1] = {};
     container[parseInt(row)+1][col] = item;
   }
-  function addItems(){
-    var command_len = Object.keys(commands).length;
-    var channel_len = channels.length;
-
-    var item_count = steps*channels.length*density/100;
-
-    for (var i = 0; i < item_count; i++) {
-      var row = getRandomInt(0, steps-1);
-      var col;
-      var randIndex = getRandomInt(0, command_len-1);
-
-      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[getRandomInt(channel_len-3, channel_len-1)];
-      }
-      else {
-        col = channels[getRandomInt(0, channel_len-4)];
-      }
-
-      placeValue(row, col, Object.values(commands)[randIndex].name, values);
-    }
-    console.log("VALUES_after_AddItems");
-    console.log(values);
-  }
+  // function addItems(){
+  //   var command_len = Object.keys(commands).length;
+  //   var channel_len = channels.length;
+  //
+  //   var item_count = steps*channels.length*density/100;
+  //
+  //   for (var i = 0; i < item_count; i++) {
+  //     var row = getRandomInt(0, steps-1);
+  //     var col;
+  //     var randIndex = getRandomInt(0, command_len-1);
+  //
+  //     if(_.includes(Object.values(commands)[randIndex].command, "Message")){
+  //       col = channels[getRandomInt(channel_len-6, channel_len-1)];
+  //     }
+  //     else {
+  //       col = channels[getRandomInt(0, channel_len-7)];
+  //     }
+  //
+  //     placeValue(row, col, Object.values(commands)[randIndex].name, values);
+  //   }
+  // }
 
   function update(){
     var resultVals = {};
 
     function pickRandom(x, y){
       var cmd, randIndex;
-      if(y >= channels.length-3){
+      if(y >= channels.length-6){
         do{
           randIndex = getRandomInt(0, Object.keys(commands).length-1);
         }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
@@ -319,47 +341,73 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     /*
      * TODO -- SOLVE THIS PROBLEM
     */
-    console.log("COUNTS_before");
-    console.log(counts);
-    console.log("VALUES_before");
-    console.log(values);
-    console.log("RESULTS_before");
-    console.log(resultVals);
+    // console.log("COUNTS_before");
+    // console.log(counts);
+    // console.log("VALUES_before");
+    // console.log(values);
+    // console.log("RESULTS_before");
+    // console.log(resultVals);
     _.forEach(resultVals, function(rowValue, rowKey) {
       _.forEach(rowValue, function(cell, colKey) {
         placeValue(rowKey-1, colKey, cell, values);
       });
     });
-    console.log("VALUES_after");
-    console.log(values);
+    // console.log("VALUES_after");
+    // console.log(values);
   }
 
-  // ONE SOLUTION -- buggy
-  // if(timer.current % steps == 1){
-  //   return dispatch => {
-  //     update();
-  //     dispatch(incTimer());
-  //   }
-  // }
-  // OTHER SOLUTION
-  if(timer.current % steps == 1){
+  if(timer.current % steps == 1 && timer.isCelluarActive)
+  {
     update();
-    return dispatch => {  };
+    return dispatch => {
+    };
   }
 
   return dispatch => {
-    /*console.log("-----------------");
-    console.log(values);
-    console.log(commands);
-    console.log(density);
-    console.log(steps);
-    console.log(duration);
-    console.log(channels);
-    console.log("-----------------");*/
+    dispatch({ type: 'FETCH_TIMER'});
+  }
+}
 
+export const addValues = (values, commands, density, steps, duration, channels, timer) => {
+  function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
+  }
+  function addItems(){
+    var command_len = Object.keys(commands).length;
+    var channel_len = channels.length;
+
+    var item_count = steps*channels.length*density/100;
+
+    for (var i = 0; i < item_count; i++) {
+      var row = getRandomInt(0, steps-1);
+      var col;
+      var randIndex = getRandomInt(0, command_len-1);
+
+      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
+        col = channels[getRandomInt(channel_len-6, channel_len-1)];
+      }
+      else {
+        col = channels[getRandomInt(0, channel_len-7)];
+      }
+
+      placeValue(row, col, Object.values(commands)[randIndex].name, values);
+    }
+  }
+
+  return dispatch => {
     addItems();
+    dispatch({ type: 'ADD_TIMER'});
+  }
+}
 
-    dispatch({ type: 'FETCH_CELLUAR', payload: {values} });
+export const celluarFillStop = () => {
+  return dispatch => {
+    dispatch({ type: 'FETCH_STOP_TIMER'});
   }
 }
 
@@ -380,15 +428,13 @@ export const sendScCommand = (server, expression) => {
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});
 
-export const incTimer = (v) => {
-  return {
-    type: 'INC_TIMER',
-  }
+export const incTimer = () => {
+  return { type: 'INC_TIMER'}
 };
 
 var timer = null;
 const x = (dispatch) => {
-  dispatch(incTimer())
+  dispatch(incTimer());
 }
 
 export const startTimer = (duration, steps) => {

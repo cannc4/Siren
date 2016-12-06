@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer, celluarFill } from '../actions'
+import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer, celluarFill, celluarFillStop, addValues} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -13,8 +13,11 @@ class Home extends Component {
       tidalServerLink: 'localhost:3001',
       duration: 8,
       steps: 16,
-      channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9', 'sendOSC procF_t','sendOSC procF_v', 'sendOSC procS' ],
-      timer: { isActive: false, current: null },
+      channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
+              'sendOSC procF_t','sendOSC procF_v',
+              'sendOSC procS1', 'sendOSC procS2',
+              'sendOSC procS3', 'sendOSC procS4' ],
+      timer: { isActive: false, current: null, isCelluarActive: false },
       values: {},
       scCommand: '',
       density: 8
@@ -25,10 +28,11 @@ class Home extends Component {
     const ctx = this;
     const { channelcommands, commands, timer } = props;
     const { steps, tidalServerLink, values, density, duration, channels } = state;
+    console.log(timer.isCelluarActive);
     if (timer.isActive) {
       const runNo = (timer.current % steps) + 1;
 
-      if(timer.current % steps == 1){
+      if(timer.current % steps == 1 && timer.isCelluarActive){
         ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
       }
 
@@ -68,9 +72,18 @@ class Home extends Component {
     store.dispatch(sendScCommand(tidalServerLink, command));
   }
 
+  addValues(values, commands, density, steps, duration, channels, timer){
+    store.dispatch(addValues(values, commands, density, steps, duration, channels, timer));
+  }
+
   celluarFill(values, commands, density, steps, duration, channels, timer){
-    // console.log("first celluarFill");
+    //this.stopTimer();
     store.dispatch(celluarFill(values, commands, density, steps, duration, channels, timer));
+    //this.startTimer();
+  }
+
+  celluarFillStop(){
+    store.dispatch(celluarFillStop());
   }
 
   handleSubmit = event => {
@@ -157,11 +170,16 @@ class Home extends Component {
     const { tidal, timer } = ctx.props;
     const { scCommand, tidalServerLink } = ctx.state;
 
-
     const { commands } = ctx.props;
     const { values, density, steps, duration, channels} = ctx.state;
+    const celluarFillStop = () => {
+      ctx.celluarFillStop();
+    }
     const celluarFill = () => {
       ctx.celluarFill(values, commands, density, steps, duration, channels, timer)
+    }
+    const addValues = () => {
+      ctx.addValues(values, commands, density, steps, duration, channels, timer)
     }
     const updateDensity = ({ target: { value } }) => {
       ctx.setState({density: value});
@@ -203,7 +221,9 @@ class Home extends Component {
       <div id="Celluar">
        Celluar Automata Density
        <input type= "textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-       <button onClick={celluarFill}>Run</button>
+       {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+       {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+       <button onClick={addValues}>Add Values</button>
       </div>
 
       </div>
