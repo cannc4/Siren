@@ -1,16 +1,4 @@
 {
-<<<<<<< Updated upstream
-  "userpath": "C:\\Users\\Mert",
-  "debug": false,
-  "ghcipath": "C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe",
-  "sclang": "C:\\Program Files\\SuperCollider-3.8.0\\sclang.exe",
-  "scsynth": "C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe",
-  "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
-  "port": 3001,
-  "samples_path": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\downloaded-quarks\\Dirt-Samples\\*",
-  "tidal_boot": "C:\\GitHub\\sq\\config\\user\\tidal-boot-user.hs",
-  "scd_start": "C:\\GitHub\\sq\\config\\default\\scd-start-default.scd"
-=======
   "userpath": "/Users/canince",
   "debug": true,
   "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.0.1-x86_64/usr/bin/ghci-8.0.1",
@@ -21,5 +9,4 @@
   "samples_path": "/Users/canince/Dropbox/Tidal Sample Bank/*",
   "tidal_boot": "/Users/canince/Documents/Github/sq/config/user/tidal-boot-user.hs",
   "scd_start": "/Users/canince/Documents/Github/sq/config/default/scd-start-default.scd"
->>>>>>> Stashed changes
 }

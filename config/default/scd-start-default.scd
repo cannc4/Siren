@@ -1,8 +1,4 @@
 (
-<<<<<<< Updated upstream
-SuperDirt.start;
-=======
-
 Server.supernova;
 s.audioBusAllocator.reserve(12,1);
 s.options.numAudioBusChannels=128;
@@ -27,6 +23,4 @@ s.options.verbosity = -2;
 //MIDIClient.init;
 //MIDIIn.connectAll;
 SuperDirt.start;
-
->>>>>>> Stashed changes
 )
