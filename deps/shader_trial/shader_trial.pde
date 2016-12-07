@@ -5,7 +5,7 @@ PShader ps;
 
 void setup() {
   //size(800, 600, P3D);
-  fullScreen(P3D, 2);
+  fullScreen(P3D, 1);
   pg = createGraphics(width,height, P3D);
 
   ph = createSphere();

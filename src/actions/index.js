@@ -517,6 +517,19 @@ export const sendScCommand = (server, expression) => {
   }
 }
 
+export const consoleSubmit = (server, expression) => {
+  console.log("store ici felan");
+  console.log(expression);
+  return dispatch => {
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': [expression] })
+    .then((response) => {
+      //dispatch({ type: 'SET_CC', payload: {channel, command} })
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+}
+
 //export const setCommand = (channel, command) => ({ type: 'SET_CC', payload: {channel, command} });
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});

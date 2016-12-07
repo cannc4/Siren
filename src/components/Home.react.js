@@ -5,7 +5,8 @@ import './Home.css';
 
 import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
-          bjorkFill, bjorkFillStop, addBjorkValues} from '../actions'
+          bjorkFill, bjorkFillStop, addBjorkValues,
+          consoleSubmit} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -106,15 +107,31 @@ class Home extends Component {
     store.dispatch(bjorkFillStop());
   }
 
-  handleSubmit=event => {
-      const body=event.target.value
-      const ctx=this;
-      const {scCommand, tidalServerLink }=ctx.state;
+  consoleSubmit(tidalServerLink, value){
+    console.log("store felan");
+    store.dispatch(consoleSubmit(tidalServerLink, value));
+  }
 
-      if(event.keyCode === 13 && event.ctrlKey && body){
-        ctx.sendScCommand(tidalServerLink, scCommand);
-      }
+  handleSubmit = event => {
+    const body=event.target.value
+    const ctx=this;
+    const {scCommand, tidalServerLink }=ctx.state;
+
+    if(event.keyCode === 13 && event.ctrlKey && body){
+      ctx.sendScCommand(tidalServerLink, scCommand);
     }
+  }
+
+  handleConsoleSubmit = event => {
+    const value = event.target.value;
+    const ctx = this;
+    const {tidalServerLink} = ctx.state;
+
+    if(event.keyCode === 13 && event.ctrlKey && value){
+      ctx.consoleSubmit(tidalServerLink, value);
+    }
+  }
+
   renderPlayer() {
     const ctx=this;
     const { channels, steps }=ctx.state;
@@ -224,14 +241,16 @@ class Home extends Component {
     const updateScCommand=({ target: { value } }) => {
       ctx.setState({scCommand: value})
     }
-    /*const sendSc=() => {
-      ctx.sendScCommand(tidalServerLink, scCommand)
-    }*/
 
     return <div className="Home cont">
       {ctx.renderPlayer()}
-      <div className="Commands">
-        <Commands />
+      <div id="CommandsColumn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+        <div className="Commands"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+          <Commands />
+        </div>
+        <div id="Execution"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', padding: "15px", paddingBottom: "25px"}}>
+          <textarea className="easter" style={{minHeight: "100px"}} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
+        </div>
       </div>
       <div className="Tidal">
         Tidal Server Link <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
@@ -240,10 +259,12 @@ class Home extends Component {
       {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
       <pre>{JSON.stringify(timer, null, 2)}</pre>
 
-      <div id="Command">
-       Interpreter
-       <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-      </div>
+
+        <div id="Command">
+         Interpreter
+         <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+        </div>
+
 
       <div id="Celluar">
        <p>Celluar Automata Updates</p>

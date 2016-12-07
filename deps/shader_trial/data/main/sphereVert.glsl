@@ -26,9 +26,9 @@ float noise(vec2 st) {
 }
 
 void main() {
-  vec3 temp = vec3(position.x * (noise(texCoord*sin(u_time)*3.5)+1.),
-                   position.y * (noise(texCoord*cos(u_time)*2.1)+1.),
-                   position.z * (noise(texCoord*cos(u_time)*2.8)+1.));
+  vec3 temp = vec3(position.x*(noise(texCoord*sin(u_time)*3.5)+1.),
+                   position.y*(noise(texCoord*cos(u_time)*2.1)+1.),
+                   position.z*(noise(texCoord*cos(u_time)*2.8)+1.));
 
   gl_Position = transform * vec4(temp, 1.0);
 

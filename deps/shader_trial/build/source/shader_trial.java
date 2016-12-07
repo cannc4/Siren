@@ -670,7 +670,7 @@ public void presets(){
     filter(edge);
   }
 }
-  public void settings() {  fullScreen(P3D, 2); }
+  public void settings() {  fullScreen(P3D, 1); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "shader_trial" };
     if (passedArgs != null) {
