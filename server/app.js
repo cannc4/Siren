@@ -47,7 +47,7 @@ class REPL {
   }
 
   tidalSendExpression(expression) {
-    console.log("tidalSendExpression "+ expression);
+    //console.log("tidalSendExpression "+ expression);
     this.tidalSendLine(':{');
     const splits = expression.split('\n');
 
@@ -122,7 +122,7 @@ const myApp = () => {
   };
 
   const sendCommand = (expr, reply) => {
-    console.log("mesjageldiSERVERCVERSVERVERE " + expr)
+    // console.log("mesjageldiSERVERCVERSVERVERE " + expr)
     _.each(expr, c => {
       TidalData.myTidal.tidalSendExpression(c);
       TidalData.myTidal.myCommands.values.push(c);
@@ -146,16 +146,12 @@ const myApp = () => {
   app.get('/tidal', (req, reply) => startTidal(reply));
 
   app.post('/command', (req, reply) => {
-    console.log("COMMAND");
-    console.log(req.body);
     const { command } = req.body;
     console.log('Command inbound:', command);
     sendCommand(command, reply);
   });
 
   app.post('/commands', (req, reply) => {
-    console.log("COMMAND(S))");
-    console.log(req.body);
     const { commands } = req.body;
     console.log('Command inbound:', commands);
     sendCommands(commands, reply);

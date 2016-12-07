@@ -22,7 +22,6 @@ PShape ph;
 PShader ps;
 
 public void setup() {
-  //size(800, 600, P3D);
   
   pg = createGraphics(width,height, P3D);
 
@@ -56,6 +55,8 @@ public void draw() {
 
   // Overall subtle line pattern
   filter(lines);
+
+  saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
 
   // Debugging texts
   /*fill(255);
@@ -670,7 +671,7 @@ public void presets(){
     filter(edge);
   }
 }
-  public void settings() {  fullScreen(P3D, 1); }
+  public void settings() {  fullScreen(P3D, 2); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "shader_trial" };
     if (passedArgs != null) {
