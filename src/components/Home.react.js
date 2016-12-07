@@ -14,8 +14,8 @@ class Home extends Component {
     super();
     this.state={
       tidalServerLink: 'localhost:3001',
-      duration: 6,
-      steps: 12,
+      duration: 8,
+      steps: 24,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2',
@@ -42,6 +42,17 @@ class Home extends Component {
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
         else
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
+
+        /*var countArr = [];
+        _.forEach(channels, function(channel, c_key){
+          var count = 0;
+          _.forEach(values, function(rowValue, rowKey) {
+            if(values[rowKey] !== undefined && values[rowKey][channel]) {
+              count++;
+            }
+          });
+          countArr[c_key] = count;
+        });*/
       }
 
       const vals=values[runNo];
@@ -67,8 +78,7 @@ class Home extends Component {
     store.dispatch(initMyTidal(tidalServerLink));
   }
 
-  sendCommands(tidalServerLink, vals, channelcommands, commands, channels) {
-    //console.log("2002");
+  sendCommands(tidalServerLink, vals, channelcommands, commands) {
     store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
   }
 
@@ -109,10 +119,14 @@ class Home extends Component {
     const ctx=this;
     const { channels, steps }=ctx.state;
     const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
+    var count = 1;
     return (<div className="Player-holder">
       <div className={playerClass}>
         <div className="playbox playbox-cycle">cycle</div>
         {_.map(channels, c => {
+          if(_.includes(c, "sendOSC")){
+            c = "p"+count++;
+          }
           return <div className="playbox" key={c}><div>{c}</div></div>
         })}
       </div>
@@ -138,7 +152,7 @@ class Home extends Component {
         const setText=({ target: { value }}) => {
             const {values}=ctx.state;
             if (values[i+1] === undefined) values[i+1]={}
-            values[i+1][c]=value;
+            values[i+1][c] = value;
             ctx.setState({values});
             if (cmds.indexOf(value) > -1){
               const cmd=_.find(commands, c => c.name === value);

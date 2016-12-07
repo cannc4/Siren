@@ -22,7 +22,7 @@ void main( void ) {
 	float r = color;
 	float g = color * colorMult.y;
 	float b = sin( color + time / 2.0 ) * colorMult.x;
-	
-	gl_FragColor = vec4(r, g, b, 1.0 );
+
+	gl_FragColor = vec4(vec3(b), 1.0 );
 
 }

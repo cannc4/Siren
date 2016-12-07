@@ -35,7 +35,10 @@ void oscEvent(OscMessage m)
           strobeTime = val;   break;
         case "randMask":
           randomMaskLasttime = millis();
-          randomMaskTime = val;   break;
+          randomMaskTime = val;
+          orientation = random(-1, 1);
+          rand_x = random(1); rand_width = random(1);
+          rand_y = random(1); rand_height = random(1); break;
         case "preset":
           presetNumber = int(val);   break;
         case "shake":
@@ -99,8 +102,6 @@ void oscEvent(OscMessage m)
       float val = m.get(1).floatValue();
 
       switch(arg){
-        case "spheres":
-          isSpheres = !isSpheres; break;
         case "shaders":
           shaderNumber = (int)val; break;
         default:

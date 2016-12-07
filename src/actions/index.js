@@ -187,27 +187,27 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cmd = _.find(commands, c => c.name === v);
-      if(cmd !== undefined && cmd !== null){
+      if(cmd !== undefined && cmd !== null && cmd !== ""){
         var append = "";
         switch (k) {
           case "d1":
-            append = " |+| nudge rand"; break;
-          // case "d2":
-          //   append = " # cut \"4\""; break;
-          // case "d3":
-          //   append = " # room \"0.05\""; break;
-          // case "d4":
-          //   append = " # room \"0.44\" # size \"12\" # gain \"0.3\""; break;
-          // case "d5":
-          //   append = " # cut \"5\""; break;
-          // case "d6":
-          //   append = " # cutoff (scale 0 16000 $ slow 2 sinewave1)"; break;
-          // case "d7":
-          //   append = ""; break;
-          // case "d8":
-          //   append = " # room \"0.23\""; break;
-          // case "d9":
-          //   append = ""; break;
+            append = " # pan \"0.35\""; break;
+          case "d2":
+            append = " # pan \"0.4\""; break;
+          case "d3":
+            append = " # pan \"0.45\""; break;
+          case "d4":
+            append = " # pan \"0.5\""; break;
+          case "d5":
+            append = " # pan \"0.5\""; break;
+          case "d6":
+            append = " # pan \"0.65\""; break;
+          case "d7":
+            append = " # pan \"0.7\""; break;
+          case "d8":
+            append = " # pan \"0.75\""; break;
+          case "d9":
+            append = " # pan \"0.78\""; break;
           default:
             break;
         }
@@ -215,7 +215,6 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         return k + ' $ ' + cmd.command + append;
       } else return false;
     }))
-  //const url = 'http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands';
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
     .then((response) => {
       //dispatch({ type: 'SET_CC', payload: {channel, command} })
@@ -230,22 +229,6 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
     container[parseInt(row)+1][col] = item;
-  }
-  function pickRandom(x, y){
-    var cmd, randIndex;
-    if(y >= channels.length-6){
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    else {
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    return cmd;
   }
   function updateCelluar(){
     var resultVals = {};
@@ -323,6 +306,13 @@ export const celluarFill = (values, commands, density, steps, duration, channels
         placeValue(rowKey-1, colKey, cell, values);
       });
     });
+
+    // Cleans up empty values
+    _.forEach(values, function(rowValue, key) {
+      if(rowValue !== undefined){
+        values[key] = _.pickBy(rowValue, function(n){ return n != "";});
+      }
+    });
   }
 
   if(timer.current % steps === 1 && timer.isCelluarActive)
@@ -337,9 +327,6 @@ export const celluarFill = (values, commands, density, steps, duration, channels
   }
 }
 export const addValues = (values, commands, density, steps, duration, channels, timer) => {
-  function scale(value, r_min, r_max, o_min, o_max) {
-    return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
-  }
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
@@ -432,13 +419,19 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
         var row = j;
         var col = _.nth(channels, i);
         if(str[j] === '1'){
-          placeValue(row, col, pickRandom(row, i), values);
-        }else {
-          placeValue(row, col, '', values);
+          if(parseInt((i/3)%2) === 0)
+            placeValue(row+1, col, pickRandom(row+1, i), values);
+          else
+            placeValue(row, col, pickRandom(row, i), values);
         }
       }
     }
-
+    // Cleans up empty values
+    _.forEach(values, function(rowValue, key) {
+      if(rowValue !== undefined){
+        values[key] = _.pickBy(rowValue, function(n){ return n != '';});
+      }
+    });
   }
 
   if(timer.current % steps === 1 && timer.isBjorkActive)
@@ -490,7 +483,11 @@ export const addBjorkValues = (values, commands, density, steps, duration, chann
         var row = j;
         var col = _.nth(channels, i);
         if(str[j] === '1'){
-          placeValue(row, col, pickRandom(row, i), values);
+          if(parseInt((i/3)%2) == 0)
+            placeValue(row+1, col, pickRandom(row+1, i), values);
+          else {
+            placeValue(row, col, pickRandom(row, i), values);
+          }
         }
       }
     }

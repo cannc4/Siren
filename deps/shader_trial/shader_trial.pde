@@ -1,9 +1,15 @@
 PGraphics pg;
 
+PShape ph;
+PShader ps;
+
 void setup() {
-  size(1000, 800, P3D);
-  //fullScreen(P3D, 1);
+  //size(800, 600, P3D);
+  fullScreen(P3D, 2);
   pg = createGraphics(width,height, P3D);
+
+  ph = createSphere();
+  ps = loadShader("main/sphereFrag.glsl", "main/sphereVert.glsl");
 
   /* start oscP5, listening for incoming messages at port 12000
      IP = 127.0.0.1 */
@@ -20,8 +26,8 @@ void draw() {
   updateUniforms_Shaders();
 
   // Main object drawn
-  drawSpheres();
   drawShaders();
+  drawSphere();
 
   // post-processing effects
   presets();
@@ -34,7 +40,7 @@ void draw() {
   filter(lines);
 
   // Debugging texts
-  fill(255);
+  /*fill(255);
   textSize(25);
-  text(frameRate, 5, 30);
+  text(frameRate, 5, 30);*/
 }

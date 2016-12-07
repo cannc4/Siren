@@ -25,8 +25,9 @@ void main()
     	newp.y+=graininess.y/float(i)*sin(float(i)*p.x+time/speed+0.3*float(i+100))+offset;
     	p=newp;
   	}
-  	vec3 col=vec3(intense*sin(3.0*p.x)+intense,intense*sin(3.0*p.y)+intense,intense*sin(p.x+p.y)+intense);
-	col.g = col.r;
-//	col.b = col.r;
-  	gl_FragColor=vec4(col, 1.0);
+    float val = intense * sin(3.0*p.x) + intense;// intense*sin(3.0*p.y)+intense, intense*sin(p.x+p.y)+intense);
+	  // col.g = col.r;
+    // col.b = col.r;
+
+  	gl_FragColor = vec4(val, val, val, 1.0);
 }

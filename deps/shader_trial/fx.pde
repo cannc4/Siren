@@ -9,6 +9,14 @@ float randomMaskLasttime = 0;
 float randomMaskTime = 0;
 /////////////////
 
+// Random Mask Parameters ///
+float orientation = 0;
+float rand_x = 0;
+float rand_width = 0;
+float rand_y = 0;
+float rand_height = 0;
+////////////////////////////
+
 int presetNumber = 0;
 
 // Keeps track of toggled shaders
@@ -50,11 +58,6 @@ void strobeFx(){
 // Masks effects randomly
 void randomMasksFx(){
   if(randomMaskLasttime + randomMaskTime > millis()){
-    float orientation = random(-1, 1);
-    float rand_x = random(1);
-    float rand_width = random(1);
-    float rand_y = random(1);
-    float rand_height = random(1);
     for(int i = 0; i < filters.size(); i++)
     {
       if(orientation > 0){

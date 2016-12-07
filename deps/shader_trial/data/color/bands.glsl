@@ -49,9 +49,6 @@ void main( void ) {
 	if (stripePosition < 0.3)
 		color -=0.9;
 
-	vec3 col = vec3(color);
-	col.r = mod(col.g, position.x);
-	col.g = mod(col.b, position.y);
-	gl_FragColor = vec4(col, 1.0);
+	gl_FragColor = vec4(vec3(color), 1.0);
 
 }
