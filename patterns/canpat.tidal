@@ -1,0 +1,115 @@
+m1 $stack[ (every 2 (density 0.5)) $note "c3(2,8)" #synth4 "0.19 0.5"
+, note "c3(5,8)" #synth4 "0.19 0.5" #synth3 "0.4 0.1"]
+d1 $every 4 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.2")$ slowspread ($) [rev, gap 4, trunc 0.25]$ stack [
+every 6 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ glitch:2 ~ glitch:5 ~ " # cut "0.5 0.8 0.7",
+whenmod 8 4 (|+| speed "2") $ degradeBy 0.6 $ sound "seawolf:5*4" # cut "1"]
+d4 silence
+d1 silence
+d4 $sound "gabor*4" # note "200"
+d1 $ sound "imp" # note "10(2,8)"
+d1 $ sound "superhex/2" # note "-7(4,8)" #sustain "1" #room "0.7"
+d4 $ n (slow 2 $ fmap (*7) $ run 8) # s "super808*6" # note "0(3,8)" #speed "0.8" #gain "0.8" #room "0.5"
+d2 $ sound "super808*4" # note "0(3,8)" #speed "0.8"
+d2 $density 1 $ every 4 (#delay "0.01 0.4") $every 2 (density 4)$ sound "supercomparator*1" # note "30 25 40 40"# decay "[1 0.6]/2"  #sustain "0.5 0.1 0.1 " # delay "0.3" # delaytime "0.05" # delayfeedback "0.4"
+d3 silence $ sound "supergong*3" # decay "[1 0.6]/4" # voice "[0.5 0]/2"
+m1 $note "c3(3,8)"
+--SuperHex
+d3 $ n (slow 2 $ fmap (*7) $ run 8) # s "superhex" # sustain "[1 0.9]/2" # note "[-2, -12]" #room "0.5"
+d3 $ n (slow 2 $ fmap (*7) $ run 8) # s "superhex/2" # sustain "[1 0.5]/4" # note "[-6, -12]" #room "0.5" # cut "2"
+d3 $ n (slow 2 $ fmap (*5) $ run 8) # s "superhex/2" # sustain "[1 0.9]/4" # note "[-2, -19]" #room "0.9" # cut "8"
+d2 $ n (slow 2 $ fmap (*5) $ run 8) # s "superhex/2" # decay "[1 0.9]/9" # note "[-12]" #room "1"#accelerate "0.2" |+| nudge rand
+d3 $ n (slow 2 $ fmap (*5) $ run 8) # s "superhex/2" # decay "[1 0.9]/4" # sustain "[1 0.9]/2"  # note "[-4]" #room "0.1"
+d3 $ n (slow 2 $ fmap (*2) $ run 8) # s "superhex/2" # sustain "[1 0.9]/4" # note "[-19, -7]" #room "0.1"
+d3 $ n (slow 2 $ fmap (*2) $ run 8) # s "pmsin/2" # note "[-12, -7]" # end "0.3"
+d3 $ n (slow 8 $ fmap (*2) $ run 4) # s "pmsin/8" # note "[-32, -37]" # end "1" # start "0.5"
+d2 $ n (slow 2 $ fmap (*5) $ run 8) # s "imp/4" # note "[ 60]" # end "0.2" # offset "0.9" # sustain "2"
+d2 silence
+d3 silence
+d1 silence
+d3 $ n (slow 2 $ fmap (*7) $ run 4) # s "supergong" # decay "[1 0.6]/2" # voice "[0.5 0]" #room "0.26"
+d3 $every 8 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.1")$ slowspread ($) [rev, gap 6, trunc 0.25]$ stack [
+every 6 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ glitch:3 glitch:2 bass:2 ~ glitch:5 ~ " # cut "0.5 0.8 0.7",
+degradeBy 0.5 $ chop 8 $ every 4 (juxBy 0.4 (gap 20)) $ sound "glitch:3" # gain "0.2",
+whenmod 8 5 (# coarse "30") $ sound "techno:8(3,8)",
+degradeBy 0.6 $ sound "glitch:5*8"|+| speed "[2 3]/2" # crush "12" # cut "1" # cutoff (scale 0 16000 $ slow 4 sinewave1) # room "0.2" # orbit "2" # delay "0.6" # delayfeedback "12" # delaytime "0.3"
+] # cutoff (scale 200 16000 $ slow 2 sinewave1) # shape ((/ 2) <$> sinewave1) # crush "6 10 4 12"
+d4 $every 3 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.1")$ slowspread ($) [rev, gap 6, trunc 0.25]$ stack [
+every 6 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ ~ seawolf:5 bass:2 ~ glitch:5 ~ " # cut "0.5 0.8 0.7",
+whenmod 8 6 (|+| speed "2") $ degradeBy 0.6 $ sound "seawolf:5*4" # cut "1"]
+d3 silence
+d1 silence
+d2 $every 4 (brak) $ degradeBy 0.3 $ every 4 (# delay "0.2")$ slowspread ($) [rev, gap 4, trunc 0.25]$ stack [
+every 3 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ ~ sn:4 bass:4 ~ glitch:5 ~ " # cut "1",
+whenmod 8 6 (|+| speed "2") $ degradeBy 0.6 $ sound "seawolf:5*2" # cut "1"
+|+| speed "[1 0.8 1 1.6]/2" # crush "4" # gain "0.2" # room "0.16" # orbit "1" ,
+degradeBy 0.5 $ chop 8 $ every 4 (juxBy 0.4 (gap 20)) $ sound "glitch:3" # gain "0.2",
+whenmod 8 5 (# coarse "30") $ sound "techno:8(3,8)",
+degradeBy 0.6 $ sound "glitch:5*8"
+|+| speed "[2 3]/2" # crush "12" # cut "1" # cutoff (scale 0 16000 $ slow 4 sinewave1) # room "0.2" # orbit "2" # delay "0.6" # delayfeedback "12" # delaytime "0.3"
+] # cutoff (scale 200 16000 $ slow 2 sinewave1) # shape ((/ 2) <$> sinewave1) # crush "6 10 4 12"
+d5 $every 4 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.2")$ slowspread ($) [rev, gap 4, trunc 0.25]$ stack [
+every 6 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ glitch:2 ~ glitch:5 ~ " # cut "0.5 0.8 0.7",
+whenmod 8 4 (|+| speed "2") $ degradeBy 0.6 $ sound "seawolf:5*4" # cut "1"]
+
+every 3 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.1")$ slowspread ($) [rev, gap 6, trunc 0.25]$ stack [
+every 6 (rev) $ whenmod 16 2 (0.25 <~) $ sound "~ ~ ~ seawolf:5 bass:2 ~ glitch:5 ~ " # cut "0.5 0.8 0.7",
+whenmod 8 6 (|+| speed "2") $ degradeBy 0.6 $ sound "seawolf:5*4" # cut "1"]
+hush
+m1 $stack[ (every 2 (density 0.2))
+   $note "c3(3,8)" #synth4 "0.19 0.5",
+    note "c3 c2" #synth4 "0.19 0.5" #synth3 "0.4 0.1"]
+cps 0.4
+m2 $every 6( density 1.4) $ note "g4 f3 ~" # sampstart "0.1 0.2" # sampend "0.5 0.8"
+      # filtfreq "0.8 0.99" # velocity "0.7 0.9 0.5"
+
+m2 $every 6( density 1.1) $ note "f2 f2" # sampstart "0.6 0.2" # sampend "0.5 0.8"
+  # filtfreq "0.99" # velocity "0.8 0.9"
+
+  m2 $every 2( density 1.1) $ note "c2 c2" # sampstart "0.8 0.2" # sampend "0.5 0.8"
+    # filtfreq "0.8 0.6" # velocity "0.4 0.5 0.5"
+
+m2  $ note "~ c3" # sampstart "0.01 0.2" # sampend "0.3 0.5"
+    # filtfreq "0.8" # velocity "0.8 0.9 0.8"
+cps 1
+m2 $stack [ (every 2 rev))) $ note "c3 c3 c3"
+  # sampstart "0.5 0.4" # sampend "0.9 0.8"
+  # filtfreq "0.8" # velocity "0.8 0.9 0.5",
+  note "c3 c3 c3" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+  # filtfreq "0.8" # velocity "0.8 0.9 0.5"]
+
+m3 $stack [ (every 8 (rev))$ note "c3 c2 c3"
+    # sampstart "0.5 0.4" # sampend "0.9 0.8",
+    note "c3 c3 c3" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+    # filtfreq "0.8" # velocity "0.8 0.9 0.5",
+    note "c3 c3 "# sampstart "0.5 0.4" # sampend "0.9 0.8" ]
+
+m12 $ note "f2 c3 "# sampstart "0.5 0.2" # sampend "0.9 0.8" |+| nudge rand
+m4 $ note " f3 ~  ~ ~ f3 "# sampstart "0.8 0.5" # sampend "0.9 0.8"
+
+m2$ every 12 (density 0.1) $stack [ note " f3 ~  ~ ~ f3 "# sampstart "0.8 0.5" # sampend "0.9 0.8" ,
+ note " ~ ~ f3 ~ ~ "# sampstart "0.2 0.5" # sampend "0.9 0.8" ]
+
+ m2$ every 4 (density 0.02) $stack [ note " c3 ~ f3 "# sampstart "0.8 0.5" # sampend "0.9 0.8" ,
+  note " ~ ~ f3 ~ ~ "# sampstart "0.3 0.5" # sampend "0.9 0.8" # sampbitreduction "0.01 0.2 0.5"]
+
+m4  $ note "c3 c3" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+  # filtfreq "0.8" # velocity "0.8 0.9 0.5"
+
+  cps 0.5
+  m4 $every 4 (density 4) $ note "f2 f2" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+    # filtfreq "0.8 0.5" # velocity "0.8 0.9 0.5"
+
+  m4  $ note "c3" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+    # filtfreq "0.8 0.7" # velocity "0.8 0.9 0.5"
+
+
+  m4 $every 4( density 2)$ note "c3 c3" # sampstart "0.01 0.2" # sampend "0.5 0.8"
+    # filtfreq "0.8" # velocity "0.8 0.9 0.5"
+
+m5  $note "~ c2 ~ c3 c3 c2 " # velocity "0.9 0.8"
+
+
+m11 $every 3 (density 4) $note "g3 f3 f3 f3 "
+
+
+m14  $note "~ c2 ~ c3 c3 c2 " # velocity "0.9 0.8"

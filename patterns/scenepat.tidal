@@ -1,0 +1,52 @@
+--Last Update: 7 Dec 2016
+              --Scene/Perf Patterns
+--MIDI Machine: Analog Rytm
+------------------------------------------------------------
+--m13 global control patterns--
+m13 <- midiStream devices "Analog Rytm Elektron MIDI" 13 rmController
+import Sound.Tidal.Scales
+m13 $every 2 (density 2)$activeScene "0.02 0.01"
+m13 $every 4 (slow 4)$activeScene "0.02? 0.01? 0.01? 0.02?" #perfparam1 "0.01 0.02? 0.03 0.9?"
+m13 $every 4 (slow 4)$activeScene "0.02 0.01"
+m13 $every 4 (density 4)$activeScene "0.02 0.02 0.01? 0.02? 0.03" #perfparam1 "0.01 0.9"
+m13 $slow 4 $perfparam1 "0.9 0.1" #perfparam2 "0.6 0.9 0.2 0.1" #activeScene "0.02 0.01"
+m13 $slow 1 $perfparam1 "0.4 0.1" #perfparam2 "0.6 0.3 0.02 0.01" #activeScene "0.01 0.01"
+m13 $every 4 (density 4) $perfparam1 "0.4 0.2 0.1" #perfparam2 "0.01 0.3 0.02 0.01" #activeScene "0.02 0.01"
+m13 $every 4 (density 8) $perfparam1 "0.4 0.2 0.1" #perfparam2 "0.01 0.3 0.02 0.01" #activeScene "0.02 0.02 0.03"
+m13 $every 4 (density 2) $perfparam1 "0.001 0.2 0.1" #perfparam2 "0.9 0.01" #activeScene "0.02 0.01"
+m13 $every 4 (density 8) $perfparam1 "0.4 0.2 0.1" #perfparam2 "0.2 0.4" #activeScene "0.02 0.01 0.01"
+m13 $every 4 (density 2) $perfparam1 "0.7 0.4 0.1" #perfparam2 "0.001 0.5 0.9" #activeScene "0.01 0.01"
+m13 $every 2 (density 2) $perfparam1 "0.2 0.1" #activeScene  "0.02 0.04 0.04"
+m13 silence
+m13 $every 2 (density 2) $perfparam1 "0.00001 0.4 0.1" #activeScene  "0.02 0.01"
+m13 $perfparam2 "0.01 0.1 " #activeScene  "0.02 0.01"
+--channel patterns--
+m1 $slow 2 $ every 3 (rev) $ note "[g2 [c2 c3] c2 ]"
+m1 silence
+m1 $ note "[g3 [c3 c3] c3 ]"
+m1 $ every 4 (density 1.5) $ note "g2 [c2 ~] g2? ~"
+m1 $every 4 (density 1.5)$ note "c2(3,8)"
+m2 $slow 2 $ note "c3(2,8)"
+m2 $ note "c2 c3 c3?"
+m2 silence
+m4 $slow 2 $every 2 (density 1.5) $note "~ [~ c2] ~ c2"
+m5 $slow 4 $note ((+) <$>"f2 ~ g1 f2" <*> (listToPat _min))
+m6 $slow 4 $note "c1"
+m6  $slow 4 $note "g2"
+m9 $ note "c3(8,8)"
+m11 $slow 2 $ every 3 (rev) $ note "[~ [c2 c3] c2 ~]"
+m9 silence
+m11 silence
+m5 silence
+m9 silence
+m12 silence
+cps 1
+m3 $note ((+) <$> "[g2 g1] c1 c3" <*> (listToPat _min))
+m3 $ every 2 (slow 4) $ note ((+) <$> "f2 ~ g1 d2" <*> (listToPat augmented2))
+m3 $every 4 (density 2) $note ((+) <$> "d1 f1 g2" <*> (listToPat _min))
+m3 $every 2(slow 2) $note ((+) <$> "f4 f2 c2" <*> (listToPat _min))
+m3 $every 2(slow 2) $note ((+) <$> "f4 f1 c2" <*> (listToPat _min))
+m3 $every 2(slow 2) $note ((+) <$> "c2 f2 c3" <*> (listToPat augmented2))
+m4 $every 5 (rev) $ note "[~ [~ c2] ~ c3]"
+
+m4 $every 5 (rev) $ note "[~ [c0 c2] c0]" #tMtype "0.03 0.02"

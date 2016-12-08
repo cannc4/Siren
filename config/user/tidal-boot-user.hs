@@ -1,6 +1,8 @@
 :set prompt ""
 :module Sound.Tidal.Context
-
+import Sound.Tidal.Scales
+import Sound.Tidal.MIDI.Context
+import Sound.Tidal.MIDI.RMControllerMIDI
 import Sound.OSC.FD
 
 procF_t <- openUDP "127.0.0.1" 12000
@@ -10,6 +12,21 @@ procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
+displayOutputDevices >>= putStrLn
+devices <- midiDevices
+m1 <- midiStream devices "Analog Rytm Elektron MIDI" 1 rmController
+m2 <- midiStream devices "Analog Rytm Elektron MIDI" 2 rmController
+m3 <- midiStream devices "Analog Rytm Elektron MIDI" 3 rmController
+m4 <- midiStream devices "Analog Rytm Elektron MIDI" 4 rmController
+m5 <- midiStream devices "Analog Rytm Elektron MIDI" 5 rmController
+m6 <- midiStream devices "Analog Rytm Elektron MIDI" 6 rmController
+m7 <- midiStream devices "Analog Rytm Elektron MIDI" 7 rmController
+m8 <- midiStream devices "Analog Rytm Elektron MIDI" 8 rmController
+m9 <- midiStream devices "Analog Rytm Elektron MIDI" 9 rmController
+m10 <- midiStream devices "Analog Rytm Elektron MIDI" 10 rmController
+m11 <- midiStream devices "Analog Rytm Elektron MIDI" 11 rmController
+m12 <- midiStream devices "Analog Rytm Elektron MIDI" 12 rmController
+m13 <- midiStream devices "Analog Rytm Elektron MIDI" 13 rmController
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow
