@@ -1,3 +1,7 @@
+.matrices {
+  font-size: 0.5vw !important ;
+}
+
 #Celluar {
   padding-top: 20px;
   padding-bottom: 10px;
@@ -99,7 +103,7 @@
 }
 
 .playbox > input {
-  font-size: 1vw;
+  font-size: 0.6vw;
   background: none!important;
   border-bottom: 2px solid #999;
   flex-grow: 1;

@@ -36,6 +36,14 @@ const models = {
       name: 'String',
       command: 'String'
     }
+  },
+  Matrices: {
+    dataSource: Firebase.database().ref("/matrices"),
+    model: {
+      name: 'String',
+      values: 'Object',
+      commands: 'Object'
+    }
   }
 }
 
@@ -98,7 +106,8 @@ export function fbauth() {
 export function fbfetch(model) {
   return dispatch => {
     models[model].dataSource.ref.on('value', data => {
-      if (Firebase.auth().currentUser !== null){
+      if (Firebase.auth().currentUser !== null)
+      {
         const { uid } = Firebase.auth().currentUser;
         const u = _.find(data.val(), (d) => d.uid === uid);
 
@@ -121,6 +130,15 @@ export function fbfetch(model) {
 }
 
 export function fbcreate(model, data) {
+  if (data['key']) {
+    return models[model].dataSource.child(data['key']).update({...data})
+  } else {
+    const newObj = models[model].dataSource.push(data);
+    return newObj.update({ key: newObj.key })
+  }
+}
+export function fbcreateMatrix(model, data) {
+
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
   } else {
@@ -222,6 +240,30 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
       console.log(error);
     });
   }
+}
+
+export const updateMatrix = (values, i) => {
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
+  }
+
+  _.forEach(values, function(rowValue, rowKey) {
+    _.forEach(rowValue, function(cell, colKey) {
+      placeValue(rowKey-1, colKey, '', values);
+    });
+  });
+
+  _.forEach(i.values, function(rowValue, rowKey) {
+    _.forEach(rowValue, function(cell, colKey) {
+      placeValue(rowKey-1, colKey, cell, values);
+    });
+  });
+
+  return dispatch => {
+    dispatch({ type: 'ADD_TIMER'});
+  };
 }
 
 export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {
@@ -367,7 +409,6 @@ export const celluarFillStop = () => {
   }
 }
 
-
 export const bjorkFill = (values, commands, density, steps, duration, channels, timer) => {
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
@@ -395,9 +436,7 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
     var countArr = [];
     _.forEach(channels, function(channel, c_key){
       var count = 0;
-      // console.log("CHANNEL"+channel);
       _.forEach(values, function(rowValue, rowKey) {
-        // console.log(values[rowKey][channel]);
         if(values[rowKey] !== undefined && values[rowKey][channel]) {
           count++;
         }
@@ -518,8 +557,6 @@ export const sendScCommand = (server, expression) => {
 }
 
 export const consoleSubmit = (server, expression) => {
-  console.log("store ici felan");
-  console.log(expression);
   return dispatch => {
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': [expression] })
     .then((response) => {

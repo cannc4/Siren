@@ -6,8 +6,8 @@ import { Link } from 'react-router';
 import './MenuBar.css'
 
 class MenuBar extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       path: location.pathname,
       paths: [{
