@@ -8,9 +8,9 @@ import timer from './timer';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
 const models = fetchModels();
-
 const keys = {}
 _.each(models, (x,key) => {
+
   const INITIAL_STATE = {}
   keys[x] = (state = INITIAL_STATE, action) => {
     switch (action.type) {

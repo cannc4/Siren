@@ -5,8 +5,8 @@ import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
 import FormElement from './FormElement.react';
 
 class Accounts extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       name: '',
       modelName: this.constructor.name // React Class Name set above

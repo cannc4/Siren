@@ -5,8 +5,8 @@ import { fbupdate, fetchModels } from '../actions';
 import Modal from './Modal.react';
 
 class FormElement extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       allModels: fetchModels()
     };
@@ -127,7 +127,7 @@ class FormElement extends Component {
     const ctx = this;
     const bindings = ctx.props.formProps;
     return <div key={bindings.key} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-      
+
       {bindings.key !== "command" && cloneElement(<input type="text" />, bindings)}
       {bindings.key === "command" && cloneElement(<textarea style={{minHeight: "30px"}}/>, bindings)}
     </div>

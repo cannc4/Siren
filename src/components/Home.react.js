@@ -6,14 +6,16 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit} from '../actions'
+          consoleSubmit, fbcreateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
 class Home extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state={
+      matName: "",
+      modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       duration: 8,
       steps: 24,
@@ -110,7 +112,6 @@ class Home extends Component {
   }
 
   consoleSubmit(tidalServerLink, value){
-    console.log("store felan");
     store.dispatch(consoleSubmit(tidalServerLink, value));
   }
 
@@ -132,6 +133,10 @@ class Home extends Component {
     if(event.keyCode === 13 && event.ctrlKey && value){
       ctx.consoleSubmit(tidalServerLink, value);
     }
+  }
+
+  updateMatrix(values, item) {
+    store.dispatch(updateMatrix(values, item));
   }
 
   renderPlayer() {
@@ -173,14 +178,6 @@ class Home extends Component {
             if (values[i+1] === undefined) values[i+1]={}
             values[i+1][c] = value;
             ctx.setState({values});
-            if (cmds.indexOf(value) > -1){
-              const cmd=_.find(commands, c => c.name === value);
-              if (cmd !== undefined && cmd !== null) {
-
-                  //ctx.sendCommand(ctx.state.tidalServerLink, c + " $ " + cmd.command);
-                  //store.dispatch(setCommand(c, c+' $ '+cmd.command));
-              }
-            }
         }
 
         const getValue=() => {
@@ -199,6 +196,51 @@ class Home extends Component {
         </div>
       })}
     </div>;
+  }
+
+  changeName({target: { value }}) {
+    const ctx = this;
+    //updateValues(value, ctx.commands, ctx.values);
+    ctx.setState({ matName: value });
+  }
+
+  addItem() {
+    const ctx = this
+    const { commands } = ctx.props;
+    const { matName, values } = ctx.state;
+    if (matName.length >= 2 && _.isEmpty(values) === false) {
+      fbcreateMatrix(ctx.state.modelName, { matName , commands, values })
+    }
+  }
+
+  renderItem(item, dbKey, i) {
+    const ctx = this;
+    const { values } = ctx.state;
+    const model = fetchModel(ctx.state.modelName);
+
+    const updateMatrix = () => {
+      ctx.updateMatrix(values, item);
+    }
+
+    // handle function to delete the object
+    const handleDelete = ({ target: { value }}) => {
+      const payload = { key: dbKey };
+      fbdelete(ctx.state.modelName, payload);
+    }
+
+    return item.key && (
+      <div key={item.key} className="matrices" >
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+          <button onClick={handleDelete}>{'(x)'}</button>
+          <button onClick={updateMatrix}>{item.matName}</button>
+        </div>
+      </div>
+    )
+  }
+
+  renderItems(items) {
+    const ctx = this;
+    return _.map(items, ctx.renderItem.bind(ctx));
   }
 
   render() {
@@ -244,8 +286,29 @@ class Home extends Component {
       ctx.setState({scCommand: value})
     }
 
+    const viewPortWidth = '100%'
+
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+
     return <div className="Home cont">
       {ctx.renderPlayer()}
+      <div id="CommandsColumn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+        <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '2px'}}>
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            
+            <div>
+            <input type="text" placeholder={ctx.state.modelName} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+              <button onClick={ctx.addItem.bind(ctx)}>Add</button>
+            </div>
+          </div>
+        </div>
+        <div style={{ width: viewPortWidth }}>
+          <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
+            {ctx.renderItems(items)}
+          </ul>
+        </div>
+      </div>
+
       <div id="CommandsColumn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
         <div className="Commands"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
           <Commands />
@@ -254,35 +317,32 @@ class Home extends Component {
           <textarea className="easter" style={{minHeight: "100px"}} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
         </div>
       </div>
+
       <div className="Tidal">
-        Tidal Server Link <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-      <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>{tidal.isActive && 'Running!'}
-      {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-      {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
-      <pre>{JSON.stringify(timer, null, 2)}</pre>
-
-
+        Tidal Server Link
+        <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
+        <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>
+        {tidal.isActive && 'Running!'}
+        {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
+        {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
+        <pre>{JSON.stringify(timer, null, 2)}</pre>
         <div id="Command">
-         Interpreter
-         <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+           Interpreter
+           <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
         </div>
-
-
-      <div id="Celluar">
-       <p>Celluar Automata Updates</p>
-       <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-       {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-       {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-       <button onClick={addValues}>  Add  </button>
-      </div>
-
-      <div id="Celluar">
-       <p>Bjorklund Algorithm Updates</p>
-       {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-       {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-       <button onClick={addBjorkValues}>  Add  </button>
-      </div>
-
+        <div id="Celluar">
+           <p>Cellular Automata Updates</p>
+           <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+           {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+           {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+           <button onClick={addValues}>  Add  </button>
+        </div>
+        <div id="Celluar">
+           <p>Bjorklund Algorithm Updates</p>
+           {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+           {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+           <button onClick={addBjorkValues}>  Add  </button>
+        </div>
       </div>
 
 

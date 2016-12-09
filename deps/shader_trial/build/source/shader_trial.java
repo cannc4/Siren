@@ -56,7 +56,7 @@ public void draw() {
   // Overall subtle line pattern
   filter(lines);
 
-  saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
+  //saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
 
   // Debugging texts
   /*fill(255);
