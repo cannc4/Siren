@@ -21,6 +21,7 @@ s.latency = 0.02;
 s.options.verbosity = -2;
 
 SuperDirt.start;
+<<<<<<< HEAD
 s.waitForBoot({
 
 	//---Loading Scripts----//
@@ -47,4 +48,6 @@ s.waitForBoot({
 	v = s.volume;
 
 });
+=======
+>>>>>>> master
 )

@@ -12,6 +12,7 @@ procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
+<<<<<<< HEAD
 displayOutputDevices >>= putStrLn
 devices <- midiDevices
 m1 <- midiStream devices "Analog Rytm Elektron MIDI" 1 rmController
@@ -27,6 +28,11 @@ m10 <- midiStream devices "Analog Rytm Elektron MIDI" 10 rmController
 m11 <- midiStream devices "Analog Rytm Elektron MIDI" 11 rmController
 m12 <- midiStream devices "Analog Rytm Elektron MIDI" 12 rmController
 m13 <- midiStream devices "Analog Rytm Elektron MIDI" 13 rmController
+=======
+import Sound.Tidal.MIDI.Context
+import Sound.Tidal.Scales
+
+>>>>>>> master
 (cps, getNow) <- bpsUtils
 
 (c1,ct1) <- dirtSetters getNow
