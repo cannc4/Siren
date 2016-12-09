@@ -191,7 +191,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         var append = "";
         switch (k) {
           case "d1":
-            append = " # pan \"0.35\""; break;
+            append = " # pan \"0.39\""; break;
           case "d2":
             append = " # pan \"0.4\""; break;
           case "d3":
@@ -203,11 +203,11 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           case "d6":
             append = " # pan \"0.65\""; break;
           case "d7":
-            append = " # pan \"0.7\""; break;
+            append = " # pan \"0.6\""; break;
           case "d8":
-            append = " # pan \"0.75\""; break;
+            append = " # pan \"0.65\""; break;
           case "d9":
-            append = " # pan \"0.78\""; break;
+            append = " # pan \"0.68\""; break;
           default:
             break;
         }
@@ -511,6 +511,19 @@ export const sendScCommand = (server, expression) => {
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/sccommand', { 'command': expression })
     .then((response) => {
       dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+}
+
+export const consoleSubmit = (server, expression) => {
+  console.log("store ici felan");
+  console.log(expression);
+  return dispatch => {
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': [expression] })
+    .then((response) => {
+      //dispatch({ type: 'SET_CC', payload: {channel, command} })
     }).catch(function (error) {
       console.log(error);
     });

@@ -22,7 +22,6 @@ PShape ph;
 PShader ps;
 
 public void setup() {
-  //size(800, 600, P3D);
   
   pg = createGraphics(width,height, P3D);
 
@@ -56,6 +55,8 @@ public void draw() {
 
   // Overall subtle line pattern
   filter(lines);
+
+  saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
 
   // Debugging texts
   /*fill(255);

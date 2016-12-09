@@ -4,8 +4,12 @@ PShape ph;
 PShader ps;
 
 void setup() {
+<<<<<<< HEAD
   size(800, 600, P3D);
   //fullScreen(P3D, 2);
+=======
+  fullScreen(P3D, 2);
+>>>>>>> origin/development
   pg = createGraphics(width,height, P3D);
 
   ph = createSphere();
@@ -38,6 +42,8 @@ void draw() {
 
   // Overall subtle line pattern
   filter(lines);
+
+  //saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
 
   // Debugging texts
   /*fill(255);
