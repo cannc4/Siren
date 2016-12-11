@@ -209,7 +209,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         var append = "";
         switch (k) {
           case "d1":
-            append = " # pan \"0.39\""; break;
+            append = " # pan \"0.29\""; break;
           case "d2":
             append = " # pan \"0.4\""; break;
           case "d3":
@@ -225,7 +225,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           case "d8":
             append = " # pan \"0.65\""; break;
           case "d9":
-            append = " # pan \"0.68\""; break;
+            append = " # pan \"0.78\""; break;
           default:
             break;
         }

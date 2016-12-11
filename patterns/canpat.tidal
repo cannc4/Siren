@@ -1,3 +1,17 @@
+d1 $sound "cstm:1"
+
+
+
+
+
+
+
+
+
+
+
+
+
 m1 $stack[ (every 2 (density 0.5)) $note "c3(2,8)" #synth4 "0.19 0.5"
 , note "c3(5,8)" #synth4 "0.19 0.5" #synth3 "0.4 0.1"]
 d1 $every 4 (brak) $ degradeBy 0.5 $ every 4 (# delay "0.2")$ slowspread ($) [rev, gap 4, trunc 0.25]$ stack [

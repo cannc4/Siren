@@ -7,6 +7,7 @@ body, .fill, .cont {
   overflow-y: auto;
   z-index: 0;
   font-size: 12px;
+
 }
 * {
   font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
@@ -35,8 +36,9 @@ body {
 
 * > button, input {
   padding: 6px;
-  font-size: 14px;
+  font-size: 12px;
   border: none;
+
 }
 
 * >input {
@@ -44,6 +46,7 @@ body {
   color: rgb(25,77,110);
   border-bottom: 2px solid rgb(25,77,110);
   font-size: 12px;
+  width:100px;
 }
 
 
@@ -53,7 +56,7 @@ body {
 
 button:hover {
   cursor: pointer;
-  color: #fff;
+  color: #000;
 }
 
 .action {
@@ -111,7 +114,7 @@ b, p {
   text-align: center;
   text-transform: lowercase;
   background: #303030;
-  color: #cacaca;
+  color: #BDB76B;
   font-size: 22px;
 }
 

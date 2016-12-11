@@ -18,9 +18,9 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       duration: 8,
-      steps: 24,
-      duration: 32,
-      steps: 32,
+      steps: 16,
+      duration: 16,
+      steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2',
@@ -230,7 +230,7 @@ class Home extends Component {
 
     return item.key && (
       <div key={item.key} className="matrices" >
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'(x)'}</button>
           <button onClick={updateMatrix}>{item.matName}</button>
         </div>
@@ -292,17 +292,18 @@ class Home extends Component {
 
     return <div className="Home cont">
       {ctx.renderPlayer()}
-      <div id="CommandsColumn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+      <div id="matrices" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
         <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '2px'}}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-            
+
             <div>
             <input type="text" placeholder={ctx.state.modelName} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
               <button onClick={ctx.addItem.bind(ctx)}>Add</button>
             </div>
           </div>
         </div>
-        <div style={{ width: viewPortWidth }}>
+        <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)' }}>
+
           <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
             {ctx.renderItems(items)}
           </ul>
@@ -313,7 +314,7 @@ class Home extends Component {
         <div className="Commands"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
           <Commands />
         </div>
-        <div id="Execution"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', padding: "15px", paddingBottom: "25px"}}>
+        <div id="Execution"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', padding: "2px", paddingBottom: "25px"}}>
           <textarea className="easter" style={{minHeight: "100px"}} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
         </div>
       </div>

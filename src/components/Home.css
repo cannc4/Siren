@@ -1,5 +1,11 @@
 .matrices {
-  font-size: 0.5vw !important ;
+  display: flex;
+  padding: 5px;
+  align-items: stretch;
+  flex-direction: column;
+  max-width: 200px;
+  justify-content: flex-start;
+
 }
 
 #Celluar {
@@ -34,6 +40,18 @@
   overflow-y: scroll;
 }
 
+.Scenes {
+  display: flex;
+  padding: 15px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  max-width: 2000px;
+  max-height: 960px;
+
+  overflow-y: scroll;
+}
 .easter {
   display: flex;
   flex-direction: column;
@@ -82,7 +100,8 @@
   flex-wrap: wrap;
   margin: 0;
   line-height: 20px;
-  min-height: 30px;
+  min-height: 35px;
+  width: 800px;
   padding: 0;
 }
 
@@ -103,7 +122,7 @@
 }
 
 .playbox > input {
-  font-size: 0.6vw;
+  font-size: 1vw;
   background: none!important;
   border-bottom: 2px solid #999;
   flex-grow: 1;
@@ -119,10 +138,10 @@
 }
 
 .playbox-cycle {
-  font-size: 20px;
+  font-size: 14px;
   vertical-align: center;
   line-height: 20px;
-  max-width: 70px;
+  max-width: 60px;
   text-align: center;flex-grow: 2;
 }
 

@@ -5,10 +5,10 @@ s.options.numAudioBusChannels=128;
 s.options.numOutputBusChannels = 2;
 s.options.numInputBusChannels = 10;
 //s.options.outDevice = "Headphones";
-//s.options.outDevice = "Built-in Output";
-// s.options.outDevice = "Fireface UCX (23648323)";
+s.options.outDevice = "Built-in Output";
+//s.options.outDevice = "MADIface USB (23612883)";
 //s.options.outDevice = "Fireface UFX (23646473)";
-s.options.outDevice = "QUAD-CAPTURE";
+//s.options.outDevice = "QUAD-CAPTURE";
 //s.options.inDevice = "Analog Rytm (Core Audio)";
 s.options.hardwareBufferSize = 256;
 s.options.maxNodes = 2048;
@@ -21,7 +21,6 @@ s.latency = 0.02;
 s.options.verbosity = -2;
 
 SuperDirt.start;
-<<<<<<< HEAD
 s.waitForBoot({
 
 	//---Loading Scripts----//
@@ -48,6 +47,5 @@ s.waitForBoot({
 	v = s.volume;
 
 });
-=======
->>>>>>> master
+
 )

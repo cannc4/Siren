@@ -4,12 +4,12 @@ PShape ph;
 PShader ps;
 
 void setup() {
-<<<<<<< HEAD
-  size(800, 600, P3D);
-  //fullScreen(P3D, 2);
-=======
+
+  //size(800, 600, P3D);
   fullScreen(P3D, 2);
->>>>>>> origin/development
+
+ // fullScreen(P3D, 2);
+
   pg = createGraphics(width,height, P3D);
 
   ph = createSphere();
