@@ -11,7 +11,7 @@ import App from '../components/App';
 // import Categories from '../components/Categories.react';
 
 import Commands from '../components/Commands.react';
-
+import Live from '../components/Live.react';
 import Home from '../components/Home.react';
 
 import {
@@ -26,6 +26,10 @@ export default (
         <Route
           path="/commands"
           component={Commands}
+        />
+        <Route
+         path="/live"
+         component={Live}
         />
       </Route>
     </Router>

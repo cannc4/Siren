@@ -16,15 +16,70 @@ m13 $every 4 (density 8) $perfparam1 "0.4 0.2 0.1" #perfparam2 "0.01 0.3 0.02 0.
 m13 $every 4 (density 2) $perfparam1 "0.001 0.2 0.1" #perfparam2 "0.9 0.01" #activeScene "0.02 0.01"
 m13 $every 4 (density 8) $perfparam1 "0.4 0.2 0.1" #perfparam2 "0.2 0.4" #activeScene "0.02 0.01 0.01"
 m13 $every 4 (density 2) $perfparam1 "0.7 0.4 0.1" #perfparam2 "0.001 0.5 0.9" #activeScene "0.01 0.01"
-m13 $every 2 (density 2) $perfparam1 "0.2 0.1" #activeScene  "0.02 0.04 0.04"
+m13 $every 2 (density 2) $perfparam1 "0.2 0.1" #activeScene  "0.01 0.01 0.01"
 m13 silence
 m13 $every 2 (density 2) $perfparam1 "0.00001 0.4 0.1" #activeScene  "0.02 0.01"
 m13 $perfparam2 "0.01 0.1 " #activeScene  "0.02 0.01"
 --channel patterns--
 m1 $slow 2 $ every 3 (rev) $ note "[g2 [c2 c3] c2 ]"
+m1 $slow 2 $ every 3 (rev) $ note "[g2 [c2 c3] c2 ]"
 m1 silence
-m1 $ note "[g3 [c3 c3] c3 ]"
-m1 $ every 4 (density 1.5) $ note "g2 [c2 ~] g2? ~"
+m1 $ note (run 4) # velocity "0.5"
+m13 silence
+cps 1.2
+m13 $slow 4 $every 2 (density 2) $every 4(rev) $perfparam1 "0.6 0.8 0.99 0.99? 0.2"
+m13 $slow 4 $every 2 (density 2) $every 4(rev) $perfparam2 "0.6 0.8 0.3 0.99?"
+m13 $slow 4 $every 2 (density 2) $every 4(rev) $perfparam4 "0.6 0.8 0.3 0.99?"
+m1 $every 4 (rev) $ note "c2 ~? c3"
+m1 $every 4 (rev) $ note "g2 ~ c2?"
+m2 $ every 4 (density 1.5) $ note "g2 [c2 ~] g2? ~"
+m2 $every 4 (rev) $ note " ~ c1 ~" #dur "0.01 0.02"
+m2 silence
+m5 $slow 4 $every 2 (rev) $ note " ~ c3*2 c3?"
+m4 $slow 4 $every 4 (rev) $ note " ~ c3*2 f3*2 c3?"
+m5 $slow 4 $every 2 (rev) $ note " c2 c3*2 f3*2 c3?"
+m5 $ note " f3*4 c3/2 f3*2 c3"
+m1 $ note " c2 ~ c2/2 c2 ~"
+m1 $ note " ~ c3 ~ ~ c3 "
+m1 $every 2 (rev) $ note " ~ c3 ~ ~ c3"
+m3 silence
+m4 silence
+m4 $every 2 (rev) $ note " ~ c1*2? ~"
+m5 $slow 4 $ note " ~ c3 ~"
+m6 $slow 4 $ note " ~ c3 ~"
+m9 $every 4 (density 2) $every 2 (rev) $slow 4$ note "~ c2*2  ~ c3*2 ~ c1*3"
+m12 $slow 4$ note "~ c2*2  ~ c3*2 ~ c1*3"
+m10 $slow 4 $ note "~ c1*2"
+m11 $slow 4 $ note "~ c1*2"
+m7 $slow 4 $ note "~ c1*2"
+m12 silence
+m9 silence
+m1 silence
+m1 silence
+m2 silence
+m3 silence
+m4 silence
+m5 silence
+m6 silence
+m9 silence
+m11 silence
+
+
+
+m13 $perfparam1 "0.2 0.3 0.5 0.1 0.1" #perfparam2 "0.4" #perfparam3 "0.2 0.99" #perfparam4 "0.9 0.2 0.2"
+m13 $perfparam1 "0.2 0.3 0.5 0.9 0.9 0.1" #perfparam2 "0.4" #perfparam3 "0.2 0.99" #perfparam4 "0.9 0.2 0.2"
+m13 $perfparam2 "0.2 0.9 0.5 0.4"
+
+m13 $perfparam3 "0.88 0.001 0.999"
+
+
+m13 silence
+m13 $perfparam3 "0.1 0.99"
+
+
+
+
+
 m1 $every 4 (density 1.5)$ note "c2(3,8)"
 m2 $slow 2 $ note "c3(2,8)"
 m2 $ note "c2 c3 c3?"

@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
 
-import { initMyTidal,sendScCommand, sendCommands, startTimer, stopTimer,
+import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
           consoleSubmit, fbcreateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix} from '../actions'
@@ -18,13 +18,10 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       duration: 8,
-      steps: 16,
-      duration: 16,
-      steps: 16,
-      channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8', 'd9',
+      steps: 8,
+      channels: ['m1','m2','m3', 'm4', 'm5','m6','m7', 'm8', 'm9','m10','m11','m12',
               'sendOSC procF_t','sendOSC procF_v',
-              'sendOSC procS1', 'sendOSC procS2',
-              'sendOSC procS3', 'sendOSC procS4' ],
+              'sendOSC procS1', 'sendOSC procS2'],
       timer: { isActive: false,
                current: null,
                isCelluarActive: false,
@@ -61,11 +58,26 @@ class Home extends Component {
       }
 
       const vals=values[runNo];
+      // const names = Object.keys(vals);
+      // console.log(names);
       if (vals !== undefined) {
+        if(vals['~qcap']!= ''){
+          const sccm = vals['~qcap']
+          const cmd = _.find(commands, c => c.name === sccm);
+          console.log(cmd);
+          //ctx.setState({scCommand : cmd});
+          //ctx.sendScCommand(tidalServerLink,cmd);
+
+
+        }
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
-      }
+      //   if(_includes(Object.keys(vals), "SC")){
+      //   console.log(true);
+      // }
     }
   }
+}
+
 
   startTimer() {
     const ctx=this;
@@ -85,6 +97,9 @@ class Home extends Component {
 
   sendCommands(tidalServerLink, vals, channelcommands, commands) {
     store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
+  }
+  sendSCMatrix(tidalServerLink, vals, commands) {
+    store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
   }
 
   sendScCommand(tidalServerLink, command) {
@@ -219,7 +234,8 @@ class Home extends Component {
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
-      ctx.updateMatrix(values, item);
+      const { commands } = ctx.props;
+      ctx.updateMatrix(values, item,commands);
     }
 
     // handle function to delete the object
@@ -231,7 +247,7 @@ class Home extends Component {
     return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
-          <button onClick={handleDelete}>{'(x)'}</button>
+          <button onClick={handleDelete}>{'x'}</button>
           <button onClick={updateMatrix}>{item.matName}</button>
         </div>
       </div>
@@ -297,13 +313,12 @@ class Home extends Component {
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
 
             <div>
-            <input type="text" placeholder={ctx.state.modelName} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+            <input type="text" placeholder= "Scene" value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
               <button onClick={ctx.addItem.bind(ctx)}>Add</button>
             </div>
           </div>
         </div>
         <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)' }}>
-
           <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
             {ctx.renderItems(items)}
           </ul>
@@ -322,7 +337,7 @@ class Home extends Component {
       <div className="Tidal">
         Tidal Server Link
         <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-        <button onClick={ctx.runTidal.bind(ctx)}>Start Tidal</button>
+        <button onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
         {tidal.isActive && 'Running!'}
         {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
         {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}

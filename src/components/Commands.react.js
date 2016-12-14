@@ -89,7 +89,6 @@ class Commands extends Component {
       <div>
         <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-            <b></b>
             <div>
               <input type="text" placeholder={modelName } value={name} onChange={changeName}/>
               <button onClick={addItem}>Add</button>

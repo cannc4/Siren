@@ -1,11 +1,5 @@
-import $ from 'jquery';
-import jquery from 'jquery';
-// export for others scripts to use
-window.$ = $;
-window.jQuery = jquery;
 
 var bjork = require('bjorklund');
-
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
@@ -138,6 +132,11 @@ export function fbcreate(model, data) {
   }
 }
 export function fbcreateMatrix(model, data) {
+  // var usersRef = new Firebase(USERS_LOCATION);
+  //   usersRef.child(userId).once('value', function(snapshot) {
+  //     var exists = (snapshot.val() !== null);
+  //     userExistsCallback(userId, exists);
+  //   });
 
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
@@ -231,6 +230,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         }
 
         return k + ' $ ' + cmd.command + append;
+
       } else return false;
     }))
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
@@ -241,7 +241,33 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
     });
   }
 }
-
+// export const sendSCMatrix = (server,vals,commands =[]) => {
+//
+//   return dispatch => {
+//       const fsc =  _.compact(_.map(vals,(v,k) => {
+//       const sccm = vals['~qcap'];
+//
+//       const cmd = _.find(commands, c => c.name === sccm);
+//       if(cmd !== undefined){
+//         var append = ');';
+//         var prepend = '~qcap'
+//         const msg =  prepend+ '.' + "set(\\obs," + cmd.command + append;
+//         console.log(msg);
+//         return msg;
+//       }
+//        else return false;
+//     }))
+//     console.log(fsc);
+//     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/sccommand', { 'command': fsc })
+//
+//     .then((response) => {
+//         dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
+//     }).catch(function (error) {
+//       console.log(error);
+//     });
+//   }
+// }
+//
 export const updateMatrix = (values, i) => {
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
@@ -277,7 +303,7 @@ export const celluarFill = (values, commands, density, steps, duration, channels
 
     function pickRandom(x, y){
       var cmd, randIndex;
-      if(y >= channels.length-6){
+      if(y >= channels.length-4){
         do{
           randIndex = _.random(0, Object.keys(commands).length-1);
         }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
@@ -388,7 +414,7 @@ export const addValues = (values, commands, density, steps, duration, channels, 
       var randIndex = _.random(0, command_len-1);
 
       if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[_.random(channel_len-6, channel_len-1)];
+        col = channels[_.random(channel_len-4, channel_len-1)];
       }
       else {
         col = channels[_.random(0, channel_len-7)];
@@ -494,7 +520,7 @@ export const addBjorkValues = (values, commands, density, steps, duration, chann
   }
   function pickRandom(x, y){
     var cmd, randIndex;
-    if(y >= channels.length-6){
+    if(y >= channels.length-4){
       do{
         randIndex = _.random(0, Object.keys(commands).length-1);
       }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);

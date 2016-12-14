@@ -1,0 +1,54 @@
+CLASS:: HistoryGui
+summary:: A gui for History objects
+categories:: GUI>Interfaces
+related:: Classes/History
+
+DESCRIPTION::
+
+HistoryGui allows easy access to History as it happens: one can read recent lines, when they were written and by whom; one can search for text strings and by author names; and one can quickly grab lines of code for rewriting. Apart from documenting just in time programming sessions, all of this can be useful in live coding performances. See e.g. the system developed by powerbooks_unplugged: link::Republic:: 
+
+The gui elements in detail:
+DEFINITIONLIST::
+## button start/end || starts and ends History emphasis::if:: code::gui.history:: is current.
+
+## button all/filt || turns filtering on/off.
+## popup all/... || selects which name key to search for (useful if networked)
+## textview || allows for typing in a search string.
+## button top/keep || sets mode whether listview stays on top line, or keeps sticking to the selected line.
+
+## listview || shows either all code::lineShorts::, or the filtered code::lineShorts::; selecting them in listview makes them come appear in post-doc window.
+::
+
+
+EXAMPLES::
+
+code::
+(
+h = History.new.lines_([
+	[0, \me, "1+2"],
+	[1, \me, "3+5"], [1.234, \you, "q = q ? ();"],
+	[3, \her, "\"Herstory\".speak"]
+]);
+g = h.makeWin;
+g.findDoc;
+g.postDoc(2);
+)
+
+h.document;
+// how filtering works:
+g.filters.postcs;
+g.filterOff;
+g.filterOn;
+g.filtering;
+g.setKeyFilter(\all);
+g.setKeyFilter(\me);
+g.setStrFilter("");
+g.setStrFilter("3");
+
+// internal state cached in gui:
+g.filteredIndices;
+g.filteredShorts;
+
+// to do: execute line on special key in listview;
+// window following?
+::

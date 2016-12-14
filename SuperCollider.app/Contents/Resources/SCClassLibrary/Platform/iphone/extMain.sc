@@ -1,0 +1,3 @@
++ Main {
+	platformClass { ^IPhonePlatform }
+}

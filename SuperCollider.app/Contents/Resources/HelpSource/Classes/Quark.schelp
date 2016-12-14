@@ -1,0 +1,138 @@
+TITLE:: Quark
+summary:: Object for managing a Quark - a package of source code
+categories:: Quarks
+related:: Guides/UsingQuarks, Classes/Quarks
+
+DESCRIPTION::
+A Quark is a folder of source code, a package. It may be cloned from a git repository, or maybe not.
+This class is used by the Quarks class and you will not usually want to use it directly.
+
+CLASSMETHODS::
+
+METHOD:: new
+ARGUMENT:: name
+Quark name, git url or local path (absolute or relative)
+ARGUMENT:: refspec
+returns:: this
+
+METHOD:: fromLocalPath
+alternate constructor
+ARGUMENT:: path
+returns:: this
+
+METHOD:: fromDirectoryEntry
+alternate constructor
+ARGUMENT:: name
+ARGUMENT:: quarkUrl
+returns:: this
+
+METHOD:: parseQuarkName
+ARGUMENT:: name
+ARGUMENT:: refspec
+returns:: this
+
+
+INSTANCEMETHODS::
+
+METHOD:: name
+returns:: String
+
+METHOD:: dependencies
+Based on the dependencies list in the quark file, returns an array of Quarks.
+returns:: Array of Quark
+
+METHOD:: deepDependencies
+Declared dependencies of this Quark and those of each dependency.
+This will check out all dependencies.
+returns:: Array of Quarks
+
+METHOD:: data
+Lazily parses the quark file (if found) and caches it
+returns:: Dictionary - the contents of the quark file
+
+METHOD:: refspec
+Git refspec (tag or sha hash)
+returns:: this
+
+METHOD:: localPath
+Absolute path where the Quark is located
+returns:: this
+
+METHOD:: summary
+Summary text from the quark file
+returns:: this
+
+METHOD:: url
+Git repository url. If not declared when creating, it will examine the checked out git source
+and get the origin.
+returns:: this
+
+METHOD:: isDownloaded
+returns:: Boolean
+
+METHOD:: isInstalled
+returns:: Boolean
+
+METHOD:: git
+Quarks that have git repos have a Git object that can be used for checking out, listing tags etc.
+returns:: a Git object
+
+METHOD:: init
+private
+ARGUMENT:: argName
+ARGUMENT:: argUrl
+ARGUMENT:: argRefspec
+ARGUMENT:: argLocalPath
+returns:: this
+
+METHOD:: install
+returns:: this
+
+METHOD:: uninstall
+returns:: this
+
+METHOD:: checkout
+Clone and checkout the url and refspec.
+Used by install and for switching versions.
+returns:: this
+
+METHOD:: version
+returns:: String
+
+METHOD:: tags
+returns:: Array of Strings
+
+METHOD:: isCompatible
+Evaluates the 'isCompatible' function in the quarkfile, if there is one.
+This allows a quarkfile to check its environment and raise an alarm before it gets installed and breaks something.
+returns:: Boolean
+
+METHOD:: definesClasses
+Classes that are defined by this Quark
+returns:: Array of Classes
+
+METHOD:: definesExtensionMethods
+Methods that this Quark defines that overwrite implementations in other packages including in Common.
+returns:: Array of Methods
+
+METHOD:: help
+Open the help file. Either as specified in the quark file as 'schelp' or searches by the name of the quark.
+returns:: this
+
+METHOD:: changed
+After un/installing or checking out, state is set to changed.
+code smell: this is for the gui
+returns:: Boolean
+
+METHOD:: parseDependency
+private
+ARGUMENT:: dep
+returns:: this
+
+METHOD:: printOn
+ARGUMENT:: stream
+returns:: this
+
+METHOD:: parseQuarkFile
+private
+returns:: this

@@ -25,7 +25,7 @@ d1 $ sound "superhex/2" # note "-7(4,8)" #sustain "1" #room "0.7"
 d4 $ n (slow 2 $ fmap (*7) $ run 8) # s "super808*6" # note "0(3,8)" #speed "0.8" #gain "0.8" #room "0.5"
 d2 $ sound "super808*4" # note "0(3,8)" #speed "0.8"
 d2 $density 1 $ every 4 (#delay "0.01 0.4") $every 2 (density 4)$ sound "supercomparator*1" # note "30 25 40 40"# decay "[1 0.6]/2"  #sustain "0.5 0.1 0.1 " # delay "0.3" # delaytime "0.05" # delayfeedback "0.4"
-d3 silence $ sound "supergong*3" # decay "[1 0.6]/4" # voice "[0.5 0]/2"
+d3 silence $ sound "in"
 m1 $note "c3(3,8)"
 --SuperHex
 d3 $ n (slow 2 $ fmap (*7) $ run 8) # s "superhex" # sustain "[1 0.9]/2" # note "[-2, -12]" #room "0.5"

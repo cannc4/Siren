@@ -16,7 +16,10 @@ class MenuBar extends Component {
       }, {
         name: 'Home',
         url: '/'
-      }]
+      },  {
+      name: 'Live',
+      url:'/live'
+    }]
     }
   }
   // ,{

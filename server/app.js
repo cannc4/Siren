@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import config from '../config/index.js'
 //console.log(config.path)
-
+import osc from 'osc';
 import fs from 'fs';
 import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
@@ -100,6 +100,46 @@ const TidalData = {
 const myApp = () => {
   const app = express();
 
+  var getIPAddresses = function () {
+      var os = require("os"),
+          interfaces = os.networkInterfaces(),
+          ipAddresses = [];
+
+      for (var deviceName in interfaces) {
+          var addresses = interfaces[deviceName];
+          for (var i = 0; i < addresses.length; i++) {
+              var addressInfo = addresses[i];
+              if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+                  ipAddresses.push(addressInfo.address);
+              }
+          }
+      }
+
+      return ipAddresses;
+  };
+
+  var udpPort = new osc.UDPPort({
+      localAddress: "127.0.0.0",
+      localPort: 3000
+  });
+  // udpPort.on("ready", function () {
+  //
+  //   // console.log("grdii");
+  //   //   var ipAddresses = getIPAddresses();
+  //   //
+  //   //   console.log("Listening for OSC over UDP.");
+  //   //   ipAddresses.forEach(function (address) {
+  //   //       console.log(" Host:", address + ", Port:", udpPort.options.localPort);
+  //   //   });
+  // });
+  //
+  // udpPort.on("error", function (err) {
+  //     console.log(err);
+  // });
+  //
+  // udpPort.open();
+
+
   app.use(bodyParser.json())
 
   app.use(function(req, res, next) {
@@ -118,6 +158,7 @@ const myApp = () => {
       TidalData.myTidal.start();
       TidalData.myTidal.myCommands.values.push('initiate tidal');
       reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, command: TidalData.myTidal.myCommands });
+
     }
   };
 
@@ -140,6 +181,7 @@ const myApp = () => {
 
   const sendScCommand = (expr, reply) => {
     TidalData.myTidal.sendSC(expr);
+    console.log(expr);
     reply.status(200).send(expr);
   }
 
@@ -159,9 +201,12 @@ const myApp = () => {
 
   app.post('/sccommand', (req, reply) => {
     const {command} = req.body;
+    _.replace(command, "\\", '');
     console.log('ScCommand inbound:', command);
+
     sendScCommand(command, reply);
   })
+
 
   app.get('*', errorHandler);
   app.listen(config.port, () => {
