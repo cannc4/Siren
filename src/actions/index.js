@@ -200,6 +200,18 @@ export const initMyTidal = (server) => {
     });
   }
 }
+
+
+// export const TidalTick = (server) => {
+//   return dispatch => {
+//     axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
+//     .then((response) => {
+//       dispatch({type: 'FETCH_TIDAL', payload: response.data })
+//     }).catch(function (error) {
+//       console.log(error);
+//     });
+//   }
+// }
 export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -268,6 +280,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
 //   }
 // }
 //
+
 export const updateMatrix = (values, i) => {
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
