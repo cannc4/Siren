@@ -5,6 +5,8 @@ import { consoleSubmit, fetchModel, fbcreate, fbupdate, fbdelete } from '../acti
 // import { renderFormElement } from '../lib/forms';
 import FormElement from './FormElement.react';
 import store from '../store';
+import io from 'socket.io-client'
+
 class Live extends Component {
   constructor(props) {
     super(props)
@@ -14,6 +16,11 @@ class Live extends Component {
     }
   }
 
+// componentDidMount(){
+//   this.socket = io('/');
+//   this.socket.on('osc')
+//
+// }
   addItem() {
     const ctx = this
     const { name } = ctx.state

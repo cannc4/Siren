@@ -3,10 +3,14 @@ var bjork = require('bjorklund');
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
+// import osc from 'osc';
+// const socketIo = require ('socket.io');
 import _ from 'lodash';
 import Firebase from 'firebase';
+//import io from 'socket.io-client'
 // import store from '../store';
-
+// var dgram = require("dgram");
+// var socket = dgram.createSocket('udp4');
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -40,7 +44,52 @@ const models = {
     }
   }
 }
+//
+// var client = dgram.createSocket('udp4');
+//
+// client.on('listening', function () {
+//     var address = client.address();
+//     console.log('UDP Server listening on ' + address.address + ":" + address.port);
+// });
+//
+// client.on('message', function (message, remote) {
+//
+//     console.log(remote.address + ':' + remote.port +' - ' + message);
+//
+// });
+//
+// client.send(message, 0, message.length, PORT, HOST, function(err, bytes) {
+//
+//     if (err) throw err;
+//     console.log('UDP message sent to ' + HOST +':'+ PORT);
+//
+// var PORT = 3002;
+// var HOST = '127.0.0.1';
+//
+// var client = dgram.createSocket('udp4');
+//
+// client.on('listening', function () {
+//     var address = client.address();
+//     console.log('UDP Server listening on ' + address.address + ":" + address.port);
+// });
+//
+// client.on('message', function (message, remote) {
+//
+//     console.log(remote.address + ':' + remote.port +' - ' + message);
+//
+// });
+//
+//
 
+export function socketExample() {
+  return dispatch => {
+    socket.on('msg', data => {
+
+      dispatch({ type: 'REDUCER_NAME', data })
+      console.log(data);
+    })
+  }
+}
 
 export function sendZapier(data) {
   const { url } = data;

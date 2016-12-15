@@ -1,13 +1,10 @@
 import _ from 'lodash';
 import config from '../config/index.js'
-//console.log(config.path)
-import osc from 'osc';
 import fs from 'fs';
 import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
 import express from 'express';
 import bodyParser from 'body-parser';
-
 const bootFilePath = `${__dirname}/BootTidal.hs`;
 const startSCD = `${__dirname}/start.scd`;
 const supercolliderjs = require('supercolliderjs');
@@ -30,7 +27,6 @@ class REPL {
 
   initTidal() {
     this.myCommands = { values: [] };
-    //console.log(config)
     const commands = fs.readFileSync(config.tidal_boot).toString().split('\n');
     for (let i = 0; i < commands.length; i++) {
       this.tidalSendLine(commands[i]);
@@ -47,7 +43,7 @@ class REPL {
   }
 
   tidalSendExpression(expression) {
-    //console.log("tidalSendExpression "+ expression);
+
     this.tidalSendLine(':{');
     const splits = expression.split('\n');
 
@@ -58,11 +54,9 @@ class REPL {
   }
 
   initSC() {
-    const self = this;
-    //console.log('1 REMOVE LATER')
-    //console.log('config.path', config.path);
-    supercolliderjs.resolveOptions(config.path).then((options) => {
-      // console.log(options);
+      const self = this;
+
+      supercolliderjs.resolveOptions(config.path).then((options) => {
       const SCLang = supercolliderjs.sclang.SCLang;
       const lang = new SCLang(options);
       lang.boot().then((sclang) => {
@@ -89,7 +83,6 @@ class REPL {
     this.doSpawn();
     this.initTidal();
     this.initSC();
-    // this.sendSC('SuperDirt.start')
   }
 }
 
@@ -99,72 +92,31 @@ const TidalData = {
 
 const myApp = () => {
   const app = express();
-  var serverPorts = {
-      K2Side : 3002,
-      ControllerSide: 3002
-  };
 
   var udpHosts = [];
-
-  // UDP server, listens to controllers.
   var dgram = require("dgram");
   var UDPserver = dgram.createSocket("udp4");
-  // socket.io, listening to K2
-  var K2IO = require('socket.io').listen(serverPorts.K2Side);
+  //var tick = socketIo.listen(3002);
 
-  // Got messages on the server
-  UDPserver.on("message", function (msg, rinfo) {
-    console.log("server got: " + msg + " from " +
-      rinfo.address + ":" + rinfo.port);
-      // Send them to the K2 clients
-      console.log ("emitting on osc: " + msg);
-      K2IO.sockets.emit('osc', {osc: msg});
-  });
-
+  //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
     var address = UDPserver.address();
     console.log("UDP server listening on " +
         address.address + ":" + address.port);
   });
 
-  UDPserver.bind(serverPorts.ControllerSide);
 
+  UDPserver.on("message", function (msg, rinfo) {
+    UDPserver.setBroadcast(true);
+    console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    console.log ("emitting on osc: " + msg);
+      //Send with broadcast, need new socket to reach the client?
+      //if so use Socketio, else figure out how to broadcast
+      //UDPserver.send(msg, 0 , msg.length, 3001, "127.0.0.0");
+  });
 
-//  K2IO.sockets.on('connection', function (socket) {
+  UDPserver.bind(3002);
 
-  //   // Tell who we are and our version
-  //   socket.emit('admin', { id: 'K2OSCSERVER', version: 0.1});
-  //   console.log ("Emitted ID and version on the admin channel")
-  //
-  //   // K2 sent us OSC data
-  //   socket.on('osc', function (data) {
-  //     console.log ("Received data on the 'osc' channel: " + data);
-  //     // Send data on each one of the UDP hosts
-  //     var message = new Buffer(data.osc, 'binary');
-  //     var client = dgram.createSocket("udp4");
-  //     for (var i = 0; i < udpHosts.length; i+=1) {
-  //         console.log ("Sending message to " + udpHosts[i].host + ":" + udpHosts[i].port);
-  //         client.send(message, 0, message.length, udpHosts[i].port, udpHosts[i].host, function(err, bytes) {
-  //             console.log ("err: ", err, "bytes: ", bytes);
-  //             //client.close();
-  //         });
-  //     }
-  //   });
-  //
-  //   // K2 sent us admin data
-  //   socket.on('admin', function (data) {
-  //     console.log ("Received data on the 'admin' channel of type " + data.type);
-  //     switch(data.type)
-  //     {
-  //     // UDP hosts on which we replicate the OSC messages
-  //     case 'udphosts':
-  //       udpHosts = data.content;
-  //       break;
-  //     default:
-  //       console.error ("Unrecognized admin command: " + data.type);
-  //     }
-  //   });
-  //});
   app.use(bodyParser.json())
 
   app.use(function(req, res, next) {
@@ -188,7 +140,6 @@ const myApp = () => {
   };
 
   const sendCommand = (expr, reply) => {
-    // console.log("mesjageldiSERVERCVERSVERVERE " + expr)
     _.each(expr, c => {
       TidalData.myTidal.tidalSendExpression(c);
       TidalData.myTidal.myCommands.values.push(c);
