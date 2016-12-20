@@ -8,7 +8,8 @@ import bodyParser from 'body-parser';
 const bootFilePath = `${__dirname}/BootTidal.hs`;
 const startSCD = `${__dirname}/start.scd`;
 const supercolliderjs = require('supercolliderjs');
-const socketIo = require ('socket.io');
+const socketIo = require('socket.io');
+var globalCount = 0;
 
 // REPL is an GHCI Instance
 class REPL {
@@ -94,28 +95,28 @@ const myApp = () => {
   const app = express();
 
   var udpHosts = [];
-  var dgram = require("dgram");
-  var UDPserver = dgram.createSocket("udp4");
-  //var tick = socketIo.listen(3002);
+    var dgram = require("dgram");
+    var UDPserver = dgram.createSocket("udp4");
+    var tick = socketIo.listen(3003);
 
-  //Get tick from sync.hs Port:3002
-  UDPserver.on("listening", function () {
-    var address = UDPserver.address();
-    console.log("UDP server listening on " +
-        address.address + ":" + address.port);
+    //Get tick from sync.hs Port:3002
+    UDPserver.on("listening", function () {
+      var address = UDPserver.address();
+      console.log("UDP server listening on " +
+          address.address + ":" + address.port);
+    });
+
+
+    UDPserver.on("message", function (msg, rinfo) {
+      console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+      tick.sockets.emit('osc', {osc:msg});
+    });
+
+    UDPserver.on("disconnect", function (msg) {
+      tick.sockets.emit('dc', {osc:msg});
   });
 
-
-  UDPserver.on("message", function (msg, rinfo) {
-    UDPserver.setBroadcast(true);
-    console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
-    console.log ("emitting on osc: " + msg);
-      //Send with broadcast, need new socket to reach the client?
-      //if so use Socketio, else figure out how to broadcast
-      //UDPserver.send(msg, 0 , msg.length, 3001, "127.0.0.0");
-  });
-
-  UDPserver.bind(3002);
+    UDPserver.bind(3002);
 
   app.use(bodyParser.json())
 

@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { consoleSubmit, fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
+import { consoleSubmit, fetchModel, fbcreate, fbupdate, fbdelete,startClick,stopClick } from '../actions';
 // import { renderFormElement } from '../lib/forms';
 import FormElement from './FormElement.react';
 import store from '../store';
-import io from 'socket.io-client'
 
 class Live extends Component {
   constructor(props) {
@@ -13,14 +12,34 @@ class Live extends Component {
     this.state = {
       name: '',
       modelName: this.constructor.name // React Class Name set above
+      // click : {current:null,
+      //         isActive:false}
     }
   }
-
-// componentDidMount(){
-//   this.socket = io('/');
-//   this.socket.on('osc')
-//
-// }
+  //
+  // componentDidMount(props,state){
+  //   const ctx = this;
+  //
+  //     var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+  //     socket.on("osc", data => {
+  //
+  //       this.startClick();
+  //       console.log("onMessage: ");
+  //
+  //       console.log(data);
+  //     })
+  //     socket.on("dc", data => {
+  //       this.stopClick();
+  //     })
+  //
+  //
+  //   }
+  //
+  // startClick() {
+  //     const ctx=this;
+  //     store.dispatch(startClick());
+  // }
+  //
   addItem() {
     const ctx = this
     const { name } = ctx.state
@@ -45,6 +64,22 @@ class Live extends Component {
   // }
 
 
+    // renderMetro(){
+    //   const ctx=this;
+    //   const { click }=ctx.props;
+    //   const currentStep=click.current;
+    //   var metro="metro metro--" ;
+    //   if (currentStep % 2 == 0 ) {
+    //     metro += " metro-active";
+    //   }
+    //   else {
+    //     metro = "metro metro--"
+    //   }
+    //   return <div className={metro}>{}
+    //     <input type="text" placeholder= "Metro"/>
+    // </div>
+    //
+    // }
   handleConsoleSubmit = event => {
     const value = event.target.value;
     const ctx = this;
@@ -68,7 +103,9 @@ class Live extends Component {
     return (
       <div id="Execution"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', padding: "2px", paddingBottom: "25px"}}>
         <textarea className="easter" style={{minHeight: "100px"}} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
+        // {ctx.renderMetro()}
       </div>
+
     );
   }
 }

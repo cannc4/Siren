@@ -5,8 +5,8 @@ PShader ps;
 
 void setup() {
 
-  size(300, 200, P3D);
-  // fullScreen(P3D, 2);
+  //size(300, 200, P3D);
+  fullScreen(P3D, 2);
 
  // fullScreen(P3D, 2);
 

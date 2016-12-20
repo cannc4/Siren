@@ -1,6 +1,6 @@
 (
 
-	// s.options.outDevice = "Built-in Output";
+	//s.options.outDevice = "Built-in Output";
 	s.options.outDevice = "QUAD-CAPTURE";
 	s.options.inDevice = "QUAD-CAPTURE";
 	//s.options.inDevice = "Analog Rytm (Core Audio)";
@@ -13,15 +13,7 @@
 	s.options.numBuffers = 2048;
 	s.latency = 0.02;
 	s.options.verbosity = -2;
+	SuperDirt.start;
+	//s.boot;
 
-	s.boot;
-s.waitForBoot({
-
-//SuperDirt.start;
-	s.makeGui(l);
-	"/Users/canince/Documents/Github/sq/deps/SCsend/npfx.scd".load;
-	"/Users/canince/Documents/Github/sq/deps/SCsend/inp.scd".load;
-
-	"/Users/canince/Documents/Github/sq/deps/SCsend/fxloops.scd".load;
-});
 )

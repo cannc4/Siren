@@ -6,7 +6,7 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit, fbcreateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix} from '../actions'
+          consoleSubmit, fbcreateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -17,9 +17,9 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      duration: 8,
-      steps: 8,
-      channels: ['m1','m2','m3', 'm4', 'm5','m6','m7', 'm8', 'm9','m10','m11','m12',
+      duration: 24,
+      steps: 24,
+      channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procF_t','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2'],
       timer: { isActive: false,
@@ -28,13 +28,37 @@ class Home extends Component {
                isBjorkActive: false },
       values: {},
       scCommand: '',
+      click : {current:null,
+              isActive:false},
       density: 8
     }
   }
+  componentDidMount(props,state){
+    const ctx = this;
 
+      var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+      socket.on("osc", data => {
+
+        this.startClick();
+        console.log("onMessage: ");
+
+        console.log(data);
+      })
+      socket.on("dc", data => {
+        this.stopClick();
+      })
+
+
+    }
+
+    startClick() {
+      const ctx=this;
+      store.dispatch(startClick());
+    }
   componentDidUpdate(props, state) {
+
     const ctx=this;
-    const { channelcommands, commands, timer }=props;
+    const { channelcommands, commands, timer ,click}=props;
     const { steps, tidalServerLink, values, density, duration, channels }=state;
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
@@ -176,7 +200,7 @@ class Home extends Component {
   renderStep(x, i) {
     const ctx=this;
     const { channels, steps }=ctx.state;
-    const { commands, timer }=ctx.props;
+    const { commands, timer,click }=ctx.props;
     const cmds=_.uniq(_.map(commands, c => c.name));
     const currentStep=timer.current % steps;
     var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
@@ -259,9 +283,25 @@ class Home extends Component {
     return _.map(items, ctx.renderItem.bind(ctx));
   }
 
+  renderMetro(){
+    const ctx=this;
+    const { click }=ctx.props;
+    const currentStep=click.current;
+    var metro="metro metro--" ;
+    if (currentStep % 2 == 0 ) {
+      metro += " metro-active";
+    }
+    else {
+      metro = "metro metro--"
+    }
+    return <div className={metro}>{}
+      <input type="text" placeholder= "Metro"/>
+  </div>
+
+  }
   render() {
     const ctx=this;
-    const { tidal, timer }=ctx.props;
+    const { tidal, timer, click }=ctx.props;
     const { scCommand, tidalServerLink }=ctx.state;
 
     const { commands }=ctx.props;
@@ -301,6 +341,7 @@ class Home extends Component {
     const updateScCommand=({ target: { value } }) => {
       ctx.setState({scCommand: value})
     }
+
 
     const viewPortWidth = '100%'
 
@@ -359,8 +400,8 @@ class Home extends Component {
            {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
            <button onClick={addBjorkValues}>  Add  </button>
         </div>
+        {ctx.renderMetro()}
       </div>
-
 
     </div>
   }

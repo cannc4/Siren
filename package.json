@@ -21,7 +21,6 @@
     "express": "^4.14.0",
     "firebase": "3.1.0",
     "lodash": "^4.17.2",
-    "osc": "2.1.0",
     "react": "^15.3.1",
     "react-dom": "^15.3.1",
     "react-redux": "^4.4.5",
@@ -29,7 +28,6 @@
     "redux": "^3.5.2",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.0.1",
-    "spotify-web-api-node": "^2.3.5",
     "supercolliderjs": "^0.13.0",
     "ws": "^1.1.1"
   },

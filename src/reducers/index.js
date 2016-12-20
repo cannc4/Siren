@@ -5,6 +5,7 @@ import user from './user';
 import sccommand from './sccommand';
 import tidal from './tidal';
 import timer from './timer';
+import click from './click';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
 const models = fetchModels();
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   timer,
   user,
   usererror,
+  click,
   ...keys
 });
 

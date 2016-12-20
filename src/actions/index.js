@@ -3,14 +3,9 @@ var bjork = require('bjorklund');
 export const FETCH_USER = 'FETCH_USER';
 export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
-// import osc from 'osc';
-// const socketIo = require ('socket.io');
 import _ from 'lodash';
 import Firebase from 'firebase';
-//import io from 'socket.io-client'
 // import store from '../store';
-// var dgram = require("dgram");
-// var socket = dgram.createSocket('udp4');
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -80,16 +75,20 @@ const models = {
 // });
 //
 //
+// export const incTimer = () => {
+//   return { type: 'INC_TIMER'}
+// };
+//
+// export const click = () => {
+//   return dispatch => {
+//     timer = setInterval(x, (duration / steps * 1000), dispatch);
+//   }
+// }
+// export const incClick = () => {
+//   return { type: 'INC_TIMER'}
+// };
+//
 
-export function socketExample() {
-  return dispatch => {
-    socket.on('msg', data => {
-
-      dispatch({ type: 'REDUCER_NAME', data })
-      console.log(data);
-    })
-  }
-}
 
 export function sendZapier(data) {
   const { url } = data;
@@ -658,6 +657,7 @@ export const consoleSubmit = (server, expression) => {
 //export const setCommand = (channel, command) => ({ type: 'SET_CC', payload: {channel, command} });
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});
+//export const startClick = () => ({type: 'INC_CLICK'});
 
 export const incTimer = () => {
   return { type: 'INC_TIMER'}
@@ -671,6 +671,17 @@ const x = (dispatch) => {
 export const startTimer = (duration, steps) => {
   return dispatch => {
     timer = setInterval(x, (duration / steps * 1000), dispatch);
+  }
+}
+export function startClick() {
+  return dispatch => {
+    dispatch({ type: 'INC_CLICK'});
+  }
+}
+
+export function stopClick() {
+  return dispatch => {
+    dispatch({ type: 'STOP_CLICK'});
   }
 }
 
