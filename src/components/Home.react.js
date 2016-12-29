@@ -18,7 +18,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       duration: 16,
-      steps: 24,
+      steps: 55,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS_v','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2'],
@@ -40,9 +40,6 @@ class Home extends Component {
       socket.on("osc", data => {
 
         this.startClick();
-        console.log("onMessage: ");
-
-        console.log(data);
       })
       socket.on("dc", data => {
         this.stopClick();
@@ -88,13 +85,12 @@ class Home extends Component {
         if(vals['~qcap']!= ''){
           const sccm = vals['~qcap']
           const cmd = _.find(commands, c => c.name === sccm);
-          console.log(cmd);
           //ctx.setState({scCommand : cmd});
           //ctx.sendScCommand(tidalServerLink,cmd);
 
 
         }
-        ctx.sendCommands(tidalServerLink, vals, channelcommands, commands);
+        ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
       //   if(_includes(Object.keys(vals), "SC")){
       //   console.log(true);
       // }
@@ -230,8 +226,7 @@ class Home extends Component {
         const index=channels.length*i+colCount++;
 
         return <div className="playbox" key={c+'_'+i}>
-          {' . '}
-          <input type="text" value={textval} onChange={setText}/>
+          <textarea type="text" value={textval} onChange={setText}/>
         </div>
       })}
     </div>;
@@ -348,30 +343,29 @@ class Home extends Component {
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
     return <div className="Home cont">
-      {ctx.renderPlayer()}
-      <div id="matrices" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
-        <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '2px'}}>
-          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+    <div id="matrices" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+      <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '2px'}}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
 
-            <div>
-            <input type="text" placeholder= "Scene" value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-              <button onClick={ctx.addItem.bind(ctx)}>Add</button>
-            </div>
+          <div>
+          <input type="text" placeholder= "Scene" value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+            <button onClick={ctx.addItem.bind(ctx)}>Add</button>
           </div>
         </div>
-        <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)' }}>
-          <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-            {ctx.renderItems(items)}
-          </ul>
-        </div>
       </div>
-
-      <div id="CommandsColumn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
-        <div className="Commands"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+      <div style={{ width: 'calc(' + viewPortWidth + ' /5)' }}>
+        <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
+          {ctx.renderItems(items)}
+        </ul>
+      </div>
+    </div>
+    {ctx.renderPlayer()}
+      <div className="Commands" >
+        <div className="CommandsColumn" >
           <Commands />
         </div>
-        <div id="Execution"  style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', padding: "2px", paddingBottom: "25px"}}>
-          <textarea className="easter" style={{minHeight: "100px"}} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
+        <div id="Execution" >
+          <textarea className="easter"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
         </div>
       </div>
 

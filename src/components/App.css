@@ -44,7 +44,7 @@ body {
 * >input {
   background: white;
   color: rgb(25,77,110);
-  border-bottom: 2px solid rgb(25,77,110);
+  border-bottom: 2px solid rgba(125,125,125, 0.8);
   font-size: 10px;
   width:100px;
 }
@@ -87,84 +87,8 @@ b, p {
   margin: 0;
 }
 
-
-
-.Section {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.Section-title {
-  margin: 0;
-  padding: 15px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.Section-description {
-  margin: 0;
-  padding: 40px;
-  width: 100%;
-  text-align: center;
-  text-transform: lowercase;
-  background: #303030;
-  color: #BDB76B;
-  font-size: 22px;
-}
-
-.Section-body {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: center;
-  width: 100%;
-}
-
-.Section-body > h5 {
-  padding: 10px;
-  font-size: 16px;
-  margin: 5px;
-}
-
-.Section-body > input {
-  font-size: 16px;
-  margin: 0;
-  width: 300px;
-  align-self: center;
-}
-
 .text-center {
   text-align: center;
-}
-
-.primary-button {
-  background: #234053;
-  color: #FFF;
-  font-weight: 200;
-}
-
-.primary-button:hover {
-  background: #F9DADB;
-  color: #234053;
-}
-
-.secondary-button {
-  background: #FFF;
-  color: #808080;
-  font-weight: 400;
-}
-
-.secondary-button:hover {
-  background: #eee;
-color: #808080;
-  font-weight: 800;
-  text-decoration: none;
 }
 
 .boxshadow {

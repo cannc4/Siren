@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { Component, cloneElement } from 'react';
 import { connect } from 'react-redux';
 import { fbupdate, fetchModels } from '../actions';
-import Modal from './Modal.react';
+
 
 class FormElement extends Component {
   constructor(props) {

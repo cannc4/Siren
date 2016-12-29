@@ -1,10 +1,40 @@
+.Home {
+  padding: 15px;
+  display: flex;
+}
+
+.Tidal {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+
+}
+
+.Commands {
+  display: flex;
+  padding: 10px;
+  flex-grow: 2;
+  flex-direction: column;
+}
+
+.CommandsColumn {
+  overflow-y: auto;
+}
+
 .matrices {
   display: flex;
-  padding: 5px;
-  align-items: stretch;
+
+  flex-grow: 1;
   flex-direction: column;
-  max-width: 200px;
-  justify-content: flex-start;
+}
+
+.Player-holder {
+  display: flex;
+  flex-grow: 2;
+  flex-direction: column;
+  width: 2000vw;
+
+  overflow-y: auto;
 
 }
 
@@ -13,11 +43,6 @@
   padding-bottom: 10px;
 }
 
-.Home {
-  padding: 15px;
-  display: flex;
-  flex-direction: row;
-}
 #SCmsg{
 
   font-size: 10px;
@@ -27,31 +52,6 @@
   text-align: center;
 }
 
-.Commands {
-  display: flex;
-  padding: 15px;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  max-width: 2000px;
-  max-height: 960px;
-
-  overflow-y: scroll;
-}
-
-.Scenes {
-  display: flex;
-  padding: 15px;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  max-width: 2000px;
-  max-height: 960px;
-
-  overflow-y: scroll;
-}
 .easter {
   display: flex;
   flex-direction: column;
@@ -69,48 +69,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 250px;
 }
 
-.Tidal {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  margin: 5px;
-  max-width: 180px;
-
-}
 .metro {
-  background-color: #233!important;
+  background-color: rgba(255,255,102,0.15)!important;
   margin: 0;
   padding: 0;
 }
 
 .metro-active {
-  background-color: #933!important;
-}
-
-.Player-holder {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  margin: 0;
-  padding: 0;
-  flex-grow: 1;
-  -webkit-flex-grow: 1;
-  background: #333!important;
-
+  background-color: rgba(255,255,102,0.95)!important;
 }
 
 .Player {
   display: flex;
-  flex-wrap: wrap;
   margin: 0;
   line-height: 20px;
   min-height: 35px;
-  width: 800px;
   padding: 0;
 }
 
@@ -130,11 +105,13 @@
   background: none!important;
 }
 
-.playbox > input {
+.playbox > textarea {
   font-size: 0.8vw;
   background: none!important;
-  border-bottom: 2px solid #999;
+  border: 1px solid rgba(125,125,125, 0.65);
   flex-grow: 1;
+  resize: none;
+  overflow: hidden;
 }
 
 .playbox > div {
@@ -144,7 +121,7 @@
 }
 
 .playbox-active {
-  background-color: #933!important;
+  background-color: rgba(255,255,102,0.15)!important;
 }
 
 .playbox-cycle {

@@ -27,6 +27,7 @@ const models = {
     dataSource: Firebase.database().ref("/commands"),
     model: {
       name: 'String',
+      params: 'String',
       command: 'String'
     }
   },
@@ -263,9 +264,22 @@ export const initMyTidal = (server) => {
 export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
-      const cmd = _.find(commands, c => c.name === v);
+      const cellName = _.split(v, ' ', 1)[0];
+      const cmd = _.find(commands, c => c.name === cellName);
       if(cmd !== undefined && cmd !== null && cmd !== ""){
-        var append = "";
+        var cellItem = _.split(v, ' ');
+        var newCommand = cmd.command;
+        var parameters = _.split(cmd.params, ',');
+
+        console.log(newCommand);
+        _.forEach(parameters, function(value, i) {
+          newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
+        });
+        console.log(cellItem);
+        console.log(newCommand);
+        console.log(parameters);
+
+        // var append = "";
         // switch (k) {
         //   case "d1":
         //     append = " # orbit \"0\""; break;
@@ -287,7 +301,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         //     break;
         // }
         //var prepend = "runnow ";
-        return k + ' $ ' + cmd.command;
+        return k + ' $ ' + newCommand;
 
       } else return false;
     }))

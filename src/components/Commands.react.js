@@ -9,6 +9,7 @@ class Commands extends Component {
     super(props)
     this.state = {
       name: '',
+      params: '',
       modelName: this.constructor.name // React Class Name set above
     }
   }
@@ -29,11 +30,23 @@ class Commands extends Component {
   renderItem(item, dbKey) {
     const ctx = this;
     const model = fetchModel(ctx.state.modelName);
+
+    const { params } = ctx.state;
     // Item Action Handlers
     // handle function when any field of the object is modified
     const handleChange = ({ target: { value, name }}) => {
+      var re = /&(\w+)&/g, match, matches = [];
+      while (match = re.exec(value)) {
+        if(_.indexOf(matches, match[1]) === -1)
+          matches.push(match[1]);
+      }
+      console.log(matches);
+      ctx.setState({ params: matches.toString() });
+
       const payload = { key: dbKey };
       payload[name] = value;
+      payload['params'] = this.state.params;
+      console.log(payload['params']);
       fbupdate(ctx.state.modelName, payload);
     }
     // handle function to delete the object

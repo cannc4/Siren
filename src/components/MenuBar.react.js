@@ -10,10 +10,7 @@ class MenuBar extends Component {
     super(props)
     this.state = {
       path: location.pathname,
-      paths: [{
-        name: 'Commands',
-        url: '/commands'
-      }, {
+      paths: [ {
         name: 'Home',
         url: '/'
       },  {
