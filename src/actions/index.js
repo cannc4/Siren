@@ -266,30 +266,28 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
       const cmd = _.find(commands, c => c.name === v);
       if(cmd !== undefined && cmd !== null && cmd !== ""){
         var append = "";
-        switch (k) {
-          case "d1":
-            append = " # pan \"0.29\""; break;
-          case "d2":
-            append = " # pan \"0.4\""; break;
-          case "d3":
-            append = " # pan \"0.45\""; break;
-          case "d4":
-            append = " # pan \"0.5\""; break;
-          case "d5":
-            append = " # pan \"0.5\""; break;
-          case "d6":
-            append = " # pan \"0.65\""; break;
-          case "d7":
-            append = " # pan \"0.6\""; break;
-          case "d8":
-            append = " # pan \"0.65\""; break;
-          case "d9":
-            append = " # pan \"0.78\""; break;
-          default:
-            break;
-        }
-
-        return k + ' $ ' + cmd.command + append;
+        // switch (k) {
+        //   case "d1":
+        //     append = " # orbit \"0\""; break;
+        //   case "d2":
+        //     append = " # orbit \"1\""; break;
+        //   case "d3":
+        //     append = " # orbit \"2\""; break;
+        //   case "d4":
+        //     append = " # orbit \"3\""; break;
+        //   case "d5":
+        //     append = " # orbit \"4\""; break;
+        //   case "d6":
+        //     append = " # orbit \"5\""; break;
+        //     case "d7":
+        //       append = " # orbit \"6\""; break;
+        //       case "d8":
+        //         append = " # orbit \"6\""; break;
+        //   default:
+        //     break;
+        // }
+        //var prepend = "runnow ";
+        return k + ' $ ' + cmd.command;
 
       } else return false;
     }))

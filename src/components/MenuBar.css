@@ -3,15 +3,16 @@
   top: 0;
   left: 0;
   right: 0;
-  color: #BDB76B;
+  color: #808080;
   z-index: 1;
-  border-bottom: 2px solid #BDB76B;
+  border-bottom: 2px solid #808080;
   padding: 0 30px;
 }
 .pullleft {
   float: left;
 }
 .pullright {
+  color: #808080;
   float: right;
 }
 
@@ -20,17 +21,17 @@
   height: 50px;
   line-height: 50px;
   vertical-align: middle;
-  color: #BDB76B;
+  color: #808080;
   font-weight: 400;
   font-size: 18px;
 }
 
 .MenuBar > a:hover {
-  color: #BDB76B;
+  color: #808080;
   text-decoration: underline;
 }
 
 .MenuBar > a.active {
-  color: #303030;
+  color: #808080;
   text-decoration: none;
 }
