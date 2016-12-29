@@ -1,4 +1,4 @@
-import _ from 'lodash';
+// import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
@@ -20,7 +20,7 @@ class Home extends Component {
       duration: 16,
       steps: 24,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
-              'm1','sendOSC procF_v',
+              'sendOSC procS_v','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2'],
       timer: { isActive: false,
                current: null,
