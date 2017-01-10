@@ -25,7 +25,13 @@
   display: flex;
 
   flex-grow: 1;
-  flex-direction: column;
+  flex-direction: row;
+}
+
+.sceneList {
+  display: flex;
+
+  overflow-y: auto;
 }
 
 .Player-holder {
@@ -126,10 +132,10 @@
 
 .playbox-cycle {
   font-size: 14px;
-  vertical-align: center;
-  line-height: 20px;
-  max-width: 60px;
-  text-align: center;flex-grow: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 2;
 }
 
 /* Table column sizing

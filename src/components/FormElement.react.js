@@ -129,7 +129,7 @@ class FormElement extends Component {
     return <div key={bindings.key} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
 
       {bindings.key !== "command" && cloneElement(<input type="text" />, bindings)}
-      {bindings.key === "command" && cloneElement(<textarea style={{minHeight: "30px"}}/>, bindings)}
+      {bindings.key === "command" && cloneElement(<textarea style={{minHeight: "50px"}}/>, bindings)}
     </div>
   }
 

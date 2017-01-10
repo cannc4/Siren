@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   right: 0;
-  color: #808080;
+  color: #ddd;
   z-index: 1;
   border-bottom: 2px solid #808080;
   padding: 0 30px;
@@ -12,7 +12,7 @@
   float: left;
 }
 .pullright {
-  color: #808080;
+  color: #ddd;
   float: right;
 }
 
@@ -21,17 +21,17 @@
   height: 50px;
   line-height: 50px;
   vertical-align: middle;
-  color: #808080;
+  color: #ddd;
   font-weight: 400;
   font-size: 18px;
 }
 
 .MenuBar > a:hover {
-  color: #808080;
+  color: #ddd;
   text-decoration: underline;
 }
 
 .MenuBar > a.active {
-  color: #808080;
+  color: #ddd;
   text-decoration: none;
 }

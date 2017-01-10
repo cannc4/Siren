@@ -181,18 +181,20 @@ export function fbcreate(model, data) {
   }
 }
 export function fbcreateMatrix(model, data) {
-  // var usersRef = new Firebase(USERS_LOCATION);
-  //   usersRef.child(userId).once('value', function(snapshot) {
-  //     var exists = (snapshot.val() !== null);
-  //     userExistsCallback(userId, exists);
-  //   });
+  var datakey;
+  models[model].dataSource.ref.once('value', dat => {
+    datakey = _.find(dat.val(), (d) => d.matName === data.matName).key;
+  });
 
-  if (data['key']) {
-    return models[model].dataSource.child(data['key']).update({...data})
+  if (datakey) {
+    return models[model].dataSource.child(datakey).update({...data})
   } else {
     const newObj = models[model].dataSource.push(data);
     return newObj.update({ key: newObj.key })
   }
+}
+export function fbupdateMatrix(model, data) {
+  models[model].dataSource.child(data['key']).update({...data})
 }
 
 export function fbupdate(model, data) {

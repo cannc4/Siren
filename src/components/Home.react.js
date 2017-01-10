@@ -6,7 +6,7 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit, fbcreateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
+          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -17,8 +17,8 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      duration: 16,
-      steps: 55,
+      duration: 48,
+      steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS_v','sendOSC procF_v',
               'sendOSC procS1', 'sendOSC procS2'],
@@ -30,7 +30,9 @@ class Home extends Component {
       scCommand: '',
       click : {current:null,
               isActive:false},
-      density: 8
+      density: 8,
+      activeMatrix: '',
+      sceneSentinel: false
     }
   }
   componentDidMount(props,state){
@@ -186,7 +188,7 @@ class Home extends Component {
           if(_.includes(c, "sendOSC")){
             c = "p"+count++;
           }
-          return <div className="playbox" key={c}><div>{c}</div></div>
+          return <div className="playbox playbox-cycle" key={c}>{c}</div>
         })}
       </div>
       {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
@@ -235,26 +237,27 @@ class Home extends Component {
   changeName({target: { value }}) {
     const ctx = this;
     //updateValues(value, ctx.commands, ctx.values);
-    ctx.setState({ matName: value });
+    ctx.setState({ matName: value , sceneSentinel: false});
   }
 
   addItem() {
     const ctx = this
     const { commands } = ctx.props;
-    const { matName, values } = ctx.state;
-    if (matName.length >= 2 && _.isEmpty(values) === false) {
+    const { matName, activeMatrix, values } = ctx.state;
+    if ( matName.length >= 2 && _.isEmpty(values) === false) {
       fbcreateMatrix(ctx.state.modelName, { matName , commands, values })
     }
   }
 
   renderItem(item, dbKey, i) {
     const ctx = this;
-    const { values } = ctx.state;
+    const { values, activeMatrix } = ctx.state;
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
       const { commands } = ctx.props;
-      ctx.updateMatrix(values, item,commands);
+      ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
+      ctx.updateMatrix(values, item, commands);
     }
 
     // handle function to delete the object
@@ -266,8 +269,9 @@ class Home extends Component {
     return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
-          <button onClick={handleDelete}>{'x'}</button>
-          <button onClick={updateMatrix}>{item.matName}</button>
+          <button onClick={handleDelete}>{'₪'}</button>
+          {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
+          {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
         </div>
       </div>
     )
@@ -349,11 +353,12 @@ class Home extends Component {
 
           <div>
           <input type="text" placeholder= "Scene" value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            <button onClick={ctx.addItem.bind(ctx)}>Add</button>
+            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
+            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
           </div>
         </div>
       </div>
-      <div style={{ width: 'calc(' + viewPortWidth + ' /5)' }}>
+      <div className={'sceneList'} style={{ width: 'calc(' + viewPortWidth + ')'}}>
         <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
           {ctx.renderItems(items)}
         </ul>
@@ -365,17 +370,17 @@ class Home extends Component {
           <Commands />
         </div>
         <div id="Execution" >
-          <textarea className="easter"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder=""/>
+          <textarea className="easter"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="command"/>
         </div>
       </div>
 
       <div className="Tidal">
         Tidal Server Link
         <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-        <button onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
+        <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
         {tidal.isActive && 'Running!'}
-        {!timer.isActive && <button onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-        {timer.isActive && <button onClick={ctx.stopTimer}>Stop timer</button>}
+        {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
+        {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
         <pre>{JSON.stringify(timer, null, 2)}</pre>
         <div id="Command">
            Interpreter
