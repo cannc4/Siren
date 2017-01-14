@@ -1,4 +1,3 @@
-// import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
@@ -298,11 +297,10 @@ class Home extends Component {
   </div>
 
   }
-  render() {
+  renderMenu(){
     const ctx=this;
     const { tidal, timer, click }=ctx.props;
     const { scCommand, tidalServerLink }=ctx.state;
-
     const { commands }=ctx.props;
     const { values, density, steps, duration, channels}=ctx.state;
 
@@ -341,6 +339,49 @@ class Home extends Component {
       ctx.setState({scCommand: value})
     }
 
+    const viewPortWidth = '100%'
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    return   <div className="Tidal">
+            Tidal Server Link
+            <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
+            <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
+            {tidal.isActive && 'Running!'}
+            {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
+            {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
+            <pre>{JSON.stringify(timer, null, 2)}</pre>
+            <div id="Command">
+               SClang
+               <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+            </div>
+            <div id="Celluar">
+               <p>Cellular Automata Updates</p>
+               <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+               {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+               {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+               <button onClick={addValues}>  Add  </button>
+            </div>
+            <div id="Celluar">
+               <p>Bjorklund Algorithm Updates</p>
+               {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+               {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+               <button onClick={addBjorkValues}>  Add  </button>
+            </div>
+          </div>
+  }
+
+
+
+  render() {
+    const ctx=this;
+    const { tidal, timer, click }=ctx.props;
+    const { scCommand, tidalServerLink }=ctx.state;
+    const { commands }=ctx.props;
+    const { values, density, steps, duration, channels}=ctx.state;
+
+    const getValue=() => {
+        return ctx.state.density;
+    }
+    const textval=getValue();
 
     const viewPortWidth = '100%'
 
@@ -373,36 +414,11 @@ class Home extends Component {
           <textarea className="easter"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="command"/>
         </div>
       </div>
-
-      <div className="Tidal">
-        Tidal Server Link
-        <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-        <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
-        {tidal.isActive && 'Running!'}
-        {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-        {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
-        <pre>{JSON.stringify(timer, null, 2)}</pre>
-        <div id="Command">
-           Interpreter
-           <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-        </div>
-        <div id="Celluar">
-           <p>Cellular Automata Updates</p>
-           <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-           {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-           {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-           <button onClick={addValues}>  Add  </button>
-        </div>
-        <div id="Celluar">
-           <p>Bjorklund Algorithm Updates</p>
-           {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-           {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-           <button onClick={addBjorkValues}>  Add  </button>
-        </div>
-        {ctx.renderMetro()}
-      </div>
-
+      <div>
+      {ctx.renderMenu()}
     </div>
+    </div>
+
   }
 }
 export default connect(state => state)(Home);

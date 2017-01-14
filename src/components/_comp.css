@@ -4,28 +4,28 @@
 }
 
 .font-motto {
-  font-family: 'Rokkitt', serif;
+  font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
 }
 
 .comp-title {
   width: 98%;
   margin: 25px 0;
   text-align: center;
-  font-size: 36px;
+  font-size: 20px;
   line-height: 36px;
   font-weight: 100;
 }
 
 *::-webkit-scrollbar-track
 {
-	-webkit-box-shadow: inset 0 0 5px rgba(25,77,110, 0.3);
-	background-color: #EEEEEE;
+	-webkit-box-shadow: inset 0 0 5px rgba(25,77,110,0.5);
+	background-color: #ddd;
 }
 
 *::-webkit-scrollbar
 {
-  width: 5px;
-  height: 5px;
+  width: 3px;
+  height: 1px;
 	background-color: #EEEEEE;
   z-index: 999;
 }

@@ -10,6 +10,6 @@ s.waitForBoot {
  ~dirt.loadSoundFiles("/Users/canince/Dropbox/Whalehouse/Samples/*");
 
  s.sync;
- ~dirt.start(57120, (0, 2 .. 11));
+ ~dirt.start(57120, (0, 2 .. 9));
 }
 );

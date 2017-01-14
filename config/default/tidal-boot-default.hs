@@ -17,7 +17,6 @@ procS4 <- openUDP "127.0.0.1" 12000
 devices <- midiDevices
 displayOutputDevices >>= putStrLn
 
-m1 <- midiStream devices "QUAD-CAPTURE" 1 synthController
 
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
