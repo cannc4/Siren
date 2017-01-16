@@ -37,7 +37,8 @@ const models = {
     model: {
       name: 'String',
       values: 'Object',
-      commands: 'Object'
+      commands: 'Object',
+      index: 'String'
     }
   }
 }
@@ -201,9 +202,12 @@ export function fbupdateMatrix(model, data) {
 export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
-
 export function fbdelete(model, data) {
   models[model].dataSource.child(data['key']).remove()
+}
+
+export function fborder(model, data) {
+  models[model].dataSource.child(data['key']).update({...data})
 }
 
 export function facebookLogin() {

@@ -31,6 +31,7 @@ class Home extends Component {
               isActive:false},
       density: 8,
       activeMatrix: '',
+      sceneIndex: 0,
       sceneSentinel: false
     }
   }
@@ -242,15 +243,46 @@ class Home extends Component {
   addItem() {
     const ctx = this
     const { commands } = ctx.props;
-    const { matName, activeMatrix, values } = ctx.state;
-    if ( matName.length >= 2 && _.isEmpty(values) === false) {
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values })
+    const { matName, activeMatrix, values, sceneIndex } = ctx.state;
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    console.log("ITEM LEINGHT" + Object.keys(items).length) ;
+    if(Object.keys(items).length == 0){
+      ctx.setState({sceneIndex: 0});
     }
+    else {
+      ctx.setState({sceneIndex: (Object.values(items)[Object.keys(items).length-1].sceneIndex)+1});
+      console.log('KEST == ' + Object.values(items)[Object.keys(items).length-1].sceneIndex);
+    }
+    if ( matName.length >= 2 && _.isEmpty(values) === false) {
+      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex })
+    }
+  }
+
+  reorder (flag, index) {
+
+console.log(flag);
+  console.log(index);
+    const ctx=this;
+    const { matName, commands, values } = ctx.state
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    const len = Object.keys(items).length;
+
+    // if(flag == 'up' && index == 0)
+    //   return;
+    // else if(flag == 'down' && len-1 == index)
+    //   return;
+    // else{
+    //   if(flag == 'up')
+    //     fborder(ctx.state.modelName, { matName , commands, values, index-1 });
+    //   else if(flag == 'down')
+    //     fborder(ctx.state.modelName, { matName , commands, values, index+1 });
+    // }
+
   }
 
   renderItem(item, dbKey, i) {
     const ctx = this;
-    const { values, activeMatrix } = ctx.state;
+    const { values, activeMatrix} = ctx.state;
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
@@ -265,20 +297,26 @@ class Home extends Component {
       fbdelete(ctx.state.modelName, payload);
     }
 
+
+
     return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'₪'}</button>
           {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
           {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
+          <button onClick={ctx.reorder.bind(ctx,'up', item.sceneIndex)}>{'↑'} </button>
+          <button onClick={ctx.reorder.bind(ctx,'down',item.sceneIndex)}>{'↓'}</button>
         </div>
       </div>
     )
   }
 
   renderItems(items) {
+
     const ctx = this;
     return _.map(items, ctx.renderItem.bind(ctx));
+
   }
 
   renderMetro(){
