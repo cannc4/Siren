@@ -5,9 +5,11 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
+          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
+
+import {Layout, LayoutSplitter} from 'react-flex-layout';
 
 class Home extends Component {
   constructor(props) {
@@ -19,8 +21,8 @@ class Home extends Component {
       duration: 48,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
-              'sendOSC procS_v','sendOSC procF_v',
-              'sendOSC procS1', 'sendOSC procS2'],
+              'sendOSC procS1','sendOSC procS2',
+              'sendOSC procS3', 'sendOSC procS4'],
       timer: { isActive: false,
                current: null,
                isCelluarActive: false,
@@ -31,10 +33,10 @@ class Home extends Component {
               isActive:false},
       density: 8,
       activeMatrix: '',
-      sceneIndex: 0,
       sceneSentinel: false
     }
   }
+
   componentDidMount(props,state){
     const ctx = this;
 
@@ -54,6 +56,7 @@ class Home extends Component {
       const ctx=this;
       store.dispatch(startClick());
     }
+
   componentDidUpdate(props, state) {
 
     const ctx=this;
@@ -84,18 +87,8 @@ class Home extends Component {
       // const names = Object.keys(vals);
       // console.log(names);
       if (vals !== undefined) {
-        if(vals['~qcap']!= ''){
-          const sccm = vals['~qcap']
-          const cmd = _.find(commands, c => c.name === sccm);
-          //ctx.setState({scCommand : cmd});
-          //ctx.sendScCommand(tidalServerLink,cmd);
-
-
-        }
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
-      //   if(_includes(Object.keys(vals), "SC")){
-      //   console.log(true);
-      // }
+
     }
   }
 }
@@ -236,53 +229,21 @@ class Home extends Component {
 
   changeName({target: { value }}) {
     const ctx = this;
-    //updateValues(value, ctx.commands, ctx.values);
     ctx.setState({ matName: value , sceneSentinel: false});
   }
 
   addItem() {
     const ctx = this
     const { commands } = ctx.props;
-    const { matName, activeMatrix, values, sceneIndex } = ctx.state;
-    const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    console.log("ITEM LEINGHT" + Object.keys(items).length) ;
-    if(Object.keys(items).length == 0){
-      ctx.setState({sceneIndex: 0});
-    }
-    else {
-      ctx.setState({sceneIndex: (Object.values(items)[Object.keys(items).length-1].sceneIndex)+1});
-      console.log('KEST == ' + Object.values(items)[Object.keys(items).length-1].sceneIndex);
-    }
+    const { matName, activeMatrix, values } = ctx.state;
     if ( matName.length >= 2 && _.isEmpty(values) === false) {
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex })
+      fbcreateMatrix(ctx.state.modelName, { matName , commands, values })
     }
-  }
-
-  reorder (flag, index) {
-
-console.log(flag);
-  console.log(index);
-    const ctx=this;
-    const { matName, commands, values } = ctx.state
-    const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    const len = Object.keys(items).length;
-
-    // if(flag == 'up' && index == 0)
-    //   return;
-    // else if(flag == 'down' && len-1 == index)
-    //   return;
-    // else{
-    //   if(flag == 'up')
-    //     fborder(ctx.state.modelName, { matName , commands, values, index-1 });
-    //   else if(flag == 'down')
-    //     fborder(ctx.state.modelName, { matName , commands, values, index+1 });
-    // }
-
   }
 
   renderItem(item, dbKey, i) {
     const ctx = this;
-    const { values, activeMatrix} = ctx.state;
+    const { values, activeMatrix } = ctx.state;
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
@@ -291,32 +252,50 @@ console.log(flag);
       ctx.updateMatrix(values, item, commands);
     }
 
-    // handle function to delete the object
+
     const handleDelete = ({ target: { value }}) => {
       const payload = { key: dbKey };
       fbdelete(ctx.state.modelName, payload);
     }
 
 
+    const reorder = (flag, index) => {
 
+      const payload = { key: dbKey };
+      const ctx=this;
+      const { matName, commands, values } = ctx.state
+      const items = ctx.props[ctx.state.modelName.toLowerCase()];
+      const len = Object.keys(items).length;
+      console.log(index);
+      console.log(flag);
+      //
+      // if(flag == "up" && parseInt(index)== 0)
+      //   return;
+      // else if(flag == "down" && len-1 == parseInt(index))
+      //   return;
+      // else{
+      //   if(flag == "up")
+      //     //fborder(ctx.state.matName, { matName , commands, values, index});
+      //   else if(flag == "down")
+      //     //fborder(ctx.state.matName, { matName , commands, values, index});
+      //   }
+      }
     return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'₪'}</button>
           {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
           {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
-          <button onClick={ctx.reorder.bind(ctx,'up', item.sceneIndex)}>{'↑'} </button>
-          <button onClick={ctx.reorder.bind(ctx,'down',item.sceneIndex)}>{'↓'}</button>
+          <button onClick={reorder('up', item.sceneIndex)}>{'↑'} </button>
+          <button onClick={reorder('down', item.sceneIndex)}>{'↓'}</button>
         </div>
       </div>
     )
   }
 
   renderItems(items) {
-
     const ctx = this;
     return _.map(items, ctx.renderItem.bind(ctx));
-
   }
 
   renderMetro(){
@@ -378,33 +357,36 @@ console.log(flag);
     }
 
     const viewPortWidth = '100%'
-    const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    return   <div className="Tidal">
-            Tidal Server Link
-            <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-            <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>
-            {tidal.isActive && 'Running!'}
-            {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-            {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
-            <pre>{JSON.stringify(timer, null, 2)}</pre>
-            <div id="Command">
-               SClang
-               <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder="" onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-            </div>
-            <div id="Celluar">
-               <p>Cellular Automata Updates</p>
-               <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-               {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-               {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-               <button onClick={addValues}>  Add  </button>
-            </div>
-            <div id="Celluar">
-               <p>Bjorklund Algorithm Updates</p>
-               {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-               {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-               <button onClick={addBjorkValues}>  Add  </button>
-            </div>
-          </div>
+    return   <div className="Tidal" style={{margin: '5px'}}>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+        Tidal Server Link
+        <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
+        {!tidal.isActive && <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
+        {tidal.isActive && <button className={'buttonSentinel'}>Running</button>}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+        {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
+        {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
+        <pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
+      </div>
+      <div id="Command">
+         <p>SuperCollider Command</p>
+         <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder={'Ctrl + Enter '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+      </div>
+      <div id="Celluar">
+         <p>Cellular Automata Updates</p>
+         <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+         {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+         {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+         <button onClick={addValues}>  Add  </button>
+      </div>
+      <div id="Celluar">
+         <p>Bjorklund Algorithm Updates</p>
+         {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+         {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+         <button onClick={addBjorkValues}>  Add  </button>
+      </div>
+    </div>
   }
 
 
@@ -425,36 +407,45 @@ console.log(flag);
 
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
-    return <div className="Home cont">
-    <div id="matrices" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
-      <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '2px'}}>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-
-          <div>
-          <input type="text" placeholder= "Scene" value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
-            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
+    return <div className={"Home cont"}>
+      <Layout fill='window'>
+        <Layout layoutWidth={120}>
+          <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
+              <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+              {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
+              {!this.state.sceneSentinel && <button  onClick={ctx.addItem.bind(ctx)}>Add</button>}
+            </div>
+            <div className={'sceneList'} style={{ width: '100%'}}>
+              <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
+                {ctx.renderItems(items)}
+              </ul>
+            </div>
           </div>
-        </div>
-      </div>
-      <div className={'sceneList'} style={{ width: 'calc(' + viewPortWidth + ')'}}>
-        <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-          {ctx.renderItems(items)}
-        </ul>
-      </div>
-    </div>
-    {ctx.renderPlayer()}
-      <div className="Commands" >
-        <div className="CommandsColumn" >
-          <Commands />
-        </div>
-        <div id="Execution" >
-          <textarea className="easter"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="command"/>
-        </div>
-      </div>
-      <div>
-      {ctx.renderMenu()}
-    </div>
+        </Layout>
+        <LayoutSplitter />
+        <Layout layoutWidth='flex'>
+          {ctx.renderPlayer()}
+        </Layout>
+        <LayoutSplitter />
+        <Layout layoutWidth={250}>
+          <div className="Commands" >
+            <div className="CommandsColumn" >
+              <Commands />
+            </div>
+
+          </div>
+        </Layout>
+        <LayoutSplitter />
+        <Layout layoutWidth={200}>
+          <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+            {ctx.renderMenu()}
+            <div id="Execution" style={{alignSelf:'flex-start'}}>
+              <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)"/>
+            </div>
+          </div>
+        </Layout>
+      </Layout>
     </div>
 
   }

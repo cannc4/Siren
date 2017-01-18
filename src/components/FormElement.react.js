@@ -3,7 +3,6 @@ import React, { Component, cloneElement } from 'react';
 import { connect } from 'react-redux';
 import { fbupdate, fetchModels } from '../actions';
 
-
 class FormElement extends Component {
   constructor(props) {
     super(props)
@@ -129,7 +128,7 @@ class FormElement extends Component {
     return <div key={bindings.key} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
 
       {bindings.key !== "command" && cloneElement(<input type="text" />, bindings)}
-      {bindings.key === "command" && cloneElement(<textarea style={{minHeight: "50px"}}/>, bindings)}
+      {bindings.key === "command" && cloneElement(<textarea placeholder={'Command body...'} style={{minHeight: "50px"}}/>, bindings)}
     </div>
   }
 

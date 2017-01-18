@@ -100,13 +100,9 @@ class Commands extends Component {
 
     return (
       <div>
-        <div style={{ width: 'calc(' + viewPortWidth + ' - 50px)', display: 'flex', flexDirection: 'column', padding: '10px'}}>
-          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-            <div>
-              <input type="text" placeholder={modelName } value={name} onChange={changeName}/>
-              <button onClick={addItem}>Add</button>
-            </div>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
+          <input className={'newCommandInput'} type="text" placeholder={'New Command Name'} value={name} onChange={changeName}/>
+          <button className={'newCommandButton'} onClick={addItem}>Add</button>
         </div>
         <div style={{ width: viewPortWidth }}>
           <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>

@@ -24,16 +24,16 @@
 
 *::-webkit-scrollbar
 {
-  width: 3px;
-  height: 1px;
+  width: 0px;
+  height: 5px;
 	background-color: #EEEEEE;
-  z-index: 999;
+  z-index: 1;
 }
 
 ::-webkit-scrollbar:hover
 {
-	width: 8px;
-  height: 8px;
+	width: 3px;
+  height: 5px;
 }
 
 *::-webkit-scrollbar-thumb
