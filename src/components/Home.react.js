@@ -33,13 +33,16 @@ class Home extends Component {
               isActive:false},
       density: 8,
       activeMatrix: '',
+      sceneIndex: '',
       sceneSentinel: false
     }
   }
 
   componentDidMount(props,state){
     const ctx = this;
-
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    var sndd = (Object.values(items).length);
+          console.log(sndd);
       var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
       socket.on("osc", data => {
 
@@ -48,7 +51,7 @@ class Home extends Component {
       socket.on("dc", data => {
         this.stopClick();
       })
-
+      ctx.setState({sceneIndex:sndd});
 
     }
 
@@ -235,12 +238,58 @@ class Home extends Component {
   addItem() {
     const ctx = this
     const { commands } = ctx.props;
-    const { matName, activeMatrix, values } = ctx.state;
-    if ( matName.length >= 2 && _.isEmpty(values) === false) {
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values })
-    }
-  }
+    const { matName, activeMatrix, values, sceneIndex } = ctx.state;
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    console.log(items);
 
+    if ( matName.length >= 2 && _.isEmpty(values) === false) {
+      var snd = ctx.state.sceneIndex +1 ;
+      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex });
+      ctx.setState({sceneIndex: snd});
+    }
+
+  }
+  reorder (index,flag){
+
+    //const payload = { key: dbKey };
+
+    const ctx = this;
+    const { commands } = ctx.props;
+    const { matName, values,sceneIndex } = ctx.state;
+    console.log(commands);
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+
+    const len = Object.keys(items).length;
+    const keys = Object.keys(items);
+    const vals = Object.values(items);
+
+    if(flag == "up" && index == 0)
+      return;
+    else if(flag == "down" && len-1 == index)
+      return;
+    else{
+      if(flag == "up"){
+        console.log("KEY INDEX: " + vals[_.indexOf(vals,vals[index])].sceneIndex);
+        console.log("INDEX: " + index);
+          if (vals[_.indexOf(vals,vals[index])].sceneIndex == index){
+            var temp = index - 1;
+            var temp2 = vals[_.indexOf(vals,vals[index-1])].matName;
+            var temp3 = vals[_.indexOf(vals,vals[index])].matName;
+
+            console.log("LOG STARTS ------");
+
+            console.log(temp2);
+            console.log(temp);
+            console.log(temp3);
+            console.log(index);
+            console.log("LOG ENDS ------");
+
+            fborder(ctx.state.modelName,{ matName:temp2, commands, values, sceneIndex: index}, keys[_.indexOf(vals,vals[index-1])]);
+            fborder(ctx.state.modelName, {matName:temp3, commands, values, sceneIndex : temp},  keys[_.indexOf(vals,vals[index])]);
+          }
+        }
+      }
+    }
   renderItem(item, dbKey, i) {
     const ctx = this;
     const { values, activeMatrix } = ctx.state;
@@ -259,35 +308,14 @@ class Home extends Component {
     }
 
 
-    const reorder = (flag, index) => {
-
-      const payload = { key: dbKey };
-      const ctx=this;
-      const { matName, commands, values } = ctx.state
-      const items = ctx.props[ctx.state.modelName.toLowerCase()];
-      const len = Object.keys(items).length;
-      console.log(index);
-      console.log(flag);
-      //
-      // if(flag == "up" && parseInt(index)== 0)
-      //   return;
-      // else if(flag == "down" && len-1 == parseInt(index))
-      //   return;
-      // else{
-      //   if(flag == "up")
-      //     //fborder(ctx.state.matName, { matName , commands, values, index});
-      //   else if(flag == "down")
-      //     //fborder(ctx.state.matName, { matName , commands, values, index});
-      //   }
-      }
     return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'₪'}</button>
           {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
           {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
-          <button onClick={reorder('up', item.sceneIndex)}>{'↑'} </button>
-          <button onClick={reorder('down', item.sceneIndex)}>{'↓'}</button>
+          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>
+          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>
         </div>
       </div>
     )

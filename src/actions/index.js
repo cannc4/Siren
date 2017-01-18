@@ -38,7 +38,7 @@ const models = {
       name: 'String',
       values: 'Object',
       commands: 'Object',
-      index: 'String'
+      sceneIndex: 'Integer'
     }
   }
 }
@@ -184,6 +184,7 @@ export function fbcreate(model, data) {
 }
 export function fbcreateMatrix(model, data) {
   var datakey;
+  console.log(data);
   models[model].dataSource.ref.once('value', dat => {
     datakey = _.find(dat.val(), (d) => d.matName === data.matName).key;
   });
@@ -206,8 +207,12 @@ export function fbdelete(model, data) {
   models[model].dataSource.child(data['key']).remove()
 }
 
-export function fborder(model, data) {
-  models[model].dataSource.child(data['key']).update({...data})
+export function fborder(model, data,keys) {
+
+console.log("PATLADIII");
+  models[model].dataSource.child(keys).update({...data})
+  models[model].dataSource.orderByChild('sceneIndex');
+
 }
 
 export function facebookLogin() {
