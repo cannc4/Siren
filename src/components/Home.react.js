@@ -9,6 +9,7 @@ import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stop
 import store from '../store';
 import Commands from './Commands.react';
 
+import Firebase from 'firebase';
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 
 class Home extends Component {
@@ -38,24 +39,24 @@ class Home extends Component {
     }
   }
 
-  componentDidMount(props,state){
-    const ctx = this;
-
-    const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    const snd = (Object.values(items).length);
-
-
-    var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-    socket.on("osc", data => {
-
-      this.startClick();
-    })
-    socket.on("dc", data => {
-      this.stopClick();
-    })
-
-    ctx.setState( {sceneIndex: snd} );
-  }
+  // componentDidMount(props,state){
+  //   const ctx = this;
+  //
+  //   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  //   const snd = (Object.values(items).length);
+  //
+  //
+  //   var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+  //   socket.on("osc", data => {
+  //
+  //     this.startClick();
+  //   })
+  //   socket.on("dc", data => {
+  //     this.stopClick();
+  //   })
+  //
+  //   ctx.setState( {sceneIndex: snd} );
+  // }
 
   startClick() {
     const ctx=this;
@@ -66,7 +67,7 @@ class Home extends Component {
 
     const ctx=this;
     const { channelcommands, commands, timer, click}=props;
-    const { steps, tidalServerLink, values, density, duration, channels }=state;
+    const { steps, tidalServerLink, values, density, duration, channels, activeMatrix }=state;
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
@@ -75,16 +76,17 @@ class Home extends Component {
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
         else if(timer.isBjorkActive)
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
-        else {
-          const items = ctx.props[ctx.state.modelName.toLowerCase()];
-          const vals = Object.values(items);
-          _.forEach(vals, function(d, i){
-            if(d.matName === ctx.state.activeMatrix)
-            {
-              ctx.setState({activeMatrix: vals[(i+1)%vals.length].matName});
-            }
-          })
-        }
+        // else if(activeMatrix != '')
+        // {
+        //   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+        //   const vals = Object.values(items);
+        //   _.forEach(vals, function(d, i){
+        //     if(d.matName === activeMatrix)
+        //     {
+        //       ctx.setState({activeMatrix: vals[(i+1)%vals.length].matName});
+        //     }
+        //   })
+        // }
         /*var countArr = [];
         _.forEach(channels, function(channel, c_key){
           var count = 0;
@@ -179,6 +181,13 @@ class Home extends Component {
   }
 
   updateMatrix(values, item) {
+    const items = this.props[this.state.modelName.toLowerCase()]
+
+    // print every scenename with its sceneIndex
+    console.log('SCENES: ');
+    _.forEach(Object.values(items), function(d){
+      console.log(d.matName + ' ' + d.sceneIndex);
+    });
     store.dispatch(updateMatrix(values, item));
   }
 
@@ -253,8 +262,9 @@ class Home extends Component {
     console.log(items);
 
     if ( matName.length >= 2 && _.isEmpty(values) === false) {
-      var snd = ctx.state.sceneIndex +1 ;
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex });
+      var snd = Object.values(items).length;
+
+      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex: snd });
       ctx.setState({sceneIndex: snd});
     }
 
@@ -276,13 +286,17 @@ class Home extends Component {
       return;
     else{
       if(flag == "up"){
-        console.log("KEY INDEX: " + vals[_.indexOf(vals,vals[index])].sceneIndex);
+        console.log("KEY INDEX: " + vals[index].sceneIndex);
         console.log("INDEX: " + index);
 
-        if (vals[_.indexOf(vals,vals[index])].sceneIndex == index){
+        if (vals[index].sceneIndex === index){
           var upIndex = index - 1;
-          var upMatName = vals[_.indexOf(vals,vals[upIndex])].matName;
-          var downMatName = vals[_.indexOf(vals,vals[index])].matName;
+          var upMatName = vals[upIndex].matName;
+          var upValues = vals[upIndex].values;
+          var upCommands = vals[upIndex].commands;
+          var downMatName = vals[index].matName;
+          var downValues = vals[index].values;
+          var downCommands = vals[index].commands;
 
           // console.log("LOG STARTS ------");
           // console.log(upMatName);
@@ -291,18 +305,22 @@ class Home extends Component {
           // console.log(index);
           // console.log("LOG ENDS ------");
 
-          fborder(ctx.state.modelName, {matName: upMatName,   commands, values, sceneIndex: index},    keys[_.indexOf(vals, vals[upIndex])]);
-          fborder(ctx.state.modelName, {matName: downMatName, commands, values, sceneIndex: upIndex},  keys[_.indexOf(vals, vals[index])]);
+          fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: index},    keys[upIndex]);
+          fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: upIndex},  keys[index]);
         }
       }
       else if (flag === "down") {
-        if (vals[_.indexOf(vals,vals[index])].sceneIndex === index){
+        if (vals[index].sceneIndex === index){
           var downIndex = index + 1;
-          var downMatName = vals[_.indexOf(vals,vals[downIndex])].matName;
-          var upMatName =   vals[_.indexOf(vals,vals[index])].matName;
+          var downMatName = vals[downIndex].matName;
+          var downCommands = vals[downIndex].commands;
+          var downValues = vals[downIndex].values;
+          var upMatName = vals[index].matName;
+          var upCommands = vals[index].commands;
+          var upValues =  vals[index].values;
 
-          fborder(ctx.state.modelName, {matName: downMatName, commands, values, sceneIndex: index},     keys[_.indexOf(vals, vals[downIndex])]);
-          fborder(ctx.state.modelName, {matName: upMatName,   commands, values, sceneIndex: downIndex}, keys[_.indexOf(vals, vals[index])]);
+          fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: index}, keys[downIndex]);
+          fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: downIndex}, keys[index]);
         }
       }
     }
@@ -318,17 +336,21 @@ class Home extends Component {
       ctx.updateMatrix(values, item, commands);
     }
 
-
     const handleDelete = ({ target: { value }}) => {
       const payload = { key: dbKey };
       fbdelete(ctx.state.modelName, payload);
 
-
-      const items = ctx.props[ctx.state.modelName.toLowerCase()];
-      console.log(Object.values(items).length -1);
-      ctx.setState({sceneIndex: (Object.values(items).length - 1)});
+      // re-order all items after delete successfull
+      Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
+        const items = ctx.props[ctx.state.modelName.toLowerCase()];
+        ctx.setState({sceneIndex: (Object.values(items).length)});
+        _.forEach(Object.values(items), function(d, i){
+          fborder(ctx.state.modelName, {matName: d.matName, commands: d.commands, values: d.values, sceneIndex: i}, d.key);
+        });
+      }, function(error) {
+        console.error(error);
+      });
     }
-
 
     return item.key && (
       <div key={item.key} className="matrices" >
@@ -406,7 +428,6 @@ class Home extends Component {
       ctx.setState({scCommand: value})
     }
 
-    const viewPortWidth = '100%'
     return   <div className="Tidal" style={{margin: '5px'}}>
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
         Tidal Server Link

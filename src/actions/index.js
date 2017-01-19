@@ -203,8 +203,6 @@ export function fbfetchscenes(model) {
   }
 }
 
-
-
 export function fbcreate(model, data) {
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
@@ -213,13 +211,13 @@ export function fbcreate(model, data) {
     return newObj.update({ key: newObj.key })
   }
 }
+
 export function fbcreateMatrix(model, data) {
-  var datakey;
-  var sceneIndex;
-  console.log(data);
+  var datakey, sceneIndex, values, commands;
   models[model].dataSource.ref.once('value', dat => {
-    datakey = _.find(dat.val(), (d) => d.matName === data.matName).key;
-    sceneIndex = _.find(dat.val(), (d) => d.matName === data.matName).sceneIndex;
+    const obj = _.find(dat.val(), (d) => d.matName === data.matName);
+    datakey = obj.key;
+    sceneIndex = obj.sceneIndex;
   });
 
   if (datakey) {
@@ -238,11 +236,11 @@ export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
 export function fbdelete(model, data) {
-  models[model].dataSource.child(data['key']).remove()
+  models[model].dataSource.child(data['key']).remove();
 }
 
-export function fborder(model, data,keys) {
-  models[model].dataSource.child(keys).update({...data})
+export function fborder(model, data, key) {
+  models[model].dataSource.child(key).update({...data})
   models[model].dataSource.orderByChild('sceneIndex');
 }
 
@@ -314,13 +312,9 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         var newCommand = cmd.command;
         var parameters = _.split(cmd.params, ',');
 
-        console.log(newCommand);
         _.forEach(parameters, function(value, i) {
           newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
         });
-        console.log(cellItem);
-        console.log(newCommand);
-        console.log(parameters);
 
         // var append = "";
         // switch (k) {
