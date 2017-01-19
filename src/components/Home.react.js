@@ -87,6 +87,7 @@ class Home extends Component {
         //     }
         //   })
         // }
+
         /*var countArr = [];
         _.forEach(channels, function(channel, c_key){
           var count = 0;
@@ -121,7 +122,7 @@ class Home extends Component {
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink }=ctx.state;
+    const { tidalServerLink } = ctx.state;
     store.dispatch(initMyTidal(tidalServerLink));
   }
 

@@ -286,7 +286,7 @@ export const initMyTidal = (server) => {
     .then((response) => {
       dispatch({type: 'FETCH_TIDAL', payload: response.data })
     }).catch(function (error) {
-      console.log(error);
+      console.error(error);
     });
   }
 }
