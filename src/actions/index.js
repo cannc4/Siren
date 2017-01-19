@@ -173,6 +173,37 @@ export function fbfetch(model) {
     })
   }
 }
+export function fbfetchscenes(model) {
+  return dispatch => {
+    models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
+      var temp = [];
+      data.forEach(function(c){
+        temp.push(c.val());
+      })
+      if (Firebase.auth().currentUser !== null)
+      {
+        const { uid } = Firebase.auth().currentUser;
+        const u = _.find(data.val(), (d) => d.uid === uid);
+
+        if (u !== null && u !== undefined) {
+          if (models[model].watch !== undefined) {
+            _.each(models[model].watch, (m,i) => {
+              if (u[i] !== undefined) {
+                dispatch(m(u[i]));
+              }
+            })
+          }
+        }
+      }
+      dispatch({
+        type: 'FETCH_' + model.toUpperCase(),
+        payload: temp
+      })
+    })
+  }
+}
+
+
 
 export function fbcreate(model, data) {
   if (data['key']) {
@@ -184,12 +215,15 @@ export function fbcreate(model, data) {
 }
 export function fbcreateMatrix(model, data) {
   var datakey;
+  var sceneIndex;
   console.log(data);
   models[model].dataSource.ref.once('value', dat => {
     datakey = _.find(dat.val(), (d) => d.matName === data.matName).key;
+    sceneIndex = _.find(dat.val(), (d) => d.matName === data.matName).sceneIndex;
   });
 
   if (datakey) {
+    data.sceneIndex = sceneIndex;
     return models[model].dataSource.child(datakey).update({...data})
   } else {
     const newObj = models[model].dataSource.push(data);
@@ -208,11 +242,8 @@ export function fbdelete(model, data) {
 }
 
 export function fborder(model, data,keys) {
-
-console.log("PATLADIII");
   models[model].dataSource.child(keys).update({...data})
   models[model].dataSource.orderByChild('sceneIndex');
-
 }
 
 export function facebookLogin() {

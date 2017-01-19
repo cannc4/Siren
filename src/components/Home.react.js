@@ -18,7 +18,7 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      duration: 48,
+      duration: 4,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS1','sendOSC procS2',
@@ -40,40 +40,51 @@ class Home extends Component {
 
   componentDidMount(props,state){
     const ctx = this;
+
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    var sndd = (Object.values(items).length);
-          console.log(sndd);
-      var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-      socket.on("osc", data => {
+    const snd = (Object.values(items).length);
 
-        this.startClick();
-      })
-      socket.on("dc", data => {
-        this.stopClick();
-      })
-      ctx.setState({sceneIndex:sndd});
 
-    }
+    var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+    socket.on("osc", data => {
 
-    startClick() {
-      const ctx=this;
-      store.dispatch(startClick());
-    }
+      this.startClick();
+    })
+    socket.on("dc", data => {
+      this.stopClick();
+    })
+
+    ctx.setState( {sceneIndex: snd} );
+  }
+
+  startClick() {
+    const ctx=this;
+    store.dispatch(startClick());
+  }
 
   componentDidUpdate(props, state) {
 
     const ctx=this;
-    const { channelcommands, commands, timer ,click}=props;
+    const { channelcommands, commands, timer, click}=props;
     const { steps, tidalServerLink, values, density, duration, channels }=state;
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
-      if(timer.current % steps === 1 && (timer.isCelluarActive || timer.isBjorkActive)){
+      if(timer.current % steps === 0){
         if(timer.isCelluarActive)
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
-        else
+        else if(timer.isBjorkActive)
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
-
+        else {
+          const items = ctx.props[ctx.state.modelName.toLowerCase()];
+          const vals = Object.values(items);
+          _.forEach(vals, function(d, i){
+            if(d.matName === ctx.state.activeMatrix)
+            {
+              ctx.setState({activeMatrix: vals[(i+1)%vals.length].matName});
+            }
+          })
+        }
         /*var countArr = [];
         _.forEach(channels, function(channel, c_key){
           var count = 0;
@@ -91,9 +102,8 @@ class Home extends Component {
       // console.log(names);
       if (vals !== undefined) {
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
-
+      }
     }
-  }
 }
 
 
@@ -251,17 +261,14 @@ class Home extends Component {
   }
   reorder (index,flag){
 
-    //const payload = { key: dbKey };
-
     const ctx = this;
     const { commands } = ctx.props;
-    const { matName, values,sceneIndex } = ctx.state;
-    console.log(commands);
+    const { matName, values, sceneIndex } = ctx.state;
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
-    const len = Object.keys(items).length;
     const keys = Object.keys(items);
     const vals = Object.values(items);
+    const len = keys.length;
 
     if(flag == "up" && index == 0)
       return;
@@ -271,25 +278,35 @@ class Home extends Component {
       if(flag == "up"){
         console.log("KEY INDEX: " + vals[_.indexOf(vals,vals[index])].sceneIndex);
         console.log("INDEX: " + index);
-          if (vals[_.indexOf(vals,vals[index])].sceneIndex == index){
-            var temp = index - 1;
-            var temp2 = vals[_.indexOf(vals,vals[index-1])].matName;
-            var temp3 = vals[_.indexOf(vals,vals[index])].matName;
 
-            console.log("LOG STARTS ------");
+        if (vals[_.indexOf(vals,vals[index])].sceneIndex == index){
+          var upIndex = index - 1;
+          var upMatName = vals[_.indexOf(vals,vals[upIndex])].matName;
+          var downMatName = vals[_.indexOf(vals,vals[index])].matName;
 
-            console.log(temp2);
-            console.log(temp);
-            console.log(temp3);
-            console.log(index);
-            console.log("LOG ENDS ------");
+          // console.log("LOG STARTS ------");
+          // console.log(upMatName);
+          // console.log(upIndex);
+          // console.log(downMatName);
+          // console.log(index);
+          // console.log("LOG ENDS ------");
 
-            fborder(ctx.state.modelName,{ matName:temp2, commands, values, sceneIndex: index}, keys[_.indexOf(vals,vals[index-1])]);
-            fborder(ctx.state.modelName, {matName:temp3, commands, values, sceneIndex : temp},  keys[_.indexOf(vals,vals[index])]);
-          }
+          fborder(ctx.state.modelName, {matName: upMatName,   commands, values, sceneIndex: index},    keys[_.indexOf(vals, vals[upIndex])]);
+          fborder(ctx.state.modelName, {matName: downMatName, commands, values, sceneIndex: upIndex},  keys[_.indexOf(vals, vals[index])]);
+        }
+      }
+      else if (flag === "down") {
+        if (vals[_.indexOf(vals,vals[index])].sceneIndex === index){
+          var downIndex = index + 1;
+          var downMatName = vals[_.indexOf(vals,vals[downIndex])].matName;
+          var upMatName =   vals[_.indexOf(vals,vals[index])].matName;
+
+          fborder(ctx.state.modelName, {matName: downMatName, commands, values, sceneIndex: index},     keys[_.indexOf(vals, vals[downIndex])]);
+          fborder(ctx.state.modelName, {matName: upMatName,   commands, values, sceneIndex: downIndex}, keys[_.indexOf(vals, vals[index])]);
         }
       }
     }
+  }
   renderItem(item, dbKey, i) {
     const ctx = this;
     const { values, activeMatrix } = ctx.state;
@@ -305,6 +322,11 @@ class Home extends Component {
     const handleDelete = ({ target: { value }}) => {
       const payload = { key: dbKey };
       fbdelete(ctx.state.modelName, payload);
+
+
+      const items = ctx.props[ctx.state.modelName.toLowerCase()];
+      console.log(Object.values(items).length -1);
+      ctx.setState({sceneIndex: (Object.values(items).length - 1)});
     }
 
 
@@ -442,7 +464,7 @@ class Home extends Component {
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
               <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
               {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
-              {!this.state.sceneSentinel && <button  onClick={ctx.addItem.bind(ctx)}>Add</button>}
+              {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
             </div>
             <div className={'sceneList'} style={{ width: '100%'}}>
               <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
