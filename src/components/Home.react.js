@@ -5,7 +5,8 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix, startClick,stopClick} from '../actions'
+          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix,
+          startClick,stopClick, progressMatrices} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -76,17 +77,12 @@ class Home extends Component {
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
         else if(timer.isBjorkActive)
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
-        // else if(activeMatrix != '')
-        // {
-        //   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-        //   const vals = Object.values(items);
-        //   _.forEach(vals, function(d, i){
-        //     if(d.matName === activeMatrix)
-        //     {
-        //       ctx.setState({activeMatrix: vals[(i+1)%vals.length].matName});
-        //     }
-        //   })
-        // }
+        else if(activeMatrix !== '')
+        {
+          console.log('1');
+          ctx.progressMatrices(activeMatrix, ctx.props[ctx.state.modelName.toLowerCase()]);
+          console.log('7');
+        }
 
         /*var countArr = [];
         _.forEach(channels, function(channel, c_key){
@@ -107,7 +103,15 @@ class Home extends Component {
         ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
       }
     }
-}
+  }
+
+  progressMatrices(activeMatrix, items){
+    const ctx = this;
+    const { commands } = ctx.props;
+    const { values } = ctx.state;
+    console.log('2');
+    store.dispatch(progressMatrices(activeMatrix, items, commands, values));
+  }
 
 
   startTimer() {
@@ -334,7 +338,7 @@ class Home extends Component {
     const updateMatrix = () => {
       const { commands } = ctx.props;
       ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
-      ctx.updateMatrix(values, item, commands);
+      ctx.updateMatrix(values, item);
     }
 
     const handleDelete = ({ target: { value }}) => {

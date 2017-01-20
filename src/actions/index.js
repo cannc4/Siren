@@ -379,6 +379,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
 //
 
 export const updateMatrix = (values, i) => {
+  console.log('5');
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
@@ -400,6 +401,24 @@ export const updateMatrix = (values, i) => {
   return dispatch => {
     dispatch({ type: 'ADD_TIMER'});
   };
+}
+
+export const progressMatrices = (activeMatrix, items, commands, values) => {
+  console.log('3');
+  var i_save = -1;
+  _.forEach(items, function(d, i, j){
+    if(d.matName === activeMatrix)
+    {
+      console.log("4");
+      //updateMatrix(values, d);
+      i_save = _.indexOf(Object.values(items), d);
+
+
+    }
+  })
+  return dispatch => {
+    dispatch({ type: 'INC_SCENE', payload: Object.values(items)[(i_save+1)%Object.values(items).length].matName});
+  }
 }
 
 export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {

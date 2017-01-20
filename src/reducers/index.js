@@ -3,6 +3,7 @@ import { combineReducers } from 'redux';
 import channelcommands from './channelcommands';
 import user from './user';
 import sccommand from './sccommand';
+import scene from './scene'
 import tidal from './tidal';
 import timer from './timer';
 import click from './click';
@@ -26,6 +27,7 @@ _.each(models, (x,key) => {
 const rootReducer = combineReducers({
   channelcommands,
   sccommand,
+  scene,
   tidal,
   timer,
   user,
