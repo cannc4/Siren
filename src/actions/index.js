@@ -722,6 +722,23 @@ export const startTimer = (duration, steps) => {
     timer = setInterval(x, (duration / steps * 1000), dispatch);
   }
 }
+
+export const pauseTimer = () => {
+  clearInterval(timer);
+  return {
+    type: 'PAUSE_TIMER'
+  }
+}
+
+
+export const stopTimer = () => {
+  clearInterval(timer);
+  return {
+    type: 'STOP_TIMER'
+  }
+}
+
+
 export function startClick() {
   return dispatch => {
     dispatch({ type: 'INC_CLICK'});
@@ -731,12 +748,5 @@ export function startClick() {
 export function stopClick() {
   return dispatch => {
     dispatch({ type: 'STOP_CLICK'});
-  }
-}
-
-export const stopTimer = () => {
-  clearInterval(timer);
-  return {
-    type: 'STOP_TIMER'
   }
 }

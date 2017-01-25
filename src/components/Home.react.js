@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
 
-import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stopTimer,
+import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, pauseTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
           consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix,
@@ -135,6 +135,10 @@ class Home extends Component {
     const ctx=this;
     const { duration, steps }=ctx.state;
     store.dispatch(startTimer(duration, steps));
+  }
+
+  pauseTimer() {
+    store.dispatch(pauseTimer());
   }
 
   stopTimer() {
@@ -445,6 +449,14 @@ class Home extends Component {
       ctx.setState({scCommand: value})
     }
 
+
+      // REPLACING START PAUSE STOP WITH IMAGES
+      // {!timer.isActive && <img src={require('../assets/play_icon.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
+      // {timer.isActive && <div> <img src={require('../assets/pause_icon.png')} onClick={ctx.pauseTimer} height={32} width={32}/>
+      //                          <img src={require('../assets/stop_icon.png')} onClick={ctx.stopTimer} height={32} width={32}/> </div>}
+
+
+
     return   <div className="Tidal" style={{margin: '5px'}}>
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
         Tidal Server Link
@@ -454,7 +466,8 @@ class Home extends Component {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
         {!timer.isActive && <button className={'buttonSentinel'} onClick={ctx.startTimer.bind(ctx)}>Start timer</button>}
-        {timer.isActive && <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop timer</button>}
+        {timer.isActive && <div> <button className={'buttonSentinel'} onClick={ctx.pauseTimer}>Pause</button>
+                                 <button className={'buttonSentinel'} onClick={ctx.stopTimer}>Stop</button> </div>}
         <pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
       </div>
       <div id="Command">
