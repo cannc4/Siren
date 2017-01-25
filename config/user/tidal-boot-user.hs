@@ -1,8 +1,6 @@
 :set prompt ""
 :module Sound.Tidal.Context
-import Sound.Tidal.Scales
-import Sound.Tidal.MIDI.Context
-import Sound.Tidal.MIDI.RMControllerMIDI
+
 import Sound.OSC.FD
 
 procF_t <- openUDP "127.0.0.1" 12000
@@ -12,15 +10,7 @@ procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
-
 (cps, getNow) <- bpsUtils
-devices <- midiDevices
-displayOutputDevices >>= putStrLn
-
-m1 <- midiStream devices "QUAD-CAPTURE" 1 synthController
-m2 <- midiStream devices "QUAD-CAPTURE" 2 synthController
-m3 <- midiStream devices "QUAD-CAPTURE" 3 synthController
-m4 <- midiStream devices "QUAD-CAPTURE" 4 synthController
 
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
@@ -42,11 +32,6 @@ m4 <- midiStream devices "QUAD-CAPTURE" 4 synthController
 (d8,t8) <- superDirtSetters getNow
 (d9,t9) <- superDirtSetters getNow
 
-let (fltdec, fltdec_p) = pF "fltdec" (Just 0)
-let (depth, depth_p) = pF "depth" (Just 0)
-let (keymod, keymod_p) = pF "keymod" (Just 0)
-let (fltrz, fltrz_p) = pF "fltrz" (Just 0)
-let (amp, amp_p) = pF "amp" (Just 0)
 
 let bps x = cps (x/2)
 let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,c1,c2,c3,c4,c5,c6,c7,c8,c9]

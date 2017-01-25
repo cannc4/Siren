@@ -307,7 +307,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
       const cmd = _.find(commands, c => c.name === cellName);
-      if(cmd !== undefined && cmd !== null && cmd !== ""){
+      if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');
         var newCommand = cmd.command;
         var parameters = _.split(cmd.params, ',');
@@ -379,7 +379,6 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
 //
 
 export const updateMatrix = (values, i) => {
-  console.log('5');
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
@@ -401,24 +400,6 @@ export const updateMatrix = (values, i) => {
   return dispatch => {
     dispatch({ type: 'ADD_TIMER'});
   };
-}
-
-export const progressMatrices = (activeMatrix, items, commands, values) => {
-  console.log('3');
-  var i_save = -1;
-  _.forEach(items, function(d, i, j){
-    if(d.matName === activeMatrix)
-    {
-      console.log("4");
-      //updateMatrix(values, d);
-      i_save = _.indexOf(Object.values(items), d);
-
-
-    }
-  })
-  return dispatch => {
-    dispatch({ type: 'INC_SCENE', payload: Object.values(items)[(i_save+1)%Object.values(items).length].matName});
-  }
 }
 
 export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {
@@ -512,7 +493,7 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     });
   }
 
-  if(timer.current % steps === 1 && timer.isCelluarActive)
+  if(timer.current % steps === steps-1 && timer.isCelluarActive)
   {
     updateCelluar();
     return dispatch => {
@@ -628,7 +609,7 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
     });
   }
 
-  if(timer.current % steps === 1 && timer.isBjorkActive)
+  if(timer.current % steps === steps-1 && timer.isBjorkActive)
   {
     updateBjork();
     return dispatch => {};

@@ -6,7 +6,7 @@ import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, stop
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
           consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix,
-          startClick,stopClick, progressMatrices} from '../actions'
+          startClick,stopClick} from '../actions'
 import store from '../store';
 import Commands from './Commands.react';
 
@@ -35,6 +35,7 @@ class Home extends Component {
               isActive:false},
       density: 8,
       activeMatrix: '',
+      songmodeActive: false,
       sceneIndex: '',
       sceneSentinel: false
     }
@@ -68,21 +69,17 @@ class Home extends Component {
 
     const ctx=this;
     const { channelcommands, commands, timer, click}=props;
-    const { steps, tidalServerLink, values, density, duration, channels, activeMatrix }=state;
+    const { steps, tidalServerLink, values, density, duration, channels, activeMatrix, songmodeActive }=state;
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
-      if(timer.current % steps === 0){
+      if(timer.current % steps === steps-1){
         if(timer.isCelluarActive)
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
         else if(timer.isBjorkActive)
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
-        else if(activeMatrix !== '')
-        {
-          console.log('1');
-          ctx.progressMatrices(activeMatrix, ctx.props[ctx.state.modelName.toLowerCase()]);
-          console.log('7');
-        }
+        else if(songmodeActive)
+          ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
 
         /*var countArr = [];
         _.forEach(channels, function(channel, c_key){
@@ -105,14 +102,34 @@ class Home extends Component {
     }
   }
 
-  progressMatrices(activeMatrix, items){
+  progressMatrices(items){
     const ctx = this;
-    const { commands } = ctx.props;
-    const { values } = ctx.state;
-    console.log('2');
-    store.dispatch(progressMatrices(activeMatrix, items, commands, values));
+    const { commands, timer} = ctx.props;
+    const { values, activeMatrix, steps, songmodeActive} = ctx.state;
+
+    timer.isActive = false;
+    if(timer.current % steps === steps-1 && songmodeActive)
+    {
+      var i_save = -1;
+      _.forEach(items, function(d, i, j){
+        if(d.matName === activeMatrix)
+        {
+          i_save = _.indexOf(Object.values(items), d);
+        }
+      })
+
+      const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
+      updateMatrix(values, nextObj);
+      ctx.setState({ activeMatrix : nextObj.matName });
+    }
   }
 
+  enableSongmode(){
+    this.setState({ songmodeActive : true});
+  }
+  disableSongmode(){
+    this.setState({ songmodeActive : false});
+  }
 
   startTimer() {
     const ctx=this;
@@ -186,13 +203,15 @@ class Home extends Component {
   }
 
   updateMatrix(values, item) {
-    const items = this.props[this.state.modelName.toLowerCase()]
 
+    // DEBUG!!!!
     // print every scenename with its sceneIndex
+    const items = this.props[this.state.modelName.toLowerCase()]
     console.log('SCENES: ');
     _.forEach(Object.values(items), function(d){
       console.log(d.matName + ' ' + d.sceneIndex);
     });
+
     store.dispatch(updateMatrix(values, item));
   }
 
@@ -302,13 +321,6 @@ class Home extends Component {
           var downMatName = vals[index].matName;
           var downValues = vals[index].values;
           var downCommands = vals[index].commands;
-
-          // console.log("LOG STARTS ------");
-          // console.log(upMatName);
-          // console.log(upIndex);
-          // console.log(downMatName);
-          // console.log(index);
-          // console.log("LOG ENDS ------");
 
           fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: index},    keys[upIndex]);
           fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: upIndex},  keys[index]);
@@ -469,10 +481,8 @@ class Home extends Component {
 
   render() {
     const ctx=this;
-    const { tidal, timer, click }=ctx.props;
-    const { scCommand, tidalServerLink }=ctx.state;
-    const { commands }=ctx.props;
-    const { values, density, steps, duration, channels}=ctx.state;
+    const { tidal, timer, click, commands }=ctx.props;
+    const { scCommand, tidalServerLink, values, density, steps, duration, channels, songmodeActive }=ctx.state;
 
     const getValue=() => {
         return ctx.state.density;
@@ -491,6 +501,10 @@ class Home extends Component {
               <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
               {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
               {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
+            </div>
+            <div>
+              {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
+              {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
             </div>
             <div className={'sceneList'} style={{ width: '100%'}}>
               <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>

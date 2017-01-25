@@ -1,8 +1,6 @@
 :set prompt ""
 :module Sound.Tidal.Context
 import Sound.Tidal.Scales
-import Sound.Tidal.MIDI.Context
-import Sound.Tidal.MIDI.RMControllerMIDI
 import Sound.OSC.FD
 
 procF_t <- openUDP "127.0.0.1" 12000
@@ -13,10 +11,6 @@ procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
 
 (cps, getNow) <- bpsUtils
-
-devices <- midiDevices
-displayOutputDevices >>= putStrLn
-
 
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
