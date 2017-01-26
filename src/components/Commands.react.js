@@ -2,8 +2,11 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
-// import { renderFormElement } from '../lib/forms';
-import FormElement from './FormElement.react';
+
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/scheme/scheme';
+
 class Commands extends Component {
   constructor(props) {
     super(props)
@@ -34,7 +37,19 @@ class Commands extends Component {
     const { params } = ctx.state;
     // Item Action Handlers
     // handle function when any field of the object is modified
-    const handleChange = ({ target: { value, name }}) => {
+    const handleChange = (obj) => {
+      console.log('---HANDLECHANGE BEGIN---');
+      var value, name;
+
+      if(obj.target !== undefined){
+        value = obj.target.value;
+        name = obj.target.name;
+      } else {
+        value = obj;
+      }
+
+      console.log(name);
+      console.log(value);
       var re = /&(\w+)&/g, match, matches = [];
       while (match = re.exec(value)) {
         if(_.indexOf(matches, match[1]) === -1)
@@ -43,45 +58,45 @@ class Commands extends Component {
       console.log(matches);
       ctx.setState({ params: matches.toString() });
 
+
       const payload = { key: dbKey };
-      payload[name] = value;
+      payload[name === undefined ? 'command' : name] = value;
       payload['params'] = this.state.params;
       console.log(payload['params']);
       fbupdate(ctx.state.modelName, payload);
+
+      console.log(value);
+      console.log('---HANDLECHANGE END---');
     }
     // handle function to delete the object
-    const handleDelete = ({ target: { value }}) => {
+    // gets the dbkey of to-be-deleted item and removes it from db
+    const handleDelete = (/*{ target: obj}*/) => {
       const payload = { key: dbKey };
       fbdelete(ctx.state.modelName, payload);
     }
+
+    var options = {
+        lineNumbers: false,
+        mode: 'scheme',
+        lineWrapping: true,
+        showCursorWhenSelecting: true
+    };
 
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
       <li key={item.key} className="easter" >
-        {_.map(model, (field, name) => {
-          const formProps = {
-            key: name,
-            name: name,
-            value: item[name],
-            type: field,
-            onChange: handleChange.bind(ctx)
-          }
-
-          return <FormElement key={name} model={ctx.state.modelName} item={item} formProps={formProps} />
-
-          // return renderFormElement.bind(ctx)(ctx.state.modelName, dbKey, formProps)
-        })}
+          <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+            <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
+            <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
+            <CodeMirror className={'commandDiv'} name={"command"} value={item["command"]} onChange={handleChange.bind(ctx)} options={options}/>
+          </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
-          <button
-            onClick={handleDelete}>{'Delete'}
-          </button>
+          <button onClick={handleDelete}>{'Delete'} </button>
         </div>
-
       </li>
     )
   }
-
 
   renderItems(items) {
     const ctx = this;

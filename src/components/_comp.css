@@ -25,7 +25,7 @@
 *::-webkit-scrollbar
 {
   width: 0px;
-  height: 5px;
+  height: 0px;
 	background-color: #EEEEEE;
   z-index: 1;
 }

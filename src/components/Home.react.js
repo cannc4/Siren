@@ -270,7 +270,9 @@ class Home extends Component {
 
         const index=channels.length*i+colCount++;
 
-        return <div className="playbox" key={c+'_'+i}>
+        const height = 85/steps;
+
+        return <div className="playbox" style={{height: height+'vh'}} key={c+'_'+i}>
           <textarea type="text" value={textval} onChange={setText}/>
         </div>
       })}
@@ -543,8 +545,8 @@ class Home extends Component {
         <Layout layoutWidth={200}>
           <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
             {ctx.renderMenu()}
-            <div id="Execution" style={{alignSelf:'flex-start'}}>
-              <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)"/>
+            <div id="Execution" style={{alignSelf:'center'}}>
+              <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)" width={'100%'}/>
             </div>
           </div>
         </Layout>
