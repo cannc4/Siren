@@ -263,7 +263,7 @@ componentDidMount(props, state){
 
   renderStep(x, i) {
     const ctx=this;
-    const { channels, steps }=ctx.state;
+    const { channels, steps , duration}=ctx.state;
     const { commands, timer,click }=ctx.props;
     const cmds=_.uniq(_.map(commands, c => c.name));
     const currentStep=timer.current % steps;
@@ -288,7 +288,7 @@ componentDidMount(props, state){
             if (values[i+1] === undefined) values[i+1]={}
             values[i+1][c] = value;
             ctx.setState({values});
-            fbSyncMatrix(ctx.state.modelNameLive, {values });
+            fbSyncMatrix(ctx.state.modelNameLive, {values, duration, steps });
         }
 //
         const getValue=() => {
