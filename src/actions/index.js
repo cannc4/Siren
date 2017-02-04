@@ -37,7 +37,8 @@ const models = {
     model: {
       name: 'String',
       values: 'Object',
-      commands: 'Object'
+      commands: 'Object',
+      sceneIndex: 'Integer'
     }
   }
 }
@@ -172,6 +173,35 @@ export function fbfetch(model) {
     })
   }
 }
+export function fbfetchscenes(model) {
+  return dispatch => {
+    models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
+      var temp = [];
+      data.forEach(function(c){
+        temp.push(c.val());
+      })
+      if (Firebase.auth().currentUser !== null)
+      {
+        const { uid } = Firebase.auth().currentUser;
+        const u = _.find(data.val(), (d) => d.uid === uid);
+
+        if (u !== null && u !== undefined) {
+          if (models[model].watch !== undefined) {
+            _.each(models[model].watch, (m,i) => {
+              if (u[i] !== undefined) {
+                dispatch(m(u[i]));
+              }
+            })
+          }
+        }
+      }
+      dispatch({
+        type: 'FETCH_' + model.toUpperCase(),
+        payload: temp
+      })
+    })
+  }
+}
 
 export function fbcreate(model, data) {
   if (data['key']) {
@@ -181,13 +211,17 @@ export function fbcreate(model, data) {
     return newObj.update({ key: newObj.key })
   }
 }
+
 export function fbcreateMatrix(model, data) {
-  var datakey;
+  var datakey, sceneIndex, values, commands;
   models[model].dataSource.ref.once('value', dat => {
-    datakey = _.find(dat.val(), (d) => d.matName === data.matName).key;
+    const obj = _.find(dat.val(), (d) => d.matName === data.matName);
+    datakey = obj.key;
+    sceneIndex = obj.sceneIndex;
   });
 
   if (datakey) {
+    data.sceneIndex = sceneIndex;
     return models[model].dataSource.child(datakey).update({...data})
   } else {
     const newObj = models[model].dataSource.push(data);
@@ -201,9 +235,13 @@ export function fbupdateMatrix(model, data) {
 export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
-
 export function fbdelete(model, data) {
-  models[model].dataSource.child(data['key']).remove()
+  models[model].dataSource.child(data['key']).remove();
+}
+
+export function fborder(model, data, key) {
+  models[model].dataSource.child(key).update({...data})
+  models[model].dataSource.orderByChild('sceneIndex');
 }
 
 export function facebookLogin() {
@@ -248,7 +286,7 @@ export const initMyTidal = (server) => {
     .then((response) => {
       dispatch({type: 'FETCH_TIDAL', payload: response.data })
     }).catch(function (error) {
-      console.log(error);
+      console.error(error);
     });
   }
 }
@@ -269,42 +307,38 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
       const cmd = _.find(commands, c => c.name === cellName);
-      if(cmd !== undefined && cmd !== null && cmd !== ""){
+      if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');
         var newCommand = cmd.command;
         var parameters = _.split(cmd.params, ',');
 
-        console.log(newCommand);
         _.forEach(parameters, function(value, i) {
           newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
         });
-        console.log(cellItem);
-        console.log(newCommand);
-        console.log(parameters);
 
         // var append = "";
         // switch (k) {
         //   case "d1":
-        //     append = " # orbit \"0\""; break;
-        //   case "d2":
-        //     append = " # orbit \"1\""; break;
-        //   case "d3":
-        //     append = " # orbit \"2\""; break;
-        //   case "d4":
-        //     append = " # orbit \"3\""; break;
-        //   case "d5":
         //     append = " # orbit \"4\""; break;
-        //   case "d6":
+        //   case "d2":
         //     append = " # orbit \"5\""; break;
-        //     case "d7":
-        //       append = " # orbit \"6\""; break;
-        //       case "d8":
-        //         append = " # orbit \"6\""; break;
-        //   default:
-        //     break;
-        // }
-        //var prepend = "runnow ";
-        return k + ' $ ' + newCommand;
+        //   case "d3":
+        //     append = " # orbit \"6\""; break;
+        //   case "d4":
+        //     append = " # orbit \"7\""; break;
+          // case "d5":
+          //   append = " # orbit \"4\""; break;
+          // case "d6":
+          //   append = " # orbit \"5\""; break;
+          //   case "d7":
+          //     append = " # orbit \"6\""; break;
+          //     case "d8":
+          //       append = " # orbit \"6\""; break;
+          // default:
+          //   break;
+        //}
+
+        return k + ' $ ' + newCommand ;
 
       } else return false;
     }))
@@ -459,7 +493,7 @@ export const celluarFill = (values, commands, density, steps, duration, channels
     });
   }
 
-  if(timer.current % steps === 1 && timer.isCelluarActive)
+  if(timer.current % steps === steps-1 && timer.isCelluarActive)
   {
     updateCelluar();
     return dispatch => {
@@ -575,7 +609,7 @@ export const bjorkFill = (values, commands, density, steps, duration, channels, 
     });
   }
 
-  if(timer.current % steps === 1 && timer.isBjorkActive)
+  if(timer.current % steps === steps-1 && timer.isBjorkActive)
   {
     updateBjork();
     return dispatch => {};
@@ -688,6 +722,23 @@ export const startTimer = (duration, steps) => {
     timer = setInterval(x, (duration / steps * 1000), dispatch);
   }
 }
+
+export const pauseTimer = () => {
+  clearInterval(timer);
+  return {
+    type: 'PAUSE_TIMER'
+  }
+}
+
+
+export const stopTimer = () => {
+  clearInterval(timer);
+  return {
+    type: 'STOP_TIMER'
+  }
+}
+
+
 export function startClick() {
   return dispatch => {
     dispatch({ type: 'INC_CLICK'});
@@ -697,12 +748,5 @@ export function startClick() {
 export function stopClick() {
   return dispatch => {
     dispatch({ type: 'STOP_CLICK'});
-  }
-}
-
-export const stopTimer = () => {
-  clearInterval(timer);
-  return {
-    type: 'STOP_TIMER'
   }
 }

@@ -6,5 +6,5 @@
   "scsynth": "~/Documents/Github/sq/deps/SuperCollider.app/Contents/Resources/scsynth",
   "sclang_conf": "~/Library/Application Support/SuperCollider/sclang_conf.yaml",
   "port":3001,
-  "samples_path": "/Users/canince/Dropbox/Tidal Sample Bank/*"
+  "samples_path": "/Users/canince/Dropbox/chouse/SelectedSamples/*"
 }

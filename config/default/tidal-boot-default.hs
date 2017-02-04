@@ -17,7 +17,15 @@ procS4 <- openUDP "127.0.0.1" 12000
 devices <- midiDevices
 displayOutputDevices >>= putStrLn
 
-
+m1 <- midiStream devices "Analog Rytm Elektron MIDI" 1 rmController
+m2 <- midiStream devices "Analog Rytm Elektron MIDI" 2 rmController
+m3 <- midiStream devices "Analog Rytm Elektron MIDI" 3 rmController
+m4 <- midiStream devices "Analog Rytm Elektron MIDI" 4 rmController
+m5 <- midiStream devices "Analog Rytm Elektron MIDI" 5 rmController
+m6 <- midiStream devices "Analog Rytm Elektron MIDI" 14 rmController
+m7 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+m8 <- midiStream devices "USB MIDI Device Port 1" 2 synthController
+midiStream devices "USB MIDI Device Port 1" 1 synthController
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
 (c3,ct3) <- dirtSetters getNow

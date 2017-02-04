@@ -2,8 +2,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { consoleSubmit, fetchModel, fbcreate, fbupdate, fbdelete,startClick,stopClick } from '../actions';
-// import { renderFormElement } from '../lib/forms';
-import FormElement from './FormElement.react';
 import store from '../store';
 
 class Live extends Component {

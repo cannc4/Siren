@@ -27,8 +27,10 @@ export default (state = INITIAL_STATE, action) => {
       return {...d};
     case 'ADD_'+modelName:
       return {...state};
+    case 'PAUSE_'+modelName:
+      return {...state, isActive: false, current: state.current}
     case 'STOP_'+modelName:
-      return {...state, isActive: false, current: 0}//state.current}
+      return {...state, isActive: false, current: 0}
     default:
       return state;
   }
