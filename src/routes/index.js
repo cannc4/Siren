@@ -16,6 +16,7 @@ import Home from '../components/Home.react';
 
 import {
   handleEnterHome,
+  handleEnterLive
 } from './callbacks';
 
 export default (
@@ -27,18 +28,19 @@ export default (
           path="/commands"
           component={Commands}
         />
-        <Route
-         path="/live"
-         component={Live}
-        />
-      </Route>
+        </Route>
+        <Route path="/live" component={App} onEnter={handleEnterLive}>
+      <IndexRoute component={Live}/>
+      <Route
+        path="/commands"
+        component={Commands}
+      />
+    </Route>
     </Router>
   </Provider>
 )
-// <Route
-//   path="/accounts"
-//   component={Accounts}
-// />
+
+
 // <Route
 //   path="/categories"
 //   component={Categories}

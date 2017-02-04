@@ -32,6 +32,14 @@ const models = {
       command: 'String'
     }
   },
+  Live: {
+    dataSource: Firebase.database().ref("/live"),
+    model: {
+      timer: 'Integer',
+      values: 'Object'
+
+    }
+  },
   Matrices: {
     dataSource: Firebase.database().ref("/matrices"),
     model: {
@@ -202,7 +210,6 @@ export function fbfetchscenes(model) {
     })
   }
 }
-
 export function fbcreate(model, data) {
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
@@ -210,6 +217,39 @@ export function fbcreate(model, data) {
     const newObj = models[model].dataSource.push(data);
     return newObj.update({ key: newObj.key })
   }
+}
+export function fbFetchLive (model){
+  return dispatch => {
+    models[model].dataSource.on('value', data => {
+      console.log(data.val());
+      console.log(data);
+    if(data.val().timer.notf === "start") {
+    dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
+    }
+    else if(data.val().timer.notf === "pause"){
+    dispatch(pauseTimer());
+    }
+    else if(data.val().timer.notf === "stop"){
+    dispatch(stopTimer());
+    }
+
+
+    })
+  }
+
+}
+export function fbLiveTimer(model, data)
+{
+
+  models[model].dataSource.child('timer').set(data);
+}
+
+export function fbSyncMatrix (model,data){
+
+//models[model].dataSource.child('timer').set(data.timer);
+models[model].dataSource.child('values').set(data.values);
+
+
 }
 
 export function fbcreateMatrix(model, data) {
