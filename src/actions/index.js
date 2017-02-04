@@ -6,7 +6,7 @@ export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
-// import store from '../store';
+import store from '../store';
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -221,25 +221,36 @@ export function fbcreate(model, data) {
 export function fbFetchLive (model){
   return dispatch => {
     models[model].dataSource.on('value', data => {
-      console.log(data.val());
+
       if(data.val().timer.notf === "start") {
-        dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
+        store.dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
       }
       else if(data.val().timer.notf === "pause"){
-        dispatch(pauseTimer());
+        store.dispatch(pauseTimer());
       }
       else if(data.val().timer.notf === "stop"){
-        dispatch(stopTimer());
+        store.dispatch(stopTimer());
       }
+      store.dispatch(fbLiveUpdate( data.val().values));
     })
+  }
+
+}
+
+export const fbLiveUpdate = (values) => {
+  return {
+    type: 'FETCH_LIVE',
+    payload:values
   }
 }
 export function fbLiveTimer(model, data) {
   models[model].dataSource.child('timer').set(data);
 }
 
-export function fbSyncMatrix (model,data) {
-  //models[model].dataSource.child('timer').set(data.timer);
+export function fbSyncMatrix (model,data){
+  models[model].dataSource.child('timer').set({duration: data.duration,
+              steps: data.steps,
+              notf: "running"});
   models[model].dataSource.child('values').set(data.values);
 }
 
