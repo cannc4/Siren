@@ -5,7 +5,8 @@ import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/scheme/scheme';
+import 'codemirror/theme/base16-light.css';
+import 'codemirror/mode/elm/elm';
 
 class Commands extends Component {
   constructor(props) {
@@ -76,8 +77,12 @@ class Commands extends Component {
     }
 
     var options = {
-        lineNumbers: false,
-        mode: 'scheme',
+        mode: 'elm',
+        theme: 'base16-light',
+        fixedGutter: true,
+        scroll: true,
+        styleSelectedText:true,
+        showToken:true,
         lineWrapping: true,
         showCursorWhenSelecting: true
     };

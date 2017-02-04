@@ -30,6 +30,18 @@
   border: 1px solid rgba(125,125,125, 0.8);
 }
 
+<<<<<<< HEAD
+=======
+.matDiv {
+  resize:both;
+  overflow-y: auto;
+  width: 98%;
+  min-height: 50px;
+  height: 90x;
+  border: 1px solid rgba(125,125,125, 0.8);
+}
+
+>>>>>>> 87efa30ab3bd36234166a320d45e6f80dc31075d
 .matrices {
   display: flex;
 

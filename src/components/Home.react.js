@@ -12,6 +12,20 @@ import Commands from './Commands.react';
 
 import Firebase from 'firebase';
 import {Layout, LayoutSplitter} from 'react-flex-layout';
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/base16-light.css';
+import 'codemirror/mode/elm/elm';
+var options = {
+    mode: 'elm',
+    theme: 'base16-light',
+    fixedGutter: true,
+    scroll: true,
+    styleSelectedText:true,
+    showToken:true,
+    lineWrapping: true,
+    showCursorWhenSelecting: true
+};
 
 class Home extends Component {
   constructor(props) {
@@ -20,7 +34,7 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      duration: 4,
+      duration: 16,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS1','sendOSC procS2',
@@ -41,6 +55,7 @@ class Home extends Component {
     }
   }
 
+  //Clock for Haskell
   // componentDidMount(props,state){
   //   const ctx = this;
   //
@@ -81,16 +96,6 @@ class Home extends Component {
         else if(songmodeActive)
           ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
 
-        /*var countArr = [];
-        _.forEach(channels, function(channel, c_key){
-          var count = 0;
-          _.forEach(values, function(rowValue, rowKey) {
-            if(values[rowKey] !== undefined && values[rowKey][channel]) {
-              count++;
-            }
-          });
-          countArr[c_key] = count;
-        });*/
       }
 
       const vals=values[runNo];
@@ -439,10 +444,13 @@ class Home extends Component {
 
       ctx.setState({density: value});
     }
+
     const getValue=() => {
         return ctx.state.density;
     }
+
     const textval=getValue();
+
     const updateTidalServerLink=({ target: { value } }) => {
         ctx.setState({ tidalServerLink: value });
     }
@@ -507,7 +515,25 @@ class Home extends Component {
     const viewPortWidth = '100%'
 
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    var options = {
+        mode: 'elm',
+        theme: 'base16-light',
+        fixedGutter: true,
+        scroll: true,
+        styleSelectedText:true,
+        showToken:true,
+        lineWrapping: true,
+        showCursorWhenSelecting: true
+    };
 
+    const getDur=() => {
+        return ctx.state.duration;
+    }
+    const durval = getDur();
+    const updateDuration=({ target: { value } }) => {
+
+      ctx.setState({duration: value});
+    }
     return <div className={"Home cont"}>
       <Layout fill='window'>
         <Layout layoutWidth={120}>
@@ -547,6 +573,10 @@ class Home extends Component {
             {ctx.renderMenu()}
             <div id="Execution" style={{alignSelf:'center'}}>
               <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)" width={'100%'}/>
+            </div>
+            <div id="Celluar">
+            <p>Duration</p>
+               <input type="textarea" value={durval} onChange={updateDuration} placeholder={""}  rows="20" cols="30"/>
             </div>
           </div>
         </Layout>

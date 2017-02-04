@@ -32,7 +32,6 @@ procS4 <- openUDP "127.0.0.1" 12000
 (d8,t8) <- superDirtSetters getNow
 (d9,t9) <- superDirtSetters getNow
 
-
 let bps x = cps (x/2)
 let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,c1,c2,c3,c4,c5,c6,c7,c8,c9]
 let solo = (>>) hush

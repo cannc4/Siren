@@ -32,6 +32,14 @@ const models = {
       command: 'String'
     }
   },
+  Live: {
+    dataSource: Firebase.database().ref("/live"),
+    model: {
+      timer: 'Integer',
+      values: 'Object'
+
+    }
+  },
   Matrices: {
     dataSource: Firebase.database().ref("/matrices"),
     model: {
@@ -202,7 +210,6 @@ export function fbfetchscenes(model) {
     })
   }
 }
-
 export function fbcreate(model, data) {
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
@@ -210,6 +217,30 @@ export function fbcreate(model, data) {
     const newObj = models[model].dataSource.push(data);
     return newObj.update({ key: newObj.key })
   }
+}
+export function fbFetchLive (model){
+  return dispatch => {
+    models[model].dataSource.on('value', data => {
+      console.log(data.val());
+      if(data.val().timer.notf === "start") {
+        dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
+      }
+      else if(data.val().timer.notf === "pause"){
+        dispatch(pauseTimer());
+      }
+      else if(data.val().timer.notf === "stop"){
+        dispatch(stopTimer());
+      }
+    })
+  }
+}
+export function fbLiveTimer(model, data) {
+  models[model].dataSource.child('timer').set(data);
+}
+
+export function fbSyncMatrix (model,data) {
+  //models[model].dataSource.child('timer').set(data.timer);
+  models[model].dataSource.child('values').set(data.values);
 }
 
 export function fbcreateMatrix(model, data) {
@@ -319,26 +350,26 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         // var append = "";
         // switch (k) {
         //   case "d1":
-        //     append = " # orbit \"0\""; break;
-        //   case "d2":
-        //     append = " # orbit \"1\""; break;
-        //   case "d3":
-        //     append = " # orbit \"2\""; break;
-        //   case "d4":
-        //     append = " # orbit \"3\""; break;
-        //   case "d5":
         //     append = " # orbit \"4\""; break;
-        //   case "d6":
+        //   case "d2":
         //     append = " # orbit \"5\""; break;
-        //     case "d7":
-        //       append = " # orbit \"6\""; break;
-        //       case "d8":
-        //         append = " # orbit \"6\""; break;
-        //   default:
-        //     break;
-        // }
-        //var prepend = "runnow ";
-        return k + ' $ ' + newCommand;
+        //   case "d3":
+        //     append = " # orbit \"6\""; break;
+        //   case "d4":
+        //     append = " # orbit \"7\""; break;
+          // case "d5":
+          //   append = " # orbit \"4\""; break;
+          // case "d6":
+          //   append = " # orbit \"5\""; break;
+          //   case "d7":
+          //     append = " # orbit \"6\""; break;
+          //     case "d8":
+          //       append = " # orbit \"6\""; break;
+          // default:
+          //   break;
+        //}
+
+        return k + ' $ ' + newCommand ;
 
       } else return false;
     }))
