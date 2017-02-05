@@ -279,15 +279,15 @@ class Live extends Component {
           const {values}=ctx.state;
 
           var key, val;
-          Firebase.database().ref("/live/values/"+(i+1)).once('value', function(snapshot){
+          Firebase.database().ref("/live/values/"+(i+1)).on('value', function(snapshot){
             if(snapshot.val() !== undefined && snapshot.val() !== null){
               key = Object.keys(snapshot.val())[0]
               val = Object.values(snapshot.val())[0];
             }
           })
           if(c === key){
-            if (values[i+1] === undefined) values[i+1]={}
-            values[i+1][c] = val;
+            // if (values[i+1] === undefined) values[i+1]={}
+            // values[i+1][c] = val;
             return val;
           }
           // const values=ctx.state.values;
