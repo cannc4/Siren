@@ -37,8 +37,8 @@ class Live extends Component {
       duration: 16,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5', 'd6', 'd7', 'd8',
-              'm1','m2',
-              'm3', 'm4'],
+              'd9','sendOSC procS1',
+              'sendOSC procS2', 'sendOSC procS3'],
       timer: { isActive: false,
                current: null,
                isCelluarActive: false,
@@ -277,26 +277,35 @@ componentDidMount(props, state){
       <div className="playbox playbox-cycle">{i+1}</div>
       {_.map(channels, c => {
 
-
-
         const setText=({ target: { value }}) => {
 
-
             const {values}=ctx.state;
-
-
             if (values[i+1] === undefined) values[i+1]={}
             values[i+1][c] = value;
             ctx.setState({values});
             fbSyncMatrix(ctx.state.modelNameLive, {values, duration, steps });
-        }
-//
-        const getValue=() => {
-          const values=ctx.state.values;
-          if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
-          return values[i+1][c];
+
         }
 
+        const getValue=() => {
+          const {values}=ctx.state;
+
+          var key, val;
+          Firebase.database().ref("/live/values/"+(i+1)).once('value', function(snapshot){
+            if(snapshot.val() !== undefined && snapshot.val() !== null){
+              key = Object.keys(snapshot.val())[0]
+              val = Object.values(snapshot.val())[0];
+            }
+          })
+          if(c === key){
+            if (values[i+1] === undefined) values[i+1]={}
+            values[i+1][c] = val;
+            return val;
+          }
+          // const values=ctx.state.values;
+          // if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
+          // return values[i+1][c];
+        }
         const textval=getValue();
 
         const index=channels.length*i+colCount++;

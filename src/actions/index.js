@@ -35,7 +35,7 @@ const models = {
   Live: {
     dataSource: Firebase.database().ref("/live"),
     model: {
-      timer: 'Integer',
+      timer: 'Object',
       values: 'Object'
 
     }
@@ -220,7 +220,7 @@ export function fbcreate(model, data) {
 }
 export function fbFetchLive (model){
   return dispatch => {
-    models[model].dataSource.on('value', data => {
+    models[model].dataSource.ref.on('value', data => {
       console.log(data.val());
       console.log(data);
     if(data.val().timer.notf === "start") {
@@ -235,32 +235,36 @@ export function fbFetchLive (model){
     store.dispatch(fbLiveUpdate( data.val().values));
   })
   }
-
 }
 
 export const fbLiveUpdate = (values) => {
-
-  return {
-    type: 'FETCH_LIVE', payload:values
+  function placeValue(row, col, item, container){
+    if (container[parseInt(row)+1] === undefined)
+      container[parseInt(row)+1] = {};
+    container[parseInt(row)+1][col] = item;
   }
+
+  _.forEach(values, function(rowValue, rowKey) {
+    _.forEach(rowValue, function(cell, colKey) {
+      placeValue(rowKey-1, colKey, cell, values);
+    });
+  });
+  return dispatch => {
+    dispatch({ type: 'FETCH_LIVE', payload:values});
+ };
+
 }
 export function fbLiveTimer(model, data)
 {
-
   models[model].dataSource.child('timer').set(data);
 }
 
 export function fbSyncMatrix (model,data){
 
-  // const c = {
-  //           };
-
-
-
-      models[model].dataSource.child('timer').set({duration: data.duration,
-                  steps: data.steps,
-                  notf: "running"});
-                  models[model].dataSource.child('values').set(data.values);
+  models[model].dataSource.child('timer').set({duration: data.duration,
+  steps: data.steps,
+  notf: "running"});
+  models[model].dataSource.child('values').update(data.values);
 }
 
 export function fbcreateMatrix(model, data) {
@@ -329,7 +333,6 @@ export function logout() {
     dispatch({ type: FETCH_USER, payload: {} });
   }
 }
-
 
 export const initMyTidal = (server) => {
   return dispatch => {
