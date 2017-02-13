@@ -5,27 +5,13 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, pauseTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
-          consoleSubmit, fbcreateMatrix, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix,
+          consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,
           startClick,stopClick} from '../actions'
-import store from '../store';
-import Commands from './Commands.react';
-
-import Firebase from 'firebase';
 import {Layout, LayoutSplitter} from 'react-flex-layout';
-import CodeMirror from 'react-codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/base16-light.css';
-import 'codemirror/mode/elm/elm';
-var options = {
-    mode: 'elm',
-    theme: 'base16-light',
-    fixedGutter: true,
-    scroll: true,
-    styleSelectedText:true,
-    showToken:true,
-    lineWrapping: true,
-    showCursorWhenSelecting: true
-};
+import Commands from './Commands.react';
+import Firebase from 'firebase';
+import store from '../store';
+import _ from 'lodash';
 
 class Home extends Component {
   constructor(props) {
@@ -34,7 +20,7 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      duration: 16,
+      duration: 8,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS1','sendOSC procS2',
@@ -59,24 +45,25 @@ class Home extends Component {
   // componentDidMount(props,state){
   //   const ctx = this;
   //
-  //   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  //   const snd = (Object.values(items).length);
-  //
+  //   var socket = io('http://localhost:3001/'); // TIP: io() with no args does auto-discovery
+  //   socket.on("/command", data => {
+  //     console.log(data);
+  //     //this.startClick();
+  //   })
+  // }
+  // componentDidMount(props,state){
+  //   const ctx = this;
   //
   //   var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
   //   socket.on("osc", data => {
-  //
   //     this.startClick();
   //   })
   //   socket.on("dc", data => {
   //     this.stopClick();
   //   })
-  //
-  //   ctx.setState( {sceneIndex: snd} );
   // }
 
   startClick() {
-    const ctx=this;
     store.dispatch(startClick());
   }
 
@@ -95,36 +82,42 @@ class Home extends Component {
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
         else if(songmodeActive)
           ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
-
       }
 
       const vals=values[runNo];
-      // const names = Object.keys(vals);
-      // console.log(names);
       if (vals !== undefined) {
-        ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
+        var sceneCommands = [];
+        const items = this.props[this.state.modelName.toLowerCase()]
+        _.each(items, function(d){
+          if(d.matName === activeMatrix)
+            sceneCommands = d.commands;
+        })
+
+        ctx.sendCommands(tidalServerLink, vals, channelcommands, sceneCommands );
       }
     }
   }
 
   progressMatrices(items){
     const ctx = this;
-    const { commands, timer} = ctx.props;
+    const { timer } = ctx.props;
     const { values, activeMatrix, steps, songmodeActive} = ctx.state;
+    var commands = [];
 
     timer.isActive = false;
     if(timer.current % steps === steps-1 && songmodeActive)
     {
       var i_save = -1;
-      _.forEach(items, function(d, i, j){
+      _.each(items, function(d, i, j){
         if(d.matName === activeMatrix)
         {
           i_save = _.indexOf(Object.values(items), d);
+          commands = d.commands;
         }
       })
 
       const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
-      updateMatrix(values, nextObj);
+      updateMatrix(commands, values, nextObj);
       ctx.setState({ activeMatrix : nextObj.matName });
     }
   }
@@ -211,7 +204,7 @@ class Home extends Component {
     }
   }
 
-  updateMatrix(values, item) {
+  updateMatrix(commands, values, item) {
 
     // DEBUG!!!!
     // print every scenename with its sceneIndex
@@ -221,7 +214,7 @@ class Home extends Component {
       console.log(d.matName + ' ' + d.sceneIndex);
     });
 
-    store.dispatch(updateMatrix(values, item));
+    store.dispatch(updateMatrix(commands, values, item));
   }
 
   renderPlayer() {
@@ -246,9 +239,8 @@ class Home extends Component {
   renderStep(x, i) {
     const ctx=this;
     const { channels, steps }=ctx.state;
-    const { commands, timer,click }=ctx.props;
-    const cmds=_.uniq(_.map(commands, c => c.name));
-    const currentStep=timer.current % steps;
+    const { timer, click, commands }=ctx.props;
+    const currentStep = timer.current % steps;
     var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
     if (i === currentStep) {
       playerClass += " playbox-active";
@@ -275,10 +267,16 @@ class Home extends Component {
 
         const index=channels.length*i+colCount++;
 
-        const height = 85/steps;
+        const mapNumbers =(value, istart, istop, ostart, ostop) => {
+          return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+        }
 
-        return <div className="playbox" style={{height: height+'vh'}} key={c+'_'+i}>
-          <textarea type="text" value={textval} onChange={setText}/>
+        // dynamic cell height
+        const cellHeight = 85/steps;
+        // dynamic text size
+        const textSize = textval.length > 15 ? Math.max( 0.65, mapNumbers(textval.length, 15, 40, 1, 0.65)) : 1;
+        return <div className="playbox" style={{height: cellHeight+'vh'}} key={c+'_'+i}>
+          <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
         </div>
       })}
     </div>;
@@ -290,24 +288,32 @@ class Home extends Component {
   }
 
   addItem() {
-    const ctx = this
-    const { commands } = ctx.props;
+    const ctx = this;
+    var commands = [];
+    // const { commands }=ctx.state;
     const { matName, activeMatrix, values, sceneIndex } = ctx.state;
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    console.log(items);
+    _.each(items, function(d){
+      if(d.matName === activeMatrix){
+        commands = d.commands;
+      }
+    })
 
     if ( matName.length >= 2 && _.isEmpty(values) === false) {
       var snd = Object.values(items).length;
 
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex: snd });
+      fbcreateMatrix(ctx.state.modelName, { matName, commands, values, sceneIndex: snd });
       ctx.setState({sceneIndex: snd});
     }
 
+    ctx.setState({activeMatrix: matName});
   }
+
   reorder (index,flag){
 
     const ctx = this;
-    const { commands } = ctx.props;
+    const { commands }=ctx.props;
+    // const { commands }=ctx.state;
     const { matName, values, sceneIndex } = ctx.state;
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
@@ -315,15 +321,12 @@ class Home extends Component {
     const vals = Object.values(items);
     const len = keys.length;
 
-    if(flag == "up" && index == 0)
+    if(flag === "up" && index === 0)
       return;
-    else if(flag == "down" && len-1 == index)
+    else if(flag === "down" && len-1 === index)
       return;
     else{
-      if(flag == "up"){
-        console.log("KEY INDEX: " + vals[index].sceneIndex);
-        console.log("INDEX: " + index);
-
+      if(flag === "up"){
         if (vals[index].sceneIndex === index){
           var upIndex = index - 1;
           var upMatName = vals[upIndex].matName;
@@ -355,13 +358,13 @@ class Home extends Component {
   }
   renderItem(item, dbKey, i) {
     const ctx = this;
-    const { values, activeMatrix } = ctx.state;
+    const { values, activeMatrix} = ctx.state;
+    const { commands } = ctx.props;
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
-      const { commands } = ctx.props;
       ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
-      ctx.updateMatrix(values, item);
+      ctx.updateMatrix(commands, values, item);
     }
 
     const handleDelete = ({ target: { value }}) => {
@@ -419,6 +422,7 @@ class Home extends Component {
     const { tidal, timer, click }=ctx.props;
     const { scCommand, tidalServerLink }=ctx.state;
     const { commands }=ctx.props;
+    // const { commands }=ctx.state;
     const { values, density, steps, duration, channels}=ctx.state;
 
     const bjorkFillStop=() => {
@@ -504,8 +508,10 @@ class Home extends Component {
 
   render() {
     const ctx=this;
-    const { tidal, timer, click, commands }=ctx.props;
-    const { scCommand, tidalServerLink, values, density, steps, duration, channels, songmodeActive }=ctx.state;
+    const { tidal, timer, click }=ctx.props;
+    const { commands }=ctx.props;
+    // const { commands }=ctx.state;
+    const { scCommand, tidalServerLink, values, density, steps, duration, channels, songmodeActive, activeMatrix }=ctx.state;
 
     const getValue=() => {
         return ctx.state.density;
@@ -562,7 +568,7 @@ class Home extends Component {
         <Layout layoutWidth={250}>
           <div className="Commands" >
             <div className="CommandsColumn" >
-              <Commands />
+              <Commands active={activeMatrix}/>
             </div>
 
           </div>

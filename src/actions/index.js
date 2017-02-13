@@ -29,7 +29,8 @@ const models = {
     model: {
       name: 'String',
       params: 'String',
-      command: 'String'
+      command: 'String',
+      skey: 'String'
     }
   },
   Live: {
@@ -217,6 +218,14 @@ export function fbcreate(model, data) {
     return newObj.update({ key: newObj.key })
   }
 }
+export function fbcreatecommandinscene(model, data, s_key) {
+  if (data['key']) {
+    return models[model].dataSource.child(data['key']).update({...data})
+  } else {
+    const newObj = models[model].dataSource.child(s_key).child("commands").push(data);
+    return newObj.update({ key: newObj.key })
+  }
+}
 export function fbFetchLive (model){
 
   return dispatch => {
@@ -268,12 +277,17 @@ export function fbSyncMatrix (model,data){
 }
 
 export function fbcreateMatrix(model, data) {
+  console.log('DATA::');
+  console.log(data);
   var datakey, sceneIndex, values, commands;
   models[model].dataSource.ref.once('value', dat => {
     const obj = _.find(dat.val(), (d) => d.matName === data.matName);
     datakey = obj.key;
     sceneIndex = obj.sceneIndex;
+    commands = obj.commands;
   });
+
+  console.log(commands);
 
   if (datakey) {
     data.sceneIndex = sceneIndex;
@@ -290,10 +304,16 @@ export function fbupdateMatrix(model, data) {
 export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
+export function fbupdatecommandinscene(model, data, s_key) {
+  // console.log(data);
+  models[model].dataSource.child(s_key).child("commands").child(data['key']).update({...data})
+}
 export function fbdelete(model, data) {
   models[model].dataSource.child(data['key']).remove();
 }
-
+export function fbdeletecommandinscene(model, data, s_key) {
+  models[model].dataSource.child(s_key).child("commands").child(data['key']).remove();
+}
 export function fborder(model, data, key) {
   models[model].dataSource.child(key).update({...data})
   models[model].dataSource.orderByChild('sceneIndex');
@@ -346,7 +366,6 @@ export const initMyTidal = (server) => {
   }
 }
 
-
 // export const TidalTick = (server) => {
 //   return dispatch => {
 //     axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
@@ -368,7 +387,21 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
         var parameters = _.split(cmd.params, ',');
 
         _.forEach(parameters, function(value, i) {
-          newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
+          if(_.indexOf(cellItem[i+1], '[') != -1 ){
+            cellItem[i+1] = cellItem[i+1].substring(1, _.indexOf(cellItem[i+1], ']'));
+            var bounds = _.split(cellItem[i+1], ',');
+            if(bounds[0] !== undefined && bounds[0] !== "" &&
+               bounds[1] !== undefined && bounds[1] !== ""){
+                 bounds[0] = parseFloat(bounds[0]);
+                 bounds[1] = parseFloat(bounds[1]);
+
+                 cellItem[i+1] = _.random(_.min(bounds), _.max(bounds));
+                 newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
+            }
+          }
+          else {
+            newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
+          }
         });
 
         // var append = "";
@@ -393,7 +426,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           //   break;
         //}
 
-        return k + ' $ ' + newCommand ;
+        return [k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))
@@ -433,7 +466,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
 // }
 //
 
-export const updateMatrix = (values, i) => {
+export const updateMatrix = (commands, values, i) => {
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};

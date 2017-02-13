@@ -1,9 +1,9 @@
-PShader blobby;
-PShader drip;
-PShader bands;
-PShader sine;
-PShader noise;
-PShader bits;
+GShader blobby;
+GShader drip;
+GShader bands;
+GShader sine;
+GShader noise;
+GShader bits;
 
 void initShaders() {
   s_init_Bands();
@@ -15,61 +15,61 @@ void initShaders() {
 }
 
 void updateUniforms_Shaders(){
-  blobby.set("time", (float) millis()/1000.0);
-  blobby.set("resolution", float(width), float(height));
-  drip.set("time", (float) millis()/1000.0);
-  drip.set("resolution", float(width), float(height));
-  bands.set("time", (float) millis()/1000.0);
-  bands.set("resolution", float(width), float(height));
-  sine.set("time", (float) millis()/1000.0);
-  sine.set("resolution", float(width), float(height));
-  noise.set("time", (float) millis()/1000.0);
-  noise.set("resolution", float(width), float(height));
-  bits.set("time", (float) millis()/1000.0);
-  bits.set("resolution", float(width), float(height));
+  blobby.update();
+  drip.update();
+  bands.update();
+  sine.update();
+  noise.update();
+  bits.update();
 }
 
 void s_init_Bands(){
-  bands = loadShader("color/bands.glsl");
+  bands = new GShader("color/bands.glsl");
 
-  bands.set("noiseFactor", 20.0); // 5-100
-  bands.set("stripes", 50.0);     // 0-100
+  bands.addUniform("noiseFactor", 20.0, 5, 100); // 5-100
+  bands.addUniform("stripes", 50.0, 0, 100);     // 0-100
+  bands.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 void s_init_Bits(){
-  bits = loadShader("color/bits.glsl");
+  bits = new GShader("color/bits.glsl");
 
-  bits.set("mx", .5); // 0-1
-  bits.set("my", .5); // 0-1
+  bits.addUniform("mx", .5, 0, 1); // 0-1
+  bits.addUniform("my", .5, 0, 1); // 0-1
+  bits.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 void s_init_Blobby(){
-  blobby = loadShader("color/blobby.glsl");
+  blobby = new GShader("color/blobby.glsl");
 
-  blobby.set("depth", 1.0); //0-2
-  blobby.set("rate", 1.0);  //0-2
+  blobby.addUniform("depth", 1.0, 0, 2); //0-2
+  blobby.addUniform("rate", 1.0, 0,2);  //0-2
+  blobby.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 void s_init_Drip(){
-  drip = loadShader("color/drip.glsl");
+  drip = new GShader("color/drip.glsl");
 
-  drip.set("intense", .5); // 0-1
-  drip.set("speed", .5);   // 0-1
-  drip.set("graininess", .5, .5); // vec2(0-1, 0-1)
+  drip.addUniform("intense", .5,0,1); // 0-1
+  drip.addUniform("speed", .5,0,1);   // 0-1
+  drip.addUniform("graininess", new PVector(.5, .5), new PVector(0, 0), new PVector(1, 1)); // vec2(0-1, 0-1
+  drip.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 void s_init_Noise(){
-  noise = loadShader("color/noisy.glsl");
+  noise = new GShader("color/noisy.glsl");
 
-  noise.set("noiseFactor", 5.0, 5.0); // vec2(0-10, 0-10)
-  noise.set("noiseFactorTime", 1.0);  // 0-2
+  noise.addUniform("noiseFactor", new PVector(5, 5), new PVector(0, 0), new PVector(10, 10)); // vec2(0-10, 0-10)
+  noise.addUniform("noiseFactorTime", 1.0, 0, 2);  // 0-2
+  noise.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 void s_init_Sine(){
-  sine = loadShader("color/sinewave.glsl");
+  sine = new GShader("color/sinewave.glsl");
 
-  sine.set("colorMult", 2., 1.25); // vec2(.5-5, .5-2)
-  sine.set("coeffx", 20.); // 10-50
-  sine.set("coeffy", 40.);  // 0-90
-  sine.set("coeffz", 50.); // 1-200
+  sine.addUniform("colorMult", new PVector(2, 1.25), new PVector(.5, .5), new PVector(5, 2)); // vec2(.5-5, .5-2)
+  sine.addUniform("coeffx", 20., 10, 50); // 10-50
+  sine.addUniform("coeffy", 40., 0, 90);  // 0-90
+  sine.addUniform("coeffz", 50., 1, 200); // 1-200
+  sine.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
