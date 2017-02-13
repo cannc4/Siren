@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+
 import './Home.css';
 
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, pauseTimer, stopTimer,
@@ -37,8 +38,8 @@ class Live extends Component {
       duration: 16,
       steps: 16,
       channels: ['d1','d2','d3', 'd4', 'd5', 'd6', 'd7', 'd8',
-              'd9','sendOSC procS1',
-              'sendOSC procS2', 'sendOSC procS3'],
+                'd9','sendOSC procS1',
+                'sendOSC procS2', 'sendOSC procS3'],
       timer: { isActive: false,
                current: null,
                isCelluarActive: false,
@@ -78,19 +79,6 @@ class Live extends Component {
     const ctx=this;
     store.dispatch(startClick());
   }
-
-
-
-// fb fetch - add
-
-componentDidMount(props, state){
-
-
-
-}
-
-
-
 
   componentDidUpdate(props, state) {
 
@@ -276,43 +264,41 @@ componentDidMount(props, state){
     return <div key={i} className={playerClass}>
       <div className="playbox playbox-cycle">{i+1}</div>
       {_.map(channels, c => {
-
         const setText=({ target: { value }}) => {
+          const {values}=ctx.state;
 
-            const {values}=ctx.state;
-            if (values[i+1] === undefined) values[i+1]={}
-            values[i+1][c] = value;
+          if (values[i+1] === undefined) values[i+1]={}
+          values[i+1][c] = value;
+
+          fbSyncMatrix(ctx.state.modelNameLive, {values, duration, steps }).then(function(){
             ctx.setState({values});
-            fbSyncMatrix(ctx.state.modelNameLive, {values, duration, steps });
-
+          });
         }
 
         const getValue=() => {
           const {values}=ctx.state;
 
           var key, val;
-          Firebase.database().ref("/live/values/"+(i+1)).once('value', function(snapshot){
+          Firebase.database().ref("/live/values/"+(i+1)).on('value', function(snapshot){
             if(snapshot.val() !== undefined && snapshot.val() !== null){
               key = Object.keys(snapshot.val())[0]
               val = Object.values(snapshot.val())[0];
             }
           })
           if(c === key){
-            if (values[i+1] === undefined) values[i+1]={}
-            values[i+1][c] = val;
+            // if (values[i+1] === undefined) values[i+1]={}
+            // values[i+1][c] = val;
             return val;
           }
           // const values=ctx.state.values;
           // if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
           // return values[i+1][c];
         }
-        const textval=getValue();
 
+        const textval=getValue();
         const index=channels.length*i+colCount++;
 
         const height = 85/steps;
-
-
         return <div className="playbox" style={{height: height+'vh'}} key={c+'_'+i}>
           <textarea className={'commandDiv'} value={textval} onChange={setText}/>
         </div>
@@ -338,8 +324,8 @@ componentDidMount(props, state){
       fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex: snd });
       ctx.setState({sceneIndex: snd});
     }
-
   }
+
   reorder (index,flag){
 
     const ctx = this;

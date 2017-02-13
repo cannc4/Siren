@@ -18,7 +18,11 @@ _.each(models, (x,key) => {
       case 'FETCH_' + x.toUpperCase():
         const items = _.mapKeys(action.payload, 'key')
         return { ...items };
-      default:
+    case 'FETCH_COMMANDS':
+      const cmd = _.mapKeys(action.payload, 'key')
+      console.log(cmd);
+      return { ...cmd};
+    default:
         return state
     }
   }

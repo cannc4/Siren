@@ -1,12 +1,11 @@
 import _ from 'lodash';
-import config from '../config/index.js'
+import config from '../config/config.json'
 import fs from 'fs';
 import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
 import express from 'express';
 import bodyParser from 'body-parser';
-const bootFilePath = `${__dirname}/BootTidal.hs`;
-const startSCD = `${__dirname}/start.scd`;
+const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var globalCount = 0;
@@ -44,7 +43,6 @@ class REPL {
   }
 
   tidalSendExpression(expression) {
-
     this.tidalSendLine(':{');
     const splits = expression.split('\n');
 
@@ -106,7 +104,6 @@ const myApp = () => {
           address.address + ":" + address.port);
     });
 
-
     UDPserver.on("message", function (msg, rinfo) {
       console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
       tick.sockets.emit('osc', {osc:msg});
@@ -116,7 +113,7 @@ const myApp = () => {
       tick.sockets.emit('dc', {osc:msg});
   });
 
-    UDPserver.bind(3002);
+  UDPserver.bind(3002);
 
   app.use(bodyParser.json())
 
@@ -150,8 +147,11 @@ const myApp = () => {
 
   const sendCommands = (commands, reply) => {
     _.each(commands, c => {
-      TidalData.myTidal.tidalSendExpression(c);
-      TidalData.myTidal.myCommands.values.push(c);
+      TidalData.myTidal.tidalSendExpression(c[0]);
+      TidalData.myTidal.myCommands.values.push(c[0]);
+
+      TidalData.myTidal.tidalSendExpression(c[1]);
+      TidalData.myTidal.myCommands.values.push(c[1]);
     })
     reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
   };

@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
+import { fetchModel, fbcreate, fbupdate, fbdelete,
+         fbcreatecommandinscene, fbupdatecommandinscene, fbdeletecommandinscene } from '../actions';
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
@@ -14,16 +15,23 @@ class Commands extends Component {
     this.state = {
       name: '',
       params: '',
-      modelName: this.constructor.name // React Class Name set above
+      modelName: this.constructor.name, // React Class Name set above,
+      sceneKey: ''
     }
   }
 
   addItem() {
     const ctx = this
-    const { name } = ctx.state
-    if (name.length >= 3) {
-      fbcreate(ctx.state.modelName, { name })
-    }
+
+    _.each(Object.values(ctx.props["matrices"]), function(d){
+      if(d.matName === ctx.props.active){
+        const { name } = ctx.state
+        ctx.setState({sceneKey: d.key});
+        if (name.length >= 3) {
+          fbcreatecommandinscene('Matrices', {name}, d.key)
+        }
+      }
+    })
   }
 
   changeName({target: { value }}) {
@@ -34,12 +42,11 @@ class Commands extends Component {
   renderItem(item, dbKey) {
     const ctx = this;
     const model = fetchModel(ctx.state.modelName);
-
-    const { params } = ctx.state;
+    const { params, sceneKey } = ctx.state;
     // Item Action Handlers
     // handle function when any field of the object is modified
     const handleChange = (obj) => {
-      console.log('---HANDLECHANGE BEGIN---');
+      // console.log('---HANDLECHANGE BEGIN---');
       var value, name;
 
       if(obj.target !== undefined){
@@ -49,31 +56,39 @@ class Commands extends Component {
         value = obj;
       }
 
-      console.log(name);
-      console.log(value);
       var re = /&(\w+)&/g, match, matches = [];
       while (match = re.exec(value)) {
         if(_.indexOf(matches, match[1]) === -1)
           matches.push(match[1]);
       }
-      console.log(matches);
       ctx.setState({ params: matches.toString() });
 
 
       const payload = { key: dbKey };
       payload[name === undefined ? 'command' : name] = value;
       payload['params'] = this.state.params;
-      console.log(payload['params']);
-      fbupdate(ctx.state.modelName, payload);
 
-      console.log(value);
-      console.log('---HANDLECHANGE END---');
+      _.each(Object.values(ctx.props["matrices"]), function(d){
+        if(d.matName === ctx.props.active){
+          ctx.setState({sceneKey: d.key});
+            fbupdatecommandinscene('Matrices', payload, d.key)
+        }
+      })
+
+      // console.log(value);
+      // console.log('---HANDLECHANGE END---');
     }
     // handle function to delete the object
     // gets the dbkey of to-be-deleted item and removes it from db
     const handleDelete = (/*{ target: obj}*/) => {
-      const payload = { key: dbKey };
-      fbdelete(ctx.state.modelName, payload);
+      const payload = { key: item.key };
+
+      _.each(Object.values(ctx.props["matrices"]), function(d){
+        if(d.matName === ctx.props.active){
+          ctx.setState({sceneKey: d.key});
+            fbdeletecommandinscene('Matrices', payload, d.key)
+        }
+      })
     }
 
     var options = {
@@ -110,8 +125,18 @@ class Commands extends Component {
 
   render() {
     const ctx = this
-    const { modelName, name } = ctx.state;
-    const items = ctx.props[modelName.toLowerCase()];
+    const { modelName, name, sceneKey } = ctx.state;
+    var items = ctx.props[modelName.toLowerCase()];
+    const scenes = Object.values(ctx.props["matrices"]);
+    _.each(scenes, function(d){
+      if(d.matName === ctx.props.active){
+        const sceneCommands = d.commands;
+        if(sceneCommands !== undefined){
+            items = d.commands;
+        }
+      }
+    })
+
     const changeName = ctx.changeName.bind(ctx);
     const addItem = ctx.addItem.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);

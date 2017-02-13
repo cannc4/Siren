@@ -46,7 +46,7 @@ body {
 }
 
  input {
-  background: white;
+  background: none;
   color: #ddd;
   border-bottom: 1px solid rgba(125,125,125, 0.8);
   font-size: 10px;
@@ -88,7 +88,7 @@ button:hover {
 
 pre {
   color: #ddd;
-
+  background: none;
 }
 
 b, p {

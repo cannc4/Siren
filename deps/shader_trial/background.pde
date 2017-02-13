@@ -17,7 +17,7 @@ PShape createSphere() {
   }
   textureMode(NORMAL);
   PShape sh = createShape();
-  sh.beginShape(TRIANGLES);
+  sh.beginShape(POINTS);
   sh.noStroke();
   for (int i = 0; i < in.length/3.0; i++) {
     sh.vertex(vertices[int(3*in[3*i])], vertices[int(3*in[3*i]+1)], vertices[int(3*in[3*i]+2)],
@@ -46,17 +46,17 @@ void drawShaders(){
   if(shaderNumber > 0){
     pg.beginDraw();
     if(shaderNumber == 1)
-      pg.shader(blobby);
+      pg.shader(blobby.shader);
     else if(shaderNumber == 2)
-      pg.shader(bits);
+      pg.shader(bits.shader);
     else if(shaderNumber == 3)
-      pg.shader(bands);
+      pg.shader(bands.shader);
     else if(shaderNumber == 4)
-      pg.shader(noise);
+      pg.shader(noise.shader);
     else if(shaderNumber == 5)
-      pg.shader(sine);
+      pg.shader(sine.shader);
     else if(shaderNumber == 6)
-      pg.shader(drip);
+      pg.shader(drip.shader);
     pg.rect(0,0,pg.width, pg.height);
     pg.endDraw();
 
