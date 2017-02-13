@@ -1,6 +1,6 @@
 {
   "name": "sq-web",
-  "version": "0.2",
+  "version": "0.0.1",
   "private": true,
   "devDependencies": {
     "babel": "^6.5.2",
