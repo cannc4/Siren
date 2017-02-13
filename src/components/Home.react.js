@@ -274,7 +274,7 @@ class Home extends Component {
         // dynamic cell height
         const cellHeight = 85/steps;
         // dynamic text size
-        const textSize = textval.length > 15 ? Math.max( 0.65, mapNumbers(textval.length, 15, 40, 1, 0.65)) : 1;
+        const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
         return <div className="playbox" style={{height: cellHeight+'vh'}} key={c+'_'+i}>
           <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
         </div>
