@@ -376,7 +376,7 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, channelcommands, commands =[]) => {
+export const sendCommands = (server,vals, channelcommands, commands = []) => {
   return dispatch => {
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
@@ -425,8 +425,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           // default:
           //   break;
         //}
-
-        return [k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+k + " $ " + newCommand.replace(/\"/g, "-") +"\"]"] ;
 
       } else return false;
     }))

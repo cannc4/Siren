@@ -75,13 +75,13 @@ class Home extends Component {
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
-      if(timer.current % steps === steps-1){
+      if(timer.current % steps === 0){
         if(timer.isCelluarActive)
           ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
         else if(timer.isBjorkActive)
           ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
-        else if(songmodeActive)
-          ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
+        else if(songmodeActive && timer.current !== 0)
+          ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()], kalan);
       }
 
       const vals=values[runNo];
@@ -98,14 +98,14 @@ class Home extends Component {
     }
   }
 
-  progressMatrices(items){
+  progressMatrices(items, kalan){
     const ctx = this;
     const { timer } = ctx.props;
-    const { values, activeMatrix, steps, songmodeActive} = ctx.state;
+    const { values, activeMatrix, steps, songmodeActive, tidalServerLink} = ctx.state;
     var commands = [];
 
     timer.isActive = false;
-    if(timer.current % steps === steps-1 && songmodeActive)
+    if(timer.current % steps === kalan && songmodeActive)
     {
       var i_save = -1;
       _.each(items, function(d, i, j){
@@ -117,8 +117,12 @@ class Home extends Component {
       })
 
       const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
+
       updateMatrix(commands, values, nextObj);
-      ctx.setState({ activeMatrix : nextObj.matName });
+      consoleSubmit(tidalServerLink, "sendOSC d_OSC $ Message \"tree\" [string \"scene\", string \""+nextObj.matName+"\"]")
+
+      console.log("sendOSC d_OSC $ Message \"tree\" [string \"scene\", string \""+nextObj.matName+"\"]");
+      ctx.setState({ activeMatrix : nextObj.matName, matName : nextObj.matName });
     }
   }
 
@@ -263,8 +267,6 @@ class Home extends Component {
           return values[i+1][c];
         }
 
-        const textval=getValue();
-
         const index=channels.length*i+colCount++;
 
         const mapNumbers =(value, istart, istop, ostart, ostop) => {
@@ -274,9 +276,9 @@ class Home extends Component {
         // dynamic cell height
         const cellHeight = 85/steps;
         // dynamic text size
-        const textSize = textval.length > 15 ? Math.max( 0.65, mapNumbers(textval.length, 15, 40, 1, 0.65)) : 1;
+        const textSize = getValue().length > 15 ? Math.max( 0.65, mapNumbers(getValue().length, 15, 40, 1, 0.65)) : 1;
         return <div className="playbox" style={{height: cellHeight+'vh'}} key={c+'_'+i}>
-          <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
+          <textarea type="text" style={{fontSize: textSize+'vw'}} value={getValue()} onChange={setText}/>
         </div>
       })}
     </div>;
@@ -453,8 +455,6 @@ class Home extends Component {
         return ctx.state.density;
     }
 
-    const textval=getValue();
-
     const updateTidalServerLink=({ target: { value } }) => {
         ctx.setState({ tidalServerLink: value });
     }
@@ -488,22 +488,23 @@ class Home extends Component {
          <p>SuperCollider Command</p>
          <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder={'Ctrl + Enter '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
       </div>
-      <div id="Celluar">
-         <p>Cellular Automata Updates</p>
-         <input type="textarea" value={textval} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-         {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-         {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-         <button onClick={addValues}>  Add  </button>
-      </div>
-      <div id="Celluar">
-         <p>Bjorklund Algorithm Updates</p>
-         {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-         {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-         <button onClick={addBjorkValues}>  Add  </button>
-      </div>
     </div>
   }
 
+  // Cellular and Bjorklund HTMLS
+  // <div id="Celluar">
+  //    <p>Cellular Automata Updates</p>
+  //    <input type="textarea" value={getValue()} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+  //    {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+  //    {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+  //    <button onClick={addValues}>  Add  </button>
+  // </div>
+  // <div id="Celluar">
+  //    <p>Bjorklund Algorithm Updates</p>
+  //    {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+  //    {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+  //    <button onClick={addBjorkValues}>  Add  </button>
+  // </div>
 
 
   render() {
@@ -513,10 +514,9 @@ class Home extends Component {
     // const { commands }=ctx.state;
     const { scCommand, tidalServerLink, values, density, steps, duration, channels, songmodeActive, activeMatrix }=ctx.state;
 
-    const getValue=() => {
+    const getValue = () => {
         return ctx.state.density;
     }
-    const textval=getValue();
 
     const viewPortWidth = '100%'
 
@@ -535,9 +535,7 @@ class Home extends Component {
     const getDur=() => {
         return ctx.state.duration;
     }
-    const durval = getDur();
     const updateDuration=({ target: { value } }) => {
-
       ctx.setState({duration: value});
     }
     return <div className={"Home cont"}>
@@ -546,12 +544,12 @@ class Home extends Component {
           <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
               <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-              {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
+              { this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
               {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
             </div>
             <div>
               {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
-              {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
+              { songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
             </div>
             <div className={'sceneList'} style={{ width: '100%'}}>
               <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
@@ -582,7 +580,7 @@ class Home extends Component {
             </div>
             <div id="Celluar">
             <p>Duration</p>
-               <input type="textarea" value={durval} onChange={updateDuration} placeholder={""}  rows="20" cols="30"/>
+               <input type="textarea" value={getDur()} onChange={updateDuration} placeholder={""}  rows="20" cols="30"/>
             </div>
           </div>
         </Layout>
