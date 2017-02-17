@@ -25,10 +25,7 @@ class Home extends Component {
       channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
               'sendOSC procS1','sendOSC procS2',
               'sendOSC procS3', 'sendOSC procS4'],
-      timer: { isActive: false,
-               current: null,
-               isCelluarActive: false,
-               isBjorkActive: false },
+      timer: [],
       values: {},
       scCommand: '',
       click : {current:null,
@@ -62,6 +59,16 @@ class Home extends Component {
   //     this.stopClick();
   //   })
   // }
+
+  componentDidMount(props, state){
+    if(timer !== undefined){
+
+      const { channels } = state;
+      for (var i = 0; i < channels.length; i++) {
+        timer[i] = {isActive: "false", current: 0};
+      }
+    }
+  }
 
   startClick() {
     store.dispatch(startClick());
@@ -121,7 +128,6 @@ class Home extends Component {
       updateMatrix(commands, values, nextObj);
       consoleSubmit(tidalServerLink, "sendOSC d_OSC $ Message \"tree\" [string \"scene\", string \""+nextObj.matName+"\"]")
 
-      console.log("sendOSC d_OSC $ Message \"tree\" [string \"scene\", string \""+nextObj.matName+"\"]");
       ctx.setState({ activeMatrix : nextObj.matName, matName : nextObj.matName });
     }
   }
@@ -233,7 +239,7 @@ class Home extends Component {
           if(_.includes(c, "sendOSC")){
             c = "p"+count++;
           }
-          return <div className="playbox playbox-cycle" key={c}>{c}</div>
+          return <div className="playbox playbox-cycle" key={c}>{c}<textarea/></div>
         })}
       </div>
       {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
