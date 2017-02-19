@@ -426,7 +426,7 @@ export const sendCommands = (server,vals, channelcommands, commands =[]) => {
           //   break;
         //}
 
-        return [k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [ k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))
@@ -791,38 +791,44 @@ export const consoleSubmit = (server, expression) => {
   }
 }
 
-//export const setCommand = (channel, command) => ({ type: 'SET_CC', payload: {channel, command} });
 export const resetCommand = () => ({type: 'RESET_CC'});
 export const fetchCommand = () => ({type: 'FETCH_CC'});
-//export const startClick = () => ({type: 'INC_CLICK'});
 
-export const incTimer = () => {
-  return { type: 'INC_TIMER'}
-};
 
-var timer = null;
-const x = (dispatch) => {
-  dispatch(incTimer());
-}
 
-export const startTimer = (duration, steps) => {
-  return dispatch => {
-    timer = setInterval(x, (duration / steps * 1000), dispatch);
+var timer = [];
+export function startIndividualTimer(_index,duration, steps) {
+  return (dispatch) => {
+     timer[_index] = setInterval(() => {
+        dispatch({type: 'INC_TIMER', payload: _index})
+      },( duration / steps * 1000), dispatch)
   }
 }
 
-export const pauseTimer = () => {
-  clearInterval(timer);
+export const updateTimerduration = (_index,d) => {
   return {
-    type: 'PAUSE_TIMER'
+    type: 'UPDATE_TIMER', payload: _index, duration : d
+  }
+}
+export const createTimer = (_index,d) => {
+  return {
+    type: 'CREATE_TIMER', payload: _index, duration : d
   }
 }
 
-
-export const stopTimer = () => {
-  clearInterval(timer);
+export const pauseIndividualTimer = (_index) => {
+  clearInterval(timer[_index]);
+  console.log("PAUSE TIMER");
+  console.log(timer);
   return {
-    type: 'STOP_TIMER'
+    type: 'PAUSE_TIMER', payload: _index
+  }
+}
+
+export const stopIndividualTimer = (_index) => {
+  clearInterval(timer[_index]);
+  return {
+    type: 'STOP_TIMER', payload: _index
   }
 }
 
