@@ -33,7 +33,8 @@ this.state={
   activeMatrix: '',
   songmodeActive: false,
   sceneIndex: '',
-  sceneSentinel: false
+  sceneSentinel: false,
+  channelEnd:[]
 }
 }
 
@@ -72,19 +73,28 @@ createTimer(i, steps){
 }
 
 componentDidUpdate(props, state) {
-
+  var runNo = [];
   const ctx=this;
   const { channelcommands, commands, timer, click}=props;
-  const { steps, tidalServerLink, values, channels, activeMatrix, songmodeActive }=state;
-  if (timer.isActive) {
-  const runNo=(timer.current % steps) + 1;
+  const { steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
+  for (var i = 0; i < channels.length; i++) {
+    if (ctx.props.timer.timer[i].isActive) {
+    runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
 
-  if(timer.current % steps === steps-1){
+    if(ctx.props.timer.timer[i].current % steps === steps-1){
       if(songmodeActive)
-      ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
+      {
+        channelEnd[i] = true;
+
+
+      }
+      if(identical(channelEnd === true)){
+        ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
+
+      }
   }
 
-  const vals=values[runNo];
+  const vals=values[runNo[i]];
   if (vals !== undefined) {
     var sceneCommands = [];
     const items = this.props[this.state.modelName.toLowerCase()]
@@ -94,10 +104,19 @@ componentDidUpdate(props, state) {
     })
 
     ctx.sendCommands(tidalServerLink, vals, channelcommands, sceneCommands );
+      }
     }
   }
 }
 
+identical(array) {
+    for(var i = 0; i < array.length - 1; i++) {
+        if(array[i] !== array[i+1]) {
+            return false;
+        }
+    }
+    return true;
+}
 progressMatrices(items){
   const ctx = this;
   const { timer } = ctx.props;
