@@ -7,6 +7,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
+
 Firebase.initializeApp({
 
      apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -376,8 +377,10 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, channelcommands, commands =[]) => {
+export const sendCommands = (server,vals, commands =[]) => {
+  console.log(vals);
   return dispatch => {
+
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
       const cmd = _.find(commands, c => c.name === cellName);
@@ -797,27 +800,49 @@ export const fetchCommand = () => ({type: 'FETCH_CC'});
 
 
 var timer = [];
-export function startIndividualTimer(_index,duration, steps) {
-  return (dispatch) => {
-     timer[_index] = setInterval(() => {
-        dispatch({type: 'INC_TIMER', payload: _index})
-      },( duration / steps * 1000), dispatch)
-  }
+export function startIndividualTimer(_index,_duration, _steps) {
+console.log(  timerWorker[_index]);
+    timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
+  // return (dispatch) => {
+    //  timer[_index] = setInterval(() => {
+    //     dispatch({type: 'INC_TIMER', payload: _index})
+    //   },( duration / steps * 1000), dispatch)
+  // }
 }
 
-export const updateTimerduration = (_index,d) => {
+export const updateTimerduration = (_index,_duration,_steps) => {
+  timerWorker[_index].postMessage({type : "update", id: _index, duration: _duration, steps: _steps,timer: timer[_index]});
   return {
-    type: 'UPDATE_TIMER', payload: _index, duration : d
+    type: 'UPDATE_TIMER', payload: _index, duration : _duration
   }
 }
-export const createTimer = (_index,d) => {
-  return {
-    type: 'CREATE_TIMER', payload: _index, duration : d
+var timerWorker= [];
+export const createTimer = (_index,_duration, _steps) => {
+
+    timerWorker[_index] = new Worker("src/actions/tworker.js");
+    timerWorker[_index].onmessage = function(e) {
+        if (e.data.type == "tick") {
+             //console.log(_index + "tick!")
+            store.dispatch(updtmr(e.data.id));
+            timer[_index] = e.data.msg;
+        }
+        else
+            console.log("message: " + e.data);
+    }
+    return {
+    type: 'CREATE_TIMER', payload: _index, duration : _duration
   }
+}
+export const updtmr = (_index) => {
+
+  return {
+       type: 'INC_TIMER', payload: _index
+     }
 }
 
 export const pauseIndividualTimer = (_index) => {
-  clearInterval(timer[_index]);
+  timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
+  //clearInterval(timer[_index]);
   console.log("PAUSE TIMER");
   console.log(timer);
   return {
@@ -826,7 +851,8 @@ export const pauseIndividualTimer = (_index) => {
 }
 
 export const stopIndividualTimer = (_index) => {
-  clearInterval(timer[_index]);
+  timerWorker[_index].postMessage({type : "stop", id: _index,timer: timer[_index]});
+  //clearInterval(timer[_index]);
   return {
     type: 'STOP_TIMER', payload: _index
   }
