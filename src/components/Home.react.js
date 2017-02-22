@@ -19,10 +19,8 @@ this.state={
   matName: "",
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
-  steps: 16,
-  channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8',
-          'sendOSC procS1','sendOSC procS2',
-          'sendOSC procS3', 'sendOSC procS4'],
+  steps: 8,
+  channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8'],
   timer: [],
   values: {},
   scCommand: '',
@@ -31,8 +29,8 @@ this.state={
   activeMatrix: '',
   songmodeActive: false,
   sceneIndex: '',
-  sceneSentinel: false,
-  channelEnd:[]
+  channelEnd :[],
+  sceneSentinel: false
 }
 }
 
@@ -58,12 +56,16 @@ this.state={
 componentWillMount(props,state){
 console.log(this.props.location.pathname);
   const ctx=this;
-  const { channels , steps , timer}=ctx.state;
+  var tempEnd = [];
+  const { channelEnd, channels , steps , timer}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
      if (timer[i] === undefined) timer[i]={ id: i, duration: 16,  isActive: false,  current: 0};
      ctx.createTimer(i, 48, steps);
      //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
+     tempEnd[i] = false
+
    }
+   ctx.setState({channelEnd : tempEnd});
 
 }
 createTimer(i,duration, steps){
@@ -74,21 +76,24 @@ componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=props;
-  const { steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
   for (var i = 0; i < channels.length; i++) {
 
     if (ctx.props.timer.timer[i].isActive) {
     runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
 
     if(ctx.props.timer.timer[i].current % steps === steps-1){
-      if(songmodeActive)
-      {
+      if(songmodeActive){
         channelEnd[i] = true;
+        console.log("NNNNOOOOWWWW");
+        console.log(channelEnd);
+        ctx.setState({channelEnd : channelEnd});
+        store.dispatch(pauseIndividualTimer(i))
+        if(ctx.identical(channelEnd ) === true){
+            ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+        // ctx.startTimer();
+        }
       }
-      // if(identical(channelEnd === true)){
-      //   ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
-      //
-      // }
     }
 
   if(values[runNo[i]]!== undefined){
@@ -112,26 +117,33 @@ componentDidUpdate(props, state) {
 
 
 
-// identical(array) {
-//     for(var i = 0; i < array.length - 1; i++) {
-//         if(array[i] !== array[i+1]) {
-//             return false;
-//         }
-//     }
-//     return true;
-// }
+identical(array) {
+    for(var i = 0; i < array.length ; i++) {
+        if(array[i] === false ) {
+            return false;
+        }
+    }
+    return true;
+}
 
 
 progressMatrices(items){
   const ctx = this;
   const { timer } = ctx.props;
-  const { values, activeMatrix, steps, songmodeActive} = ctx.state;
+  const { channelEnd, values, activeMatrix, steps, songmodeActive} = ctx.state;
   var commands = [];
 
-  timer.isActive = false;
-  if(timer.current % steps === steps-1 && songmodeActive)
+//for (var i = 0; i < channelEnd.length; i++) {
+
+
+  //timer[i].isActive = false;
+  if(ctx.identical(channelEnd))
   {
     var i_save = -1;
+    for (var j = 0; j < channelEnd.length; j++) {
+      channelEnd[j] = false;
+
+    }
     _.each(items, function(d, i, j){
       if(d.matName === activeMatrix)
       {
@@ -142,8 +154,13 @@ progressMatrices(items){
 
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
     updateMatrix(commands, values, nextObj);
-    ctx.setState({ activeMatrix : nextObj.matName });
+    for (var i = 0; i < channelEnd.length; i++) {
+      channelEnd[i] = false;
+    }
+    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd });
+
   }
+  //}
 }
 
 enableSongmode(){
@@ -254,18 +271,18 @@ _handleKeyPress = event => {
   var _index = _.indexOf(channels, _key);
 
   if(event.key === 'Enter' && event.ctrlKey){
-    if( value < "4"){
-      value = 4;
-    }
+    // if( value < "4"){
+    //   value = 4;
+    // }
     if(ctx.props.timer.timer[_index].isActive === true){
       store.dispatch(pauseIndividualTimer(_index));
     }
     startIndividualTimer(_index, value,steps);
   }
   else if (event.key === 'Enter' && event.shiftKey){
-    if( value < "4"){
-      value = 4;
-    }
+    // if( value < "10"){
+    //   value = 10;
+    // }
     if(ctx.props.timer.timer[_index].isActive === true){
       store.dispatch(stopIndividualTimer(_index));
     }
@@ -277,7 +294,7 @@ startTimer() {
   const ctx = this;
   const {channels, steps} = ctx.state;
   for (var i = 0; i < channels.length; i++) {
-    store.dispatch(startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps));
+    startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps);
   }
 }
 

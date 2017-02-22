@@ -428,8 +428,8 @@ export const sendCommands = (server,vals, commands =[]) => {
           // default:
           //   break;
         //}
-
-        return [ k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+//, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
+        return [ k + ' $ ' + newCommand ] ;
 
       } else return false;
     }))
@@ -801,17 +801,11 @@ export const fetchCommand = () => ({type: 'FETCH_CC'});
 
 var timer = [];
 export function startIndividualTimer(_index,_duration, _steps) {
-console.log(  timerWorker[_index]);
     timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
-  // return (dispatch) => {
-    //  timer[_index] = setInterval(() => {
-    //     dispatch({type: 'INC_TIMER', payload: _index})
-    //   },( duration / steps * 1000), dispatch)
-  // }
 }
 
 export const updateTimerduration = (_index,_duration,_steps) => {
-  timerWorker[_index].postMessage({type : "update", id: _index, duration: _duration, steps: _steps,timer: timer[_index]});
+  //timerWorker[_index].postMessage({type : "update", id: _index, duration: _duration, steps: _steps,timer: timer[_index]});
   return {
     type: 'UPDATE_TIMER', payload: _index, duration : _duration
   }

@@ -96,3 +96,16 @@ d
 d2 silence
 d1 $ slow 3 $ wedge (4%13) (n "0 [~!! 1] ~ [~ 0 0]" # s "drums") $ n "[[0 ~! 1] ~ [~ 0 0]]!!" # s "drums"
 hush
+
+
+let dr3 i = n "[[0 ~! 1] ~ [~ 0 0]]!!" # s i
+    dr4 i = n "0 [~!! 1] ~ [~ 0 0]" # s i
+  in d1 $
+     slow 13 $ wedge (4%13) (dr4 "drum") $
+     -- slow 9 $
+     dr3 "drum"
+
+
+
+
+     slow 200 $ (sound $ step "feel" (take 1600 $ lindenmayer 30 "-:0,0:-1,1:-4-,4:-" "-0-1"))
