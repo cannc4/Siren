@@ -429,7 +429,8 @@ export const sendCommands = (server,vals, commands =[]) => {
         //}
 
         //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-        return [ k + ' $ ' + newCommand ] ;
+
+        return [ k + ' $ ' + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))

@@ -33,7 +33,6 @@ this.state={
   sceneSentinel: false
 }
 }
-
 //Clock for Haskell
 // componentDidMount(props,state){
 //   const ctx = this;
@@ -66,7 +65,6 @@ console.log(this.props.location.pathname);
 
    }
    ctx.setState({channelEnd : tempEnd});
-
 }
 createTimer(i,duration, steps){
   store.dispatch(createTimer(i,duration,steps));
@@ -115,8 +113,6 @@ componentDidUpdate(props, state) {
   }
 }
 
-
-
 identical(array) {
     for(var i = 0; i < array.length ; i++) {
         if(array[i] === false ) {
@@ -142,7 +138,6 @@ progressMatrices(items){
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
       channelEnd[j] = false;
-
     }
     _.each(items, function(d, i, j){
       if(d.matName === activeMatrix)
@@ -301,7 +296,6 @@ startTimer() {
 }
 
 pauseTimer() {
-
     const ctx = this;
     const {channels} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
@@ -524,8 +518,6 @@ renderMenu(){
   // const { commands }=ctx.state;
   const { values, steps, channels}=ctx.state;
 
-
-
   const updateTidalServerLink=({ target: { value } }) => {
       ctx.setState({ tidalServerLink: value });
   }
@@ -539,8 +531,6 @@ renderMenu(){
     // {!timer.isActive && <img src={require('../assets/play_icon.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
     // {timer.isActive && <div> <img src={require('../assets/pause_icon.png')} onClick={ctx.pauseTimer} height={32} width={32}/>
     //                          <img src={require('../assets/stop_icon.png')} onClick={ctx.stopTimer} height={32} width={32}/> </div>}
-
-
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -562,8 +552,6 @@ renderMenu(){
     </div>
   </div>
 }
-
-
 
 render() {
   const ctx=this;
