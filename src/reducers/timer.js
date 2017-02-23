@@ -1,36 +1,33 @@
 const modelName = 'TIMER';
-const INITIAL_STATE = { isActive: false, current: 0, isCelluarActive: false, isBjorkActive: false};
+const INITIAL_STATE ={timer :[]};
 export default (state = INITIAL_STATE, action) => {
+  const _timer =  { id: action.payload, duration: action.duration,  isActive: false,  current: 0};
   switch (action.type) {
-    case 'INC_'+modelName:
+    case 'CREATE_'+modelName:
       const s = state;
-      s.isActive = true;
-      s.current++;
+      s.timer[action.payload] = _timer;
       return {...s};
-    case 'FETCH_'+modelName:
-      const a = state;
-      a.isCelluarActive = true;
-      a.isBjorkActive = false;
-      return {...a};
-    case 'FETCH_STOP_'+modelName:
+    case 'INC_'+modelName:
+      const k = state;
+      console.log("GTTIGG");
+      k.timer[action.payload].current++;
+      k.timer[action.payload].isActive = true;
+      return {...k};
+    case 'UPDATE_'+modelName:
       const b = state;
-      b.isCelluarActive = false;
+      b.timer[action.payload].duration = action.duration;
       return {...b};
-    case 'FETCH_2_'+modelName:
-      const c = state;
-      c.isCelluarActive = false;
-      c.isBjorkActive = true;
-      return {...c};
-    case 'FETCH_STOP_2_'+modelName:
-      const d = state;
-      d.isBjorkActive = false;
-      return {...d};
     case 'ADD_'+modelName:
       return {...state};
     case 'PAUSE_'+modelName:
-      return {...state, isActive: false, current: state.current}
+      const p = state;
+      p.timer[action.payload].isActive = false;
+      return {...p}
     case 'STOP_'+modelName:
-      return {...state, isActive: false, current: 0}
+      const stp = state;
+      stp.timer[action.payload].isActive = false;
+      stp.timer[action.payload].current = 0;
+      return {...stp}
     default:
       return state;
   }

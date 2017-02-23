@@ -60,7 +60,11 @@
   overflow-y: auto;
 
 }
+.durInput{
+  width: 50%;
+  
 
+}
 #Celluar {
   padding-top: 20px;
   padding-bottom: 10px;
