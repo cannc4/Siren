@@ -1,0 +1,111 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+cps 1.4
+--Main
+d1 $every 6 ((#n "{0 2 ~ 1 1*2 }%5" ).(rev)) $every 2 (#n "{~ 1 [2? 1] [2 3]}%5" ) $n "{0 1 ~ 0 1 }%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "2" #gain "1"
+--Sub
+d2 $slow 4 $n "{ 2  [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "1" #gain "1"
+
+--Break
+
+
+  d3 $ slow 2 $
+  slowspread (\wa ->
+               slowspread (\wb ->
+                            sometimes (within(wa, wb)
+                                       (slowspread (\f ->
+                                                     (slowspread (\v ->
+                                                                   (f v))
+                                                      [0.25, 0.25, 0.75]))
+                                        [(stut 4 0.75), (stut 2 0.75), (<~),
+                                         (stut 4 0.75), (stut 2 0.75), (~>)])))
+               [0.5, 0.75, 1])
+  [0.25, 0.25, 0, 0] $
+  stack[
+    slowcat[
+       n "{1 [~ 1] ~  1}%5" #coarse "2" #end "0.3",
+       n "{1 [~ 1] 1  1}%5",
+       n "{2 [2 ~ ] 2  ~}%5" #speed "2"
+       ] # s "drums" #cut "1 2"
+    ]
+
+d5 $slow 4 $every 6 ((#n "{0 2 ~ 2 1*2 }%5" ).(rev)) $every 2 (#n "{~ 2 [2? 1] [2 ~]}%5" $n "{ 2  [2? 2]}%5 " #s "drums" #speed "2" #shape "0.2 0.35" #cut "1" #gain "1"
+d1 silence
+d3 silence
+d2 silence
+d5 silence
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Main
+d1 $every 6 ((#n "{0 2 ~ 1 1*2 }%5" ).(rev)) $every 2 (#n "{~ 1 [2? 1] 0 [2 0] }%5" ) $n "{0 1 ~ 0 1 }%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "2" #gain "1"
+--Sub
+d1 silence
+d2 $slow 4 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "3" #gain "1" #speed "2 0.5" #cutoff "3000 1500" #resonance "0.002 0.12"
+
+d2 $every 4 (slow 8 ) $slow 4 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #cut "3" #gain "1" #speed "0.78 0.65" #cutoff "4000 1500" #resonance "0.002 0.15" #attack "0.5"
+
+d2 $every 4 (slow 8 ) $slow 6 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #cut "3" #gain "1" #speed "0.78 0.65" #cutoff "4000 1500" #resonance "0.002 0.15" #attack "0.5"
+
+d4 $jux(iter 2) $slow 16 $striate 256 $n"4" #s "drums" #speed "2"
+d4 silence
+--Break
+
+
+  d3 $ slow 2 $
+  slowspread (\wa ->
+               slowspread (\wb ->
+                            sometimes (within(wa, wb)
+                                       (slowspread (\f ->
+                                                     (slowspread (\v ->
+                                                                   (f v))
+                                                      [0.25, 0.25, 0.75]))
+                                        [(stut 4 0.75), (stut 2 0.75), (<~),
+                                         (stut 4 0.75), (stut 2 0.75), (~>)])))
+               [0.5, 0.75, 1])
+  [0.25, 0.25, 0, 0] $
+  stack[
+    slowcat[
+       slow 4 $n "{2 [2 ~] ~  1}%5" #end "1" #speed "0.78 0.65"#cutoff "3000 1500" #resonance "0.002 0.12",
+       slow 2 $n "{2 [2 ~] ~  1}%5" #end "1" #speed "0.78 0.65"#cutoff "3000 1500" #resonance "0.002 0.12",
+       n "{1 [~ 1] ~  1}%5",
+       n "{2 [~ 2] 2  ~}%5" #speed "2"
+       ] # s "drums" #cut "-1 2"
+    ]
+
+d4 $slow 4 $n "{ 2  [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "1" #gain "1"
+
+d1 silence
+d2 silence
+d3 silence
+d4 silence
+
+------------------------------------------------------------------------------------------
+d1 silence
+d3 silence
+d2 silence
+
+d3 $ slow 8 $ n (wedge (4%13) "0 [~!! 1] ~ [~ 0 0]" "[[0 ~! 1] ~ [~ 0 0]]!!") # s "sacid"
+d2 silence
+
+d3  $every 6 ((#n "{0 2 ~ 1 ~ }%5" ).(rev)) $every 5 (#n "{~ 1 [2 1] [2 3]}%5" ) $n "{0 1 ~ 0 1 }%5 " #s "pad"
+#speed "1"  #end "0.5 2" #pan (slow 4 $scale 0.8 1.2 sine1) #orbit "3" #room "0.25" #speed "1" #delay "0.4 0.2" #cut "2 1" #cutoff "5000"
+
+d2 silence
+
+
+d1 silence
+d
+d2 silence
+d1 $ slow 3 $ wedge (4%13) (n "0 [~!! 1] ~ [~ 0 0]" # s "drums") $ n "[[0 ~! 1] ~ [~ 0 0]]!!" # s "drums"
+hush
+
+
+let dr3 i = n "[[0 ~! 1] ~ [~ 0 0]]!!" # s i
+    dr4 i = n "0 [~!! 1] ~ [~ 0 0]" # s i
+  in d1 $
+     slow 13 $ wedge (4%13) (dr4 "drum") $
+     -- slow 9 $
+     dr3 "drum"
+
+
+
+
+     slow 200 $ (sound $ step "feel" (take 1600 $ lindenmayer 30 "-:0,0:-1,1:-4-,4:-" "-0-1"))

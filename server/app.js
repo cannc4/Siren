@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
 import express from 'express';
 import bodyParser from 'body-parser';
-const startSCD = `${__dirname}/start.scd`;
+const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var globalCount = 0;
@@ -54,7 +54,7 @@ class REPL {
 
   initSC() {
       const self = this;
-      
+
       supercolliderjs.resolveOptions(config.path).then((options) => {
       const SCLang = supercolliderjs.sclang.SCLang;
       const lang = new SCLang(options);
