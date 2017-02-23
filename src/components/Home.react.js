@@ -19,8 +19,8 @@ this.state={
   matName: "",
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
-  steps: 8,
-  channels: ['d1','d2','d3', 'd4', 'd5','d6','d7', 'd8'],
+  steps: 12,
+  channels: ['d1','d2','d3', 'd4', 'd5','d6'],
   timer: [],
   values: {},
   scCommand: '',
@@ -30,6 +30,7 @@ this.state={
   songmodeActive: false,
   sceneIndex: '',
   channelEnd :[],
+  play : false,
   sceneSentinel: false
 }
 }
@@ -59,7 +60,7 @@ console.log(this.props.location.pathname);
   var tempEnd = [];
   const { channelEnd, channels , steps , timer}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
-     if (timer[i] === undefined) timer[i]={ id: i, duration: 16,  isActive: false,  current: 0};
+     if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
      ctx.createTimer(i, 48, steps);
      //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
      tempEnd[i] = false
@@ -85,8 +86,6 @@ componentDidUpdate(props, state) {
     if(ctx.props.timer.timer[i].current % steps === steps-1){
       if(songmodeActive){
         channelEnd[i] = true;
-        console.log("NNNNOOOOWWWW");
-        console.log(channelEnd);
         ctx.setState({channelEnd : channelEnd});
         store.dispatch(pauseIndividualTimer(i))
         if(ctx.identical(channelEnd ) === true){
@@ -292,28 +291,32 @@ _handleKeyPress = event => {
 startTimer() {
 
   const ctx = this;
-  const {channels, steps} = ctx.state;
+  const {channels, steps, play} = ctx.state;
+
   for (var i = 0; i < channels.length; i++) {
     startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps);
   }
+  ctx.setState({play:true});
 }
 
 pauseTimer() {
 
     const ctx = this;
-    const {channels} = ctx.state;
+    const {channels, play} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
       store.dispatch(pauseIndividualTimer(i));
     }
+    ctx.setState({play: false});
 }
 
 stopTimer() {
 
   const ctx = this;
-  const {channels} = ctx.state;
+  const {channels, play} = ctx.state;
   for (var i = 0; i < channels.length; i++) {
     store.dispatch(stopIndividualTimer(i));
   }
+  ctx.setState({play: false});
 }
 
 renderStep(x, i) {
@@ -481,16 +484,16 @@ renderItem(item, dbKey, i) {
   }
 
   return item.key && (
-    <div key={item.key} className="matrices" >
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
-        <button onClick={handleDelete}>{'₪'}</button>
-        {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
-        {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
-        <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>
-        <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>
+      <div key={item.key} className="matrices" >
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
+          <button onClick={handleDelete}>{'x'}</button>
+          {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
+          {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
+          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>
+          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>
+        </div>
       </div>
-    </div>
-  )
+    )
 }
 
 renderItems(items) {
@@ -517,7 +520,7 @@ renderMetro(){
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
-  const { scCommand, tidalServerLink }=ctx.state;
+  const { scCommand, tidalServerLink, play}=ctx.state;
   const { commands }=ctx.props;
   // const { commands }=ctx.state;
   const { values, steps, channels}=ctx.state;
@@ -534,10 +537,7 @@ renderMenu(){
 
 
     // REPLACING START PAUSE STOP WITH IMAGES
-    // {!timer.isActive && <img src={require('../assets/play_icon.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
-    // {timer.isActive && <div> <img src={require('../assets/pause_icon.png')} onClick={ctx.pauseTimer} height={32} width={32}/>
-    //                          <img src={require('../assets/stop_icon.png')} onClick={ctx.stopTimer} height={32} width={32}/> </div>}
-
+//<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
 
 
   return   <div className="Tidal" style={{margin: '5px'}}>
@@ -548,11 +548,11 @@ renderMenu(){
       {tidal.isActive && <button className={'buttonSentinel'}>Running</button>}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
-    <div>
-    <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer} height={32} width={32}/>
-    <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer} height={32} width={32}/> </div>}
-      <pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
+    {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
+    {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
+                             <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
+
+
     </div>
     <div id="Command">
        <p>SuperCollider Command</p>

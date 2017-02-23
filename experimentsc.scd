@@ -18,24 +18,26 @@ SynthDef(\hihat, {|out=0, amp = 1, attack = 0.01, release = 0.1, pan = 0.5|
     snd = RHPF.ar(WhiteNoise.ar(amp) * env, 10000, 0.1) * env * amp;
     OffsetOut.ar(out, DirtPan.ar(snd, ~dirt.numChannels, pan))
     }).add;
+    Routine.run{
+            var syn, time= 16;              //allow each patch to run for 16sec / 8bars
+            3.do{|i|
+                    ("\n//fm7 patch"+i+"generated on"+Date.localtime).post;
+                    syn= ("
+                            (
+                            var x= #"++({{{1.5.linrand.round(0.5)}!4}!3}!6).asCompileString++";
+                            var y= #"++({{{1.5.linrand.round(0.5)}!4}!6}!6).asCompileString++";
+                            {
+                                    var ctls= x.collect{|a| a.collect{|b| LFSaw.kr(*b)}};
+                                    var mods= y.collect{|a| a.collect{|b| LFSaw.kr(*b)}};
+                                    var chans= #[0, 1];
+                                    FM7.ar(ctls, mods).slice(chans)*0.5;
+                            }.play)").postln.interpret;
+                    time.wait;
+                    syn.free;
+            };
+    };
 )
+//link enable 
 /*(
-Routine.run{
-        var syn, time= 16;              //allow each patch to run for 16sec / 8bars
-        inf.do{|i|
-                ("\n//fm7 patch"+i+"generated on"+Date.localtime).post;
-                syn= ("
-                        (
-                        var x= #"++({{{1.5.linrand.round(0.5)}!4}!3}!6).asCompileString++";
-                        var y= #"++({{{1.5.linrand.round(0.5)}!4}!6}!6).asCompileString++";
-                        {
-                                var ctls= x.collect{|a| a.collect{|b| LFSaw.kr(*b)}};
-                                var mods= y.collect{|a| a.collect{|b| LFSaw.kr(*b)}};
-                                var chans= #[0, 1];
-                                FM7.ar(ctls, mods).slice(chans)*0.5;
-                        }.play)").postln.interpret;
-                time.wait;
-                syn.free;
-        };
-};
+
 )*/
