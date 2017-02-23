@@ -13,6 +13,7 @@ import store from '../store';
 import _ from 'lodash';
 
 class Home extends Component {
+
 constructor(props) {
 super(props);
 this.state={
@@ -33,7 +34,7 @@ this.state={
   sceneSentinel: false
 }
 }
-
+  
 //Clock for Haskell
 // componentDidMount(props,state){
 //   const ctx = this;
@@ -66,6 +67,7 @@ console.log(this.props.location.pathname);
 
    }
    ctx.setState({channelEnd : tempEnd});
+
 
 }
 createTimer(i,duration, steps){
@@ -116,7 +118,6 @@ componentDidUpdate(props, state) {
 }
 
 
-
 identical(array) {
     for(var i = 0; i < array.length ; i++) {
         if(array[i] === false ) {
@@ -142,7 +143,6 @@ progressMatrices(items){
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
       channelEnd[j] = false;
-
     }
     _.each(items, function(d, i, j){
       if(d.matName === activeMatrix)
@@ -298,8 +298,8 @@ startTimer() {
   }
 }
 
-pauseTimer() {
 
+pauseTimer() {
     const ctx = this;
     const {channels} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
@@ -315,6 +315,7 @@ stopTimer() {
     store.dispatch(stopIndividualTimer(i));
   }
 }
+
 
 renderStep(x, i) {
   const ctx=this;
@@ -350,6 +351,7 @@ renderStep(x, i) {
         if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
         return values[i+1][c];
       }
+
 
       const textval=getValue();
 
@@ -514,6 +516,7 @@ renderMetro(){
   </div>
 }
 
+
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
@@ -521,7 +524,6 @@ renderMenu(){
   const { commands }=ctx.props;
   // const { commands }=ctx.state;
   const { values, steps, channels}=ctx.state;
-
 
 
   const updateTidalServerLink=({ target: { value } }) => {
@@ -539,6 +541,20 @@ renderMenu(){
     //                          <img src={require('../assets/stop_icon.png')} onClick={ctx.stopTimer} height={32} width={32}/> </div>}
 
 
+  // Cellular and Bjorklund HTMLS
+  // <div id="Celluar">
+  //    <p>Cellular Automata Updates</p>
+  //    <input type="textarea" value={getValue()} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
+  //    {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
+  //    {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
+  //    <button onClick={addValues}>  Add  </button>
+  // </div>
+  // <div id="Celluar">
+  //    <p>Bjorklund Algorithm Updates</p>
+  //    {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
+  //    {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
+  //    <button onClick={addBjorkValues}>  Add  </button>
+  // </div>
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -560,8 +576,6 @@ renderMenu(){
     </div>
   </div>
 }
-
-
 
 render() {
   const ctx=this;

@@ -377,8 +377,8 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
+
 export const sendCommands = (server,vals, commands =[]) => {
-  console.log(vals);
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -428,6 +428,7 @@ export const sendCommands = (server,vals, commands =[]) => {
           // default:
           //   break;
         //}
+
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
         return [ k + ' $ ' + newCommand ] ;
 
