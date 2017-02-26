@@ -8,31 +8,43 @@ import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands,createTimer,timer
       startClick,stopClick} from '../actions'
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import Commands from './Commands.react';
+import Channel from './Channel.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
 
 class Home extends Component {
 constructor(props) {
-super(props);
-this.state={
-  matName: "",
-  modelName : "Matrices",
-  tidalServerLink: 'localhost:3001',
-  steps: 12,
-  channels: ['d1','d2','d3', 'd4', 'd5','d6'],
-  timer: [],
-  values: {},
-  scCommand: '',
-  click : {current:null,
-          isActive:false},
-  activeMatrix: '',
-  songmodeActive: false,
-  sceneIndex: '',
-  channelEnd :[],
-  play : false,
-  sceneSentinel: false
-}
+  super(props);
+  this.state={
+    matName: "",
+    modelName : "Matrices",
+    tidalServerLink: 'localhost:3001',
+    steps: 12,
+    channels: ['d1','d2','d3', 'd4', 'd5','d6'],
+    timer: [],
+    values: {},
+    scCommand: '',
+    click : {current:null,
+            isActive:false},
+    activeMatrix: '',
+    songmodeActive: false,
+    sceneIndex: '',
+    channelEnd: [],
+    play : false,
+    sceneSentinel: false
+  }
+
+  const ctx=this;
+  var tempEnd = [];
+  const { channels , steps , timer} = ctx.state;
+  for (var i = 0; i < channels.length; i++) {
+     if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
+     ctx.createTimer(i, 48, steps);
+     tempEnd[i] = false
+  }
+
+  this.state.channelEnd = tempEnd;
 }
 //Clock for Haskell
 // componentDidMount(props,state){
@@ -53,63 +65,45 @@ this.state={
 //   })
 // }
 
-componentWillMount(props,state){
-console.log(this.props.location.pathname);
-  const ctx=this;
-  var tempEnd = [];
-  const { channelEnd, channels , steps , timer}=ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-     if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
-     ctx.createTimer(i, 48, steps);
-     //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
-     tempEnd[i] = false
-
-   }
-   ctx.setState({channelEnd : tempEnd});
-}
-createTimer(i,duration, steps){
-  store.dispatch(createTimer(i,duration,steps));
-}
-
-componentDidUpdate(props, state) {
+componentDidUpdate(prevProps, prevState) {
+  console.log('componentDidUpdate');
   var runNo = [];
   const ctx=this;
-  const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
-  for (var i = 0; i < channels.length; i++) {
-
+  const { commands, timer, click}=prevProps;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd } = prevState;
+  /*for (var i = 0; i < channels.length; i++) {
     if (ctx.props.timer.timer[i].isActive) {
-    runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
+      runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
 
-    if(ctx.props.timer.timer[i].current % steps === steps-1){
-      if(songmodeActive){
-        channelEnd[i] = true;
-        ctx.setState({channelEnd : channelEnd});
-        store.dispatch(pauseIndividualTimer(i))
-        if(ctx.identical(channelEnd ) === true){
-            ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
-        // ctx.startTimer();
+      if(ctx.props.timer.timer[i].current % steps === steps-1){
+        if(songmodeActive){
+          channelEnd[i] = true;
+          ctx.setState({channelEnd : channelEnd});
+          store.dispatch(pauseIndividualTimer(i))
+          if(ctx.identical(channelEnd ) === true){
+              ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+              // ctx.startTimer();
+          }
         }
       }
-    }
 
-  if(values[runNo[i]]!== undefined){
-    const vals = values[runNo[i]][channels[i]];
-    const channel = channels[i];
-    const obj = {[channel]: vals};
-      if (vals !== undefined) {
-        var sceneCommands = [];
-        const items = this.props[this.state.modelName.toLowerCase()]
-        _.each(items, function(d){
-          if(d.matName === activeMatrix)
-            sceneCommands = d.commands;
-        })
+      if(values[channels[i]] !== undefined){
+        const vals = values[channels[i]][runNo[i]];
+        const channel = channels[i];
+        const obj = {[channel]: vals};
+        if (vals !== undefined) {
+          var sceneCommands = [];
+          const items = this.props[this.state.modelName.toLowerCase()]
+          _.each(items, function(d){
+            if(d.matName === activeMatrix)
+              sceneCommands = d.commands;
+          })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands );
+          ctx.sendCommands(tidalServerLink, obj , sceneCommands );
+          }
         }
       }
-    }
-  }
+    }*/
 }
 
 identical(array) {
@@ -121,6 +115,9 @@ identical(array) {
     return true;
 }
 
+createTimer(i,duration, steps){
+  store.dispatch(createTimer(i,duration,steps));
+}
 
 progressMatrices(items){
   const ctx = this;
@@ -128,10 +125,6 @@ progressMatrices(items){
   const { channelEnd, values, activeMatrix, steps, songmodeActive} = ctx.state;
   var commands = [];
 
-//for (var i = 0; i < channelEnd.length; i++) {
-
-
-  //timer[i].isActive = false;
   if(ctx.identical(channelEnd))
   {
     var i_save = -1;
@@ -152,9 +145,7 @@ progressMatrices(items){
       channelEnd[i] = false;
     }
     ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd });
-
   }
-  //}
 }
 
 enableSongmode(){
@@ -207,12 +198,11 @@ handleConsoleSubmit = event => {
 }
 
 updateMatrix(commands, values, item) {
-
-  const items = this.props[this.state.modelName.toLowerCase()]
-  console.log('SCENES: ');
-  _.forEach(Object.values(items), function(d){
-    console.log(d.matName + ' ' + d.sceneIndex);
-  });
+  // const items = this.props[this.state.modelName.toLowerCase()]
+  // console.log('SCENES: ');
+  // _.forEach(Object.values(items), function(d){
+  //   console.log(d.matName + ' ' + d.sceneIndex);
+  // });
 
   store.dispatch(updateMatrix(commands, values, item));
 }
@@ -226,25 +216,6 @@ updateMatrix(commands, values, item) {
 //   ctx.setState({duration:duration});
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
-
-
-renderPlayer() {
-  const ctx=this;
-  const { channels, steps , timer}=ctx.state;
-  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-  var count = 1;
-
-  return (<div className="Player-holder">
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle">cycle</div>
-      {_.map(channels, c => {
-        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/></div>
-      })}
-    </div>
-    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
-  </div>)
-}
 
 updateDur = ({target : {value, id}}) => {
 
@@ -264,10 +235,6 @@ _handleKeyPress = event => {
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
 
-console.log(event.ctrlKey);
-console.log(event.shiftKey);
-
-console.log(event);
   if(event.key === 'Enter'){
 
     if(ctx.props.timer.timer[_index].isActive === true){
@@ -315,67 +282,27 @@ stopTimer() {
   ctx.setState({play: false});
 }
 
-renderStep(x, i) {
+renderPlayer() {
   const ctx=this;
-  const { channels, steps }=ctx.state;
-  const { timer, click, commands }=ctx.props;
+  const { channels, steps, values }=ctx.state;
 
-  //var currentStep = [];
-  // for (var i = 0; i < timer.length; i++) {
-  //   currentStep[i] = timer[i].current %steps;
-  // }
-  //
-  //     for (var j = 0; j < timer.length; j++) {
-  //       if(i === currentStep[j]){
-  //        indvChannel[j] += "playbox-active";
-  //       }
-  //     }
-  var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
+  const setState = (item) => {
+    ctx.setState(item);
+  }
 
-  var colCount=0;
-
-  return <div key={i} className={playerClass}>
-    <div className="playbox playbox-cycle">{i+1}</div>
-    {_.map(channels, c => {
-      const setText=({ target: { value }}) => {
-          const {values}=ctx.state;
-          if (values[i+1] === undefined) values[i+1]={}
-          values[i+1][c] = value;
-          ctx.setState({values});
-      }
-
-      const getValue=() => {
-        const values=ctx.state.values;
-        if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
-        return values[i+1][c];
-      }
-
-      const textval=getValue();
-
-      const index=channels.length*i+colCount++;
-
-      const mapNumbers =(value, istart, istop, ostart, ostop) => {
-        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
-      }
-
-      //Timer Check
-      var _index = _.indexOf(channels,c);
-      const currentStep = ctx.props.timer.timer[_index].current % steps;
-      var individualClass = "playbox";
-      if (i === currentStep) {
-        individualClass += " playbox-active";
-      }
-
-
-      // dynamic cell height
-      const cellHeight = 85/steps;
-      // dynamic text size
-      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
-      return <div className={individualClass} style={{height: cellHeight+'vh'}} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
-      </div>
+  return (<div className={"Player-holder Player--" + (channels.length + 1.0) + "cols"}>
+    <div className={"Player"}>
+      <div className="playbox playbox-cycle">cycle</div>
+      {_.map(Array.apply(null, Array(steps)), (x, i) => {
+        return <div key={i} className="playbox playbox-cycle">{i+1}</div>
+      })}
+    </div>
+    {_.map(channels, (c, i) => {
+      return <Channel key={c} channel={c} index={i}
+                      values={values} steps={steps} setter={setState}
+                      onChange={ctx.updateDur.bind(ctx)} onKeyPress={ctx._handleKeyPress.bind(ctx)}/>
     })}
-  </div>;
+  </div>)
 }
 
 changeName({target: { value }}) {

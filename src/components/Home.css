@@ -55,16 +55,15 @@
 .Player-holder {
   display: flex;
   flex-grow: 2;
-  flex-direction: column;
+  flex-direction: row;
 
   overflow-y: auto;
-
 }
+
 .durInput{
   width: 50%;
-  
-
 }
+
 #Celluar {
   padding-top: 20px;
   padding-bottom: 10px;
@@ -132,6 +131,7 @@
 
 .Player {
   display: flex;
+  flex-direction: column;
   margin: 0;
   line-height: 20px;
   min-height: 35px;
