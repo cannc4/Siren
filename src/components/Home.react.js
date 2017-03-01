@@ -20,7 +20,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['d1','d2','d3', 'd4', 'd5','d6'],
+  channels: ['d1','d2','d3', 'd4', 'd5','m1'],
   timer: [],
   values: {},
   scCommand: '',
@@ -53,7 +53,16 @@ this.state={
 //     //this.startClick();
 //   })
 // }
-
+// shouldComponentUpdate(nextProps, nextState) {
+//   const {timer} = nextProps;
+//   const {channels} = nextState;
+//   for (var i = 0; i < channels.length; i++) {
+//     if (nextProps.timer.timer[i].isActive) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 componentWillMount(props,state){
 console.log(this.props.location.pathname);
   const ctx=this;
@@ -232,7 +241,10 @@ updateMatrix(commands, values, item) {
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
 
-
+soloChannel(){
+  //add solo channels
+  //const _key = event.target.id;
+}
 renderPlayer() {
   const ctx=this;
   const { channels, steps , timer}=ctx.state;
@@ -244,7 +256,7 @@ renderPlayer() {
       <div className="playbox playbox-cycle">cycle</div>
       {_.map(channels, c => {
         return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/></div>
+        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/> <img src={require('../assets/stop@3x.png')} id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/> </div>
       })}
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
@@ -517,6 +529,20 @@ renderMetro(){
   </div>
 }
 
+clearMatrix(){
+  const ctx = this;
+
+
+  const { values, channels, steps} = ctx.state;
+  console.log(values);
+  for (var i = 0; i < channels.length*steps; i++) {
+
+      values [i] = [];
+
+  }
+  ctx.setState({values});
+}
+
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
@@ -555,9 +581,11 @@ renderMenu(){
 
     </div>
     <div id="Command">
-       <p>SuperCollider Command</p>
-       <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder={'Ctrl + Enter '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-    </div>
+
+        <p>  </p>
+        <p>Console</p>
+       <textarea className="defaultCommandArea" value={scCommand} onChange={updateScCommand} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+      </div>
   </div>
 }
 
@@ -593,7 +621,9 @@ render() {
             <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
+            <button onClick={ctx.clearMatrix.bind(ctx)}> Clear Matrix </button>
           </div>
+
           <div>
             {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
             {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
@@ -623,7 +653,7 @@ render() {
         <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           {ctx.renderMenu()}
           <div id="Execution" style={{alignSelf:'center'}}>
-            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)" width={'100%'}/>
+            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
           </div>
         </div>
       </Layout>

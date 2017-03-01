@@ -18,7 +18,7 @@ SynthDef(\hihat, {|out=0, amp = 1, attack = 0.01, release = 0.1, pan = 0.5|
     snd = RHPF.ar(WhiteNoise.ar(amp) * env, 10000, 0.1) * env * amp;
     OffsetOut.ar(out, DirtPan.ar(snd, ~dirt.numChannels, pan))
     }).add;
-    Routine.run{
+    /*Routine.run{
             var syn, time= 16;              //allow each patch to run for 16sec / 8bars
             3.do{|i|
                     ("\n//fm7 patch"+i+"generated on"+Date.localtime).post;
@@ -35,9 +35,9 @@ SynthDef(\hihat, {|out=0, amp = 1, attack = 0.01, release = 0.1, pan = 0.5|
                     time.wait;
                     syn.free;
             };
-    };
+    };*/
 )
-//link enable 
+//link enable
 /*(
 
 )*/

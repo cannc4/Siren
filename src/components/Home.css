@@ -25,9 +25,9 @@
   resize:both;
   overflow-y: auto;
   width: 98%;
-  min-height: 70px;
+  min-height: 80px;
   height: 150px;
-  border: 1px solid rgba(125,100,100, 0.8);
+  border: 1px rgba(125,100,100, 0.8);
 }
 
 .matDiv {
@@ -62,7 +62,7 @@
 }
 .durInput{
   width: 50%;
-  
+
 
 }
 #Celluar {
@@ -95,9 +95,8 @@
 .easter {
   display: flex;
   flex-direction: column;
-
   flex-wrap: wrap;
-  width: 100%;
+  width: 120%;
   height: 150%;
 }
 
