@@ -47,8 +47,8 @@ d2 $every 4 (slow 8 ) $slow 6 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #cut "
 d4 $jux(iter 2) $slow 16 $striate 256 $n"4" #s "drums" #speed "2"
 d4 silence
 --Break
-
-
+displayOutputDevices >>= putStrLn
+devices <- midiDevices
   d3 $ slow 2 $
   slowspread (\wa ->
                slowspread (\wb ->
@@ -109,3 +109,73 @@ let dr3 i = n "[[0 ~! 1] ~ [~ 0 0]]!!" # s i
 
 
      slow 200 $ (sound $ step "feel" (take 1600 $ lindenmayer 30 "-:0,0:-1,1:-4-,4:-" "-0-1"))
+     data Sieve a = Sieve {at :: Int -> a}
+     instance Functor Sieve where
+         fmap f s = Sieve $ \i -> f (at s i)
+     instance Applicative Sieve where
+         pure b = Sieve $ \i -> b
+         (<*>) a b = Sieve $ \i -> (at a i) (at b i)
+     let basicSieve m i = Sieve $ \j -> (j `mod` m) == i
+         infixl 9 @@
+         (@@) = basicSieve
+         infixl 7 #||#
+         (#||#) = liftA2 (||)
+         infixl 8 #&&#
+         (#&&#) = liftA2 (&&)
+         snot = fmap not
+         infixl 7 #^^#
+         (#^^#) x y = (x #&&# snot y) #||# (y #&&# snot x)
+         toList n s = map (at s) [0..n-1]
+         toString n s = map b2c $ toList n s where
+           b2c b | b == True = 'x' | otherwise = '-'
+         toInts n s = map snd $ filter fst (zip (toList n s) [0..n-1])
+     toInts 12 $ 2@@1 #^^# 3@@0
+     toString 16 $ 3@@1 #||# 2@@0
+     -- more complicated sieve examples
+     d1 $ slow 4 $ sound (stack [
+      step "bd" $ toString 32 $ 5@@2 #||# 4@@0,
+      step "sn:2" $ toString 32 $ 4@@2 #^^# 3@@2])
+      # shape "0.5"
+     d2 $ do {
+       x <- "<1 2 3>";
+       y <- "<1 2>";
+       n (toScale (toInts 12 $ snot $ 4@@x #^^# 3@@0) (fmap (*y) $ every 2 rev $ run (8 `div` y)))}
+      # s "superzow" # bandf (density 1.2 $ scalex 500 2000 sine1) # bandq "5"
+
+
+      d1 $
+      spin 2 $
+      juxBy 0.9 (slow 2) $
+      superimpose (slowspread slow [3, 4] . (#vowel "{a e i o u}%3") . (|*| speed "0.5")) $
+      sometimes (slowspread chop [2, 8, 4] . slow 2) $
+      (
+      slow 32 $ slowspread (\x -> slowspread (striate' x) [(1/2), (1/4), (1/2), (1/8)]) [32, 64] $
+      interlace
+      (
+        stack [
+        foldEvery [3, 4] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "0" #cut "1",
+        foldEvery [3, 4] (0.5 <~) $ degradeBy 0.95 $ s samplset #n "1" #cut "2",
+        foldEvery [4, 5] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "2" #cut "3",
+        foldEvery [4, 5] (0.5 <~) $ degradeBy 0.5 $ s samplset #n "3" #cut "4"
+        ]
+      )
+      (
+        slowcat [
+        foldEvery [3, 4] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "0" #cut "5",
+        foldEvery [3, 4] (0.5 <~) $ degradeBy 0.95 $ s samplset #n "1" #cut "6",
+        foldEvery [4, 5] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "2" #cut "7",
+        foldEvery [4, 5] (0.5 <~) $ degradeBy 0.5 $ s samplset #n "3" #cut "8"
+        ]
+      )
+      )#speed "{1 1 1 1 2/4, ~ ~ 0.25/3 ~}%3"
+      #cutoff (rand' 1.2 1000 3000)
+      #delaytime (slow 16 "{0.25 0.5 1 0.5}%3")
+      #delay (rand' 1.4 0.1 0.3)
+      #delayfeedback (rand' 1.5 0.2 0.4)
+      #shape (sine' 16 0.1 0.9)
+      #crush (slow 7 "16 12 11/2 10 8/3 7/7")
+
+
+      foldEvery [3,4 ] (13.25<~)
+      slowspread ($) [id,rev]
+      #unit "c"
