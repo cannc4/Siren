@@ -109,11 +109,12 @@ class Commands extends Component {
           <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
             <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
             <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
+              <button onClick={handleDelete}>{'Delete'} </button>
+            </div>
             <CodeMirror className={'commandDiv'} name={"command"} value={item["command"]} onChange={handleChange.bind(ctx)} options={options}/>
           </div>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
-          <button onClick={handleDelete}>{'Delete'} </button>
-        </div>
+
       </li>
     )
   }

@@ -15,36 +15,26 @@ import _ from 'lodash';
 
 class Home extends Component {
 constructor(props) {
-  super(props);
-  this.state={
-    matName: "",
-    modelName : "Matrices",
-    tidalServerLink: 'localhost:3001',
-    steps: 12,
-    channels: ['d1','d2','d3', 'd4', 'd5','d6'],
-    timer: [],
-    values: {},
-    scCommand: '',
-    click : {current:null,
-            isActive:false},
-    activeMatrix: '',
-    songmodeActive: false,
-    sceneIndex: '',
-    channelEnd: [],
-    play : false,
-    sceneSentinel: false
-  }
 
-  const ctx=this;
-  var tempEnd = [];
-  const { channels , steps , timer} = ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-     if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
-     ctx.createTimer(i, 48, steps);
-     tempEnd[i] = false
-  }
-
-  this.state.channelEnd = tempEnd;
+super(props);
+this.state={
+  matName: "",
+  modelName : "Matrices",
+  tidalServerLink: 'localhost:3001',
+  steps: 12,
+  channels: ['d1','d2','d3', 'd4', 'd5','m1'],
+  timer: [],
+  values: {},
+  scCommand: '',
+  click : {current:null,
+          isActive:false},
+  activeMatrix: '',
+  songmodeActive: false,
+  sceneIndex: '',
+  channelEnd :[],
+  play : false,
+  sceneSentinel: false
+}
 }
 //Clock for Haskell
 // componentDidMount(props,state){
@@ -65,8 +55,37 @@ constructor(props) {
 //   })
 // }
 
-componentDidUpdate(prevProps, prevState) {
-  console.log('componentDidUpdate');
+// shouldComponentUpdate(nextProps, nextState) {
+//   const {timer} = nextProps;
+//   const {channels} = nextState;
+//   for (var i = 0; i < channels.length; i++) {
+//     if (nextProps.timer.timer[i].isActive) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+componentWillMount(props,state){
+console.log(this.props.location.pathname);
+  const ctx=this;
+  var tempEnd = [];
+  const { channelEnd, channels , steps , timer}=ctx.state;
+  for (var i = 0; i < channels.length; i++) {
+     if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
+     ctx.createTimer(i, 48, steps);
+     //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
+     tempEnd[i] = false
+
+   }
+   ctx.setState({channelEnd : tempEnd});
+
+
+}
+createTimer(i,duration, steps){
+  store.dispatch(createTimer(i,duration,steps));
+}
+
+componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=prevProps;
@@ -216,6 +235,28 @@ updateMatrix(commands, values, item) {
 //   ctx.setState({duration:duration});
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
+
+soloChannel(){
+  //add solo channels
+  //const _key = event.target.id;
+}
+renderPlayer() {
+  const ctx=this;
+  const { channels, steps , timer}=ctx.state;
+  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
+  var count = 1;
+
+  return (<div className="Player-holder">
+    <div className={playerClass}>
+      <div className="playbox playbox-cycle">cycle</div>
+      {_.map(channels, c => {
+        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
+        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/> <img src={require('../assets/stop@3x.png')} id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/> </div>
+      })}
+    </div>
+    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
+  </div>)
+}
 
 updateDur = ({target : {value, id}}) => {
 
@@ -440,6 +481,20 @@ renderMetro(){
   </div>
 }
 
+clearMatrix(){
+  const ctx = this;
+
+
+  const { values, channels, steps} = ctx.state;
+  console.log(values);
+  for (var i = 0; i < channels.length*steps; i++) {
+
+      values [i] = [];
+
+  }
+  ctx.setState({values});
+}
+
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
@@ -478,9 +533,11 @@ renderMenu(){
 
     </div>
     <div id="Command">
-       <p>SuperCollider Command</p>
-       <input type="textarea" value={scCommand} onChange={updateScCommand} placeholder={'Ctrl + Enter '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-    </div>
+
+        <p>  </p>
+        <p>Console</p>
+       <textarea className="defaultCommandArea" value={scCommand} onChange={updateScCommand} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+      </div>
   </div>
 }
 
@@ -514,7 +571,9 @@ render() {
             <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
+            <button onClick={ctx.clearMatrix.bind(ctx)}> Clear Matrix </button>
           </div>
+
           <div>
             {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
             {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
@@ -544,7 +603,7 @@ render() {
         <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
           {ctx.renderMenu()}
           <div id="Execution" style={{alignSelf:'center'}}>
-            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal Command Here (Ctrl + Enter)" width={'100%'}/>
+            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
           </div>
         </div>
       </Layout>
