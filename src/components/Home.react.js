@@ -31,6 +31,8 @@ this.state={
   sceneIndex: '',
   channelEnd :[],
   play : false,
+  solo : [],
+  soloSentinel: false,
   sceneSentinel: false
 }
 }
@@ -67,13 +69,13 @@ componentWillMount(props,state){
 console.log(this.props.location.pathname);
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer}=ctx.state;
+  const { channelEnd, channels , steps , timer, solo}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
      if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
      ctx.createTimer(i, 48, steps);
      //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
      tempEnd[i] = false
-
+     solo[i] = false;
    }
    ctx.setState({channelEnd : tempEnd});
 
@@ -86,7 +88,7 @@ componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo }=state;
   for (var i = 0; i < channels.length; i++) {
 
     if (ctx.props.timer.timer[i].isActive) {
@@ -116,7 +118,7 @@ componentDidUpdate(props, state) {
             sceneCommands = d.commands;
         })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands );
+        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo);
         }
       }
     }
@@ -240,14 +242,38 @@ updateMatrix(commands, values, item) {
 //   ctx.setState({duration:duration});
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
+updateDur = ({target : {value, id}}) => {
 
-soloChannel(){
+    const ctx = this;
+    const {channels,steps} = ctx.state;
+    const {timer} = ctx.props;
+    var _index = _.indexOf(channels,id);
+    if(value !== undefined && value !== "")
+      store.dispatch(updateTimerduration(_index,value,steps));
+}
+
+soloChannel =  ({target : {id}}) => {
+  const ctx = this;
+  const {channels,solo,soloSentinel} = ctx.state;
+  var _index = _.indexOf(channels,id);
+  if(_index !== -1 ){
+
+    for (var i = 0; i < solo.length; i++) {
+      if(_index !== i)
+        solo[i] = false;
+    }
+    solo[_index] = !solo[_index];
+    console.log(solo);
+    ctx.setState({solo: solo, soloSentinel : solo[_index]});
+
+  }
   //add solo channels
   //const _key = event.target.id;
 }
+
 renderPlayer() {
   const ctx=this;
-  const { channels, steps , timer}=ctx.state;
+  const { channels, steps , timer, solo, soloSentinel}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
 
@@ -256,7 +282,11 @@ renderPlayer() {
       <div className="playbox playbox-cycle">cycle</div>
       {_.map(channels, c => {
         return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/> <img src={require('../assets/stop@3x.png')} id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/> </div>
+        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/>
+        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+
+         </div>
       })}
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}

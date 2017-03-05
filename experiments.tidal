@@ -179,3 +179,9 @@ let dr3 i = n "[[0 ~! 1] ~ [~ 0 0]]!!" # s i
       foldEvery [3,4 ] (13.25<~)
       slowspread ($) [id,rev]
       #unit "c"
+
+
+
+d1 $slowspread ($) [rev, (stut 4 0.125 0.25 . zoom (0,0.25)), id, id, iter 4 ]$ foldEvery [3,4] (0.25 <~) $ whenmod 6 5 (zoom (0.5,1)) $ stack [
+
+]

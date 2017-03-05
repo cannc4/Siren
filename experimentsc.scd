@@ -15,6 +15,20 @@ SynthDef(\superfork, {|out, speed=1, sustain=1, decay=0, pan, freq, voice=0 |
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
 }).add;
 
+/*~bellA = [-19.4, -18.2, -17, -14.8, -23.2, -19, -19.4, -26.7, -21, -27.1, -39, -36.3];
+~bellF = [1, 2.010752688172, 2.4408602150538, 4.0537634408602, 5.0430107526882, 5.9784946236559, 8.1827956989247, 10.559139784946, 13.021505376344, 15.58064516129, 18.172043010753, 20.806451612903];
+~bellRing = [10, 8, 7, 9, 5, 6, 6, 8, 5, 4, 3, 7];
+
+
+SynthDef(\bell, {
+	arg f = 50, randLo, randHi, dur, out,sound;
+	var sig, env;
+	env = EnvGen.kr(Env.new([1, 0.001], [1], \exp), 1, timeScale:dur, doneAction:2);
+	sig = LPF.ar(PinkNoise.ar, 10000);
+	sig = DynKlank.ar(`[(~bellF*f)+ExpRand(randLo, randHi), ~bellA.dbamp, ~bellRing], sig)*0.025;
+OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
+}).add;*/
+
 // hammond B3 sim
 // freq adjustments courtesy Tom Wiltshire (electricdruid.net)
 // drawbar settings selectable with "voice" and from many public domain sources,
@@ -245,7 +259,7 @@ SynthDef(\supertest, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
 }).add;
 
-SynthDef(\superchop, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0 |
+  SynthDef(\superchop, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0 |
 	var env = EnvGen.ar(Env.pairs([[0,0],[0.05,1],[0.2,1-decay],[0.95,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
 	var basefreq = freq * Line.kr(1, 1+accelerate, sustain);
 	var chopfreq = basefreq;

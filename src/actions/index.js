@@ -377,7 +377,7 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, commands =[]) => {
+export const sendCommands = (server,vals, commands =[], solo) => {
   console.log(vals);
   return dispatch => {
 
@@ -407,6 +407,12 @@ export const sendCommands = (server,vals, commands =[]) => {
           }
         });
 
+        for (var i = 0; i < solo.length; i++) {
+          if(solo[i] === true){
+            k = "solo $ " + k;
+          }
+        }
+        console.log(k);
         // var append = "";
         // switch (k) {
         //   case "d1":
