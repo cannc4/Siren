@@ -1,13 +1,12 @@
 {
-  "userpath": "C:\\Users\\Mert",
+  "userpath": "/Users/canince",
   "debug": true,
-  "ghcipath": "C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe",
-  "sclang": "C:\\Program Files\\SuperCollider-3.8.0\\sclang.exe",
-  "scsynth": "C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe",
-  "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
-  "port":3001,
-  "samples_path": "C:\\Users\\Mert\\Dropbox\\Whalehouse\\Samples\\*",
-  "tidal_boot": "C:\\GitHub\\sq\\config\\tidal-boot-default.hs",
-  "scd_start": "C:\\GitHub\\sq\\config\\scd-start-default.scd",
-  "path": "C:\\GitHub\\sq\\config\\config.json"
+  "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.0.1-x86_64/usr/bin/ghci-8.0.1",
+  "sclang": "/Users/canince/Documents/Github/sq/deps/SuperCollider.app/Contents/MacOS/sclang",
+  "scsynth": "/Users/canince/Documents/Github/sq/deps/SuperCollider.app/Contents/Resources/scsynth",
+  "sclang_conf": "/Users/canince/Library/Application Support/SuperCollider/sclang_conf.yaml",
+  "port": 3001,
+  "path" : "/Users/canince/Documents/Github/sq/config/config.json",
+  "tidal_boot": "/Users/canince/Documents/Github/sq/config/tidal-boot-default.hs",
+  "scd_start": "/Users/canince/Documents/Github/sq/config/scd-start-default.scd"
 }

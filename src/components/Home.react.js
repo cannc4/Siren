@@ -18,7 +18,6 @@ import store from '../store';
 import _ from 'lodash';
 
 class Home extends Component {
-
 constructor(props) {
 super(props);
 this.state={
@@ -26,7 +25,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['d1','d2','d3', 'd4', 'd5','m1'],
+  channels: ['t1','t2','t3', 't4', 't5'],
   timer: [],
   values: {},
   scCommand: '',
@@ -35,8 +34,11 @@ this.state={
   activeMatrix: '',
   songmodeActive: false,
   sceneIndex: '',
+  transition: [],
   channelEnd :[],
   play : false,
+  solo : [],
+  soloSentinel: false,
   sceneSentinel: false
   //rotation: 1.5,
   //stateSketch : sketch
@@ -75,16 +77,15 @@ componentWillMount(props,state){
 console.log(this.props.location.pathname);
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer}=ctx.state;
+  const { channelEnd, channels , steps , timer, solo}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
      if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
      ctx.createTimer(i, 48, steps);
      //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
      tempEnd[i] = false
-
+     solo[i] = false;
    }
    ctx.setState({channelEnd : tempEnd});
-
 
 }
 createTimer(i,duration, steps){
@@ -95,7 +96,7 @@ componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition }=state;
   for (var i = 0; i < channels.length; i++) {
 
     if (ctx.props.timer.timer[i].isActive) {
@@ -125,12 +126,13 @@ componentDidUpdate(props, state) {
             sceneCommands = d.commands;
         })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands );
+        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels);
         }
       }
     }
   }
 }
+
 
 
 identical(array) {
@@ -158,6 +160,7 @@ progressMatrices(items){
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
       channelEnd[j] = false;
+
     }
     _.each(items, function(d, i, j){
       if(d.matName === activeMatrix)
@@ -192,8 +195,8 @@ runTidal() {
   store.dispatch(initMyTidal(tidalServerLink));
 }
 
-sendCommands(tidalServerLink, vals, channelcommands, commands) {
-  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
+sendCommands(tidalServerLink, vals, channelcommands, commands,solo,transition, channels) {
+  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels));
 }
 sendSCMatrix(tidalServerLink, vals, commands) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
@@ -247,14 +250,38 @@ updateMatrix(commands, values, item) {
 //   ctx.setState({duration:duration});
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
+updateDur = ({target : {value, id}}) => {
 
-soloChannel(){
+    const ctx = this;
+    const {channels,steps} = ctx.state;
+    const {timer} = ctx.props;
+    var _index = _.indexOf(channels,id);
+    if(value !== undefined && value !== "")
+      store.dispatch(updateTimerduration(_index,value,steps));
+}
+
+soloChannel =  ({target : {id}}) => {
+  const ctx = this;
+  const {channels,solo,soloSentinel} = ctx.state;
+  var _index = _.indexOf(channels,id);
+  if(_index !== -1 ){
+
+    for (var i = 0; i < solo.length; i++) {
+      if(_index !== i)
+        solo[i] = false;
+    }
+    solo[_index] = !solo[_index];
+    console.log(solo);
+    ctx.setState({solo: solo, soloSentinel : solo[_index]});
+
+  }
   //add solo channels
   //const _key = event.target.id;
 }
+
 renderPlayer() {
   const ctx=this;
-  const { channels, steps , timer}=ctx.state;
+  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
 
@@ -263,10 +290,20 @@ renderPlayer() {
       <div className="playbox playbox-cycle">cycle</div>
       {_.map(channels, c => {
         return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)} onKeyUp={ctx._handleKeyPress.bind(ctx)}/> <img src={require('../assets/stop@3x.png')} id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/> </div>
+        onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
+        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+         </div>
       })}
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
+      <div className={playerClass}>
+        <div className="playbox playbox-cycle">Transition</div>
+      {_.map(channels, c => {
+        return <input className = "playbox" id = {c} key = {c} value = {ctx.state.transition[_.indexOf(channels, c)]} style = {{margin: 5}}
+        onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      })}
+      </div>
   </div>)
 }
 
@@ -307,6 +344,39 @@ _handleKeyPress = event => {
   }
 }
 
+
+
+updateT = ({target : {value, id}}) => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key =id;
+  var value = value;
+  var _index = _.indexOf(channels, _key);
+  var temp = transition;
+  console.log("TRANSITION");
+  console.log(temp);
+  temp[_index] = value;
+  console.log(transition[_index]);
+  ctx.setState({transition:temp});
+}
+
+
+_handleKeyPressT = event => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key = event.target.id;
+  var value = event.target.value;
+  var _index = _.indexOf(channels, _key);
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    var temp = transition;
+    temp[_index] = value;
+   console.log(transition[_index]);
+   ctx.setState({transition:temp});
+  }
+}
 startTimer() {
 
   const ctx = this;
@@ -318,8 +388,8 @@ startTimer() {
   ctx.setState({play:true});
 }
 
-
 pauseTimer() {
+
     const ctx = this;
     const {channels, play} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
@@ -337,7 +407,6 @@ stopTimer() {
   }
   ctx.setState({play: false});
 }
-
 
 renderStep(x, i) {
   const ctx=this;
@@ -373,7 +442,6 @@ renderStep(x, i) {
         if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
         return values[i+1][c];
       }
-
 
       const textval=getValue();
 
@@ -538,7 +606,6 @@ renderMetro(){
   </div>
 }
 
-
 clearMatrix(){
   const ctx = this;
 
@@ -553,7 +620,6 @@ clearMatrix(){
   ctx.setState({values});
 }
 
-
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
@@ -561,6 +627,7 @@ renderMenu(){
   const { commands }=ctx.props;
   // const { commands }=ctx.state;
   const { values, steps, channels}=ctx.state;
+
 
 
   const updateTidalServerLink=({ target: { value } }) => {
@@ -575,20 +642,6 @@ renderMenu(){
     // REPLACING START PAUSE STOP WITH IMAGES
 //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
 
-  // Cellular and Bjorklund HTMLS
-  // <div id="Celluar">
-  //    <p>Cellular Automata Updates</p>
-  //    <input type="textarea" value={getValue()} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-  //    {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-  //    {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-  //    <button onClick={addValues}>  Add  </button>
-  // </div>
-  // <div id="Celluar">
-  //    <p>Bjorklund Algorithm Updates</p>
-  //    {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-  //    {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-  //    <button onClick={addBjorkValues}>  Add  </button>
-  // </div>
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -612,6 +665,8 @@ renderMenu(){
       </div>
   </div>
 }
+
+
 
 render() {
   const ctx=this;

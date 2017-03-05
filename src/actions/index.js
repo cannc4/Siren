@@ -54,6 +54,9 @@ const models = {
     }
   }
 }
+String.prototype.replaceAt=function(index, character) {
+  return this.substr(0, index) + character + this.substr(index+character.length);
+}
 //
 // var client = dgram.createSocket('udp4');
 //
@@ -386,8 +389,9 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
+export const sendCommands = (server,vals, commands =[], solo, transition, channels) => {
 
-export const sendCommands = (server,vals, commands =[]) => {
+  console.log(transition[0]);
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -415,31 +419,34 @@ export const sendCommands = (server,vals, commands =[]) => {
             newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
           }
         });
+        var soloHolder = k ;
+        var transitionHolder = "" ;
 
-        // var append = "";
-        // switch (k) {
-        //   case "d1":
-        //     append = " # orbit \"4\""; break;
-        //   case "d2":
-        //     append = " # orbit \"5\""; break;
-        //   case "d3":
-        //     append = " # orbit \"6\""; break;
-        //   case "d4":
-        //     append = " # orbit \"7\""; break;
-          // case "d5":
-          //   append = " # orbit \"4\""; break;
-          // case "d6":
-          //   append = " # orbit \"5\""; break;
-          //   case "d7":
-          //     append = " # orbit \"6\""; break;
-          //     case "d8":
-          //       append = " # orbit \"6\""; break;
-          // default:
-          //   break;
-        //}
+          var _k = k;
+          if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
+          k = k.replaceAt(0, "d");
+          soloHolder = k ;
+          transitionHolder = " $ ";
+          }
 
+          if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
+            transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
+            soloHolder = k ;
+          }
+
+          if(solo[_.indexOf(channels,_k)] === true){
+            k = k.replaceAt(0, "d");
+            soloHolder = "solo $ " + k ;
+            transitionHolder = " $ ";
+          }
+
+
+
+
+
+        console.log(soloHolder + transitionHolder + newCommand );
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-        return [ k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [soloHolder + transitionHolder + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))
