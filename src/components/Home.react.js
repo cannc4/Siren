@@ -20,7 +20,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['d1','d2','d3', 'd4', 'd5','m1'],
+  channels: ['t1','t2','t3', 't4', 't5'],
   timer: [],
   values: {},
   scCommand: '',
@@ -29,6 +29,7 @@ this.state={
   activeMatrix: '',
   songmodeActive: false,
   sceneIndex: '',
+  transition: [],
   channelEnd :[],
   play : false,
   solo : [],
@@ -88,7 +89,7 @@ componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo }=state;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition }=state;
   for (var i = 0; i < channels.length; i++) {
 
     if (ctx.props.timer.timer[i].isActive) {
@@ -118,7 +119,7 @@ componentDidUpdate(props, state) {
             sceneCommands = d.commands;
         })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo);
+        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels);
         }
       }
     }
@@ -187,8 +188,8 @@ runTidal() {
   store.dispatch(initMyTidal(tidalServerLink));
 }
 
-sendCommands(tidalServerLink, vals, channelcommands, commands) {
-  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
+sendCommands(tidalServerLink, vals, channelcommands, commands,solo,transition, channels) {
+  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels));
 }
 sendSCMatrix(tidalServerLink, vals, commands) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
@@ -273,7 +274,7 @@ soloChannel =  ({target : {id}}) => {
 
 renderPlayer() {
   const ctx=this;
-  const { channels, steps , timer, solo, soloSentinel}=ctx.state;
+  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
 
@@ -282,7 +283,7 @@ renderPlayer() {
       <div className="playbox playbox-cycle">cycle</div>
       {_.map(channels, c => {
         return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/>
+        onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
         {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
         {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
 
@@ -290,6 +291,13 @@ renderPlayer() {
       })}
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
+      <div className={playerClass}>
+        <div className="playbox playbox-cycle">Transition</div>
+      {_.map(channels, c => {
+        return <input className = "playbox" id = {c} key = {c} value = {ctx.state.transition[_.indexOf(channels, c)]} style = {{margin: 5}}
+        onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      })}
+      </div>
   </div>)
 }
 
@@ -311,7 +319,7 @@ _handleKeyPress = event => {
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
 
-  if(event.key === 'Enter' && event.ctrlKey){
+  if(event.keyCode === 13 && event.ctrlKey){
     // if( value < "4"){
     //   value = 4;
     // }
@@ -320,7 +328,7 @@ _handleKeyPress = event => {
     }
     startIndividualTimer(_index, value,steps);
   }
-  else if (event.key === 'Enter' && event.shiftKey){
+  else if (event.keyCode === 13 && event.shiftKey){
     // if( value < "10"){
     //   value = 10;
     // }
@@ -330,6 +338,39 @@ _handleKeyPress = event => {
   }
 }
 
+
+
+updateT = ({target : {value, id}}) => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key =id;
+  var value = value;
+  var _index = _.indexOf(channels, _key);
+  var temp = transition;
+  console.log("TRANSITION");
+  console.log(temp);
+  temp[_index] = value;
+  console.log(transition[_index]);
+  ctx.setState({transition:temp});
+}
+
+
+_handleKeyPressT = event => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key = event.target.id;
+  var value = event.target.value;
+  var _index = _.indexOf(channels, _key);
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    var temp = transition;
+    temp[_index] = value;
+   console.log(transition[_index]);
+   ctx.setState({transition:temp});
+  }
+}
 startTimer() {
 
   const ctx = this;

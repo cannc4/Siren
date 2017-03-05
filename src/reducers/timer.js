@@ -9,7 +9,6 @@ export default (state = INITIAL_STATE, action) => {
       return {...s};
     case 'INC_'+modelName:
       const k = state;
-      console.log("GTTIGG");
       k.timer[action.payload].current++;
       k.timer[action.payload].isActive = true;
       return {...k};
