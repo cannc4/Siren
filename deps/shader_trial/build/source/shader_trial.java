@@ -21,19 +21,49 @@ PGraphics pg;
 PShape ph;
 PShader ps;
 
+float angle = 0;
+float scale = 0;
+
 public void setup() {
+
   
-  pg = createGraphics(width,height, P3D);
+  //fullScreen(P3D, 1);
+
+  pg = createGraphics(width, height, P3D);
 
   ph = createSphere();
   ps = loadShader("main/sphereFrag.glsl", "main/sphereVert.glsl");
 
   /* start oscP5, listening for incoming messages at port 12000
-     IP = 127.0.0.1 */
+   IP = 127.0.0.1 */
   oscP5 = new OscP5(this, 12000);
 
   initFilters();
   initShaders();
+}
+
+public void keyPressed(){
+  if(key == 'p')
+    presetNumber++;
+  else if(key == 'o')
+    presetNumber--;
+  else if(key == 's'){
+    strobeLasttime = millis();
+    strobeTime = 500;
+  }
+  else if(key == 'a'){
+    glitchLasttime = millis();
+    glitchTime = 500;
+  }
+  else if(key == 'd'){
+    randomMaskLasttime = millis();
+    randomMaskTime = 1000;
+    orientation = random(-1, 1);
+    rand_x = random(1);
+    rand_width = random(1);
+    rand_y = random(1);
+    rand_height = random(1);
+  }
 }
 
 public void draw() {
@@ -44,7 +74,16 @@ public void draw() {
 
   // Main object drawn
   drawShaders();
-  drawSphere();
+  pushMatrix();
+  angle+= 0.02f;
+  translate(width/2, height/2);
+  rotate(angle, random(0,1),random(0,1),random(0,1));
+  noFill();
+  stroke(200);
+  sphereDetail(10);
+  sphere(100);
+  popMatrix();
+  //drawSphere();
 
   // post-processing effects
   presets();
@@ -54,36 +93,37 @@ public void draw() {
   toggleFilters();
 
   // Overall subtle line pattern
-  filter(lines);
-
-  //saveFrame("C:\\GitHub\\200c\\celluar\\im-######.tga");
+  filter(lines.shader);
 
   // Debugging texts
   /*fill(255);
-  textSize(25);
-  text(frameRate, 5, 30);*/
+   textSize(25);
+   text(frameRate, 5, 30);*/
 }
-PShader lines;
-PShader shake;
-PShader rgbShift;
-PShader hueSaturation;
-PShader brightContrast;
-PShader barrelBlur;
-PShader glow;
-PShader halftone;
-PShader pixelate;
-PShader pixelRolls;
-PShader patches;
-PShader edge;
-PShader mirror;
+GShader lines;
+GShader shake;
+GShader rgbShift;
+GShader hueSaturation;
+GShader brightContrast;
+GShader barrelBlur;
+GShader glow;
+GShader halftone;
+GShader pixelate;
+GShader pixelRolls;
+GShader patches;
+GShader edge;
+GShader mirror;
 
-ArrayList<PShader> filters = new ArrayList();
+ArrayList<GShader> filters = new ArrayList();
 ArrayList<String>  filterNames = new ArrayList();
 
 public void updateUniforms_Filters() {
-  shake.set("time", (float)millis()/1000.0f);
-  barrelBlur.set("time", (float)millis()/1000.0f);
-  pixelRolls.set("time", (float)millis()/1000.0f);
+  for(GShader g : filters){
+    g.update();
+  }
+  //shake.addUniform("time", (float)millis()/1000.0);
+  //barrelBlur.addUniform("time", (float)millis()/1000.0);
+  //pixelRolls.addUniform("time", (float)millis()/1000.0);
 }
 
 public void initFilters() {
@@ -103,159 +143,357 @@ public void initFilters() {
 }
 
 public void f_init_Lines() {
-  lines = loadShader("texture/lines.glsl");
+  lines = new GShader("texture/lines.glsl");
 
-  lines.set("lineStrength", 0.09f);
-  lines.set("lineSize", 2000.f);
-  lines.set("lineTilt", 0.45f);
+  lines.addUniform("lineStrength", 0.09f, 0, 1);
+  lines.addUniform("lineSize", 2000.f, 2000, 4000);
+  lines.addUniform("lineTilt", 0.45f, 0, 1);
 
   filters.add(lines);
   filterNames.add("lines");
 }
 
 public void f_init_Shake() {
-  shake = loadShader("texture/shake.glsl");
+  shake = new GShader("texture/shake.glsl");
 
-  shake.set("time", millis());
-  shake.set("amount", 0.01f);     // 0-1.0
-
-  shake.set("mask_c", 0.0f, .0f);
-  shake.set("mask_d", 1.f, 1.f);
+  shake.addUniform("amount", 0.01f, 0, 1);     // 0-1.0
 
   filters.add(shake);
   filterNames.add("shake");
 }
 
 public void f_init_RGBShift() {
-  rgbShift = loadShader("texture/rgbShift.glsl");
+  rgbShift = new GShader("texture/rgbShift.glsl");
 
-  rgbShift.set("angle", PI);     // 0-TWO_PI
-  rgbShift.set("amount", 0.005f); // 0-0.1
-
-  rgbShift.set("mask_c", 0.0f, .0f);
-  rgbShift.set("mask_d", 1.f, 1.f);
+  rgbShift.addUniform("angle", PI, 0, TWO_PI);     // 0-TWO_PI
+  rgbShift.addUniform("amount", 0.005f, 0, .1f);     // 0-0.1
 
   filters.add(rgbShift);
   filterNames.add("rgbShift");
 }
 
 public void f_init_HueSaturation() {
-  hueSaturation = loadShader("texture/hueSaturation.glsl");
+  hueSaturation = new GShader("texture/hueSaturation.glsl");
 
-  hueSaturation.set("hue", 0.0f);         // 0 - 2
-  hueSaturation.set("saturation", 1.0f);  // -1 - 1
+  hueSaturation.addUniform("hue", 0.0f, .0f, 2.f);         // 0 - 2
+  hueSaturation.addUniform("saturation", 1.0f, -1, 1);  // -1 - 1
 
-    hueSaturation.set("mask_c", 0.0f, .0f);
-    hueSaturation.set("mask_d", 1.f, 1.f);
   filters.add(hueSaturation);
   filterNames.add("hueSaturation");
 }
 
 public void f_init_BarrelBlur() {
-  barrelBlur = loadShader("texture/barrelBlur.glsl");
+  barrelBlur = new GShader("texture/barrelBlur.glsl");
 
-  barrelBlur.set("amount", 0.1f);
+  barrelBlur.addUniform("amount", 0.1f, 0, 1);
 
-    barrelBlur.set("mask_c", 0.0f, .0f);
-    barrelBlur.set("mask_d", 1.f, 1.f);
   filters.add(barrelBlur);
   filterNames.add("barrelBlur");
 }
 
 public void f_init_BrightnessContrast() {
-  brightContrast = loadShader("texture/brightContrast.glsl");
+  brightContrast = new GShader("texture/brightContrast.glsl");
 
-  brightContrast.set("brightness", 1.0f);
-  brightContrast.set("contrast", 1.0f);
+  brightContrast.addUniform("brightness", 1.0f, 0, 1);
+  brightContrast.addUniform("contrast", 1.0f, 0, 1);
 
-    brightContrast.set("mask_c", 0.0f, .0f);
-    brightContrast.set("mask_d", 1.f, 1.f);
   filters.add(brightContrast);
   filterNames.add("brightContrast");
 }
 
 
 public void f_init_Glow() {
-  glow = loadShader("texture/glow.glsl");
+  glow = new GShader("texture/glow.glsl");
 
-  glow.set("brightness", 0.25f); // 0-0.5
-  glow.set("radius", 2);        // 0-3
+  glow.addUniform("brightness", 0.25f, 0, .5f); // 0-0.5
+  glow.addUniform("radius", 2, 0, 3);         // 0-3
 
-    glow.set("mask_c", 0.0f, .0f);
-    glow.set("mask_d", 1.f, 1.f);
   filters.add(glow);
   filterNames.add("glow");
 }
 
 public void f_init_Halftone() {
-  halftone = loadShader("texture/halftone.glsl");
+  halftone = new GShader("texture/halftone.glsl");
 
-  halftone.set("pixelsPerRow", 80);
+  halftone.addUniform("pixelsPerRow", 80.f, 10.f, 400.f);
 
-    halftone.set("mask_c", 0.0f, .0f);
-    halftone.set("mask_d", 1.f, 1.f);
   filters.add(halftone);
   filterNames.add("halftone");
 }
 
 public void f_init_Pixelate() {
-  pixelate = loadShader("texture/pixelate.glsl");
+  pixelate = new GShader("texture/pixelate.glsl");
 
-  pixelate.set("pixels", 0.1f * width, 0.1f * height);
+  pixelate.addUniform("pixels", new PVector (0.1f * width, 0.1f * height), new PVector(10, 10), new PVector(width/2, height/2));
 
-    pixelate.set("mask_c", 0.0f, .0f);
-    pixelate.set("mask_d", 1.f, 1.f);
   filters.add(pixelate);
   filterNames.add("pixelate");
 }
 
 public void f_init_Patches() {
-  patches = loadShader("texture/patches.glsl");
+  patches = new GShader("texture/patches.glsl");
 
-  patches.set("row", 0.5f);
-  patches.set("col", 0.5f);
+  patches.addUniform("row", 0.5f, 0, 1);
+  patches.addUniform("col", 0.5f, 0, 1);
 
-    patches.set("mask_c", 0.0f, .0f);
-    patches.set("mask_d", 1.f, 1.f);
   filters.add(patches);
   filterNames.add("patches");
 }
 
 public void f_init_PixelRolls() {
-  pixelRolls = loadShader("texture/pixelrolls.glsl");
+  pixelRolls = new GShader("texture/pixelrolls.glsl");
 
-  pixelRolls.set("pixels", 50.0f, 10.0f);
-  pixelRolls.set("rollRate", 10.0f);        //0-10
-  pixelRolls.set("rollAmount", 0.09f);
-
-    pixelRolls.set("mask_c", 0.0f, .0f);
-    pixelRolls.set("mask_d", 1.f, 1.f);
+  pixelRolls.addUniform("pixels", new PVector (50.0f, 10.0f), new PVector (2.0f, 2.0f), new PVector (300.0f, 300.0f));
+  pixelRolls.addUniform("rollRate", 10.0f, 0, 10);        //0-10
+  pixelRolls.addUniform("rollAmount", 0.09f, 0, .5f);
 
   filters.add(pixelRolls);
   filterNames.add("pixelRolls");
 }
 
 public void f_init_Edge(){
-  edge = loadShader("texture/edges.glsl");
-
-  edge.set("mask_c", 0.0f, .0f);
-  edge.set("mask_d", 1.f, 1.f);
+  edge = new GShader("texture/edges.glsl");
 
   filters.add(edge);
   filterNames.add("edge");
 }
 
 public void f_init_Mirror(){
-  mirror = loadShader("texture/mirror.glsl");
+  mirror = new GShader("texture/mirror.glsl");
 
-  mirror.set("dir", 0.0f);  // 0 vertical, 1 horizontal
-
-  mirror.set("mask_c", 0.0f, .0f);
-  mirror.set("mask_d", 1.f, 1.f);
+  mirror.addUniform("dir", 0.0f, 0, 1);  // 0 vertical, 1 horizontal
 
   filters.add(mirror);
   filterNames.add("mirror");
 }
+class GShader {
+  PShader shader;
+  String filename;
+
+  // common uniforms
+  Uniform<PVector> mask_c;
+  Uniform<PVector> mask_d;
+  Uniform<Float> time;
+  
+  // all uniforms
+  ArrayList<Uniform<Float>> f_uniforms;
+  ArrayList<Uniform<PVector>> p_uniforms;
+
+  GShader(String filename) {
+    this.filename = filename;
+    this.f_uniforms = new ArrayList<Uniform<Float>>();
+    this.p_uniforms = new ArrayList<Uniform<PVector>>();
+
+    shader = loadShader(filename);
+
+    mask_c = new Uniform<PVector>(this, "mask_c", new PVector(.0f, .0f), new PVector(.0f, .0f), new PVector(1.f, 1.f));
+    mask_d = new Uniform<PVector>(this, "mask_d", new PVector(1.f, 1.f), new PVector(.0f, .0f), new PVector(1.f, 1.f));
+    time = new Uniform<Float>(this, "time", (float)millis()/1000.0f, 0.f, Float.MAX_VALUE);
+  }
+  
+  public void update() {
+    time.set((float)millis()/1000.0f);
+  }
+  
+  public void addUniform(String name, float val){
+    f_uniforms.add(new Uniform<Float>(this, name, val));
+  }
+  public void addUniform(String name, PVector val){
+    p_uniforms.add(new Uniform<PVector>(this, name, val));
+  }
+  public void addUniform(String name, float val, float min, float max){
+    f_uniforms.add(new Uniform<Float>(this, name, val, min, max));
+  }
+  public void addUniform(String name, PVector val, PVector min, PVector max){
+    p_uniforms.add(new Uniform<PVector>(this, name, val, min, max));
+  }
+  
+  public float getF(String n){
+    if(n.equals(time.name)) {return time.value;}
+    else{
+      for(Uniform<Float> u : f_uniforms){
+        if(n.equals(u.name) && u.value instanceof Float){
+           return u.value;
+        }
+      }
+    }
+    return -1;
+  }
+  public PVector getV(String n){
+    if(n.equals(mask_c.name)) {return mask_c.value;}
+    else if(n.equals(mask_d.name)) {return mask_d.value;}
+    else{
+      for(Uniform<PVector> u : p_uniforms){
+        if(n.equals(u.name) && u.value instanceof PVector){
+           return u.value;
+        }
+      }
+    }
+    return null;
+  }
+  public boolean set(String n, float v){
+    if(n.equals(time.name)) { time.set(v); return true;}
+    else{
+      for(Uniform<Float> u : f_uniforms){
+        if(n.equals(u.name) && u.value instanceof Float){
+           u.set(v);
+           return true;
+        }
+      }
+    }
+    return false;
+  }
+  public boolean set(String n, PVector v){
+    if(n.equals(mask_c.name)) { mask_c.set(v); return true;}
+    else if(n.equals(mask_d.name)) { mask_d.set(v); return true;}
+    else{
+      for(Uniform<PVector> u : p_uniforms){
+        if(n.equals(u.name) && u.value instanceof PVector){
+           u.set(v);
+           return true;
+        }
+      }
+    }
+    return false;
+  }
+  public boolean set(String n, float v, long d){
+    if(n.equals(time.name)) { time.set(v,d); return true;}
+    else{
+      for(Uniform<Float> u : f_uniforms){
+        if(n.equals(u.name) && u.value instanceof Float){
+           u.set(v,d);
+           return true;
+        }
+      }
+    }
+    return false;
+  }
+  public boolean set(String n, PVector v, long d){
+    if(n.equals(mask_c.name)) { mask_c.set(v, d); return true;}
+    else if(n.equals(mask_d.name)) { mask_d.set(v, d); return true;}
+    else{
+      for(Uniform<PVector> u : p_uniforms){
+        if(n.equals(u.name) && u.value instanceof PVector){
+           u.set(v, d);
+           return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  // Printer
+  public void print(){
+    println(split(filename, '/')[1]+": ");
+    for(int i = 0; i < f_uniforms.size(); i++)
+      println(i+ "(float): " + f_uniforms.get(i).name + " " + f_uniforms.get(i).value);
+      
+    for(int i = 0; i < p_uniforms.size(); i++)
+      println((i+f_uniforms.size()) + "(PVector): " + p_uniforms.get(i).name + " " + p_uniforms.get(i).value);
+    println("(PVector): " + mask_c.name + " " + mask_c.value);
+    println("(PVector): " + mask_d.name + " " + mask_d.value);
+    println("(float): " + time.name + " " + time.value);
+  }
+};
+
+class Uniform<T> {
+  Interpolater i;
+  GShader s;
+
+  String name;
+  T value;
+  
+  T maxValue;
+  T minValue;
+  
+  
+  Uniform(GShader g, String n, T v){
+    s = g;
+    name = n;
+    set(v);
+  }
+  
+  Uniform(GShader g, String n, T v, T min, T max){
+    s = g;
+    name = n;
+    minValue = min;
+    maxValue = max;
+    set(v);
+  }
+
+  public void setMinMax(T min, T max){
+    minValue = min;
+    maxValue = max;
+  }
+
+  public void set(T v) { 
+    value = v;
+    
+    if(maxValue != null && minValue != null){
+      if(v instanceof Float) {
+        if((float)v > (float)maxValue)
+          value = maxValue;
+        else if((float)v < (float)minValue)
+          value = minValue;
+      }
+      else if(v instanceof PVector) {
+        if(((PVector)v).x > ((PVector)maxValue).x)
+          ((PVector)value).x = ((PVector)maxValue).x;
+        else if(((PVector)v).x < ((PVector)minValue).x)
+          ((PVector)value).x = ((PVector)minValue).x;
+        
+        if(((PVector)v).y > ((PVector)maxValue).y)
+          ((PVector)value).y = ((PVector)maxValue).y;
+        else if(((PVector)v).y < ((PVector)minValue).y)
+          ((PVector)value).y = ((PVector)minValue).y;   
+      }
+    }
+    
+    try{
+      if(v instanceof Float)
+        s.shader.set(name, (float)v);
+      else if(v instanceof PVector)
+        s.shader.set(name, ((PVector)v).x, ((PVector)v).y);
+    }catch(Exception e){e.printStackTrace();}
+  }
+  public void set(T v, long duration) {
+    if (i == null) {
+      i = new Interpolater(this, get(), v, millis(), duration);
+      i.start();
+    }
+  }
+  public T get() {
+    return value;
+  }
+
+  private class Interpolater extends Thread {
+    private T value_initial, value_target;
+    private long timecheck, duration;
+    private Uniform uni;
+
+    public Interpolater(Uniform u, T v0, T vn, long t0, long d) {
+      uni = u;
+      value_initial = v0;
+      value_target = vn;
+      timecheck = t0;
+      duration = d;
+    }
+
+    public void run() {
+      while (timecheck+duration > millis()) {
+        float amt = ((float)millis()-(float)timecheck)/(float)duration;
+        if (value_initial instanceof PVector)
+          uni.set(((PVector)value_initial).lerp((PVector)value_target, amt));          
+        else if ( value_initial instanceof Float)
+          uni.set(lerp((float)value_initial, (float)value_target, amt));
+        
+        try { Thread.sleep(20); }
+        catch(Exception e) {}
+      }
+      i = null;
+    }
+  };
+};
 
 OscP5 oscP5;
 
@@ -278,98 +516,129 @@ boolean ismirror = false;
 public void oscEvent(OscMessage m)
 {
   // sendOSC `channel` $ Message "global" [string "global", Float 1]
-  if(getName(m).equals("global")){
+  if (getName(m).equals("global")) {
     if (m.checkTypetag("sf"))
     {
       String arg = m.get(0).stringValue();
       float val = m.get(1).floatValue();
 
-      switch(arg){
-        case "glitch":
-          glitchLasttime = millis();
-          glitchTime = val;   break;
-        case "strobe":
-          strobeLasttime = millis();
-          strobeTime = val;   break;
-        case "randMask":
-          randomMaskLasttime = millis();
-          randomMaskTime = val;
-          orientation = random(-1, 1);
-          rand_x = random(1); rand_width = random(1);
-          rand_y = random(1); rand_height = random(1); break;
-        case "preset":
-          presetNumber = PApplet.parseInt(val);   break;
-        case "shake":
-          isshake = !isshake;
-          if(isshake) toggledFilters.add(shake);
-          else toggledFilters.remove(shake); break;
-        case "rgbShift":
-          isrgbShift = !isrgbShift;
-          if(isrgbShift) toggledFilters.add(rgbShift);
-          else toggledFilters.remove(rgbShift); break;
-        case "hueSaturation":
-          ishueSaturation = !ishueSaturation;
-          if(ishueSaturation) toggledFilters.add(hueSaturation);
-          else toggledFilters.remove(hueSaturation); break;
-        case "brightContrast":
-          isbrightContrast = !isbrightContrast;
-          if(isbrightContrast) toggledFilters.add(brightContrast);
-          else toggledFilters.remove(brightContrast); break;
-        case "barrelBlur":
-          isbarrelBlur = !isbarrelBlur;
-          if(isbarrelBlur) toggledFilters.add(barrelBlur);
-          else toggledFilters.remove(barrelBlur); break;
-        case "glow":
-          isglow = !isglow;
-          if(isglow) toggledFilters.add(glow);
-          else toggledFilters.remove(glow); break;
-        case "halftone":
-          ishalftone = !ishalftone;
-          if(ishalftone) toggledFilters.add(halftone);
-          else toggledFilters.remove(halftone); break;
-        case "pixelate":
-          ispixelate = !ispixelate;
-          if(ispixelate) toggledFilters.add(pixelate);
-          else toggledFilters.remove(pixelate); break;
-        case "pixelRolls":
-          ispixelRolls = !ispixelRolls;
-          if(ispixelRolls) toggledFilters.add(pixelRolls);
-          else toggledFilters.remove(pixelRolls); break;
-        case "patches":
-          ispatches = !ispatches;
-          if(ispatches) toggledFilters.add(patches);
-          else toggledFilters.remove(patches); break;
-        case "edge":
-          isedge = !isedge;
-          if(isedge) toggledFilters.add(edge);
-          else toggledFilters.remove(edge); break;
-        case "mirror":
-          ismirror = !ismirror;
-          if(ismirror) toggledFilters.add(mirror);
-          else toggledFilters.remove(mirror); break;
-        default:
-          break;
+      switch(arg) {
+      case "glitch":
+        glitchLasttime = millis();
+        glitchTime = val;
+        break;
+      case "strobe":
+        strobeLasttime = millis();
+        strobeTime = val;
+        break;
+      case "randMask":
+        randomMaskLasttime = millis();
+        randomMaskTime = val;
+        orientation = random(-1, 1);
+        rand_x = random(1);
+        rand_width = random(1);
+        rand_y = random(1);
+        rand_height = random(1);
+        break;
+      case "preset":
+        presetNumber = PApplet.parseInt(val);
+        break;
+      case "shake":
+        isshake = !isshake;
+        if (isshake) toggledFilters.add(shake);
+        else toggledFilters.remove(shake);
+        break;
+      case "rgbShift":
+        isrgbShift = !isrgbShift;
+        if (isrgbShift) toggledFilters.add(rgbShift);
+        else toggledFilters.remove(rgbShift);
+        break;
+      case "hueSaturation":
+        ishueSaturation = !ishueSaturation;
+        if (ishueSaturation) toggledFilters.add(hueSaturation);
+        else toggledFilters.remove(hueSaturation);
+        break;
+      case "brightContrast":
+        isbrightContrast = !isbrightContrast;
+        if (isbrightContrast) toggledFilters.add(brightContrast);
+        else toggledFilters.remove(brightContrast);
+        break;
+      case "barrelBlur":
+        isbarrelBlur = !isbarrelBlur;
+        if (isbarrelBlur) toggledFilters.add(barrelBlur);
+        else toggledFilters.remove(barrelBlur);
+        break;
+      case "glow":
+        isglow = !isglow;
+        if (isglow) toggledFilters.add(glow);
+        else toggledFilters.remove(glow);
+        break;
+      case "halftone":
+        ishalftone = !ishalftone;
+        if (ishalftone) toggledFilters.add(halftone);
+        else toggledFilters.remove(halftone);
+        break;
+      case "pixelate":
+        ispixelate = !ispixelate;
+        if (ispixelate) toggledFilters.add(pixelate);
+        else toggledFilters.remove(pixelate);
+        break;
+      case "pixelRolls":
+        ispixelRolls = !ispixelRolls;
+        if (ispixelRolls) toggledFilters.add(pixelRolls);
+        else toggledFilters.remove(pixelRolls);
+        break;
+      case "patches":
+        ispatches = !ispatches;
+        if (ispatches) toggledFilters.add(patches);
+        else toggledFilters.remove(patches);
+        break;
+      case "edge":
+        isedge = !isedge;
+        if (isedge) toggledFilters.add(edge);
+        else toggledFilters.remove(edge);
+        break;
+      case "mirror":
+        ismirror = !ismirror;
+        if (ismirror) toggledFilters.add(mirror);
+        else toggledFilters.remove(mirror);
+        break;
+      default:
+        break;
       }
     }
-  }
-  else if(getName(m).equals("object")){
+  } else if (getName(m).equals("object")) {
     if (m.checkTypetag("sf"))
     {
       // get attr name and value
       String arg = m.get(0).stringValue();
       float val = m.get(1).floatValue();
 
-      switch(arg){
-        case "shaders":
-          shaderNumber = (int)val; break;
-        default:
-          break;
+      switch(arg) {
+      case "shaders":
+        shaderNumber = (int)val;
+        break;
+      default:
+        break;
       }
+    }
+  } else if (getName(m).equals("tree")) {
+    println(m.get(1).stringValue());
+    if (m.checkTypetag("ss"))
+    {
+      // get attr name and value
+      String arg = m.get(0).stringValue();
+      String val = m.get(1).stringValue();
+
+
+      println("==tree OSC== \nname:"+arg+" value: "+val);
     }
   }
   else // per filter modification
   {
     // sendOSC `channel` $ Message "FilterName" [string "AttrName", Float AttrValue]
+
+    // Instant modification
     if (m.checkTypetag("sf"))
     {
       // get attr name and value
@@ -384,9 +653,27 @@ public void oscEvent(OscMessage m)
         }
       }
 
-      // Apply modification
       if (index >= 0) {
         filters.get(index).set(arg, val);
+      }
+    }
+    // Delayed modification
+    else if (m.checkTypetag("sff")){
+
+      String arg = m.get(0).stringValue();
+      float val = m.get(1).floatValue();
+      float dur = m.get(2).floatValue();
+
+      // Get filter index
+      int index = -1;
+      for (int i = 0; i < filterNames.size(); ++i) {
+        if (filterNames.get(i).equals(getName(m))) {
+          index = i;
+        }
+      }
+
+      if (index >= 0) {
+        filters.get(index).set(arg, val, (long)dur);
       }
     }
   }
@@ -400,12 +687,12 @@ public String getName(OscMessage m) {
   }
   return s;
 }
-PShader blobby;
-PShader drip;
-PShader bands;
-PShader sine;
-PShader noise;
-PShader bits;
+GShader blobby;
+GShader drip;
+GShader bands;
+GShader sine;
+GShader noise;
+GShader bits;
 
 public void initShaders() {
   s_init_Bands();
@@ -417,63 +704,63 @@ public void initShaders() {
 }
 
 public void updateUniforms_Shaders(){
-  blobby.set("time", (float) millis()/1000.0f);
-  blobby.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
-  drip.set("time", (float) millis()/1000.0f);
-  drip.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
-  bands.set("time", (float) millis()/1000.0f);
-  bands.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
-  sine.set("time", (float) millis()/1000.0f);
-  sine.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
-  noise.set("time", (float) millis()/1000.0f);
-  noise.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
-  bits.set("time", (float) millis()/1000.0f);
-  bits.set("resolution", PApplet.parseFloat(width), PApplet.parseFloat(height));
+  blobby.update();
+  drip.update();
+  bands.update();
+  sine.update();
+  noise.update();
+  bits.update();
 }
 
 public void s_init_Bands(){
-  bands = loadShader("color/bands.glsl");
+  bands = new GShader("color/bands.glsl");
 
-  bands.set("noiseFactor", 20.0f); // 5-100
-  bands.set("stripes", 50.0f);     // 0-100
+  bands.addUniform("noiseFactor", 20.0f, 5, 100); // 5-100
+  bands.addUniform("stripes", 50.0f, 0, 100);     // 0-100
+  bands.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 public void s_init_Bits(){
-  bits = loadShader("color/bits.glsl");
+  bits = new GShader("color/bits.glsl");
 
-  bits.set("mx", .5f); // 0-1
-  bits.set("my", .5f); // 0-1
+  bits.addUniform("mx", .5f, 0, 1); // 0-1
+  bits.addUniform("my", .5f, 0, 1); // 0-1
+  bits.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 public void s_init_Blobby(){
-  blobby = loadShader("color/blobby.glsl");
+  blobby = new GShader("color/blobby.glsl");
 
-  blobby.set("depth", 1.0f); //0-2
-  blobby.set("rate", 1.0f);  //0-2
+  blobby.addUniform("depth", 1.0f, 0, 2); //0-2
+  blobby.addUniform("rate", 1.0f, 0,2);  //0-2
+  blobby.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 public void s_init_Drip(){
-  drip = loadShader("color/drip.glsl");
+  drip = new GShader("color/drip.glsl");
 
-  drip.set("intense", .5f); // 0-1
-  drip.set("speed", .5f);   // 0-1
-  drip.set("graininess", .5f, .5f); // vec2(0-1, 0-1)
+  drip.addUniform("intense", .5f,0,1); // 0-1
+  drip.addUniform("speed", .5f,0,1);   // 0-1
+  drip.addUniform("graininess", new PVector(.5f, .5f), new PVector(0, 0), new PVector(1, 1)); // vec2(0-1, 0-1
+  drip.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 public void s_init_Noise(){
-  noise = loadShader("color/noisy.glsl");
+  noise = new GShader("color/noisy.glsl");
 
-  noise.set("noiseFactor", 5.0f, 5.0f); // vec2(0-10, 0-10)
-  noise.set("noiseFactorTime", 1.0f);  // 0-2
+  noise.addUniform("noiseFactor", new PVector(5, 5), new PVector(0, 0), new PVector(10, 10)); // vec2(0-10, 0-10)
+  noise.addUniform("noiseFactorTime", 1.0f, 0, 2);  // 0-2
+  noise.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 
 public void s_init_Sine(){
-  sine = loadShader("color/sinewave.glsl");
+  sine = new GShader("color/sinewave.glsl");
 
-  sine.set("colorMult", 2.f, 1.25f); // vec2(.5-5, .5-2)
-  sine.set("coeffx", 20.f); // 10-50
-  sine.set("coeffy", 40.f);  // 0-90
-  sine.set("coeffz", 50.f); // 1-200
+  sine.addUniform("colorMult", new PVector(2, 1.25f), new PVector(.5f, .5f), new PVector(5, 2)); // vec2(.5-5, .5-2)
+  sine.addUniform("coeffx", 20.f, 10, 50); // 10-50
+  sine.addUniform("coeffy", 40.f, 0, 90);  // 0-90
+  sine.addUniform("coeffz", 50.f, 1, 200); // 1-200
+  sine.addUniform("resolution", new PVector(width, height), new PVector(width/2, height/2), new PVector(width, height));
 }
 // OSC Parameters for shape drawing
 int shaderNumber = 0;
@@ -494,7 +781,7 @@ public PShape createSphere() {
   }
   textureMode(NORMAL);
   PShape sh = createShape();
-  sh.beginShape(TRIANGLES);
+  sh.beginShape(POINTS);
   sh.noStroke();
   for (int i = 0; i < in.length/3.0f; i++) {
     sh.vertex(vertices[PApplet.parseInt(3*in[3*i])], vertices[PApplet.parseInt(3*in[3*i]+1)], vertices[PApplet.parseInt(3*in[3*i]+2)],
@@ -523,17 +810,17 @@ public void drawShaders(){
   if(shaderNumber > 0){
     pg.beginDraw();
     if(shaderNumber == 1)
-      pg.shader(blobby);
+      pg.shader(blobby.shader);
     else if(shaderNumber == 2)
-      pg.shader(bits);
+      pg.shader(bits.shader);
     else if(shaderNumber == 3)
-      pg.shader(bands);
+      pg.shader(bands.shader);
     else if(shaderNumber == 4)
-      pg.shader(noise);
+      pg.shader(noise.shader);
     else if(shaderNumber == 5)
-      pg.shader(sine);
+      pg.shader(sine.shader);
     else if(shaderNumber == 6)
-      pg.shader(drip);
+      pg.shader(drip.shader);
     pg.rect(0,0,pg.width, pg.height);
     pg.endDraw();
 
@@ -562,20 +849,20 @@ float rand_height = 0;
 int presetNumber = 0;
 
 // Keeps track of toggled shaders
-ArrayList<PShader> toggledFilters = new ArrayList<PShader>();
+ArrayList<GShader> toggledFilters = new ArrayList<GShader>();
 
 // Glitch Effect
 public void glitchFx(){
   if(glitchLasttime+glitchTime > millis()){
-    pixelate.set("pixels", random(1, 0.1f * width), random(1, 0.1f * height));
+    pixelate.set("pixels", new PVector(random(1, 0.1f * width), random(1, 0.1f * height)));
 
-    glow.set("mask_c", 0.f, .0f);
-    glow.set("mask_d", 1.f, 1.f);
-    pixelate.set("mask_c", 0.f, .0f);
-    pixelate.set("mask_d", 1.f, 1.f);
+    glow.set("mask_c", new PVector(0,0));
+    glow.set("mask_d", new PVector(1,1));
+    pixelate.set("mask_c", new PVector(0,0));
+    pixelate.set("mask_d", new PVector(1,1));
 
-    filter(glow);
-    filter(pixelate);
+    filter(glow.shader);
+    filter(pixelate.shader);
   }
 }
 
@@ -585,15 +872,10 @@ public void strobeFx(){
     brightContrast.set("brightness", random(-5, 5));
     brightContrast.set("contrast", random(-5, 5));
 
-    brightContrast.set("mask_c", 0.f, .0f);
-    brightContrast.set("mask_d", 1.f, 1.f);
+    brightContrast.set("mask_c", new PVector(0,0));
+    brightContrast.set("mask_d", new PVector(1,1));
 
-    filter(brightContrast);
-  }
-  else{
-    brightContrast.set("brightness", 1.f);
-    brightContrast.set("contrast", 1.f);
-    filter(brightContrast);
+    filter(brightContrast.shader);
   }
 }
 
@@ -603,20 +885,20 @@ public void randomMasksFx(){
     for(int i = 0; i < filters.size(); i++)
     {
       if(orientation > 0){
-        filters.get(i).set("mask_c", 0.f, rand_y);
-        filters.get(i).set("mask_d", 1.f, rand_height);
+        filters.get(i).set("mask_c", new PVector(0,rand_y));
+        filters.get(i).set("mask_d", new PVector(1,rand_height));
       }
       else{
-        filters.get(i).set("mask_c", rand_x, 0.f);
-        filters.get(i).set("mask_d", rand_width, 1.f);
+        filters.get(i).set("mask_c", new PVector(rand_x, 0));
+        filters.get(i).set("mask_d", new PVector(rand_width, 1));
       }
     }
   }
   else{
     for(int i = 0; i < filters.size(); i++)
     {
-      filters.get(i).set("mask_c", 0.f, 0.f);
-      filters.get(i).set("mask_d", 1.f, 1.f);
+      filters.get(i).set("mask_c", new PVector(0,0));
+      filters.get(i).set("mask_d", new PVector(1,1));
     }
   }
 }
@@ -624,54 +906,79 @@ public void randomMasksFx(){
 // Toggle Filters
 public void toggleFilters() {
   for(int i = 0; i < toggledFilters.size(); i++) {
-    filter(toggledFilters.get(i));
+    filter(toggledFilters.get(i).shader);
   }
 }
 
 // Saved filter sequences
 public void presets(){
-  if(presetNumber == 1){
-    filter(shake);
-    filter(rgbShift);
-    filter(hueSaturation);
-    filter(brightContrast);
-    filter(barrelBlur);
-    filter(glow);
-    filter(halftone);
-    filter(mirror);
-  }
-  else if(presetNumber == 2)
-  {
-    filter(shake);
-    filter(rgbShift);
-    filter(hueSaturation);
-    filter(brightContrast);
-    filter(barrelBlur);
-    filter(glow);
-    filter(pixelRolls);
-  }
-  else if(presetNumber == 3)
-  {
-    filter(shake);
-    filter(rgbShift);
-    filter(hueSaturation);
-    filter(brightContrast);
-    filter(barrelBlur);
-    filter(glow);
-    filter(patches);
-  }
-  else if(presetNumber == 4)
-  {
-    filter(shake);
-    filter(rgbShift);
-    filter(hueSaturation);
-    filter(brightContrast);
-    filter(barrelBlur);
-    filter(glow);
-    filter(edge);
-  }
+  if(presetNumber == 1)      // OK
+    filter(shake.shader);
+  else if(presetNumber == 2) // OK
+    filter(rgbShift.shader);
+  else if(presetNumber == 3) // OK
+    filter(hueSaturation.shader);
+  else if(presetNumber == 4) // OK
+    filter(brightContrast.shader);
+  else if(presetNumber == 5) // OK --
+    filter(barrelBlur.shader);
+  else if(presetNumber == 6) // not working
+    filter(glow.shader);
+  else if(presetNumber == 7) // complete black
+    filter(halftone.shader);
+  else if(presetNumber == 8) // OK
+    filter(pixelRolls.shader);
+  else if(presetNumber == 9) // OK
+    filter(pixelate.shader);
+  else if(presetNumber == 10)// OKo
+    filter(patches.shader);
+  else if(presetNumber == 11)// OK
+    filter(edge.shader);
+  else if(presetNumber == 12)// OK
+    filter(mirror.shader);
+  
+  //if(presetNumber == 1){
+  //  filter(shake.shader);
+  //  filter(rgbShift.shader); // not colored
+  //  filter(hueSaturation.shader); // always applies
+  //  filter(brightContrast.shader); // doesnt seem to work
+  //  filter(barrelBlur.shader); // something off
+  //  filter(glow.shader); // doesnt work
+  //  filter(halftone.shader); // blacks out screen
+  //  filter(mirror.shader); 
+  //}
+  //else if(presetNumber == 2)
+  //{
+  //  filter(shake.shader);
+  //  filter(rgbShift.shader);
+  //  filter(hueSaturation.shader);
+  //  filter(brightContrast.shader);
+  //  filter(barrelBlur.shader);
+  //  filter(glow.shader);
+  //  filter(pixelRolls.shader);
+  //}
+  //else if(presetNumber == 3)
+  //{
+  //  filter(shake.shader);
+  //  filter(rgbShift.shader);
+  //  filter(hueSaturation.shader);
+  //  filter(brightContrast.shader);
+  //  filter(barrelBlur.shader);
+  //  filter(glow.shader);
+  //  filter(patches.shader);
+  //}
+  //else if(presetNumber == 4)
+  //{
+  //  filter(shake.shader);
+  //  filter(rgbShift.shader);
+  //  filter(hueSaturation.shader);
+  //  filter(brightContrast.shader);
+  //  filter(barrelBlur.shader);
+  //  filter(glow.shader);
+  //  filter(edge.shader);
+  //}
 }
-  public void settings() {  fullScreen(P3D, 2); }
+  public void settings() {  size(1280, 720, P3D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "shader_trial" };
     if (passedArgs != null) {

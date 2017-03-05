@@ -1,0 +1,12 @@
+{
+  "userpath": "/Users/canince",
+  "debug": true,
+  "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.0.1-x86_64/usr/bin/ghci-8.0.1",
+  "sclang": "/Users/canince/Documents/Github/sq/deps/SuperCollider.app/Contents/MacOS/sclang",
+  "scsynth": "/Users/canince/Documents/Github/sq/deps/SuperCollider.app/Contents/Resources/scsynth",
+  "sclang_conf": "/Users/canince/Library/Application Support/SuperCollider/sclang_conf.yaml",
+  "port": 3001,
+  "path" : "/Users/canince/Documents/Github/sq/config/config.json",
+  "tidal_boot": "/Users/canince/Documents/Github/sq/config/tidal-boot-default.hs",
+  "scd_start": "/Users/canince/Documents/Github/sq/config/scd-start-default.scd"
+}

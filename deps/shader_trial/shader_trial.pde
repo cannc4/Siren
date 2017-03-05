@@ -22,18 +22,6 @@ void setup() {
 
   initFilters();
   initShaders();
-  
-  for(GShader g : filters){
-    g.print();
-  }
-  
-   blobby.print();
-   drip.print();
-   bands.print();
-   sine.print();
-   noise.print();
-   bits.print();
-  
 }
 
 void keyPressed(){
@@ -43,20 +31,20 @@ void keyPressed(){
     presetNumber--;
   else if(key == 's'){
     strobeLasttime = millis();
-    strobeTime = 500;  
+    strobeTime = 500;
   }
   else if(key == 'a'){
     glitchLasttime = millis();
-    glitchTime = 500;   
+    glitchTime = 500;
   }
   else if(key == 'd'){
     randomMaskLasttime = millis();
     randomMaskTime = 1000;
     orientation = random(-1, 1);
-    rand_x = random(1); 
+    rand_x = random(1);
     rand_width = random(1);
-    rand_y = random(1); 
-    rand_height = random(1); 
+    rand_y = random(1);
+    rand_height = random(1);
   }
 }
 
@@ -70,7 +58,7 @@ void draw() {
   drawShaders();
   pushMatrix();
   angle+= 0.02;
-  translate(width/2, height/2);  
+  translate(width/2, height/2);
   rotate(angle, random(0,1),random(0,1),random(0,1));
   noFill();
   stroke(200);
@@ -88,7 +76,7 @@ void draw() {
 
   // Overall subtle line pattern
   filter(lines.shader);
-  
+
   // Debugging texts
   /*fill(255);
    textSize(25);
