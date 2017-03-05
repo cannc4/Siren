@@ -31,12 +31,14 @@
     "react-router": "^2.7.0",
     "react-splitter": "^0.2.0",
     "react-syntax-highlighter": "^4.0.1",
+    "react-three-renderer": "^3.0.2",
     "redux": "^3.5.2",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.0.1",
     "socket.io": "^1.7.1",
     "supercolliderjs": "^0.13.0",
     "threads": "^0.7.2",
+    "three": "^0.82.1",
     "ws": "^1.1.1"
   },
   "scripts": {

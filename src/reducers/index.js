@@ -20,7 +20,6 @@ _.each(models, (x,key) => {
         return { ...items };
     case 'FETCH_COMMANDS':
       const cmd = _.mapKeys(action.payload, 'key')
-      console.log(cmd);
       return { ...cmd};
     default:
         return state

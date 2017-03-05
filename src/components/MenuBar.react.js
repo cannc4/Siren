@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-// import { googleLogin, logout } from '../actions';
-// import store from '../store';
+import { changeUsername } from '../actions';
+import store from '../store';
 import './MenuBar.css'
 
 class MenuBar extends Component {
@@ -13,28 +13,13 @@ class MenuBar extends Component {
       paths: [ {
         name: 'Home',
         url: '/'
-      },  {
-      name: 'Live',
-      url:'/live'
-    }]
+        },  {
+        name: 'Live',
+        url:'/live'
+      }],
+      username: 'can'
     }
   }
-  // ,{
-  //   name: 'About',
-  //   url: '/about'
-  // },{
-  //   name: 'Accounts',
-  //   url: '/accounts'
-  // },{
-  //   name: 'Categories',
-  //   url: '/categories'
-  // },{
-  //   name: 'Products',
-  //   url: '/products'
-  // },{
-  //   name: 'CableSections',
-  //   url: '/cablesections'
-  // }
   componentDidUpdate() {
     const ctx = this;
     if (ctx.state.path !== location.pathname){
@@ -59,6 +44,13 @@ class MenuBar extends Component {
     // }
     return (<div className='MenuBar boxshadow'>
       <Link className="pullleft" to='/'  onClick={updatePath}>sq</Link>
+      <input type="String" value={this.state.username} onChange={function(event){
+        ctx.setState({username: event.target.value});
+      }} onKeyUp={function(event){
+        if(event.keyCode === 13 && event.ctrlKey){
+          changeUsername(ctx.state.username);
+        }
+      }}/>
       {paths.map((p, i) => {
         return <Link key={i} to={p.url} className={'pullright ' + (p.url === path ? 'active' : '')} onClick={updatePath}>{p.name}</Link>
       })}
