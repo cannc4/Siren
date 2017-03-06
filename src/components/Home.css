@@ -1,6 +1,7 @@
 .Home {
   padding: 15px;
   display: flex;
+  background: rgba(10,10,10,1);
 }
 
 .Tidal {
@@ -154,7 +155,7 @@
   font-size: 1vw;
   line-height: 24px;
   vertical-align: center;
-  background: none!important;
+  background: rgba(0,0,0,0.5);
 }
 
 .playbox > textarea {
