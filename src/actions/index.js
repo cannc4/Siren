@@ -16,9 +16,6 @@ Firebase.initializeApp({
 
 });
 
-/// XXX
-var username = 'ca';
-
 const models = {
   Accounts: {
     dataSource: Firebase.database().ref("/accounts"),
@@ -108,14 +105,13 @@ String.prototype.replaceAt=function(index, character) {
 //
 
 export function changeUsername(username) {
-  console.log("BEFORE");
-  console.log(models);
-
+  // console.log("BEFORE");
+  // console.log(models);
   // _.forEach(models, function(modelValue) {
   //   modelValue.dataSource = modelValue.dataSource.child(username);
   // })
-  console.log("AFTER");
-  console.log(models);
+  // console.log("AFTER");
+  // console.log(models);
 }
 
 export function sendZapier(data) {
@@ -419,32 +415,28 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
             newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
           }
         });
-        var soloHolder = k ;
+        var soloHolder = "d"+(k);
         var transitionHolder = "" ;
 
           var _k = k;
           if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
-          k = k.replaceAt(0, "d");
-          soloHolder = k ;
-          transitionHolder = " $ ";
+            k = "d"+(k);
+            soloHolder = k ;
+            transitionHolder = " $ ";
           }
 
           if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
             transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
-            soloHolder = k ;
+            soloHolder = "t"+(k);
           }
 
           if(solo[_.indexOf(channels,_k)] === true){
-            k = k.replaceAt(0, "d");
+            k = "d"+(k);
             soloHolder = "solo $ " + k ;
             transitionHolder = " $ ";
           }
 
-
-
-
-
-        console.log(soloHolder + transitionHolder + newCommand );
+        //console.log(soloHolder + transitionHolder + newCommand );
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
         return [soloHolder + transitionHolder + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 

@@ -8,7 +8,7 @@ import './Home.css';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,
-      startClick,stopClick} from '../actions'
+      startClick,stopClick, changeUsername} from '../actions'
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 // import Simple from './examples/Benchmark/RotatingCubesDirectUpdates.js'
 import Simple from './Simple.react'
@@ -25,7 +25,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['t1','t2','t3', 't4', 't5'],
+  channels: ['1','2','3', '4', '5'],
   timer: [],
   values: {},
   scCommand: '',
@@ -39,7 +39,8 @@ this.state={
   play : false,
   solo : [],
   soloSentinel: false,
-  sceneSentinel: false
+  sceneSentinel: false,
+  username: 'can'
   //rotation: 1.5,
   //stateSketch : sketch
 }
@@ -115,7 +116,7 @@ componentDidUpdate(props, state) {
     }
 
   if(values[runNo[i]]!== undefined){
-    const vals = values[runNo[i]][channels[i]];
+    const vals = values[runNo[i]][i];
     const channel = channels[i];
     const obj = {[channel]: vals};
       if (vals !== undefined) {
@@ -433,14 +434,14 @@ renderStep(x, i) {
       const setText=({ target: { value }}) => {
           const {values}=ctx.state;
           if (values[i+1] === undefined) values[i+1]={}
-          values[i+1][c] = value;
+          values[i+1][_.indexOf(channels,c)] = value;
           ctx.setState({values});
       }
 
       const getValue=() => {
         const values=ctx.state.values;
-        if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
-        return values[i+1][c];
+        if (values[i+1] === undefined || values[i+1][_.indexOf(channels,c)] === undefined) return ''
+        return values[i+1][_.indexOf(channels,c)];
       }
 
       const textval=getValue();
@@ -622,13 +623,8 @@ clearMatrix(){
 
 renderMenu(){
   const ctx=this;
-  const { tidal, timer, click }=ctx.props;
-  const { scCommand, tidalServerLink, play}=ctx.state;
-  const { commands }=ctx.props;
-  // const { commands }=ctx.state;
-  const { values, steps, channels}=ctx.state;
-
-
+  const { tidal, timer, click, commands }=ctx.props;
+  const { scCommand, tidalServerLink, play, values, steps, channels}=ctx.state;
 
   const updateTidalServerLink=({ target: { value } }) => {
       ctx.setState({ tidalServerLink: value });
@@ -637,13 +633,24 @@ renderMenu(){
   const updateScCommand=({ target: { value } }) => {
     ctx.setState({scCommand: value})
   }
-
-
-    // REPLACING START PAUSE STOP WITH IMAGES
-//<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
-
+  // REPLACING START PAUSE STOP WITH IMAGES
+  //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
 
   return   <div className="Tidal" style={{margin: '5px'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+      Username
+      <input type="String" value={ctx.state.username}
+      onChange={function(event){
+        ctx.setState({username: event.target.value});
+      }}
+      onKeyUp={function(event){
+        if(event.keyCode === 13 && event.ctrlKey){
+          ctx.setState({username: event.target.value});
+          changeUsername(ctx.state.username);
+        }
+      }}/>
+    </div>
+    <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
       Tidal Server Link
       <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
@@ -705,7 +712,7 @@ render() {
             <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
-            <button onClick={ctx.clearMatrix.bind(ctx)}> Clear Matrix </button>
+            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
           </div>
 
           <div>

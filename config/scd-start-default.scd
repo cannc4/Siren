@@ -1,27 +1,15 @@
 (
 s.options.numOutputBusChannels = 10;
-s.options.numBuffers = 2048 * 16;
-s.options.maxNodes = 1024 * 16;
-s.options.memSize_(65536 * 4);
+s.options.numBuffers = 1024 * 16;
+s.options.memSize = 8192 * 16;
 s.quit;
 
 s.waitForBoot {
 
  ~dirt = SuperDirt(2, s);
- ~dirt.loadSoundFiles("/Users/canince/Desktop/Batch/*");
+ ~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\Whalehouse\\Samples\\*");
 
  s.sync;
- ~dirt.start(57120, (0, 2 .. 4));
-
-
-
-Link.enable;
-0.2.wait;
-Link.setTempo(120,1);
-s.makeGui;
-s.meter;
-s.latency = 0.3;
-~dirt.orderModules([\shape, \lpf]);
-"/Users/canince/documents/github/sq/experimentsc.scd".load;
-  }
+ ~dirt.start(57120, (0, 2 .. 9));
+}
 )
