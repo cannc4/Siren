@@ -560,95 +560,6 @@ d3 $ stut 3 0.9 0.25 $ sometimes (|+| n "12") $ n (superimpose ((((+7) <$>)) . (
   # vowel "a i o u"
   # gain "0.8"
 
-d1 $ sound "bd {bd bd bd ~}%1"
-d1 $ sound "bd [bd!3 ~]/4"
-d1 $ sound "bd <bd bd bd ~>"
-
-d1 $ sound "bd {bd!3 ~}%1"
-
-d1 $ sound "bd <arpy ! ! ~ >"
-
-
-hush
-
-
-
-
-d1 $ sound "bd sn"
-
-
-d1 $ slowspread (density) [1,2,3] $
-  sound "numbers:0 numbers:1 numbers:2"
-
-d1 $ slowspread (density) [1,2,3] $
-  slowspread (chop) [4,12,6,8] $ sound "sn:5"
-
-d1 $ slowspread ($) [slowspread (density) [2,3,4], slowspread (density) [4,8], slowspread (density) [3,5]] $
-  sound "bd sn cp"
-
-
-import.Data.Maybe
-
-let inhabit :: [(String, Pattern a)] -> Pattern String -> Pattern a
-    inhabit ps p = unwrap' $ (\s -> fromMaybe silence $ lookup s ps) <$> p
-
-      let funcs = [("id", pure $ id),
-                   ("chipmunk", pure $ (|*| speed "2") . density 2),
-                   ("slurp", pure $ rev . chop 8)
-                  ]
-          tx ps p = unwrap $ (\f -> f p) <$> (inhabit funcs ps)
-          tx' ps p = unwrap' $ (\f -> f p) <$> (inhabit funcs ps)
-
-      let chords = [("am7", "[a4 c4 e4 g5]"),
-                ("gm7", "[g4 bf4 d4 f5]"),
-                ("cmaj7","[c4 e4 g4 bf4]"),
-                ("d7b5", "[d4 gf4 af4 c5]"),
-                ("dm7", "[d4 f4 a4 c5]"),
-                ("gmaj7", "[g4 b4 d5 f5]"),
-                ("cmaj6", "[c4 e4 g4 a4]")
-             ]
-  in
-  d1 $ slow 4 $ rarely ((within (0.25, 0.75) (density 1.5))) $ struct "x(7,12,4)" $ n (inhabit chords "cmaj7 d7b5 dm7 gmaj7 cmaj6")
-
-d1 $ slowspread (density) [2, 4, 3] $
-  sound "bd sn cp"
-
-d1 $ slow 2 $ sound "bd sn"
-
--- accessspacelabs
--- beansandchipsyum
-
--- http://is.gd/tidalworksheet
-
-
-
-d1 $ do x <- (slow 4 "2 3 4")
-        chop x $ sound "arpy:4 arpy:3"
-
-d1 $ do x <- (slow 4 "8 3 4")
-        y <- (slow 2 "3 4")
-        every x (chop y) $ sound "arpy:4 arpy:3"
-
-d1 $ sound "bd"
-
-d2 $ sound "cp"
-
-d1 $ stack [sound "bd",
-            density 2 $ sound "cp"
-           ]
-  # speed "2"
-
-let x = [1,2,3,4]
-in
- d1 $ slowspread (slow) x $ sound "arpy:0 arpy:3"
-
-hush
-
-
-d1 $ do y <- "0.25 0.1"
-        every 2 (trunc y) $ sound "jvbass(3,8)"
-hush
-
 
 import Data.Fixed (mod')
 import Sound.Tidal.Utils
@@ -747,31 +658,7 @@ hush
 p:t transpose
 :t repeat
 
-import Data.Map.Strict
-import Data.Maybe
 
-d1 $ (\x -> x ! s_p) <$> (sound "bd")
-
-d1 $ jux ((|*| begin "0.125") . density 0.5 . (# cut "2")) $ begin "[0.5 0.25 ~ 0.125] [0.125 0.5]" # (loopAt 16 $ sound "bev")
-  |+| begin "[0 0.125 0.25]/3"
-  # cut "1"
-
-
-
-cp -r Embrace\ -\ The\ Good\ Will\ Out\ \(1998\)\ \[V0\]/ /media/alex/0F33-890B/
-cp -r Meat\ Beat\ Manifesto\ -\ Subliminal\ Sandwich.V0/ /media/alex/0F33-890B/
-  cp -r M.I.A./ /media/alex/0F33-890B/
-  cp -r Spiritualized\ -\ Ladies\ And\ Gentlemen\ We\ Are\ Floating\ In\ Space\ \[V0\]/ /media/alex/0F33-890B/
-  cp -r Tango\ n\'\ Vectif/ /media/alex/0F33-890B/
-  cp -r Underworld\ -\ Barbara\ Barbara\,\ we\ face\ a\ shining\ future\ \(2016\ \[MP3\ 320kbps\]/ /media/alex/0F33-890B/
-  ls
-  cp -r The\ xx\ -\ I\ See\ You\ \(2017\)\ -\ CD\ V0/ /media/alex/0F33-890B/
-  cp -r Holly\ Herndon\ -\ * /media/alex/0F33-890B/
-  cp -r Speedy\ J\ -\ * /media/alex/0F33-890B/
-  cp -r Queen\ -\ Absolute\ Greatest\ Hits-\[V0\]-2009/ /media/alex/0F33-890B/
-  cp -r Speedy_J-Loudboxer-\(NOMU93CD\)-FLAC-2002/ /media/alex/0F33-890B/
-
-"has" ++ "kell" :: String
 
 d1 $ slow 4 $ n (wedge (4%13) "0 [~!! 1] ~ [~ 0 0]" "[[0 ~! 1] ~ [~ 0 0]]!!") # s "drum"
 
@@ -1016,3 +903,9 @@ d1 $ tx "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
 
 d1 $ slow 2 $ tx' "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
 hush
+
+$ do {
+  x <- "<1 2 3>";
+  y <- "<1 2>";
+  n (toScale (toInts 12 $ snot $ 4@@x #^^# 3@@0) (fmap (*y) $ every 2 rev $ run (8 `div` y)))}
+ # s "superzow" # bandf (density 1.2 $ scalex 500 2000 sine1) # bandq "5"

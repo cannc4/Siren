@@ -18,6 +18,10 @@ export default (state = INITIAL_STATE, action) => {
       return {...b};
     case 'ADD_'+modelName:
       return {...state};
+    case 'ASSIGN_'+modelName:
+      const z = state;
+      z.timer[action.payload].current = action.current;
+      return {...z};
     case 'PAUSE_'+modelName:
       const p = state;
       p.timer[action.payload].isActive = false;

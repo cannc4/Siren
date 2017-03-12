@@ -7,7 +7,7 @@ import './Home.css';
 // import sketch from './../sketches/sketch';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
-      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,
+      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
       startClick,stopClick, changeUsername} from '../actions'
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 // import Simple from './examples/Benchmark/RotatingCubesDirectUpdates.js'
@@ -16,6 +16,8 @@ import Commands from './Commands.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
+
+
 
 class Home extends Component {
 constructor(props) {
@@ -40,6 +42,7 @@ this.state={
   solo : [],
   soloSentinel: false,
   sceneSentinel: false,
+  parvalues: '',
   username: 'can'
   //rotation: 1.5,
   //stateSketch : sketch
@@ -127,7 +130,7 @@ componentDidUpdate(props, state) {
             sceneCommands = d.commands;
         })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels);
+        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels,timer.timer[i]);
         }
       }
     }
@@ -411,19 +414,9 @@ stopTimer() {
 
 renderStep(x, i) {
   const ctx=this;
-  const { channels, steps }=ctx.state;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
   const { timer, click, commands }=ctx.props;
 
-  //var currentStep = [];
-  // for (var i = 0; i < timer.length; i++) {
-  //   currentStep[i] = timer[i].current %steps;
-  // }
-  //
-  //     for (var j = 0; j < timer.length; j++) {
-  //       if(i === currentStep[j]){
-  //        indvChannel[j] += "playbox-active";
-  //       }
-  //     }
   var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
 
   var colCount=0;
@@ -466,10 +459,39 @@ renderStep(x, i) {
       // dynamic text size
       const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
       return <div className={individualClass} style={{height: cellHeight+'vh'}} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
+        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
       </div>
     })}
   </div>;
+}
+
+
+handleSubmitCell = event => {
+  const ctx=this;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
+  const { timer, click, commands }=ctx.props;
+
+  var body = event.target.id;
+  var c = _.split(body,',')[0]-1;
+  var i = _.split(body,',')[1];
+  var text = event.target.value;
+  const getSceneCommands = () => {
+    var sceneCommands = [];
+    const items = this.props[this.state.modelName.toLowerCase()]
+    _.each(items, function(d){
+      if(d.matName === activeMatrix)
+        sceneCommands = d.commands;
+    })
+    return sceneCommands;
+  }
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    console.log(event.target.id);
+    console.log(i);
+    console.log(c);
+    store.dispatch(assignTimer(timer.timer[c], steps, i))
+    ctx.sendCommands(tidalServerLink,{[c]: text}, getSceneCommands(),solo, transition, channels,timer.timer[c]);
+  }
 }
 
 changeName({target: { value }}) {
@@ -701,9 +723,6 @@ render() {
 //
 
   return <div >
-
-  
-
   <div className={"Home cont"}>
     <Layout fill='window'>
       <Layout layoutWidth={120}>

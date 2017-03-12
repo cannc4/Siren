@@ -385,9 +385,15 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, commands =[], solo, transition, channels) => {
+export const assignTimer = (timer,steps, _index) => {
+  var dum =timer.current + (_index - timer.current%steps);
+  return {
+    type: 'ASSIGN_TIMER', payload: timer.id , current : dum
+  };
+}
 
-  console.log(transition[0]);
+var math = require('mathjs');
+export const sendCommands = (server,vals, commands =[], solo, transition, channels, timer) => {
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -396,10 +402,13 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
       if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');
         var newCommand = cmd.command;
-        var parameters = _.split(cmd.params, ',');
-
+        var parameters =_.concat( _.split(cmd.params, ','),'t');
+        //Param parser
         _.forEach(parameters, function(value, i) {
-          if(_.indexOf(cellItem[i+1], '[') != -1 ){
+          if (value === 't'){
+            newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), timer.current);
+            }
+          else if(_.indexOf(cellItem[i+1], '[') != -1 ){
             cellItem[i+1] = cellItem[i+1].substring(1, _.indexOf(cellItem[i+1], ']'));
             var bounds = _.split(cellItem[i+1], ',');
             if(bounds[0] !== undefined && bounds[0] !== "" &&
@@ -415,6 +424,15 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
             newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
           }
         });
+
+        //Timer parser
+        console.log(newCommand);
+        //Math Parser
+        var re = /(---)(.+)(---)/g, match, matches = [];
+        while (match = re.exec(newCommand)) {
+          newCommand =_.replace(newCommand, new RegExp("(---)(.+)(---)", "g"), math.eval(_.trim(match[0],"---")));
+        }
+
         var soloHolder = "d"+(k);
         var transitionHolder = "" ;
 
