@@ -4,13 +4,12 @@
 import Sound.Tidal.Scales
 import Sound.OSC.FD
 import Sound.Tidal.MIDI.Context
-import Sound.Tidal.MIDI.RMControllerMIDI
-
+import qualified Sound.Tidal.Scales as Scales
 import Data.Maybe
 
 let inhabit :: [(String, Pattern a)] -> Pattern String -> Pattern a
     inhabit ps p = unwrap' $ (\s -> fromMaybe silence $ lookup s ps) <$> p
-    
+
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
 procS1 <- openUDP "127.0.0.1" 12000
