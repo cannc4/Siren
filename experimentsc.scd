@@ -37,6 +37,7 @@ OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
 // vintage Hammonds had percf as 2 or 3 (switchable), two perc levels (maybe roughly 0.7 and 1.2?),
 // and two decay options (roughly 0 and maybe 1ish?)
 // "vibrato", "vrate", "perc", "percf" are all new params you'll need to define in Tidal if you want to change them
+
 SynthDef(\superhammond, {|out, speed=1, sustain=1, decay=0, pan, freq, vibrato=0.5, vrate=7,
 	voice=0, perc=0, percf=2 |
 	var freqs, amps, sound, click, env, ampscale, attrel;
@@ -257,6 +258,30 @@ SynthDef(\supertest, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0
 	sound = Dust2.ar(basefreq);
 	sound = CombL.ar(CombL.ar(Decay.ar(sound, 1/basefreq), 0.2, 1/basefreq, 0.5), 0.2, 1.1/basefreq, 0.1);
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
+
+SynthDef(\superphy, {|out, pan, freq,sustain=1,accelerate=2 |
+  var attrel = (sustain/2).clip(0,1);
+	var env = EnvGen.ar(Env.linen(attrel, sustain-(2*attrel), attrel), doneAction:2);
+  var n = SinOsc.ar(freq)*env;
+  var bank = (0.01, 0.015 ..0.07);
+  var v = LFTri.kr(bank.scramble[5..7]).range(0.0001, 0.0003);
+  var excit = LFSaw.kr(0.01,rrand(0.01, accelerate/10), 0.42);
+  var sound = MembraneHexagon.ar(n,excit,mul:v);
+  OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan,env))
+}).add;
+
+SynthDef(\superphy2, {|out, pan, freq,sustain=1,accelerate=0.04 |
+  var delayTime = (1 / freq)+accelerate;
+  var attrel = (sustain).clip(0,0.8);
+	var env = EnvGen.ar(Env.linen(attrel, sustain-(1.5*attrel), attrel), doneAction:2);
+  var n = PinkNoise.ar(freq);
+  var bank = (0.01, 0.015 ..0.07);
+  var v = LFTri.kr(0.015).range(0.0001, 0.0003);
+  var sound = MembraneHexagon.ar(n,accelerate.range(0.001,0.4),mul:v);
+  sound = CombL.ar(sound,delayTime.range(0.01, 0.5),delayTime.range(0.02,0.4),4);
+  OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan,env))
 }).add;
 
   SynthDef(\superchop, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0 |

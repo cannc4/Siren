@@ -17,7 +17,7 @@ s.waitForBoot {
 
 Link.enable;
 0.2.wait;
-Link.setTempo(120,1);
+//Link.setTempo(120,1);
 s.makeGui;
 s.meter;
 s.latency = 0.3;

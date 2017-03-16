@@ -16,7 +16,7 @@ class MenuBar extends Component {
         name: 'Live',
         url:'/live'
       }],
-      username: 'can'
+      username: 'vou'
     }
   }
   componentDidUpdate() {

@@ -138,6 +138,9 @@ let (***) = foldl (|*|)
     lsize = mf "lsize"
     perc = mf "perc"
     percf = mf "percf"
+
+    (phfirst, phfirst_p) = pF "phfirst" (Just 0)
+    (phlast, phlast_p) = pF "phlast" (Just 5)
     (fattack, fattack_p) = pF "fattack" (Just 0)
     (fhold, fhold_p) = pF "fhold" (Just 1)
     (frelease, frelease_p) = pF "frelease" (Just 0)

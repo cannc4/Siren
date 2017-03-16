@@ -27,7 +27,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['1','2','3', '4', '5'],
+  channels: ['1','2','3', '4', '5','cps'],
   timer: [],
   values: {},
   scCommand: '',
@@ -43,7 +43,7 @@ this.state={
   soloSentinel: false,
   sceneSentinel: false,
   parvalues: '',
-  username: 'can'
+  username: 'vou'
   //rotation: 1.5,
   //stateSketch : sketch
 }

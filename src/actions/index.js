@@ -391,7 +391,7 @@ export const assignTimer = (timer,steps, _index) => {
     type: 'ASSIGN_TIMER', payload: timer.id , current : dum
   };
 }
-
+// Context //
 var math = require('mathjs');
 export const sendCommands = (server,vals, commands =[], solo, transition, channels, timer) => {
   return dispatch => {
@@ -399,7 +399,14 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
       const cmd = _.find(commands, c => c.name === cellName);
-      if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+      if(_.indexOf(channels,k) === 5){
+        var newCommand = cellName;
+        console.log(newCommand);
+        console.log(k + newCommand);
+        return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+
+      }
+      else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');
         var newCommand = cmd.command;
         var parameters =_.concat( _.split(cmd.params, ','),'t');
@@ -435,8 +442,15 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
 
         var soloHolder = "d"+(k);
         var transitionHolder = "" ;
-
-          var _k = k;
+        var _k = k;
+        if(_.indexOf(channels,_k)=== 5){
+          transitionHolder = k;
+          console.log(k);
+          soloHolder = " ";
+          console.log(transitionHolder);
+          console.log(newCommand);
+        }
+        else {
           if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
             k = "d"+(k);
             soloHolder = k ;
@@ -453,7 +467,7 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
             soloHolder = "solo $ " + k ;
             transitionHolder = " $ ";
           }
-
+        }
         //console.log(soloHolder + transitionHolder + newCommand );
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
         return [soloHolder + transitionHolder + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
