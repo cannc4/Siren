@@ -10,6 +10,20 @@ const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var globalCount = 0;
 
+//
+// grid.key(function(x, y, s) {
+//   console.log('key received: ' + x + ', ' + y + ', ' + s);
+// });
+//
+//     for (let y=0;y<8;y++) {
+//       led[y] = [];
+//       for (let x=0;x<16;x++)
+//         led[y][x] = 0;
+//     }
+//     led[0][0] = 15;
+//     led[2][0] = 5;
+//     led[0][2] = 5;
+//     grid.refresh(led);
 // REPL is an GHCI Instance
 class REPL {
 
@@ -26,6 +40,7 @@ class REPL {
   }
 
   initTidal() {
+
     this.myCommands = { values: [] };
     const commands = fs.readFileSync(config.tidal_boot).toString().split('\n');
     for (let i = 0; i < commands.length; i++) {

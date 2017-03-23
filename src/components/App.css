@@ -9,8 +9,8 @@ body, .fill, .cont {
   font-size: 12px;
 }
 * {
-  font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
-  font-weight: 400;
+  font-family: 'Monaco', Monaco;
+  font-weight: 40;
 }
 body {
   /*background: url('http://sut.la/tcab/background.png');*/
@@ -21,7 +21,7 @@ body {
 }
 
 .logo {
-  background: url('http://tcab.biz/assets/logo.png');
+
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;

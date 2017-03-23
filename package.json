@@ -1,6 +1,6 @@
 {
   "name": "sq-web",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "private": true,
   "devDependencies": {
     "babel": "^6.5.2",
@@ -22,6 +22,9 @@
     "express": "^4.14.0",
     "firebase": "3.1.0",
     "lodash": "^4.17.2",
+    "mathjs": "^3.10.0",
+    "monome-grid": "0.0.6",
+    "raw-loader": "^0.5.1",
     "react": "^15.4.2",
     "react-codemirror": "^0.3.0",
     "react-contenteditable": "^2.0.2",
@@ -31,19 +34,21 @@
     "react-router": "^2.7.0",
     "react-splitter": "^0.2.0",
     "react-syntax-highlighter": "^4.0.1",
+    "react-three-renderer": "^3.0.2",
     "redux": "^3.5.2",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.0.1",
     "socket.io": "^1.7.1",
     "supercolliderjs": "^0.13.0",
     "threads": "^0.7.2",
+    "three": "^0.82.1",
     "ws": "^1.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "tidal": "node server/start.js",
+    "sq": "node server/start.js",
     "web": "react-scripts start",
     "rename-samples": "node rename-samples-folder.js"
   },

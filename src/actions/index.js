@@ -51,6 +51,9 @@ const models = {
     }
   }
 }
+String.prototype.replaceAt=function(index, character) {
+  return this.substr(0, index) + character + this.substr(index+character.length);
+}
 //
 // var client = dgram.createSocket('udp4');
 //
@@ -101,6 +104,15 @@ const models = {
 // };
 //
 
+export function changeUsername(username) {
+  // console.log("BEFORE");
+  // console.log(models);
+  // _.forEach(models, function(modelValue) {
+  //   modelValue.dataSource = modelValue.dataSource.child(username);
+  // })
+  // console.log("AFTER");
+  // console.log(models);
+}
 
 export function sendZapier(data) {
   const { url } = data;
@@ -278,8 +290,6 @@ export function fbSyncMatrix (model,data){
 }
 
 export function fbcreateMatrix(model, data) {
-  console.log('DATA::');
-  console.log(data);
   var datakey, sceneIndex, values, commands;
   models[model].dataSource.ref.once('value', dat => {
     const obj = _.find(dat.val(), (d) => d.matName === data.matName);
@@ -287,8 +297,6 @@ export function fbcreateMatrix(model, data) {
     sceneIndex = obj.sceneIndex;
     commands = obj.commands;
   });
-
-  console.log(commands);
 
   if (datakey) {
     data.sceneIndex = sceneIndex;
@@ -377,20 +385,34 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-
-export const sendCommands = (server,vals, commands =[]) => {
+export const assignTimer = (timer,steps, _index) => {
+  var dum =timer.current + (_index - timer.current%steps);
+  return {
+    type: 'ASSIGN_TIMER', payload: timer.id , current : dum
+  };
+}
+// Context //
+var math = require('mathjs');
+export const sendCommands = (server,vals, commands =[], solo, transition, channels, timer) => {
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
       const cellName = _.split(v, ' ', 1)[0];
       const cmd = _.find(commands, c => c.name === cellName);
-      if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+      if(_.indexOf(channels,k) === 5){
+        var newCommand = cellName;
+        return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      }
+      else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');
         var newCommand = cmd.command;
-        var parameters = _.split(cmd.params, ',');
-
+        var parameters =_.concat( _.split(cmd.params, ','),'t');
+        //Param parser
         _.forEach(parameters, function(value, i) {
-          if(_.indexOf(cellItem[i+1], '[') != -1 ){
+          if (value === 't'){
+            newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), timer.current);
+            }
+          else if(_.indexOf(cellItem[i+1], '[') != -1 ){
             cellItem[i+1] = cellItem[i+1].substring(1, _.indexOf(cellItem[i+1], ']'));
             var bounds = _.split(cellItem[i+1], ',');
             if(bounds[0] !== undefined && bounds[0] !== "" &&
@@ -407,30 +429,45 @@ export const sendCommands = (server,vals, commands =[]) => {
           }
         });
 
-        // var append = "";
-        // switch (k) {
-        //   case "d1":
-        //     append = " # orbit \"4\""; break;
-        //   case "d2":
-        //     append = " # orbit \"5\""; break;
-        //   case "d3":
-        //     append = " # orbit \"6\""; break;
-        //   case "d4":
-        //     append = " # orbit \"7\""; break;
-          // case "d5":
-          //   append = " # orbit \"4\""; break;
-          // case "d6":
-          //   append = " # orbit \"5\""; break;
-          //   case "d7":
-          //     append = " # orbit \"6\""; break;
-          //     case "d8":
-          //       append = " # orbit \"6\""; break;
-          // default:
-          //   break;
-        //}
+        //Timer parser
+        console.log(newCommand);
+        //Math Parser
+        var re = /(---)(.+)(---)/g, match, matches = [];
+        while (match = re.exec(newCommand)) {
+          newCommand =_.replace(newCommand, new RegExp("(---)(.+)(---)", "g"), math.eval(_.trim(match[0],"---")));
+        }
 
+        var soloHolder = "d"+(k);
+        var transitionHolder = "" ;
+        var _k = k;
+        if(_.indexOf(channels,_k)=== 5){
+          transitionHolder = k;
+          console.log(k);
+          soloHolder = " ";
+          console.log(transitionHolder);
+          console.log(newCommand);
+        }
+        else {
+          if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
+            k = "d"+(k);
+            soloHolder = k ;
+            transitionHolder = " $ ";
+          }
+
+          if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
+            transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
+            soloHolder = "t"+(k);
+          }
+
+          if(solo[_.indexOf(channels,_k)] === true){
+            k = "d"+(k);
+            soloHolder = "solo $ " + k ;
+            transitionHolder = " $ ";
+          }
+        }
+        //console.log(soloHolder + transitionHolder + newCommand );
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-        return [ k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [soloHolder + transitionHolder + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))
@@ -837,9 +874,6 @@ export const updtmr = (_index) => {
 
 export const pauseIndividualTimer = (_index) => {
   timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
-  //clearInterval(timer[_index]);
-  console.log("PAUSE TIMER");
-  console.log(timer);
   return {
     type: 'PAUSE_TIMER', payload: _index
   }

@@ -1,9 +1,127 @@
 (
-  var numChannels = ~dirt.numChannels;
-  SynthDef(\noop, {}).add;
+var numChannels = ~dirt.numChannels;
 
-// tuning fork
-// from my own experimentation and from "On the acoustics of tuning forks", Rossing Russell and Brown
+
+//eli fieldsteel's instrument
+
+
+SynthDef(\bpfsaw, { |attack=2, sustain=0, release=3, ts=1, c1=1, c2=(-1),
+  freq=500, detune=0.2, pan=0, cfhzmin=0.1, cfhzmax=0.3, accelerate=500,
+  cfmin= 200, cfmax=2000, rqmin=0.1, rqmax=0.2, lsf=200, ldb=0, amp=1, out|
+	var sig, env;
+	env = EnvGen.kr(Env([0,1,1,0],[attack,sustain,release],[c1,0,c2]),timeScale:ts,doneAction:2);
+	sig = Saw.ar(freq*{LFNoise1.kr(0.5,detune)}!2);
+	sig = BPF.ar(
+		sig,
+		{LFNoise1.kr(
+			LFNoise1.kr(4).exprange(cfhzmin,cfhzmax)
+		).exprange(cfmin,cfmax)}!2,
+		{LFNoise1.kr(0.1).exprange(rqmin,rqmax)}!2
+	);
+	sig = BLowShelf.ar(sig,accelerate,0.5,ldb);
+	sig = Balance2.ar(sig[0],sig[1],pan);
+	sig = sig*amp;
+  OffsetOut.ar(out, DirtPan.ar(sig, ~dirt.numChannels, pan,env))
+}).add;
+
+
+//Harpsichord synth
+
+SynthDef(\harpsi, {| out = 0, freq = 440, amp = 0.1, pan = 0, dist=0, smooth=0,
+   click=0,attack=0.01,release=1, sustain=0.3, hfeedback=0.3, detune=0|
+    var env, snd;
+	env = EnvGen.ar(Env.linen(attack,sustain,release),timeScale:sustain,doneAction:2);
+	snd = LFTri.ar(freq, click, 1) * SinOscFB.ar(freq*((detune/100)+1),hfeedback,1);
+	snd = CrossoverDistortion.ar(snd,dist,smooth,1).clip;
+  snd = LeakDC.ar(snd);
+  OffsetOut.ar(out, DirtPan.ar(snd, ~dirt.numChannels, pan,env))
+}).add;
+
+
+/*SynthDef(\henon,{| freq=440,mfreq=440,hena=1.3,henb=0.3,x0=0.30501993062401,
+  y0=0.20938865431933,attack=0.01,sustain=1,release=1,out ,pan, amp = 0.3|
+		var sig,env;
+		sig = Henon2DN.ar(freq,freq+mfreq,hena,henb,x0,y0,amp);
+		env = EnvGen.ar(Env.linen(attack,sustain,release),1,1,0,sustain,2);
+		sig = LeakDC.ar(sig);
+		OffsetOut.ar(out, DirtPan.ar(sig, ~dirt.numChannels, pan,env))
+}).add;*/
+
+
+//Warp1 constant synth
+
+/*
+SynthDef(\warp1,
+	{arg buf=0, channels=2, pos=0, rate=1, size=0.2, env= -1, olap=8, rand=0, interp=4, poslag=0, ratelag=0, out=0, sizelag=0, pan=0, amp=0.5;
+		var sig;
+		sig = Warp1.ar(2,buf,Lag.kr(pos,poslag),Lag.kr(rate,ratelag),Lag.kr(size,sizelag),env,olap,rand,interp,1);
+		Out.ar(out,Pan2.ar(sig,pan,amp));
+}).add;
+);*/
+
+//GrainBuf synth
+
+/*(
+SynthDef(\grains,
+	{arg buf=0, channels=2, dust=2, imp=2, dur=0.2, rate=1, pos=0.5, interp=4, pan=0, dustlag=0, implag=0, out=0, amp=0.5, ratelag=0, maxgrains=512, env= -1;
+		var sig;
+		sig = GrainBuf.ar(2,Dust.kr(Lag.kr(dust,dustlag))+Impulse.kr(Lag.kr(imp,implag)),dur,buf,Lag.kr(rate,ratelag),pos,interp,pan,env,maxgrains,amp);
+		Out.ar(out,sig);
+}).add;
+
+);*/
+
+//Latest SynthDefs ---------------------------------------------------------------
+
+SynthDef(\supers, {|out, pan, freq=440,sustain=0.1, accelerate=0.2 |
+  var snd, env, ctrl,bank,v;
+  snd = SinOscFB.ar([freq,freq+10],accelerate,3).tanh;
+  snd = snd + BrownNoise.ar(accelerate * XLine.kr(1,0.001,0.05));
+  snd = BPF.ar(snd, freq+50, 0.9);
+  snd = LeakDC.ar(snd);
+  env = EnvGen.ar(Env.perc(0.01,sustain), doneAction:2 );
+  bank = (0.01, 0.015 ..0.07);
+  v = LFTri.kr(0.015).range(0.0001, 0.0003);
+  snd = MembraneHexagon.ar(snd,accelerate.range(0.001,0.4),mul:v);
+  OffsetOut.ar(out, DirtPan.ar(snd, ~dirt.numChannels, pan,env))
+}).add;
+
+SynthDef(\supersfb, {|out, pan, freq=440,sustain=0.1, accelerate=0.2 |
+  var snd, env, ctrl;
+  snd = SinOscFB.ar([freq,freq+10],accelerate,3).tanh;
+  snd = snd + BrownNoise.ar(accelerate * XLine.kr(1,0.001,0.05));
+  snd = BPF.ar(snd, freq+50, 0.9);
+  snd = LeakDC.ar(snd);
+  env = EnvGen.ar(Env.perc(0.01,sustain), doneAction:2 );
+  OffsetOut.ar(out, DirtPan.ar(snd, ~dirt.numChannels, pan,env))
+}).add;
+
+SynthDef(\superphy, {|out, pan, freq,sustain=1,accelerate=2 |
+  var attrel = (sustain/2).clip(0,1);
+	var env = EnvGen.ar(Env.linen(attrel, sustain-(2*attrel), attrel), doneAction:2);
+  var n = SinOsc.ar(freq)*env;
+  var bank = (0.01, 0.015 ..0.07);
+  var v = LFTri.kr(bank.scramble[5..7]).range(0.0001, 0.0003);
+  var excit = LFSaw.kr(0.01,rrand(0.01, accelerate/10), 0.42);
+  var sound = MembraneHexagon.ar(n,excit,mul:v);
+  OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan,env))
+}).add;
+
+SynthDef(\superphy2, {|out, pan, freq,sustain=1,accelerate=0.04 |
+  var delayTime = (1 / freq)+accelerate;
+  var attrel = (sustain).clip(0,0.8);
+	var env = EnvGen.ar(Env.linen(attrel, sustain-(1.5*attrel), attrel), doneAction:2);
+  var n = PinkNoise.ar(freq);
+  var bank = (0.01, 0.015 ..0.07);
+  var v = LFTri.kr(0.015).range(0.0001, 0.0003);
+  var sound = MembraneHexagon.ar(n,accelerate.range(0.001,0.4),mul:v);
+  sound = CombL.ar(sound,delayTime.range(0.01, 0.5),delayTime.range(0.02,0.4),4);
+  OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan,env))
+}).add;
+//--------------------------------------------------------------------------------
+
+
+
 SynthDef(\superfork, {|out, speed=1, sustain=1, decay=0, pan, freq, voice=0 |
 	var sound, env;
 	env = EnvGen.ar(Env.linen(0.001, 0.998, 0.001), timeScale:sustain, doneAction:2);
@@ -15,14 +133,21 @@ SynthDef(\superfork, {|out, speed=1, sustain=1, decay=0, pan, freq, voice=0 |
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
 }).add;
 
-// hammond B3 sim
-// freq adjustments courtesy Tom Wiltshire (electricdruid.net)
-// drawbar settings selectable with "voice" and from many public domain sources,
-// Google "Hammond drawbar settings" and add your own in the big SelectX block
-// "perc" "percf" and "decay" are an attempt at the percussion, no idea if it sounds at all reasonable
-// vintage Hammonds had percf as 2 or 3 (switchable), two perc levels (maybe roughly 0.7 and 1.2?),
-// and two decay options (roughly 0 and maybe 1ish?)
-// "vibrato", "vrate", "perc", "percf" are all new params you'll need to define in Tidal if you want to change them
+/*~bellA = [-19.4, -18.2, -17, -14.8, -23.2, -19, -19.4, -26.7, -21, -27.1, -39, -36.3];
+~bellF = [1, 2.010752688172, 2.4408602150538, 4.0537634408602, 5.0430107526882, 5.9784946236559, 8.1827956989247, 10.559139784946, 13.021505376344, 15.58064516129, 18.172043010753, 20.806451612903];
+~bellRing = [10, 8, 7, 9, 5, 6, 6, 8, 5, 4, 3, 7];
+
+
+SynthDef(\bell, {
+	arg f = 50, randLo, randHi, dur, out,sound;
+	var sig, env;
+	env = EnvGen.kr(Env.new([1, 0.001], [1], \exp), 1, timeScale:dur, doneAction:2);
+	sig = LPF.ar(PinkNoise.ar, 10000);
+	sig = DynKlank.ar(`[(~bellF*f)+ExpRand(randLo, randHi), ~bellA.dbamp, ~bellRing], sig)*0.025;
+OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
+}).add;*/
+
+
 SynthDef(\superhammond, {|out, speed=1, sustain=1, decay=0, pan, freq, vibrato=0.5, vrate=7,
 	voice=0, perc=0, percf=2 |
 	var freqs, amps, sound, click, env, ampscale, attrel;
@@ -69,9 +194,6 @@ SynthDef(\supervibe, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
 }).add;
 
-// Hoover, adapted from Wouter Snoei's
-// http://superdupercollider.blogspot.com/2009/06/more-dominator-deconstruction.html
-// could use some tweaking / more params?
 SynthDef(\superhoover, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, slide=0|
 	var env = EnvGen.ar(Env.pairs([[0,0],[0.03,1],[0.2,1-decay],[0.95,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
 	var pwm, mix, fglide;
@@ -121,20 +243,19 @@ SynthDef(\supercross, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
 }).add;
 
-// env on filter?, and try to play with saw
-// doesn't actually sound anything like a 303
 SynthDef(\super303, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0.0, slide=0,
 	pitch1=1, pitch2=1, pitch3=1, fattack=0, fhold=1, frelease=0, fenv=0, cutoff=10000, resonance=0|
-	//var env = EnvGen.ar(Env.pairs([[0,0],[0.1,1],[0.2,1-decay],[0.9,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
-	var sound, glide, basefreq, env, env2, mix;
-    env = EnvGen.ar(Env.perc(0.003, (1-decay)*2, 1, -3), timeScale:sustain, doneAction:2);
+	var env = EnvGen.ar(Env.pairs([[0,0],[0.1,1],[0.2,1-decay],[0.9,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
+	var sound, glide, basefreq, env2, mix;
+    //env = EnvGen.ar(Env.perc(0.003, (1-decay)*2, 1, -3), timeScale:sustain, doneAction:2);
 	env2= EnvGen.ar(Env.linen(fattack, fhold*sustain, frelease));
 	glide = EnvGen.ar(Env.perc(0.05, 0.5, 1, \lin), timeScale:sustain) * (-1*slide/4) + 1;
 	basefreq = freq * glide * Line.kr(1, 1+accelerate, sustain);
 	//sound = clip(VarSaw.ar(basefreq, 0, 0.98) * (voice*20+1), -1, 1);
 	sound = tanh(VarSaw.ar(basefreq, 0, 0.98)*(voice*20+1));
-	//sound = 3*RLPFD.ar(sound, clip(basefreq*pitch1+(fenv*env2),2,20000), pitch2, pitch3);
-	sound = 3*RLPFD.ar(sound, clip((cutoff*pitch1)+(fenv*env2*pitch2),2,10000), resonance, pitch3);
+	sound = 3*RLPFD.ar(sound, clip(basefreq*pitch1+(fenv*env2),2,20000), pitch2, pitch3);
+	//sound = 3*RLPFD.ar(sound, clip((cutoff*pitch1)+(fenv*env2*pitch2),2,10000), resonance, pitch3);
+  sound = LeakDC.ar(sound);
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
 }).add;
 
@@ -147,7 +268,7 @@ SynthDef(\super303, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0,
 // vcfegint: advanced param for tweaking Q of bandpass (vcf for short)
 // pitch1, pitch2: advanced params for tweaking lowpass and bandpass frequencies
 
-// something I still don't like - CLEAN UP AND FIX
+
 SynthDef(\super302, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0.0, slide=0,
 	pitch1=1, pitch2=1, pitch3=1, sfattack=0, sfrelease=0, sfenv=0, sfcutoff=1000, sfresonance=0, vcfegint=0|
 	var sound, glide, basefreq, env, env2, resq, loresq;
@@ -171,8 +292,7 @@ SynthDef(\super302, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0,
 
 
 // testing sample combos - this should override the one in "core-synths.scd"
-
-SynthDef(format("dirt_sampleduo_%", numChannels), { |out, bufnum1, bufnum2, sustain = 1, begin=0, end=1, speed = 1, endSpeed = 1, pan = 0|
+/*SynthDef(format("dirt_sampleduo_%", numChannels), { |out, bufnum1, bufnum2, sustain = 1, begin=0, end=1, speed = 1, endSpeed = 1, pan = 0|
 	var sound, sound1, sound2, p,q,rate, phase, sawrate, numFrames;
 	// playback speed
 	rate = Line.kr(speed, endSpeed, sustain);
@@ -197,7 +317,7 @@ SynthDef(format("dirt_sampleduo_%", numChannels), { |out, bufnum1, bufnum2, sust
 	sound = DirtPan.ar(bitXor(p, q) / (2**31), numChannels, pan);
 	//sound = DirtPan.ar(sound2, numChannels, pan);
 	Out.ar(out, sound)
-}, [\ir, \ir, \ir, \ir, \ir, \ir, \ir, \ir]).add;
+}, [\ir, \ir, \ir, \ir, \ir, \ir, \ir, \ir]).add;*/
 
 SynthDef(\superlagcomp, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0.2|
 	var env = EnvGen.ar(Env.pairs([[0,0],[0.03,1],[0.2,1-decay],[0.95,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
@@ -245,7 +365,8 @@ SynthDef(\supertest, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
 }).add;
 
-SynthDef(\superchop, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0 |
+
+  SynthDef(\superchop, {|out, speed=1, sustain=1, decay=0, pan, freq, accelerate=0, voice=0 |
 	var env = EnvGen.ar(Env.pairs([[0,0],[0.05,1],[0.2,1-decay],[0.95,1-decay],[1,0]], -1), timeScale:sustain, doneAction:2);
 	var basefreq = freq * Line.kr(1, 1+accelerate, sustain);
 	var chopfreq = basefreq;

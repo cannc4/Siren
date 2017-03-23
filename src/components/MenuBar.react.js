@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-// import { googleLogin, logout } from '../actions';
-// import store from '../store';
+import store from '../store';
 import './MenuBar.css'
 
 class MenuBar extends Component {
@@ -13,28 +12,13 @@ class MenuBar extends Component {
       paths: [ {
         name: 'Home',
         url: '/'
-      },  {
-      name: 'Live',
-      url:'/live'
-    }]
+        },  {
+        name: 'Live',
+        url:'/live'
+      }],
+      username: 'vou'
     }
   }
-  // ,{
-  //   name: 'About',
-  //   url: '/about'
-  // },{
-  //   name: 'Accounts',
-  //   url: '/accounts'
-  // },{
-  //   name: 'Categories',
-  //   url: '/categories'
-  // },{
-  //   name: 'Products',
-  //   url: '/products'
-  // },{
-  //   name: 'CableSections',
-  //   url: '/cablesections'
-  // }
   componentDidUpdate() {
     const ctx = this;
     if (ctx.state.path !== location.pathname){

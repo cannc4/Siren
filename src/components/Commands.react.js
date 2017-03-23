@@ -8,6 +8,8 @@ import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/base16-light.css';
 import 'codemirror/mode/elm/elm';
+// load math.js
+// use math.js
 
 class Commands extends Component {
   constructor(props) {
@@ -55,13 +57,17 @@ class Commands extends Component {
       } else {
         value = obj;
       }
+       // 2i
 
       var re = /&(\w+)&/g, match, matches = [];
       while (match = re.exec(value)) {
         if(_.indexOf(matches, match[1]) === -1)
           matches.push(match[1]);
       }
-      ctx.setState({ params: matches.toString() });
+      _.remove(matches, function(n) {
+      return n === 't';
+      });
+      ctx.setState({ params: matches.toString()});
 
 
       const payload = { key: dbKey };

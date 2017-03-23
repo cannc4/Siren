@@ -1,19 +1,25 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-
+//
+// import ReactDOM from 'react-dom';
+// import P5Wrapper from 'react-p5-wrapper';
+// import sketch from './../sketches/sketch';
 import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
-      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,
-      startClick,stopClick} from '../actions'
+      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
+      startClick,stopClick, changeUsername} from '../actions'
 import {Layout, LayoutSplitter} from 'react-flex-layout';
+// import Simple from './examples/Benchmark/RotatingCubesDirectUpdates.js'
+import Simple from './Simple.react'
 import Commands from './Commands.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
 
-class Home extends Component {
 
+
+class Home extends Component {
 constructor(props) {
 super(props);
 this.state={
@@ -21,7 +27,7 @@ this.state={
   modelName : "Matrices",
   tidalServerLink: 'localhost:3001',
   steps: 12,
-  channels: ['d1','d2','d3', 'd4', 'd5','m1'],
+  channels: ['1','2','3', '4', '5','cps'],
   timer: [],
   values: {},
   scCommand: '',
@@ -30,12 +36,19 @@ this.state={
   activeMatrix: '',
   songmodeActive: false,
   sceneIndex: '',
+  transition: [],
   channelEnd :[],
   play : false,
-  sceneSentinel: false
+  solo : [],
+  soloSentinel: false,
+  sceneSentinel: false,
+  parvalues: '',
+  username: 'vou'
+  //rotation: 1.5,
+  //stateSketch : sketch
 }
 }
-  
+
 //Clock for Haskell
 // componentDidMount(props,state){
 //   const ctx = this;
@@ -68,16 +81,15 @@ componentWillMount(props,state){
 console.log(this.props.location.pathname);
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer}=ctx.state;
+  const { channelEnd, channels , steps , timer, solo}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
      if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
      ctx.createTimer(i, 48, steps);
      //store.dispatch(timerThread(i, ctx.props.timer.timer[i].duration, steps));
      tempEnd[i] = false
-
+     solo[i] = false;
    }
    ctx.setState({channelEnd : tempEnd});
-
 
 }
 createTimer(i,duration, steps){
@@ -88,7 +100,7 @@ componentDidUpdate(props, state) {
   var runNo = [];
   const ctx=this;
   const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd }=state;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition }=state;
   for (var i = 0; i < channels.length; i++) {
 
     if (ctx.props.timer.timer[i].isActive) {
@@ -107,7 +119,7 @@ componentDidUpdate(props, state) {
     }
 
   if(values[runNo[i]]!== undefined){
-    const vals = values[runNo[i]][channels[i]];
+    const vals = values[runNo[i]][i];
     const channel = channels[i];
     const obj = {[channel]: vals};
       if (vals !== undefined) {
@@ -118,12 +130,13 @@ componentDidUpdate(props, state) {
             sceneCommands = d.commands;
         })
 
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands );
+        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels,timer.timer[i]);
         }
       }
     }
   }
 }
+
 
 
 identical(array) {
@@ -151,6 +164,7 @@ progressMatrices(items){
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
       channelEnd[j] = false;
+
     }
     _.each(items, function(d, i, j){
       if(d.matName === activeMatrix)
@@ -185,8 +199,8 @@ runTidal() {
   store.dispatch(initMyTidal(tidalServerLink));
 }
 
-sendCommands(tidalServerLink, vals, channelcommands, commands) {
-  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
+sendCommands(tidalServerLink, vals, channelcommands, commands,solo,transition, channels) {
+  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels));
 }
 sendSCMatrix(tidalServerLink, vals, commands) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
@@ -240,14 +254,38 @@ updateMatrix(commands, values, item) {
 //   ctx.setState({duration:duration});
 //   store.dispatch(updateTimerduration(c,channeldur, steps));
 // }
+updateDur = ({target : {value, id}}) => {
 
-soloChannel(){
+    const ctx = this;
+    const {channels,steps} = ctx.state;
+    const {timer} = ctx.props;
+    var _index = _.indexOf(channels,id);
+    if(value !== undefined && value !== "")
+      store.dispatch(updateTimerduration(_index,value,steps));
+}
+
+soloChannel =  ({target : {id}}) => {
+  const ctx = this;
+  const {channels,solo,soloSentinel} = ctx.state;
+  var _index = _.indexOf(channels,id);
+  if(_index !== -1 ){
+
+    for (var i = 0; i < solo.length; i++) {
+      if(_index !== i)
+        solo[i] = false;
+    }
+    solo[_index] = !solo[_index];
+    console.log(solo);
+    ctx.setState({solo: solo, soloSentinel : solo[_index]});
+
+  }
   //add solo channels
   //const _key = event.target.id;
 }
+
 renderPlayer() {
   const ctx=this;
-  const { channels, steps , timer}=ctx.state;
+  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
 
@@ -256,10 +294,20 @@ renderPlayer() {
       <div className="playbox playbox-cycle">cycle</div>
       {_.map(channels, c => {
         return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyPress={ctx._handleKeyPress.bind(ctx)}/> <img src={require('../assets/stop@3x.png')} id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/> </div>
+        onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
+        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+         </div>
       })}
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
+      <div className={playerClass}>
+        <div className="playbox playbox-cycle">Transition</div>
+      {_.map(channels, c => {
+        return <input className = "playbox" id = {c} key = {c} value = {ctx.state.transition[_.indexOf(channels, c)]} style = {{margin: 5}}
+        onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      })}
+      </div>
   </div>)
 }
 
@@ -276,12 +324,12 @@ updateDur = ({target : {value, id}}) => {
 _handleKeyPress = event => {
 
   const ctx=this;
-  const {steps, channels, timer} = ctx.state;
+  const {steps, channels, timer, play} = ctx.state;
   const _key = event.target.id;
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
 
-  if(event.key === 'Enter' && event.ctrlKey){
+  if(event.keyCode === 13 && event.ctrlKey){
     // if( value < "4"){
     //   value = 4;
     // }
@@ -289,8 +337,9 @@ _handleKeyPress = event => {
       store.dispatch(pauseIndividualTimer(_index));
     }
     startIndividualTimer(_index, value,steps);
+    ctx.setState({play:true});
   }
-  else if (event.key === 'Enter' && event.shiftKey){
+  else if (event.keyCode === 13 && event.shiftKey){
     // if( value < "10"){
     //   value = 10;
     // }
@@ -300,6 +349,39 @@ _handleKeyPress = event => {
   }
 }
 
+
+
+updateT = ({target : {value, id}}) => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key =id;
+  var value = value;
+  var _index = _.indexOf(channels, _key);
+  var temp = transition;
+  console.log("TRANSITION");
+  console.log(temp);
+  temp[_index] = value;
+  console.log(transition[_index]);
+  ctx.setState({transition:temp});
+}
+
+
+_handleKeyPressT = event => {
+
+  const ctx=this;
+  const {transition, channels} = ctx.state;
+  const _key = event.target.id;
+  var value = event.target.value;
+  var _index = _.indexOf(channels, _key);
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    var temp = transition;
+    temp[_index] = value;
+   console.log(transition[_index]);
+   ctx.setState({transition:temp});
+  }
+}
 startTimer() {
 
   const ctx = this;
@@ -311,8 +393,8 @@ startTimer() {
   ctx.setState({play:true});
 }
 
-
 pauseTimer() {
+
     const ctx = this;
     const {channels, play} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
@@ -331,22 +413,11 @@ stopTimer() {
   ctx.setState({play: false});
 }
 
-
 renderStep(x, i) {
   const ctx=this;
-  const { channels, steps }=ctx.state;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
   const { timer, click, commands }=ctx.props;
 
-  //var currentStep = [];
-  // for (var i = 0; i < timer.length; i++) {
-  //   currentStep[i] = timer[i].current %steps;
-  // }
-  //
-  //     for (var j = 0; j < timer.length; j++) {
-  //       if(i === currentStep[j]){
-  //        indvChannel[j] += "playbox-active";
-  //       }
-  //     }
   var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
 
   var colCount=0;
@@ -357,16 +428,15 @@ renderStep(x, i) {
       const setText=({ target: { value }}) => {
           const {values}=ctx.state;
           if (values[i+1] === undefined) values[i+1]={}
-          values[i+1][c] = value;
+          values[i+1][_.indexOf(channels,c)] = value;
           ctx.setState({values});
       }
 
       const getValue=() => {
         const values=ctx.state.values;
-        if (values[i+1] === undefined || values[i+1][c] === undefined) return ''
-        return values[i+1][c];
+        if (values[i+1] === undefined || values[i+1][_.indexOf(channels,c)] === undefined) return ''
+        return values[i+1][_.indexOf(channels,c)];
       }
-
 
       const textval=getValue();
 
@@ -390,10 +460,39 @@ renderStep(x, i) {
       // dynamic text size
       const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
       return <div className={individualClass} style={{height: cellHeight+'vh'}} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText}/>
+        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
       </div>
     })}
   </div>;
+}
+
+
+handleSubmitCell = event => {
+  const ctx=this;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
+  const { timer, click, commands }=ctx.props;
+
+  var body = event.target.id;
+  var c = _.split(body,',')[0]-1;
+  var i = _.split(body,',')[1];
+  var text = event.target.value;
+  const getSceneCommands = () => {
+    var sceneCommands = [];
+    const items = this.props[this.state.modelName.toLowerCase()]
+    _.each(items, function(d){
+      if(d.matName === activeMatrix)
+        sceneCommands = d.commands;
+    })
+    return sceneCommands;
+  }
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    console.log(event.target.id);
+    console.log(i);
+    console.log(c);
+    store.dispatch(assignTimer(timer.timer[c], steps, i))
+    ctx.sendCommands(tidalServerLink,{[c]: text}, getSceneCommands(),solo, transition, channels,timer.timer[c]);
+  }
 }
 
 changeName({target: { value }}) {
@@ -531,7 +630,6 @@ renderMetro(){
   </div>
 }
 
-
 clearMatrix(){
   const ctx = this;
 
@@ -546,15 +644,10 @@ clearMatrix(){
   ctx.setState({values});
 }
 
-
 renderMenu(){
   const ctx=this;
-  const { tidal, timer, click }=ctx.props;
-  const { scCommand, tidalServerLink, play}=ctx.state;
-  const { commands }=ctx.props;
-  // const { commands }=ctx.state;
-  const { values, steps, channels}=ctx.state;
-
+  const { tidal, timer, click, commands }=ctx.props;
+  const { scCommand, tidalServerLink, play, values, steps, channels}=ctx.state;
 
   const updateTidalServerLink=({ target: { value } }) => {
       ctx.setState({ tidalServerLink: value });
@@ -563,27 +656,24 @@ renderMenu(){
   const updateScCommand=({ target: { value } }) => {
     ctx.setState({scCommand: value})
   }
-
-
-    // REPLACING START PAUSE STOP WITH IMAGES
-//<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
-
-  // Cellular and Bjorklund HTMLS
-  // <div id="Celluar">
-  //    <p>Cellular Automata Updates</p>
-  //    <input type="textarea" value={getValue()} onChange={updateDensity} placeholder="" rows="20" cols="30"/>
-  //    {!timer.isCelluarActive && <button onClick={celluarFill}>Run</button>}
-  //    {timer.isCelluarActive && <button onClick={celluarFillStop}>Stop</button>}
-  //    <button onClick={addValues}>  Add  </button>
-  // </div>
-  // <div id="Celluar">
-  //    <p>Bjorklund Algorithm Updates</p>
-  //    {!timer.isBjorkActive && <button onClick={bjorkFill}>Run</button>}
-  //    {timer.isBjorkActive && <button onClick={bjorkFillStop}>Stop</button>}
-  //    <button onClick={addBjorkValues}>  Add  </button>
-  // </div>
+  // REPLACING START PAUSE STOP WITH IMAGES
+  //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
 
   return   <div className="Tidal" style={{margin: '5px'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+      Username
+      <input type="String" value={ctx.state.username}
+      onChange={function(event){
+        ctx.setState({username: event.target.value});
+      }}
+      onKeyUp={function(event){
+        if(event.keyCode === 13 && event.ctrlKey){
+          ctx.setState({username: event.target.value});
+          changeUsername(ctx.state.username);
+        }
+      }}/>
+    </div>
+    <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
       Tidal Server Link
       <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
@@ -605,6 +695,8 @@ renderMenu(){
       </div>
   </div>
 }
+
+
 
 render() {
   const ctx=this;
@@ -628,7 +720,11 @@ render() {
       showCursorWhenSelecting: true
   };
 
-  return <div className={"Home cont"}>
+//<P5Wrapper sketch={this.state.stateSketch}/>
+//
+
+  return <div >
+  <div className={"Home cont"}>
     <Layout fill='window'>
       <Layout layoutWidth={120}>
         <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
@@ -636,7 +732,7 @@ render() {
             <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
-            <button onClick={ctx.clearMatrix.bind(ctx)}> Clear Matrix </button>
+            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
           </div>
 
           <div>
@@ -673,6 +769,7 @@ render() {
         </div>
       </Layout>
     </Layout>
+    </div>
   </div>
   }
 }

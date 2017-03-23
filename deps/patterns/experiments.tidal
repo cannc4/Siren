@@ -1,0 +1,913 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+cps 1.4
+--Main
+d1 $every 6 ((#n "{0 2 ~ 1 1*2 }%5" ).(rev)) $every 2 (#n "{~ 1 [2? 1] [2 3]}%5" ) $n "{0 1 ~ 0 1 }%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "2" #gain "1"
+--Sub
+d2 $slow 4 $n "{ 2  [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "1" #gain "1"
+
+--Break
+
+
+  d3 $ slow 2 $
+  slowspread (\wa ->
+               slowspread (\wb ->
+                            sometimes (within(wa, wb)
+                                       (slowspread (\f ->
+                                                     (slowspread (\v ->
+                                                                   (f v))
+                                                      [0.25, 0.25, 0.75]))
+                                        [(stut 4 0.75), (stut 2 0.75), (<~),
+                                         (stut 4 0.75), (stut 2 0.75), (~>)])))
+               [0.5, 0.75, 1])
+  [0.25, 0.25, 0, 0] $
+  stack[
+    slowcat[
+       n "{1 [~ 1] ~  1}%5" #coarse "2" #end "0.3",
+       n "{1 [~ 1] 1  1}%5",
+       n "{2 [2 ~ ] 2  ~}%5" #speed "2"
+       ] # s "drums" #cut "1 2"
+    ]
+
+d5 $slow 4 $every 6 ((#n "{0 2 ~ 2 1*2 }%5" ).(rev)) $every 2 (#n "{~ 2 [2? 1] [2 ~]}%5" $n "{ 2  [2? 2]}%5 " #s "drums" #speed "2" #shape "0.2 0.35" #cut "1" #gain "1"
+d1 silence
+d3 silence
+d2 silence
+d5 silence
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--Main
+d1 $every 6 ((#n "{0 2 ~ 1 1*2 }%5" ).(rev)) $every 2 (#n "{~ 1 [2? 1] 0 [2 0] }%5" ) $n "{0 1 ~ 0 1 }%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "2" #gain "1"
+--Sub
+d1 silence
+d2 $slow 4 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "3" #gain "1" #speed "2 0.5" #cutoff "3000 1500" #resonance "0.002 0.12"
+
+d2 $every 4 (slow 8 ) $slow 4 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #cut "3" #gain "1" #speed "0.78 0.65" #cutoff "4000 1500" #resonance "0.002 0.15" #attack "0.5"
+
+d2 $every 4 (slow 8 ) $slow 6 $n "{ 2 ~ [2? 2]}%5 " #s "drums" #speed "1" #cut "3" #gain "1" #speed "0.78 0.65" #cutoff "4000 1500" #resonance "0.002 0.15" #attack "0.5"
+
+d4 $jux(iter 2) $slow 16 $striate 256 $n"4" #s "drums" #speed "2"
+d4 silence
+--Break
+displayOutputDevices >>= putStrLn
+devices <- midiDevices
+  d3 $ slow 2 $
+  slowspread (\wa ->
+               slowspread (\wb ->
+                            sometimes (within(wa, wb)
+                                       (slowspread (\f ->
+                                                     (slowspread (\v ->
+                                                                   (f v))
+                                                      [0.25, 0.25, 0.75]))
+                                        [(stut 4 0.75), (stut 2 0.75), (<~),
+                                         (stut 4 0.75), (stut 2 0.75), (~>)])))
+               [0.5, 0.75, 1])
+  [0.25, 0.25, 0, 0] $
+  stack[
+    slowcat[
+       slow 4 $n "{2 [2 ~] ~  1}%5" #end "1" #speed "0.78 0.65"#cutoff "3000 1500" #resonance "0.002 0.12",
+       slow 2 $n "{2 [2 ~] ~  1}%5" #end "1" #speed "0.78 0.65"#cutoff "3000 1500" #resonance "0.002 0.12",
+       n "{1 [~ 1] ~  1}%5",
+       n "{2 [~ 2] 2  ~}%5" #speed "2"
+       ] # s "drums" #cut "-1 2"
+    ]
+
+d4 $slow 4 $n "{ 2  [2? 2]}%5 " #s "drums" #speed "1" #shape "0.2 0.35" #cut "1" #gain "1"
+
+d1 silence
+d2 silence
+d3 silence
+d4 silence
+
+------------------------------------------------------------------------------------------
+d1 silence
+d3 silence
+d2 silence
+
+d3 $ slow 8 $ n (wedge (4%13) "0 [~!! 1] ~ [~ 0 0]" "[[0 ~! 1] ~ [~ 0 0]]!!") # s "sacid"
+d2 silence
+
+d3  $every 6 ((#n "{0 2 ~ 1 ~ }%5" ).(rev)) $every 5 (#n "{~ 1 [2 1] [2 3]}%5" ) $n "{0 1 ~ 0 1 }%5 " #s "pad"
+#speed "1"  #end "0.5 2" #pan (slow 4 $scale 0.8 1.2 sine1) #orbit "3" #room "0.25" #speed "1" #delay "0.4 0.2" #cut "2 1" #cutoff "5000"
+
+d2 silence
+
+
+d1 silence
+d
+d2 silence
+d1 $ slow 3 $ wedge (4%13) (n "0 [~!! 1] ~ [~ 0 0]" # s "drums") $ n "[[0 ~! 1] ~ [~ 0 0]]!!" # s "drums"
+hush
+
+
+let dr3 i = n "[[0 ~! 1] ~ [~ 0 0]]!!" # s i
+    dr4 i = n "0 [~!! 1] ~ [~ 0 0]" # s i
+  in d1 $
+     slow 13 $ wedge (4%13) (dr4 "drum") $
+     -- slow 9 $
+     dr3 "drum"
+
+
+
+
+     slow 200 $ (sound $ step "feel" (take 1600 $ lindenmayer 30 "-:0,0:-1,1:-4-,4:-" "-0-1"))
+     data Sieve a = Sieve {at :: Int -> a}
+     instance Functor Sieve where
+         fmap f s = Sieve $ \i -> f (at s i)
+     instance Applicative Sieve where
+         pure b = Sieve $ \i -> b
+         (<*>) a b = Sieve $ \i -> (at a i) (at b i)
+     let basicSieve m i = Sieve $ \j -> (j `mod` m) == i
+         infixl 9 @@
+         (@@) = basicSieve
+         infixl 7 #||#
+         (#||#) = liftA2 (||)
+         infixl 8 #&&#
+         (#&&#) = liftA2 (&&)
+         snot = fmap not
+         infixl 7 #^^#
+         (#^^#) x y = (x #&&# snot y) #||# (y #&&# snot x)
+         toList n s = map (at s) [0..n-1]
+         toString n s = map b2c $ toList n s where
+           b2c b | b == True = 'x' | otherwise = '-'
+         toInts n s = map snd $ filter fst (zip (toList n s) [0..n-1])
+     toInts 12 $ 2@@1 #^^# 3@@0
+     toString 16 $ 3@@1 #||# 2@@0
+     -- more complicated sieve examples
+     d1 $ slow 4 $ sound (stack [
+      step "bd" $ toString 32 $ 5@@2 #||# 4@@0,
+      step "sn:2" $ toString 32 $ 4@@2 #^^# 3@@2])
+      # shape "0.5"
+     d2 $ do {
+       x <- "<1 2 3>";
+       y <- "<1 2>";
+       n (toScale (toInts 12 $ snot $ 4@@x #^^# 3@@0) (fmap (*y) $ every 2 rev $ run (8 `div` y)))}
+      # s "superzow" # bandf (density 1.2 $ scalex 500 2000 sine1) # bandq "5"
+
+
+      d1 $
+      spin 2 $
+      juxBy 0.9 (slow 2) $
+      superimpose (slowspread slow [3, 4] . (#vowel "{a e i o u}%3") . (|*| speed "0.5")) $
+      sometimes (slowspread chop [2, 8, 4] . slow 2) $
+      (
+      slow 32 $ slowspread (\x -> slowspread (striate' x) [(1/2), (1/4), (1/2), (1/8)]) [32, 64] $
+      interlace
+      (
+        stack [
+        foldEvery [3, 4] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "0" #cut "1",
+        foldEvery [3, 4] (0.5 <~) $ degradeBy 0.95 $ s samplset #n "1" #cut "2",
+        foldEvery [4, 5] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "2" #cut "3",
+        foldEvery [4, 5] (0.5 <~) $ degradeBy 0.5 $ s samplset #n "3" #cut "4"
+        ]
+      )
+      (
+        slowcat [
+        foldEvery [3, 4] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "0" #cut "5",
+        foldEvery [3, 4] (0.5 <~) $ degradeBy 0.95 $ s samplset #n "1" #cut "6",
+        foldEvery [4, 5] (0.25 <~) $ degradeBy 0.5 $ s samplset #n "2" #cut "7",
+        foldEvery [4, 5] (0.5 <~) $ degradeBy 0.5 $ s samplset #n "3" #cut "8"
+        ]
+      )
+      )#speed "{1 1 1 1 2/4, ~ ~ 0.25/3 ~}%3"
+      #cutoff (rand' 1.2 1000 3000)
+      #delaytime (slow 16 "{0.25 0.5 1 0.5}%3")
+      #delay (rand' 1.4 0.1 0.3)
+      #delayfeedback (rand' 1.5 0.2 0.4)
+      #shape (sine' 16 0.1 0.9)
+      #crush (slow 7 "16 12 11/2 10 8/3 7/7")
+
+
+      foldEvery [3,4 ] (13.25<~)
+      slowspread ($) [id,rev]
+      #unit "c"
+
+
+
+d1 $slowspread ($) [rev, (stut 4 0.125 0.25 . zoom (0,0.25)), id, id, iter 4 ]$ foldEvery [3,4] (0.25 <~) $ whenmod 6 5 (zoom (0.5,1)) $ stack [
+
+]
+hush
+d2 $ slowspread density [1.1, 1.2 .. 2.7] $ sound "blp_grit:4"
+
+
+t2 (jumpMod 2)  $struct "[x x] [x x x]" $n (run 5) # s"blp_grit"
+t2 xfade  $struct "[x x] [x x x]" $n (run 5) # s"blp_grit"
+t2 (anticipateIn 2)  $struct "[x x] [x x x]" $n (run 5) # s"blp_78e"
+t2 (wash (chop 8) 4)   $struct "[x x] [x x x]" $n (run 5) # s"blp_78e"
+
+
+
+d1 $ struct "[x x] [x x x]" $n (run 5) # sound "blp_grit"
+d1 $ every 4 (|*| speed "-1") $ jux rev $ slowspread (chop) [4,3] $ s "{ravebass:12 mt:1, bd sn [ravebass:10 sn:2]}"
+
+d2 silence
+hush
+let chords = [("am7c", "[a3 c4, e4 ~ e3, g3 g4]"),
+              ("gm7", "[g4, bf3 bf2, d3 d4, f4]")
+             ]
+in
+d1 $ up (every 2 ((+ 12) <$>) $ fromIntegral <$> inhabit chords "am7c [gm7 ~] gm7 [~ am7c]") # s "arpy"
+
+t1  (anticipateIn 4)  $every 4 (|*| speed "-1") $ jux rev $ slowspread (chop) [4,3] $ s "{ravebass:12 mt:1, bd sn [ravebass:10 sn:2]}"
+----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+let chords = [("am7", "[a4 c4 e4 g5]"),
+              ("gm7", "[g4 bf4 d4 f5]"),
+              ("cmaj7","[c4 e4 g4 bf4]"),
+              ("d7b5", "[d4 gf4 af4 c5]"),
+              ("dm7", "[d4 f4 a4 c5]"),
+              ("gmaj7", "[g4 b4 d5 f5]"),
+              ("cmaj6", "[c4 e4 g4 a4]")
+           ]
+in
+d1 $ slow 4 $ rarely ((within (0.25, 0.75) (density 1.5))) $ struct "x(7,12,4)" $ n (inhabit chords "cmaj7 d7b5 dm7 gmaj7 cmaj6")
+
+d1 $ slow 4 $
+  stack [sound "cp [~ ~ arpy] bd*2 ~"
+         ]
+  # nudge "0.04"
+
+
+
+loopTime t p =
+
+import Sound.Tidal.Utils
+
+let loopFirst p = splitQueries $ Pattern f
+      where f a@(s,e) = mapSnds' plus $ mapFsts' plus $ arc p (minus a)
+              where minus = mapArc (subtract (sam s))
+                    plus = mapArc (+ (sam s))
+    outside n = inside (1/n)
+    timeLoop n = outside n loopFirst
+    seqPLoop ps = timeLoop (maximum $ map (\(_,x,_) -> x) ps) $ seqP ps
+
+:t seqPLoop
+
+
+d1 $ seqPLoop [(0,2,sound "blp_grit:2"),
+               (2,4, sound "blp_grit:3"),
+               (1,3, sound "blp_grit")
+              ]
+
+hush
+d1 $ sound "bd"
+
+
+let p = "[1 2 3 4 5 6 7 8]/8" :: Pattern Int
+
+density 8 $ inside (1/4) loopFirst p
+let
+:t inside
+let s = 4.1
+    e = 4.5
+
+let p = Pattern $ \(s,e) -> arc (slow 4 $ run 4) (mapArc (subtract (sam s)) (s,e))
+
+density 2 $ p
+
+subtract (sam 3.3) (3.3)
+
+density 3 $ loopFirst "[1 2 3]/3"
+
+let loopFirst p = splitQueries $ Pattern f
+      where f a@(s,e) = mapSnds' plus $ mapFsts' plus $ arc p (minus a)
+              where minus = mapArc (subtract (sam s))
+                    plus = mapArc (+ (sam s))
+    outside n = inside (1/n)
+    timeLoop n = outside n loopFirst
+    seqPLoop ps = timeLoop (maximum $ map (\(_,x,_) -> x) ps) $ seqP ps
+
+density 3 $ seqPLoop [(2,4, "a"), (3, 5, "b" :: Pattern String)]
+
+(map density [1.1,1.2 .. 2.7]) <*> sound "blp_grit"
+
+
+d1 $ slowspread density [1.1, 1.2 .. 2.7] $ sound "blp_grit"
+
+d1 $ rev $ slow 4 $ chop 64 $ sound "bev"
+
+cps 2
+
+import Sound.Tidal.MIDI.Context
+import Sound.Tidal.MIDI.CC
+displayOutputDevices >>= putStrLn
+devices <- midiDevices
+m1 <- midiStream devices "Midi Through Port-0" 1 ccallController
+m1 $ n "50" # cc0 "3"
+
+hush
+
+
+
+drawLines ("out.pdf") (dirtToColour (sound "bd sn"))
+
+
+d1 $ sound "newnotes" # n "4"
+
+
+import Sound.Tidal.Draw
+
+
+let permeate steps ns p = (n (permstep steps ns (slow 16 sine1)) # sound p)
+  in
+ d1 $ slow 4 $ jux' [permeate 16 [2..7],
+                     permeate 12 [7,5,2],
+                     permeate 8 [0,3,7]
+                    ] "latibro"
+  # speed "4"
+  # room "0.9"
+  # size "0.9"
+  # cutoff (slow 16 $ scale 1000 2000 saw1)
+  # resonance (slow 16 $ scale 0.3 0.4 saw1)
+
+d2 $ slow 2 $ n (permstep 16 [3 .. 9] (slow 16 sine1)) # sound "arpy"
+b  # speed "0.5"
+  # pan "0"
+
+:t permstep
+
+d1 $ sound "bd [<2> sn:4 bd, <2/3> newnotes:3 sn:2]@3"
+
+cps 0.5
+
+d1 $ jux rev $ iter 4 $ sound "bd [sn sn:1] . sn:2 arpy arpy:3 . bd ~ bd . arpy:4 [arpy:3 arpy:5]"
+  # cutoff (scale 1000 3000 sine1)
+  # resonance "0.2"
+
+d2 $ within (0,0.5) (density 0.5) $ jux rev $ (loopAt 1 $ chop 16 $ sound "breaks125")
+  # orbit "1"
+
+cps 0.5
+
+d3 $ jux rev $ slow 4 $ n (offadd (1/16) 12 $ offadd (1/32) (7) $ (subtract 12) <$> "g8(3,8) e7(3,8) . f7(3,8) e7(3,8) a6(3,8) g7*2 . d8(3,8,2) g8(3,8) . a8(5,8) e7(3,8) a7(3,8) g6*2") # sound "rash"
+  # cutoff (scale 1000 5000 sine1)
+  # resonance "0.2"
+  # shape "0.4"
+  # orbit "1"
+
+d4 $ substruct "x x/2" $ sound "future feel . cp sd8:4 sd8:4"
+  # delay "0.8"
+  # delaytime (slow 2 $ scale 0.05 0.03 sine1)
+  # delayfeedback "0.9"
+  # orbit "2"
+
+d3 $ brak $ sound "drum feel feel:3 ~"
+  # orbit "1"
+
+
+d1 $ jux rev $ stut 3 0.9 0.25 $ slow 2 $ n "d6 e7 . d7 e8 g8 . a8 d7 . g8" # sound "pulse"
+  # speed "0.5"
+
+
+d1 $ slow 2 $ jux rev $ (loopAt 2 $ chop 16 $ sound "atlast:2")
+  |*| speed "[0.5]"
+
+d2 $ jux (iter 4) $ sound "funky*4" # n (irand 8)
+
+hush
+cps 1
+
+c1 $ sound "bd"
+
+
+d1 $ n "0 1" # sound "numbers"
+  # pan "0 1"
+
+
+hush
+
+(cps, nudger, getNow) <- cpsUtils'
+
+nudger (0.1)
+
+c1 $ jux rev $ chop 8 $ sound "bd [sn sd8:3*2] bd*3 bd"
+
+hush
+
+
+d1 $ jux rev $ chop 16 $ sound "bd sn:2"
+
+d10 $ n  "1 0 0 0" # sound "casio"
+  # orbit "2"
+
+let pp = [sound "gabba sn:2", sound "cp cp"]
+  in
+    d1 $ do {n <- "{0 0 1 [0,1]}%1"; pp!!n}
+
+
+
+d1 $ slow 4 $ sound "cp sn sn sn"
+  # nudge "0.2"
+
+hush
+
+d1 $ sound "arpy:0(3,8)" # speed "1"
+
+d1 $ sound "arpy:0(3,8)" # orbit "2"
+  # pan "0 1"
+hush
+t1 (interpolateIn 4) $ sound "arpy:2(3,8)" # speed "4" # shape "0"
+
+t1 (interpolateIn 4) $ sound "arpy:0(3,8)" # speed "1" # shape "0.2"
+hush
+
+
+import Sound.Tidal.MIDI.Context
+
+import Sound.Tidal.MIDI.CC
+
+devices <- midiDevices
+
+m1 <- midiStream devices "USB Uno MIDI Interface MIDI 1" 1 ccallController
+
+m1 $ midinote "[33(3,5),32*10,34(5,8)]"
+   |=| cc12 "3"
+
+import Control.Concurrent
+import Control.Concurrent.MVar
+
+threadDelay
+
+let makeVisualiser = do mv <- newMVar silence
+                        forkIO $ clocked (visTick mv)
+                        return mv
+    visTick mv tempo tick = do p <- readMVar mv
+                               mapM_ (\(t,v) -> forkIO $ do {threadDelay (floor $ 1000000 * t); putStrLn (show v)}) values p
+     where
+       values p = map (\(t, _, v) -> (toSecs t, v)) $ seqToRelOnsetDeltas (toRational tick, toRational (tick+1)) p
+       toSecs t = t / (Sound.Tidal.Tempo.cps tempo)
+
+
+
+visualise $ sound "bd sn*2"
+
+d1 $ sound "bd"
+
+d1 $ sound "bd*32" # speed ((+) <$> sine1 <*> slow 4 saw1)
+
+import Data.Map.Strict as Map
+
+let copyParam:: ParamPattern -> Param -> Param -> ParamPattern
+    copyParam pat fromParam toParam = f
+      where f = do v <- Map.lookup fromParam pat
+                   return $ Map.union pat (Map.fromList [(toParam,v)])
+
+
+
+(copyParam n_p orbit_p) <$> (sound "bd:3")
+
+d1 $ do a <- slow 2 tri1
+        b <- slow 4 tri1
+        within (toRational a, toRational b) (density 8) $ sound "bd arpy:1 arpy:2 arpy:5"
+
+let a = sound "bd sn*2"
+    b = sound "cp"
+in
+
+d1 $ randcat [sound "bd*8", sound "sn*8"]
+
+hush
+hush
+let pat = "{0 0*2 0*2 ~ 0 ~ 0 0 0*2}%4"
+
+
+d1 $ jux rev $ superimpose ((# speed (scale 2 4 sine1)) . iter 4 . (# sound "sn [mt jungbass:3] ht") . ((1/8) <~)) $ n "{0 0*2 0*2 ~ 0 ~ 0 0 0*2}%4" # sound "bd"
+
+d1 $ jux rev$superimpose((#speed(scale 2 4 sine1)).iter 4.(#sound"sn [mt jungbass:3] ht").((1/8)<~))$n"{0 0*2 0*2~0~0 0 0*2}%4"#s"bd"
+
+d1 $ jux rev $ off (1/8) (# sound "blp_ccec blp_uono") $ n "{0 0*2 0*2 ~ 0 ~ 0 0 0*2}%4" # sound "blp_grit:2"
+d1 silence
+let pat = "{0 0*2 0*2 ~ 0 ~ 0 0 0*2}%4"
+
+d1 $ stack [
+  n pat # s "bd",
+  (0.125 <~) $ n pat # s "sn" ]```
+
+
+d2 $ chop 8 $ slow 2 $ jux rev $ off 0.25 (# sound "mt ht") $ sound "bd sn(3,8)"
+  # gain "1.2"
+
+d1 $ (jux rev $ n (offadd 0.25 7 "40(3,8,[0 2]/2)") # sound "xx")
+  # gain "1 0.4"
+  # cutoff (slow 4 $ scale 100 1000 sine1)
+  # resonance "0.3"
+
+let off t f p = superimpose ((t ~>) . f) p
+
+let off t f p = superimpose (f . (t ~>)) p
+
+
+[(Param, Value, Param, Value)] -> ParamPattern  -> ParamPattern
+
+fromNote $ choose ["a","bs"]
+
+ slow 0.09$(s$randcat$"808":(parsePat.("808"++)<$>words "bd cy hc ht lc lt mc mt oh sd"))#n(irand 24)#cut(irand 3)
+
+:t Prelude.map
+
+
+d1 $ struct "[x x] [x x x]" $ iter 4 $ n (run 8) # sound "blp_grit"
+
+
+((\a b c -> a ++ " "++ b ++ " " ++ c) <$> "a e b f g" <*> "{0.5 0.7 0.4}%5" <*> "{0.3 0.2}%5") :: Pattern String
+
+
+
+d1 $ sometimes (|*| speed "-1") $ jux rev $ n (superimpose ((0.25 <~) . ((+12) <$>)) $ superimpose ((0.125 <~) . ((+7) <$>)) $ slow 4 $ "[[c7 g7]/2](3,8) a7*2 f6(3,8) e5*2") # sound "rash"
+  # cutoff "1000"
+  # orbit "1"
+  # resonance "0.2"
+  # room "0.9"
+  # size "0.9"
+  # gain "0.8"
+
+d2 $ jux rev $ runWith 4 (density 2) $ slow 2 $ sound "bd8 [~ mt8] sd8:2*2 [~ sd8]"
+  # gain "1.2"
+  # shape "0.7"
+
+d3 $ runWith 4 (density 2) $ jux (rev) $ iter 4 $ slow 2 $ n (run 16) # sound "funky"
+  # orbit "1"
+
+d1 $ jux rev $ slowspread (chop) [3,4] $ sound "bssnare bssnare"
+  # pan "0 1"
+
+d2 $ n "50(3,8)" # sound "rash(3,8)"
+
+d1 $ every 4 (|*| speed "-1") $ jux rev $ slowspread (chop) [4,3] $ s "{ravebass:12 mt:1, bd sn [ravebass:10 sn:2]}"
+
+
+
+d1 $ jux rev $ slowspread (chop) [16,8] $ slow 2 $ sound "[~ bsperc [~ bsperc] ~, bd*4, bskick ~ bskick:2 ~]"
+  # resonance (scale 0.2 0.4 $ slow 8 saw1)
+  # cutoff (slow 2 $ scale 200 1000 sine1)
+  # room "0.9"
+  # size "0.8"
+  # orbit "1"
+
+d2 $ (runWith 4 (density 2 . (# speed "2")) $ jux rev $ n "[0 0] 0 3 1 0 1 0 [0 1]/2" # sound "oh8")
+  # resonance (scale 0.2 0.4 $ slow 8 saw1)
+  # cutoff (slow 2 $ scale 2000 4000 rand)
+
+d3 $ stut 3 0.9 0.25 $ sometimes (|+| n "12") $ n (superimpose ((((+7) <$>)) . (0.25 ~>)) $ slow 4 "[[c7 g7]/2](3,8) a6(3,8,2) f7(3,8) e7(5,8)") # sound "rash"
+  # resonance (scale 0.2 0.4 $ slow 8 saw1)
+  # cutoff (slow 2 $ scale 2000 4000 rand)
+  # vowel "a i o u"
+  # gain "0.8"
+
+
+import Data.Fixed (mod')
+import Sound.Tidal.Utils
+
+
+let g i n t | x < 1 = 1-x
+            | otherwise = 0
+      where x = (t - (fromIntegral i)) `mod'` (fromIntegral n)
+    interfere :: Pattern Double -> [ParamPattern] -> ParamPattern
+    interfere p ps = stack $ map (\(i, p') -> p' |*| gain ((g i (length ps)) <$> p)) $ enumerate ps
+
+d1 $ sound "bd sn*2 sn"
+
+d1 $ interfere ("0 1 2") [sound "bd*2 sn:2*2 sn",
+                          sound "mt(3,8)",
+                          sound "mt8(5,8)"
+                         ]
+
+d1 $ inside 8 (every 2 (const silence)) $ n (run 8) # sound "arpy"
+
+d2 $ (1/8) ~> (inside 8 (when (\x -> x%2 == 1) (const silence)) $ (1/8) <~ n (run 8) # sound "arpy")
+
+d2 $ when (\x -> ((x`mod`2) == 0)) (const silence) (n (run 8) # sound "arpy")
+
+
+932 % 2
+g 3 4 4
+
+:t mod'
+
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
+
+
+1 8 1 8 1 8 1 8
+2 7 2 7 2 7 2 7
+3 6 3 6 3 6 3 6
+4 5 4 5 4 5 4 5
+5 4 5 4 5 4 5 4
+6 3 6 3 6 3 6 3
+7 2 7 2 7 2 7 2
+8 1 8 1 8 1 8 1 .
+
+let weft n = concatMap (\x -> [[0..n-1],(reverse [0..n-1])]) [0 .. (n `div` 2)]
+    warp = transpose . weft
+    weftP n p = slow (n%1) $ cat $ map (\i -> zoom (i%n,(i+1)%n) p) (concat $ weft n)
+    warpP n p = slow (n%1) $ cat $ map (\i -> zoom (i%n,(i+1)%n) p) (concat $ warp n)
+    maskedWarp n p = mask (every 2 rev $ density ((n`div`2)%1) "1 ~" :: Pattern Int) $ warpP n p
+    maskedWeft n p = mask (every 2 rev $ density ((n`div`2)%1) "~ 1" :: Pattern Int) $ weftP n p
+    interfere n p p' = stack [maskedWarp n p,
+                              maskedWeft n p'
+                             ]
+
+
+tabby n p p' = stack [maskedWarp n p,
+                      maskedWeft n p'
+                     ]
+  where
+    weft n = concatMap (\x -> [[0..n-1],(reverse [0..n-1])]) [0 .. (n `div` 2) - 1]
+    warp = transpose . weft
+    thread xs n p = slow (n%1) $ cat $ map (\i -> zoom (i%n,(i+1)%n) p) (concat xs)
+    weftP n p = thread (weft n) n p
+    warpP n p = thread (warp n) n p
+    maskedWeft n p = mask (every 2 rev $ density ((n)%2) "~ 1" :: Pattern Int)
+                       $ weftP n p
+    maskedWarp n p = mask (every 2 rev $ density ((n)%2) "1 ~" :: Pattern Int)
+                       $ warpP n p
+
+mask ((density (4%2) "1 ~") :: Pattern String) $ warpP 4 (run 4)
+
+d1 $ slow 2 $ tabby 8
+  (n (run 8) # sound "arpy")
+  (n (run 16) # sound "arpy")
+  # room "0.6"
+  # size "0.4"
+  # speed "0.5"
+
+d1 $ jux' [id,(# speed "2 1.5"), slow 2, (# crush "5")]
+  $ slowspread (stut 4 0.4) [0.125, -0.125, 0.5] $ interfere 8
+  (n (run 8) # sound "jvr" # pan "0.75")
+  (density 2 $ n (run 8) # sound "voodoo" # pan "0.25")
+  # speed "1"
+  |+| pan (slow 8 $ saw1)
+
+d2 $ slow 2 $ n (offadd 0.125 12 $ offadd 0.25 7 $ slow 2 $ "c6(3,8) a6(3,8) f6(3,8) e(3,8)") # sound "pulse"
+  # gain "1.1"
+
+hush
+
+p:t transpose
+:t repeat
+
+
+
+d1 $ slow 4 $ n (wedge (4%13) "0 [~!! 1] ~ [~ 0 0]" "[[0 ~! 1] ~ [~ 0 0]]!!") # s "drum"
+
+d1 $ juxcut' [(begin "0.1 0.5*2" #), (begin "0.25 0.7*3" #), (begin "0.5 0.25 0 0.25" #) . (|*| up "0 5"), (begin "0.25 0.55 0.75" #)] $ sound "pulse:20"
+
+
+d1 $ jux' [runWith 4 (density 2) . (# n "6"),
+           runWith 2 (density 2) . (substruct "x x/2")  . (# n "6"),
+           runWith 4 (density 2) . (substruct "x/2 x/4") . (# n "3")
+           ] $ sound "jvr:1(3,8)"
+  # speed "0.75"
+  # room "0.5"
+  # orbit "2"
+
+let (span, span_p)               = pF "splay" Nothing
+    (splay, splay_p)             = pF "splay" Nothing
+    (panWidth, panWidth_p)       = pF "panwidth" Nothing
+    (orientation, orientation_p) = pF "orientation" Nothing
+
+d1 $ sound "hh(3,8)"
+
+let jux = jux4
+
+d1 $ chop 64 $ jux' [id, ((|+| n "5") . (0.25 <~)), density 2 . (# speed "2")] $ sound "bd8:2(<3 3 5>,8,[0 2]/2)"
+  # gain "0.6"
+
+
+
+d1 $ jux rev $ sound "bd(3,8)"
+  # pan saw1
+  # gain "0.6"
+
+d1 $ sound "bd sn cp cp"
+
+cps 1
+
+hush
+
+let slowchoose f xs p = Pattern $ \(s,e) -> arc (f (getrand s xs) p) (s,e)
+      where getrand s xs = xs!!(floor $ (r s) * (l xs))
+            r s = timeToRand $ fromIntegral $ floor s
+            l xs = fromIntegral $ length xs
+
+d1 $ slowchoose (density) [2,3,4] $ sound "ht8:4 lt8:3*2"
+
+
+let spreadPat f valuepat pat = valuepat >>= \v -> f v pat
+
+d1 $ spreadPat (density) "<2 3 1,1 0.5>" $ sound "ht8:4 lt8:3"
+
+d1 $ spreadPat (density) (every 2 (density 2) $ cycleChoose [2,3,4]) $ sound "ht8:4 lt8:3*2"
+
+d1 $ spread' slow "2 4%3" $ sound "ho ho:2 ho:3 hc"
+
+d1 $ spreadPat slow "2 4%3" $ sound "ho ho:2 ho:3 hc"
+
+let spread' :: Monad m => (a -> b -> m c) -> m a -> b -> m c
+    spread' f vpat pat = do vpat >>= \v -> f v pat
+
+
+d1 $ spread' density "<3 4 5>" $ sound "bd sn"
+
+slowchoose (density) [2,3,4] $
+
+  Pattern $ \r -> concatMap (\(_,r', x) -> (arc (f x pat) r')) (rs r)
+  where rs r = arc (filterOnsetsInRange timepat) r
+
+d1 $ sound "cyclo16(3,8)" # legato "0.4"
+
+density :: Patternable a -> Pattern a
+
+
+:set -XTypeSynonymInstances -XFlexibleInstances -XRankNTypes
+
+class Foo a where
+  testA :: a -> String
+
+instance Foo Integer where
+  testA = show
+
+instance Foo String where
+  testA = show
+
+class Bar a where
+  testB :: a -> String
+
+instance Bar Int where
+  testB = show
+
+testA "4" -- this works
+
+testB 4 -- this doesn't
+
+
+class Temporal a where
+  toTimePattern :: a -> Pattern Time
+
+instance Temporal Time where
+  {-# SPECIALISE instance Temporal Time #-}
+  toTimePattern = pure
+
+instance Temporal (Pattern Time) where
+  toTimePattern = id
+
+let density' :: Temporal a => a -> Pattern b -> Pattern b
+    density' t p = do t' <- toTimePattern t
+                      density t' p
+
+class Show2 a where
+  show2 :: a -> String
+
+instance Show2 Int where
+  show2 i = "int"
+
+show2 (3  :: Int)
+{-# LANGUAGE CPP, NoImplicitPrelude, BangPatterns, StandaloneDeriving,
+             MagicHash, UnboxedTuples #-}
+:set -XStandaloneDeriving, -XMagicHash
+
+d1 $ density' (2 :: Rational) $ sound "bd sn"
+
+hush
+d1 $ density' 2 $ sound "bd sn"
+
+show 3.2
+
+d1 $ density' (2) $ sound "bd sn"
+
+d1 $ density' "2 3%2" $ sound "bd sn"
+
+d1 $ sound "bd*8"
+
+foo :: (forall a. a -> a) -> (Bool, Char)
+
+
+
+let foo :: (forall a. a -> a) -> (Char,Bool)
+    foo f = (f 'c', f True)
+
+
+:t foo
+
+let slowchoose f xs p = Pattern $ \(s,e) -> arc (f (getrand s xs) p) (s,e)
+      where getrand s xs = xs!!(floor $ (r s) * (l xs))
+            r s = timeToRand $ fromIntegral $ floor s
+            l xs = fromIntegral $ length xs
+
+
+d1 $ jux rev $ spreadrand (density) [1,2,3] $ sound "bd sn:1*2"
+
+spreadChoose :: (t -> t1 -> Pattern b) -> [t] -> t1 -> Pattern b
+spreadChoose f vs p = do v <- discretise 1 (choose vs)
+                         f v p
+
+spreadr = spreadChoose
+
+d1 $ sound "bd sn"
+
+
+
+d1 $ ur 16 (every 2 (density 2) $ "[0:out, 1 [2 3:out], 4:in]")
+  [jux rev $ iter 4 $ loopAt 2 $ chop 16 $ sound "breaks125",
+   sound "arpy ~ arpy:3 arpy:2" # crush "3",
+   sound "arpy ~ arpy:3*2 arpy:2" # crush "4",
+   runWith 4 (density 2) $ sound "arpy ~ arpy:3*2 arpy:2" # crush "3",
+   stut' 4 0.125 (|*| speed "2") $ sound "bd sn:3*2" # speed "1"
+  ]
+
+
+let pat = "0 0 1 0 1 1 0 1"
+    inverse = (not <$>)
+    mask' p p' = mask (filterValues id p) p'
+    sew p pa pb = overlay (mask' p pa) (mask' (inverse p) pb)
+in
+d1 $ sew (iter 4 pat) (sound "bd*10") (sound "sn:3*10")
+
+d1 $ ur 1 "{0 0 1 1 0 1 1 1 0 1}%8" [sound "bd", sound "sn:3"]
+
+let conditional :: Pattern Bool -> Pattern a -> Pattern a -> Pattern a
+    conditional p pa pb = (\a b c -> if a then b else c) <$> p <*> pa <*> pb
+    mask' p pa = conditional p silence pa
+
+d1 $ off (1/8) (|+| (speed "2" |+| n "<1 2>")) $ (sound $ conditional "{1 0 0 1 0}%8" ("<bd kurt>") ("mt ht rs"))
+  # crush "3"
+
+
+
+d1 $ (sound "sn:3")
+
+(x1,_) <- superDirtSetters getNow
+(x2,_) <- superDirtSetters getNow
+(x3,_) <- superDirtSetters getNow
+
+g <- newMVar (id :: ParamPattern -> ParamPattern)
+
+let globaltx :: MVar (ParamPattern -> ParamPattern) -> (ParamPattern -> IO ()) -> ParamPattern -> IO ()
+    globaltx g d p = do f <- readMVar g
+                        d $ f p
+    g1 p = globaltx g d1 p
+    g2 p = globaltx g d2 p
+    g3 p = globaltx g d3 p
+    setg = swapMVar g
+
+g1 $ sound "bd sn"
+
+g2 $ sound "arpy(3,8)"
+
+setg $ density 2
+
+let am7c = "[a4, c4, e4, g5]"
+
+d1 $ density 5 $ rarely (iter 3) $ every 2 ( # n am7c) $ struct "[x(5,8,2) x(3,8)]/5" $ n gm7
+
+import Data.Maybe
+
+let inhabit :: [(String, Pattern a)] -> Pattern String -> Pattern a
+    inhabit ps p = unwrap' $ (\s -> fromMaybe silence $ lookup s ps) <$> p
+
+let chords = [("am7c", "[a6, c6, e6, g7]"),
+              ("gm7", "[g6, bf6, d7, f7]")
+             ]
+in
+d1 $ n (every 2 ((+ 12) <$>) $ inhabit chords "am7c ~ gm7") # s "rash"
+
+let inhabit :: [(String, Pattern a)] -> Pattern String -> Pattern a
+    inhabit ps p = unwrap' $ (\s -> fromMaybe silence $ lookup s ps) <$> p
+
+let arps = [("am7c", "[a6 c6 e6 g7]"),
+            ("gm7", palindrome "[g6 bf6 d7 f7]")
+           ]
+in
+d1 $ n (every 2 ((+ 12) <$>) $ inhabit arps "am7c [gm7 ~] gm7 [~ am7c]") # s "rash"
+
+let funcs = [("id", pure $ id),
+             ("chipmunk", pure $ (|*| speed "2") . density 2),
+             ("slurp", pure $ rev . chop 8)
+            ]
+    tx ps p = unwrap $ (\f -> f p) <$> (inhabit funcs ps)
+    tx' ps p = unwrap' $ (\f -> f p) <$> (inhabit funcs ps)
+
+d1 $ tx "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
+
+d1 $ slow 2 $ tx' "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
+hush
+d1 $ s "supersquare*8" # release "0.3"
+     # bandf (density 3 $ sine1 * ((discretise 1 $ rand * 3600)) + 400)
+     # bandq "5.5"
+$ do {
+  x <- "<1 2 3>";
+  y <- "<1 2>";
+  n (toScale (toInts 12 $ snot $ 4@@x #^^# 3@@0) (fmap (*y) $ every 2 rev $ run (8 `div` y)))}
+ # s "superzow" # bandf (density 1.2 $ scalex 500 2000 sine1) # bandq "5"
