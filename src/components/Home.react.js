@@ -324,7 +324,7 @@ updateDur = ({target : {value, id}}) => {
 _handleKeyPress = event => {
 
   const ctx=this;
-  const {steps, channels, timer} = ctx.state;
+  const {steps, channels, timer, play} = ctx.state;
   const _key = event.target.id;
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
@@ -337,6 +337,7 @@ _handleKeyPress = event => {
       store.dispatch(pauseIndividualTimer(_index));
     }
     startIndividualTimer(_index, value,steps);
+    ctx.setState({play:true});
   }
   else if (event.keyCode === 13 && event.shiftKey){
     // if( value < "10"){

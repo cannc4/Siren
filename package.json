@@ -48,7 +48,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "tidal": "node server/start.js",
+    "sq": "node server/start.js",
     "web": "react-scripts start",
     "rename-samples": "node rename-samples-folder.js"
   },

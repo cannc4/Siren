@@ -401,10 +401,7 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
       const cmd = _.find(commands, c => c.name === cellName);
       if(_.indexOf(channels,k) === 5){
         var newCommand = cellName;
-        console.log(newCommand);
-        console.log(k + newCommand);
         return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-
       }
       else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
         var cellItem = _.split(v, ' ');

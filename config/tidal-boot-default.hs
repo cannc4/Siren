@@ -7,8 +7,6 @@ import Sound.Tidal.MIDI.Context
 import qualified Sound.Tidal.Scales as Scales
 import Data.Maybe
 
-let inhabit :: [(String, Pattern a)] -> Pattern String -> Pattern a
-    inhabit ps p = unwrap' $ (\s -> fromMaybe silence $ lookup s ps) <$> p
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
@@ -100,6 +98,8 @@ let (***) = foldl (|*|)
     rand' x = Pattern $ \a -> [(a, a, timeToRand $ (+ x/100) $ midPoint a)]
     quiet = const silence
     oct t = (echo (4*t)) . (quad t)
+
+    --- params
     mf x = fst $ pF x (Just 0)
     mi x = fst $ pI x (Just 0)
     fm = mf "fm"
@@ -138,7 +138,26 @@ let (***) = foldl (|*|)
     lsize = mf "lsize"
     perc = mf "perc"
     percf = mf "percf"
-
+    (ts, ts_p) = pF "ts" (Just 1)
+    (cone, cone_p) = pF "cone" (Just 1)
+    (ctwo, ctwo_p) = pF "ctwo" (Just 0)
+    (cfhzmin, cfhzmin_p) = pF "cfhzmin" (Just 0)
+    (cfhzmax, cfhzmax_p) = pF "cfhzmax" (Just 1)
+    (cfhmin, cfhmin_p) = pF "cfhmin" (Just 500)
+    (cfmax, cfmax_p) = pF "cfmax" (Just 2000)
+    (cfmin, cfmin_p) = pF "cfmin" (Just 0)
+    (rqmin, rqmin_p) = pF "rqmin" (Just 0)
+    (rqmax, rqmax_p) = pF "rqmax" (Just 1)
+    (lsf, lsf_p) = pF "lsf" (Just 200)
+    (ldb, ldb_p) = pF "ldb" (Just 1)
+    (ffreq,ffreq_p) = pF "ffreq"(Just 1000)
+    (preamp, preamp_p) = pF "preamp" (Just 4)
+    (dist, dist_p) = pF "dist" (Just 0)
+    (smooth, smooth_p) = pF "smooth" (Just 0)
+    (click, click_p) = pF "click" (Just 0)
+    (hfeedback, hfeedback_p) = pF "hfeedback" (Just 0)
+    (hena,hena_p)= pF "hena"(Just 1)
+    (henb,henb_p)= pF "henb"(Just 0)
     (phfirst, phfirst_p) = pF "phfirst" (Just 0)
     (phlast, phlast_p) = pF "phlast" (Just 5)
     (fattack, fattack_p) = pF "fattack" (Just 0)

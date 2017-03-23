@@ -903,7 +903,9 @@ d1 $ tx "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
 
 d1 $ slow 2 $ tx' "{id chipmunk slurp}%4" $ sound "bd ~ mt*2 ht:2"
 hush
-
+d1 $ s "supersquare*8" # release "0.3"
+     # bandf (density 3 $ sine1 * ((discretise 1 $ rand * 3600)) + 400)
+     # bandq "5.5"
 $ do {
   x <- "<1 2 3>";
   y <- "<1 2>";
