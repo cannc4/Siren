@@ -393,7 +393,7 @@ export const assignTimer = (timer,steps, _index) => {
 }
 // Context //
 var math = require('mathjs');
-export const sendCommands = (server,vals, commands =[], solo, transition, channels, timer) => {
+export const sendCommands = (server,vals, commands =[], solo, transition, channels, timer,globalFunctions,globalCommands) => {
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -465,9 +465,18 @@ export const sendCommands = (server,vals, commands =[], solo, transition, channe
             transitionHolder = " $ ";
           }
         }
+        if(globalFunctions !== undefined || globalFunctions !== '')
+        {
+          globalFunctions = '';
+        }
+        else {
+          globalFunctions = globalFunctions + " $ "
+        }
+        console.log(globalFunctions);
+        console.log(globalCommands);
         //console.log(soloHolder + transitionHolder + newCommand );
 //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-        return [soloHolder + transitionHolder + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [soloHolder + transitionHolder+ globalFunctions + newCommand + globalCommands, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
       } else return false;
     }))

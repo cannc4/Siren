@@ -442,6 +442,70 @@ SynthDef(\superblip, {|out, sustain=1, pan, freq|
 	var sound = Pulse.ar(freq, Line.kr(0,1,sustain), 0.5);
 	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env));
 }).add;
+
+SynthDef(\basicmandolin, {|out, freq|
+	var sound = Decay.ar(Impulse.ar(0), 0.1) * WhiteNoise.ar;
+	sound = CombL.ar(sound, 0.05, freq.reciprocal);
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, 0.5));
+}).add;
+
+// *** include?
+SynthDef(\bowed, {|out, speed=1, begin=0, end=1, pan, accelerate, freq, vel=0.5, force=1, pos=0.14 |
+	var dur = (end-begin)/speed;
+	var env = EnvGen.ar(Env.linen(0.002, dur, 0.002, 0.8,-3), timeScale:dur, doneAction:2);
+	var sound = DWGSoundBoard.ar( DWGBowed.ar(freq, velb:vel, force:force, pos:pos, c1:10) );
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
+// *** modify
+SynthDef(\bgongo,{|out, speed=1, begin=0, end=1, pan, freq |
+	var dur = (end-begin)/speed;
+	var basefreq = freq;
+	// lowest modes for free circular plate
+	var freqlist =[ 1.000,  2.188,  5.091,  8.529,  8.950,  9.305, 13.746, 14.653, 19.462, 22.003, 24.888, 25.991,
+		26.085, 30.509, 33.608, 35.081, 40.125, 42.023, 46.527, 49.481]**1.0;
+	var tscale = 100.0 / basefreq / (freqlist**1);
+	var ascale = 1.0 / (freqlist**0);
+	var sound = Mix.arFill(15, {arg i; EnvGen.ar(Env.perc(0.01*tscale[i], 0.5*tscale[i], 0.5*ascale[i] ), timeScale:dur*5)
+		* SinOsc.ar(basefreq * freqlist[i])});
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan))
+}).add;
+
+SynthDef(\bgong,{|out, speed=1, begin=0, end=1, pan, accelerate, freq |
+	var dur = (end-begin)/speed;
+	var env = EnvGen.ar(Env.perc(0.001/speed, 1/speed, 0.5, -4), timeScale:dur, doneAction:2);
+	var basefreq = freq;
+	var freqlist = [1.0, 3.893, 8.722, 2.081, 5.954, 3.414];
+	var sound = Mix.arFill(4, {arg i; XLine.ar(1, 0.01, 10/freqlist[i]**4) * SinOsc.ar(basefreq * freqlist[i])});
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
+SynthDef(\nonlin, {|out, freq, pan, begin=0, end=1, accelerate, speed|
+	var dur = (end-begin)/speed;
+	var env = EnvGen.ar(Env.linen(0.01, dur, 0.01, 0.5, -3), timeScale:dur, doneAction:2);
+	var source = Decay.ar(Impulse.ar(0), 0.1) * SinOsc.ar(freq);
+	var sound = WeaklyNonlinear2.ar(source, 0, 1, 1, freq, 0, 0, -0.001, 3);
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
+SynthDef(\sqr, { |out, speed=1, begin=0, end=1, sustain=1, pan, accelerate, freq, pitch1, pitch2 |
+	var env, sound, dur, basefreq;
+	dur = sustain;
+	basefreq = freq * speed;
+	env = EnvGen.ar(Env.linen(0.002, dur, 0.002, 0.5, -3), timeScale:dur, doneAction:2);
+	sound = Pulse.ar(basefreq*(1.0+ Sweep.kr(1,accelerate)), 0.25-(pitch1/4)+Sweep.kr(1,pitch2));
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
+SynthDef(\sinelong, { |out, speed=1, sustain=1, pan, accelerate, freq, voice=0, offset |
+	var env, sound, dur, basefreq;
+	dur = sustain;
+	basefreq = freq * speed;
+	env = EnvGen.ar(Env.linen(0.02, dur, 0.02, 0.5, -3), timeScale:dur, doneAction:2);
+	sound = SinOscFB.ar(basefreq*(1.0+ Sweep.kr(1,accelerate)), voice);
+	OffsetOut.ar(out, DirtPan.ar(sound, ~dirt.numChannels, pan, env))
+}).add;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// custom effects ////////////////////////////////////////////////////////////////////////////////
 

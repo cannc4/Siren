@@ -16,8 +16,21 @@ import Commands from './Commands.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/base16-light.css';
+import 'codemirror/mode/elm/elm';
+var options = {
+    mode: 'elm',
+    theme: 'base16-light',
+    fixedGutter: true,
+    scroll: true,
+    styleSelectedText:true,
+    showToken:true,
+    lineWrapping: true,
+    showCursorWhenSelecting: true
 
-
+};
 
 class Home extends Component {
 constructor(props) {
@@ -43,10 +56,13 @@ this.state={
   soloSentinel: false,
   sceneSentinel: false,
   parvalues: '',
+  globalCommands: '',
+  globalFunctions: '',
   username: 'vou'
   //rotation: 1.5,
   //stateSketch : sketch
-}
+  }
+
 }
 
 //Clock for Haskell
@@ -76,6 +92,12 @@ this.state={
 //     }
 //   }
 //   return false;
+// }
+
+// componentDidMount(){
+//   cm.ref.on('keyUp', function(instance, event) {
+//     console.log(instance, event);
+// });
 // }
 componentWillMount(props,state){
 console.log(this.props.location.pathname);
@@ -200,7 +222,9 @@ runTidal() {
 }
 
 sendCommands(tidalServerLink, vals, channelcommands, commands,solo,transition, channels) {
-  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels));
+  const ctx = this;
+  const {globalCommands,globalFunctions} = ctx.state;
+  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels,globalFunctions,globalCommands));
 }
 sendSCMatrix(tidalServerLink, vals, commands) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
@@ -218,10 +242,25 @@ handleSubmit = event => {
   const body=event.target.value
   const ctx=this;
   const {scCommand, tidalServerLink }=ctx.state;
-
+  console.log(event);
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.sendScCommand(tidalServerLink, scCommand);
   }
+}
+handleGlobalFunctions = event => {
+  const body=event.target.value
+  const ctx=this;
+  const {globalFunctions}=ctx.state;
+  var temp = body;
+  ctx.setState({globalFunctions:temp});
+}
+
+handleGlobalCommands = event => {
+  const body=event.target.value
+  const ctx=this;
+  const {globalCommands}=ctx.state;
+  var temp = body;
+  ctx.setState({globalCommands:temp});
 }
 
 handleConsoleSubmit = event => {
@@ -653,8 +692,9 @@ renderMenu(){
       ctx.setState({ tidalServerLink: value });
   }
 
-  const updateScCommand=({ target: { value } }) => {
-    ctx.setState({scCommand: value})
+  const updateScCommand = (obj)  => {
+    console.log(obj);
+    ctx.setState({scCommand: obj.value})
   }
   // REPLACING START PAUSE STOP WITH IMAGES
   //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
@@ -691,7 +731,7 @@ renderMenu(){
 
         <p>  </p>
         <p>Console</p>
-       <textarea className="defaultCommandArea" value={scCommand} onChange={updateScCommand} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
+        <textarea className={'defaultCommandArea'} value={scCommand} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScCommand}/>
       </div>
   </div>
 }
@@ -709,16 +749,6 @@ render() {
   const viewPortWidth = '100%'
 
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  var options = {
-      mode: 'elm',
-      theme: 'base16-light',
-      fixedGutter: true,
-      scroll: true,
-      styleSelectedText:true,
-      showToken:true,
-      lineWrapping: true,
-      showCursorWhenSelecting: true
-  };
 
 //<P5Wrapper sketch={this.state.stateSketch}/>
 //
@@ -734,7 +764,6 @@ render() {
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
             <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
           </div>
-
           <div>
             {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
             {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
@@ -756,7 +785,6 @@ render() {
           <div className="CommandsColumn" >
             <Commands active={activeMatrix}/>
           </div>
-
         </div>
       </Layout>
       <LayoutSplitter />
@@ -765,8 +793,10 @@ render() {
           {ctx.renderMenu()}
           <div id="Execution" style={{alignSelf:'center'}}>
             <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
+            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command (Ctrl + Enter)" width={'100%'}/>
+            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleGlobalFunctions.bind(ctx)} placeholder="Global Function (Ctrl + Enter)" width={'100%'}/>
           </div>
-        </div>
+         </div>
       </Layout>
     </Layout>
     </div>
