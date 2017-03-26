@@ -28,10 +28,10 @@ class RotatingCube extends React.Component {
       castShadow
     >
       <geometryResource
-        resourceId="sphereGeo"
+        resourceId="boxGeo"
       />
       <materialResource
-        resourceId="sphereMaterial"
+        resourceId="boxMaterial"
       />
     </mesh>);
   }

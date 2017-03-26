@@ -2,7 +2,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fetchModel, fbcreate, fbupdate, fbdelete } from '../actions';
-import FormElement from './FormElement.react';
 
 class Accounts extends Component {
   constructor(props) {

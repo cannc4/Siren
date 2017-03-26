@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 
 import './Home.css';
 
-import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands, startTimer, pauseTimer, stopTimer,
+import { initMyTidal,sendScCommand, sendSCMatrix, sendPatterns, startTimer, pauseTimer, stopTimer,
           celluarFill, celluarFillStop, addValues,
           bjorkFill, bjorkFillStop, addBjorkValues,
           consoleSubmit, fbSyncMatrix, fbcreateMatrix, fbLiveTimer, fbupdateMatrix, fbdelete,fborder, fetchModel, fetchModels, updateMatrix,
           startClick,stopClick} from '../actions'
 import store from '../store';
-import Commands from './Commands.react';
+import Patterns from './Patterns.react';
 import Firebase from 'firebase';
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import CodeMirror from 'react-codemirror';
@@ -83,16 +83,16 @@ class Live extends Component {
   componentDidUpdate(props, state) {
 
     const ctx=this;
-    const { channelcommands, commands, timer, click}=props;
+    const { channelpatterns, patterns, timer, click}=props;
     const { steps, tidalServerLink, values, density, duration, channels, activeMatrix, songmodeActive }=state;
     if (timer.isActive) {
       const runNo=(timer.current % steps) + 1;
 
       if(timer.current % steps === steps-1){
         if(timer.isCelluarActive)
-          ctx.celluarFill(values, commands, density, steps, duration, channels, timer);
+          ctx.celluarFill(values, patterns, density, steps, duration, channels, timer);
         else if(timer.isBjorkActive)
-          ctx.bjorkFill(values, commands, density, steps, duration, channels, timer);
+          ctx.bjorkFill(values, patterns, density, steps, duration, channels, timer);
         else if(songmodeActive)
           ctx.progressMatrices(ctx.props[ctx.state.modelName.toLowerCase()]);
 
@@ -101,14 +101,14 @@ class Live extends Component {
       const vals=values[runNo];
 
       if (vals !== undefined) {
-        ctx.sendCommands(tidalServerLink, vals, channelcommands, commands );
+        ctx.sendPatterns(tidalServerLink, vals, channelpatterns, patterns );
       }
     }
   }
 
   progressMatrices(items){
     const ctx = this;
-    const { commands, timer} = ctx.props;
+    const { patterns, timer} = ctx.props;
     const { values, activeMatrix, steps, songmodeActive} = ctx.state;
 
     timer.isActive = false;
@@ -162,32 +162,32 @@ class Live extends Component {
     store.dispatch(initMyTidal(tidalServerLink));
   }
 
-  sendCommands(tidalServerLink, vals, channelcommands, commands) {
-    store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands));
+  sendPatterns(tidalServerLink, vals, channelpatterns, patterns) {
+    store.dispatch(sendPatterns(tidalServerLink, vals, channelpatterns, patterns));
   }
-  sendSCMatrix(tidalServerLink, vals, commands) {
-    store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
-  }
-
-  sendScCommand(tidalServerLink, command) {
-    store.dispatch(sendScCommand(tidalServerLink, command));
+  sendSCMatrix(tidalServerLink, vals, patterns) {
+    store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
   }
 
-  addValues(values, commands, density, steps, duration, channels, timer){
-    store.dispatch(addValues(values, commands, density, steps, duration, channels, timer));
+  sendScCommand(tidalServerLink, pattern) {
+    store.dispatch(sendScCommand(tidalServerLink, pattern));
   }
-  celluarFill(values, commands, density, steps, duration, channels, timer){
-    store.dispatch(celluarFill(values, commands, density, steps, duration, channels, timer));
+
+  addValues(values, patterns, density, steps, duration, channels, timer){
+    store.dispatch(addValues(values, patterns, density, steps, duration, channels, timer));
+  }
+  celluarFill(values, patterns, density, steps, duration, channels, timer){
+    store.dispatch(celluarFill(values, patterns, density, steps, duration, channels, timer));
   }
   celluarFillStop(){
     store.dispatch(celluarFillStop());
   }
 
-  addBjorkValues(values, commands, density, steps, duration, channels, timer){
-    store.dispatch(addBjorkValues(values, commands, density, steps, duration, channels, timer));
+  addBjorkValues(values, patterns, density, steps, duration, channels, timer){
+    store.dispatch(addBjorkValues(values, patterns, density, steps, duration, channels, timer));
   }
-  bjorkFill(values, commands, density, steps, duration, channels, timer){
-    store.dispatch(bjorkFill(values, commands, density, steps, duration, channels, timer));
+  bjorkFill(values, patterns, density, steps, duration, channels, timer){
+    store.dispatch(bjorkFill(values, patterns, density, steps, duration, channels, timer));
   }
   bjorkFillStop(){
     store.dispatch(bjorkFillStop());
@@ -252,8 +252,8 @@ class Live extends Component {
   renderStep(x, i) {
     const ctx=this;
     const { channels, steps , duration}=ctx.state;
-    const { commands, timer,click }=ctx.props;
-    const cmds=_.uniq(_.map(commands, c => c.name));
+    const { patterns, timer,click }=ctx.props;
+    const cmds=_.uniq(_.map(patterns, c => c.name));
     const currentStep=timer.current % steps;
     var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
     if (i === currentStep) {
@@ -300,7 +300,7 @@ class Live extends Component {
 
         const height = 85/steps;
         return <div className="playbox" style={{height: height+'vh'}} key={c+'_'+i}>
-          <textarea className={'commandDiv'} value={textval} onChange={setText}/>
+          <textarea className={'patternDiv'} value={textval} onChange={setText}/>
         </div>
       })}
     </div>;
@@ -313,7 +313,7 @@ class Live extends Component {
 
   addItem() {
     const ctx = this
-    const { commands } = ctx.props;
+    const { patterns } = ctx.props;
     const { matName, activeMatrix, values, sceneIndex } = ctx.state;
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
     console.log(items);
@@ -321,7 +321,7 @@ class Live extends Component {
     if ( matName.length >= 2 && _.isEmpty(values) === false) {
       var snd = Object.values(items).length;
 
-      fbcreateMatrix(ctx.state.modelName, { matName , commands, values, sceneIndex: snd });
+      fbcreateMatrix(ctx.state.modelName, { matName , patterns, values, sceneIndex: snd });
       ctx.setState({sceneIndex: snd});
     }
   }
@@ -329,7 +329,7 @@ class Live extends Component {
   reorder (index,flag){
 
     const ctx = this;
-    const { commands } = ctx.props;
+    const { patterns } = ctx.props;
     const { matName, values, sceneIndex } = ctx.state;
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
@@ -350,27 +350,27 @@ class Live extends Component {
           var upIndex = index - 1;
           var upMatName = vals[upIndex].matName;
           var upValues = vals[upIndex].values;
-          var upCommands = vals[upIndex].commands;
+          var upPatterns = vals[upIndex].patterns;
           var downMatName = vals[index].matName;
           var downValues = vals[index].values;
-          var downCommands = vals[index].commands;
+          var downPatterns = vals[index].patterns;
 
-          fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: index},    keys[upIndex]);
-          fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: upIndex},  keys[index]);
+          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index},    keys[upIndex]);
+          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex},  keys[index]);
         }
       }
       else if (flag === "down") {
         if (vals[index].sceneIndex === index){
           var downIndex = index + 1;
           var downMatName = vals[downIndex].matName;
-          var downCommands = vals[downIndex].commands;
+          var downPatterns = vals[downIndex].patterns;
           var downValues = vals[downIndex].values;
           var upMatName = vals[index].matName;
-          var upCommands = vals[index].commands;
+          var upPatterns = vals[index].patterns;
           var upValues =  vals[index].values;
 
-          fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: index}, keys[downIndex]);
-          fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: downIndex}, keys[index]);
+          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index}, keys[downIndex]);
+          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex}, keys[index]);
         }
       }
     }
@@ -381,7 +381,7 @@ class Live extends Component {
     const model = fetchModel(ctx.state.modelName);
 
     const updateMatrix = () => {
-      const { commands } = ctx.props;
+      const { patterns } = ctx.props;
       ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
       ctx.updateMatrix(values, item);
     }
@@ -395,7 +395,7 @@ class Live extends Component {
         const items = ctx.props[ctx.state.modelName.toLowerCase()];
         ctx.setState({sceneIndex: (Object.values(items).length)});
         _.forEach(Object.values(items), function(d, i){
-          fborder(ctx.state.modelName, {matName: d.matName, commands: d.commands, values: d.values, sceneIndex: i}, d.key);
+          fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
         });
       }, function(error) {
         console.error(error);
@@ -440,27 +440,27 @@ class Live extends Component {
     const ctx=this;
     const { tidal, timer, click }=ctx.props;
     const { scCommand, tidalServerLink }=ctx.state;
-    const { commands }=ctx.props;
+    const { patterns }=ctx.props;
     const { values, density, steps, duration, channels}=ctx.state;
 
     const bjorkFillStop=() => {
       ctx.bjorkFillStop();
     }
     const bjorkFill=() => {
-      ctx.bjorkFill(values, commands, density, steps, duration, channels, timer)
+      ctx.bjorkFill(values, patterns, density, steps, duration, channels, timer)
     }
     const addBjorkValues =() => {
-      ctx.addBjorkValues(values, commands, density, steps, duration, channels, timer)
+      ctx.addBjorkValues(values, patterns, density, steps, duration, channels, timer)
     }
 
     const celluarFillStop=() => {
       ctx.celluarFillStop();
     }
     const celluarFill=() => {
-      ctx.celluarFill(values, commands, density, steps, duration, channels, timer)
+      ctx.celluarFill(values, patterns, density, steps, duration, channels, timer)
     }
     const addValues=() => {
-      ctx.addValues(values, commands, density, steps, duration, channels, timer)
+      ctx.addValues(values, patterns, density, steps, duration, channels, timer)
     }
     const updateDensity=({ target: { value } }) => {
 
@@ -526,7 +526,7 @@ class Live extends Component {
 
   render() {
     const ctx=this;
-    const { tidal, timer, click, commands }=ctx.props;
+    const { tidal, timer, click, patterns }=ctx.props;
     const { scCommand, tidalServerLink, values, density, steps, duration, channels, songmodeActive }=ctx.state;
 
     const getValue=() => {
@@ -582,9 +582,9 @@ class Live extends Component {
         </Layout>
         <LayoutSplitter />
         <Layout layoutWidth={250}>
-          <div className="Commands" >
-            <div className="CommandsColumn" >
-              <Commands />
+          <div className="Patterns" >
+            <div className="PatternsColumn" >
+              <Patterns />
             </div>
 
           </div>

@@ -1,0 +1,11 @@
+{
+  "rules": {
+    ".read": "true",
+    ".write": "true",
+    "eseq-f5fe0": {
+      "matrices": {
+        ".indexOn": "sceneIndex"
+      }
+    }
+  }
+}

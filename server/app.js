@@ -41,19 +41,19 @@ class REPL {
 
   initTidal() {
 
-    this.myCommands = { values: [] };
-    const commands = fs.readFileSync(config.tidal_boot).toString().split('\n');
-    for (let i = 0; i < commands.length; i++) {
-      this.tidalSendLine(commands[i]);
+    this.myPatterns = { values: [] };
+    const patterns = fs.readFileSync(config.tidal_boot).toString().split('\n');
+    for (let i = 0; i < patterns.length; i++) {
+      this.tidalSendLine(patterns[i]);
     }
   }
 
-  stdinWrite(command) {
-    this.repl.stdin.write(command);
+  stdinWrite(pattern) {
+    this.repl.stdin.write(pattern);
   }
 
-  tidalSendLine(command) {
-    this.stdinWrite(command);
+  tidalSendLine(pattern) {
+    this.stdinWrite(pattern);
     this.stdinWrite('\n');
   }
 
@@ -79,8 +79,8 @@ class REPL {
         // if (notExists) {
 
         setTimeout(function(){
-          const commands = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
-          lang.interpret(commands);
+          const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
+          lang.interpret(patterns);
 
         }, 4000)
       });
@@ -140,38 +140,38 @@ const myApp = () => {
 
   const startTidal = (reply) => {
     if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed === false) {
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, command: TidalData.myTidal.myCommands });
+      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
     } else {
       if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed) {
         TidalData.myTidal = new REPL();
       }
       TidalData.myTidal.start();
-      TidalData.myTidal.myCommands.values.push('initiate tidal');
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, command: TidalData.myTidal.myCommands });
+      TidalData.myTidal.myPatterns.values.push('initiate tidal');
+      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
 
     }
   };
 
-  const sendCommand = (expr, reply) => {
+  const sendPattern = (expr, reply) => {
     _.each(expr, c => {
       TidalData.myTidal.tidalSendExpression(c);
-      TidalData.myTidal.myCommands.values.push(c);
+      TidalData.myTidal.myPatterns.values.push(c);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
+    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };
 
-  const sendCommands = (commands, reply) => {
-    _.each(commands, c => {
+  const sendPatterns = (patterns, reply) => {
+    _.each(patterns, c => {
       TidalData.myTidal.tidalSendExpression(c[0]);
-      TidalData.myTidal.myCommands.values.push(c[0]);
+      TidalData.myTidal.myPatterns.values.push(c[0]);
 
       TidalData.myTidal.tidalSendExpression(c[1]);
-      TidalData.myTidal.myCommands.values.push(c[1]);
+      TidalData.myTidal.myPatterns.values.push(c[1]);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
+    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };
 
-  const sendScCommand = (expr, reply) => {
+  const sendScPattern = (expr, reply) => {
     TidalData.myTidal.sendSC(expr);
     console.log(expr);
     reply.status(200).send(expr);
@@ -180,24 +180,24 @@ const myApp = () => {
   app.get('/tidal', (req, reply) => startTidal(reply));
   // app.get('/tidaltick', (req, reply) => startTidal(reply));
 
-  app.post('/command', (req, reply) => {
-    const { command } = req.body;
-    console.log('Command inbound:', command);
-    sendCommand(command, reply);
+  app.post('/pattern', (req, reply) => {
+    const { pattern } = req.body;
+    console.log('Pattern inbound:', pattern);
+    sendPattern(pattern, reply);
   });
 
-  app.post('/commands', (req, reply) => {
-    const { commands } = req.body;
-    console.log('Command inbound:', commands);
-    sendCommands(commands, reply);
+  app.post('/patterns', (req, reply) => {
+    const { patterns } = req.body;
+    console.log('Pattern inbound:', patterns);
+    sendPatterns(patterns, reply);
   });
 
-  app.post('/sccommand', (req, reply) => {
-    const {command} = req.body;
-    _.replace(command, "\\", '');
-    console.log('ScCommand inbound:', command);
+  app.post('/scpattern', (req, reply) => {
+    const {pattern} = req.body;
+    _.replace(pattern, "\\", '');
+    console.log('ScPattern inbound:', pattern);
 
-    sendScCommand(command, reply);
+    sendScPattern(pattern, reply);
   })
 
 
