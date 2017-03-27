@@ -737,6 +737,10 @@ renderMenu(){
     </div>
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+   {!tidal.isActive && <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
+   {tidal.isActive && <button className={'buttonSentinel'}>Running</button>}
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
     {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
     {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
                              <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
