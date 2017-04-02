@@ -6,7 +6,6 @@ import sccommand from './sccommand';
 import tidal from './tidal';
 import timer from './timer';
 import click from './click';
-import storepattern from './storepattern';
 import matvals from './matvals';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
@@ -37,7 +36,6 @@ const rootReducer = combineReducers({
   usererror,
   click,
   matvals,
-  storepattern,
   ...keys
 });
 

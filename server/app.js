@@ -10,20 +10,6 @@ const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var globalCount = 0;
 
-//
-// grid.key(function(x, y, s) {
-//   console.log('key received: ' + x + ', ' + y + ', ' + s);
-// });
-//
-//     for (let y=0;y<8;y++) {
-//       led[y] = [];
-//       for (let x=0;x<16;x++)
-//         led[y][x] = 0;
-//     }
-//     led[0][0] = 15;
-//     led[2][0] = 5;
-//     led[0][2] = 5;
-//     grid.refresh(led);
 // REPL is an GHCI Instance
 class REPL {
 
@@ -75,13 +61,9 @@ class REPL {
       const lang = new SCLang(options);
       lang.boot().then((sclang) => {
         self.sc = lang;
-        // Check users quarks folder
-        // if (notExists) {
-
         setTimeout(function(){
           const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
           lang.interpret(patterns);
-
         }, 4000)
       });
     });
@@ -108,24 +90,24 @@ const myApp = () => {
   const app = express();
 
   var udpHosts = [];
-    var dgram = require("dgram");
-    var UDPserver = dgram.createSocket("udp4");
-    var tick = socketIo.listen(3003);
+  var dgram = require("dgram");
+  var UDPserver = dgram.createSocket("udp4");
+  var tick = socketIo.listen(3003);
 
-    //Get tick from sync.hs Port:3002
-    UDPserver.on("listening", function () {
-      var address = UDPserver.address();
-      console.log("UDP server listening on " +
-          address.address + ":" + address.port);
-    });
+  //Get tick from sync.hs Port:3002
+  UDPserver.on("listening", function () {
+    var address = UDPserver.address();
+    console.log("UDP server listening on " +
+        address.address + ":" + address.port);
+  });
 
-    UDPserver.on("message", function (msg, rinfo) {
-      console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
-      tick.sockets.emit('osc', {osc:msg});
-    });
+  UDPserver.on("message", function (msg, rinfo) {
+    console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    tick.sockets.emit('osc', {osc:msg});
+  });
 
-    UDPserver.on("disconnect", function (msg) {
-      tick.sockets.emit('dc', {osc:msg});
+  UDPserver.on("disconnect", function (msg) {
+    tick.sockets.emit('dc', {osc:msg});
   });
 
   UDPserver.bind(3002);
@@ -200,8 +182,8 @@ const myApp = () => {
     sendScPattern(pattern, reply);
   })
 
-
   app.get('*', errorHandler);
+  
   app.listen(config.port, () => {
     console.log(`Server started at http://localhost:${config.port}`);
   });

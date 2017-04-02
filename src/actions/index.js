@@ -1,13 +1,10 @@
 
-
-var bjork = require('bjorklund');
 export const FETCH_ACCOUNTS = 'FETCH_ACCOUNTS';
 export const FETCH_ACCOUNTS_ERROR = 'FETCH_ACCOUNTS_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-
 import { handleEnterHome } from '../routes'
 
 Firebase.initializeApp({
@@ -55,8 +52,10 @@ const models = {
     }
   }
 }
-String.prototype.replaceAt=function(index, character) {
+
+String.prototype.replaceAt = function(index, character) {
   return this.substr(0, index) + character + this.substr(index+character.length);
+
 }
 //
 // var client = dgram.createSocket('udp4');
@@ -449,12 +448,12 @@ export const assignTimer = (timer,steps, _index) => {
   };
 }
 // Context //
+////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
-export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands) => {
+export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
-
     // gets parameters list
     const getParameters = (v) => {
       var param = [];
@@ -514,7 +513,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
         console.log("math eval", newCommand);
       })
-
+      var chn = k;
       var soloHolder = "d"+(k);
       var transitionHolder = "" ;
       var _k = k;
@@ -555,7 +554,15 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       //create interface mechanism
 
       var pattern = soloHolder +  transitionHolder + globalTransformations + newCommand + globalCommands;
-      //storePattern(patter);
+      console.log(k);
+      //dispatch(storePattern(pattern,chn));
+      storedPatterns[chn-1] = '';
+      storedPatterns[chn-1] = pattern;
+      console.log("STORED PATTERNS");
+      console.log(storedPatterns[0]);
+      console.log(storedPatterns[1]);
+      console.log(storedPatterns[2]);
+      console.log(storedPatterns[3]);
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
     }
@@ -582,13 +589,12 @@ export const continousPattern = (server, pattern) => {
   }
 }
 
+////////////////// PARSER ENDS HERE //////////////////
 
-export const storePattern = (pattern) => {
+//To store last compiled patterns
+//export const storePattern = (pattern,chn) => ({type: 'STORE_PATTERN', payload: pattern, channel: chn})
 
-  return dispatch => {
-    dispatch({ type: 'STORE_PATTERN', payload: pattern});
-  };
-}
+
 
 // export const sendSCMatrix = (server,vals,patterns =[]) => {
 //
@@ -682,6 +688,7 @@ export const updateTimerduration = (_index,_duration,_steps) => {
     type: 'UPDATE_TIMER', payload: _index, duration : _duration
   }
 }
+
 var timerWorker= [];
 export const createTimer = (_index,_duration, _steps) => {
 
@@ -699,6 +706,7 @@ export const createTimer = (_index,_duration, _steps) => {
     type: 'CREATE_TIMER', payload: _index, duration : _duration
   }
 }
+
 export const updtmr = (_index) => {
 
   return {

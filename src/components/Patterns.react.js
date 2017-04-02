@@ -15,15 +15,14 @@ class Patterns extends Component {
     this.state = {
       name: '',
       params: '',
-      modelName: this.constructor.name, // React Class Name set above,
+      modelName: this.constructor.name,
       sceneKey: '',
       uid: ''
     }
   }
-
+  //Pattern Dictionary
   addItem() {
     const ctx = this
-
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === ctx.props.active){
         const { name } = ctx.state
@@ -44,20 +43,14 @@ class Patterns extends Component {
     const ctx = this;
     const model = fetchModel(ctx.state.modelName);
     const { params, sceneKey } = ctx.state;
-    // Item Action Handlers
-    // handle function when any field of the object is modified
     const handleChange = (obj) => {
-      // console.log('---HANDLECHANGE BEGIN---');
       var value, name;
-
       if(obj.target !== undefined){
         value = obj.target.value;
         name = obj.target.name;
       } else {
         value = obj;
       }
-       // 2i
-
       var re = /`(\w+)`/g, match, matches = [];
       while (match = re.exec(value)) {
         if(_.indexOf(matches, match[1]) === -1)
@@ -67,8 +60,6 @@ class Patterns extends Component {
         return n === 't';
       });
       ctx.setState({ params: matches.toString()});
-
-
       const payload = { key: dbKey };
       payload[name === undefined ? 'pattern' : name] = value;
       payload['params'] = this.state.params;
@@ -79,13 +70,10 @@ class Patterns extends Component {
             fbupdatepatterninscene('Matrices', payload, d.key)
         }
       })
-
-      // console.log(value);
-      // console.log('---HANDLECHANGE END---');
     }
     // handle function to delete the object
     // gets the dbkey of to-be-deleted item and removes it from db
-    const handleDelete = (/*{ target: obj}*/) => {
+    const handleDelete = () => {
       const payload = { key: item.key };
 
       _.each(Object.values(ctx.props["matrices"]), function(d){

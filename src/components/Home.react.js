@@ -6,14 +6,14 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timer
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
       startClick,stopClick, changeUsername,continousPattern} from '../actions'
+
 import {Layout, LayoutSplitter} from 'react-flex-layout';
-import Simple from './Simple.react'
+import NumberEditor from 'react-number-editor';
+import Simple from './Simple.react';
 import Patterns from './Patterns.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
-import NumberEditor from 'react-number-editor'  ;
-
 
 // import CodeMirror from 'react-codemirror';
 // import 'codemirror/lib/codemirror.css';
@@ -59,7 +59,7 @@ class Home extends Component {
       globalTransformations: '',
       username: 'vou',
       numberValue: 12,
-      storedPattern: ''
+      storedPatterns: []
     }
   }
 //Clock for Haskell
@@ -215,8 +215,8 @@ runTidal() {
 
 sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
   const ctx = this;
-  const {globalCommands,globalTransformations} = ctx.state;
-  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands));
+  const {globalCommands,globalTransformations, storedPatterns} = ctx.state;
+  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands,storedPatterns));
 }
 sendSCMatrix(tidalServerLink, vals, patterns) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
@@ -276,15 +276,6 @@ updateMatrix(patterns, values, item) {
   store.dispatch(updateMatrix(patterns, values, item));
 }
 
-// updateChannelduration(c, channeldur){
-//   const ctx = this;
-//   const {steps, duration, channels} = ctx.state;
-//   duration[c] = channeldur;
-//   var c = channels.indexOf(c)
-//   console.log(c);
-//   ctx.setState({duration:duration});
-//   store.dispatch(updateTimerduration(c,channeldur, steps));
-// }
 updateDur = ({target : {value, id}}) => {
 
     const ctx = this;
@@ -310,8 +301,6 @@ soloChannel =  ({target : {id}}) => {
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
 
   }
-  //add solo channels
-  //const _key = event.target.id;
 }
 
 renderPlayer() {
@@ -492,6 +481,8 @@ renderStep(x, i) {
       //   return styleCSS;
       // }
       // dynamic cell height
+
+
       const cellHeight = 85/steps;
 
       //Timer Check
@@ -512,8 +503,6 @@ renderStep(x, i) {
         individualClass += " playbox-active";
         translateAmount = cellHeight;
       }
-
-
       // dynamic text size
       const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 20, 30, 1, 0.65)) : 1;
       return <div className={individualClass} style={css} key={c+'_'+i}>
@@ -767,7 +756,7 @@ renderMenu(){
     const ctx = this;
     const {numberValue, tidalServerLink } = ctx.state;
     ctx.setState({numberValue: value});
-    var pat = "d1 $ n \"0 1 2 [3 2] \" #s \"pdpad\" #speed " + numberValue;
+    var pat = "d1 $ slow 2  $ n \"{0 1 2 }%5 \" #s \"clean\" #speed " + numberValue + "#coarse " + numberValue *10;
     store.dispatch(continousPattern(tidalServerLink, pat));
     //onKeyDown={ctx._onKeyDown.bind(ctx)}
   }
@@ -786,12 +775,8 @@ render() {
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
   const { patterns, isCanvasOn }=ctx.props;
-  // const { patterns }=ctx.state;
-  const { scPattern, tidalServerLink, values, steps, channels, songmodeActive, activeMatrix }=ctx.state;
-
-
+  const { scPattern, tidalServerLink, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state;
   const viewPortWidth = '100%'
-
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
   return <div >
@@ -844,15 +829,22 @@ render() {
           <div>
              <NumberEditor
                  className="spinner"
-                 max={4}
-                 min={1}
+                 max={1}
+                 min={0}
                  decimals={1}
                  onValueChange={ctx._onNumberChange.bind(ctx)}
-                 step={0.25}
+                 step={0.05}
                  value={ctx.state.numberValue}
                  ref="demo-spinner"
              />
              <div>Value: {this.state.numberValue}</div>
+           </div>
+           <div>
+           <textarea className="defaultPatternArea" value = {storedPatterns[0]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
+           <textarea className="defaultPatternArea" value = {storedPatterns[1]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
+           <textarea className="defaultPatternArea" value = {storedPatterns[2]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
+           <textarea className="defaultPatternArea" value = {storedPatterns[3]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
+           <textarea className="defaultPatternArea" value = {storedPatterns[4]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
            </div>
          </div>
       </Layout>
