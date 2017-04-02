@@ -5,13 +5,15 @@ import './Home.css';
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
-      startClick,stopClick, changeUsername} from '../actions'
+      startClick,stopClick, changeUsername,continousPattern} from '../actions'
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import Simple from './Simple.react'
 import Patterns from './Patterns.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
+import NumberEditor from 'react-number-editor'  ;
+
 
 // import CodeMirror from 'react-codemirror';
 // import 'codemirror/lib/codemirror.css';
@@ -54,8 +56,10 @@ class Home extends Component {
       sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
-      globalFunctions: '',
-      username: 'vou'
+      globalTransformations: '',
+      username: 'vou',
+      numberValue: 12,
+      storedPattern: ''
     }
   }
 //Clock for Haskell
@@ -211,8 +215,8 @@ runTidal() {
 
 sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
   const ctx = this;
-  const {globalCommands,globalFunctions} = ctx.state;
-  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalFunctions,globalCommands));
+  const {globalCommands,globalTransformations} = ctx.state;
+  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands));
 }
 sendSCMatrix(tidalServerLink, vals, patterns) {
   store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
@@ -234,12 +238,12 @@ handleSubmit = event => {
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
 }
-handleGlobalFunctions = event => {
+handleGlobalTransformations = event => {
   const body=event.target.value
   const ctx=this;
-  const {globalFunctions}=ctx.state;
+  const {globalTransformations}=ctx.state;
   var temp = body;
-  ctx.setState({globalFunctions:temp});
+  ctx.setState({globalTransformations:temp});
 }
 
 handleGlobalCommands = event => {
@@ -511,7 +515,7 @@ renderStep(x, i) {
 
 
       // dynamic text size
-      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
+      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 20, 30, 1, 0.65)) : 1;
       return <div className={individualClass} style={css} key={c+'_'+i}>
         <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
       </div>
@@ -759,6 +763,24 @@ renderMenu(){
 }
 
 
+  _onNumberChange(value) {
+    const ctx = this;
+    const {numberValue, tidalServerLink } = ctx.state;
+    ctx.setState({numberValue: value});
+    var pat = "d1 $ n \"0 1 2 [3 2] \" #s \"pdpad\" #speed " + numberValue;
+    store.dispatch(continousPattern(tidalServerLink, pat));
+    //onKeyDown={ctx._onKeyDown.bind(ctx)}
+  }
+
+  _onKeyDown(e) {
+        //  var key = e.which;
+        //  var value = this.state.numberValue;
+        //  if(key === KEYS.K) {
+        //      this._onNumberChange(value * 1000);
+        //  } else if(key === KEYS.M) {
+        //      this._onNumberChange(value * 1000000);
+        //  }
+  }
 
 render() {
   const ctx=this;
@@ -815,9 +837,23 @@ render() {
             <textarea className="defaultPatternArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
           </div>
           <div id="Execution" style={{alignSelf:'center'}}>
-            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command (Ctrl + Enter)" width={'100%'}/>
-            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalFunctions.bind(ctx)} placeholder="Global Function (Ctrl + Enter)" width={'100%'}/>
-          </div>
+            Globals
+            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'70%'}/>
+            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation " width={'70%'}/>
+        </div>
+          <div>
+             <NumberEditor
+                 className="spinner"
+                 max={4}
+                 min={1}
+                 decimals={1}
+                 onValueChange={ctx._onNumberChange.bind(ctx)}
+                 step={0.25}
+                 value={ctx.state.numberValue}
+                 ref="demo-spinner"
+             />
+             <div>Value: {this.state.numberValue}</div>
+           </div>
          </div>
       </Layout>
     </Layout>

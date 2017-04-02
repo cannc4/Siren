@@ -450,7 +450,7 @@ export const assignTimer = (timer,steps, _index) => {
 }
 // Context //
 var math = require('mathjs');
-export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalFunctions,globalCommands) => {
+export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands) => {
   return dispatch => {
 
   const x =  _.compact(_.map(vals,(v,k) => {
@@ -540,17 +540,23 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
           transitionHolder = " $ ";
         }
       }
-      if(globalFunctions === undefined || globalFunctions === '')
+      if(globalTransformations === undefined || globalTransformations === '')
     {
-      globalFunctions = '';
+      globalTransformations = '';
     }
     else {
-      globalFunctions = globalFunctions + " $ "
+      globalTransformations = globalTransformations + " $ "
     }
-      //console.log(soloHolder + transitionHolder + newCommand );
-      //, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-      console.log("final", soloHolder + transitionHolder + newCommand);
-      return [soloHolder +  transitionHolder + globalFunctions + newCommand + globalCommands, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      console.log("Reconstructed Pattern: ", soloHolder + transitionHolder + newCommand);
+
+      //create a channel array to keep track of running patterns - reducers
+      //create a variable/concept that instantly appends the transformer and recompiles the patterns
+      //check for conflicts with timers
+      //create interface mechanism
+
+      var pattern = soloHolder +  transitionHolder + globalTransformations + newCommand + globalCommands;
+      //storePattern(patter);
+      return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
     }
     else
@@ -564,6 +570,26 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
     });
   }
 }
+export const continousPattern = (server, pattern) => {
+  return dispatch => {
+    console.log(pattern);
+    const x = pattern;
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
+    .then((response) => {
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+}
+
+
+export const storePattern = (pattern) => {
+
+  return dispatch => {
+    dispatch({ type: 'STORE_PATTERN', payload: pattern});
+  };
+}
+
 // export const sendSCMatrix = (server,vals,patterns =[]) => {
 //
 //   return dispatch => {

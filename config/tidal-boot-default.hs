@@ -98,8 +98,27 @@ let (***) = foldl (|*|)
     rand' x = Pattern $ \a -> [(a, a, timeToRand $ (+ x/100) $ midPoint a)]
     quiet = const silence
     oct t = (echo (4*t)) . (quad t)
+    wank p =
+      foldEvery [5, 7] (stut 2 1 2) $
+      foldEvery [6, 10, 15] (slow 2) $
+      foldEvery [7, 11, 13] (# speed "-1") $ p
 
-    --- params
+    fuccup p =
+      every' 2 1 (trunc 0.2) $
+      every' 6 3 (stut 8 1 0.5) $
+      every' 4 3 (# vowel "<a e i>") $
+      every' 3 1 (# legato "0.75") $
+      every' 11 7 (gap 1 . chop 2) $
+      every' 7 4 (|*| speed "-1") $ p # hcutoff 500
+
+    brk2 =
+      slow 8 $ fit' 1 4 (run 4) "0 1 2 1 2 1 2 3" $ chop 8 $ s "breaks165"
+
+
+
+
+
+    -- params
     mf x = fst $ pF x (Just 0)
     mi x = fst $ pI x (Just 0)
     fm = mf "fm"
@@ -171,5 +190,8 @@ let (***) = foldl (|*|)
     (sfrelease, sfrelease_p) = pF "sfrelease" (Just 0)
     (sfenv, sfenv_p) = pF "sfenv" (Just 0)
     sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
+
+
+
 
 :set prompt "tidal> "
