@@ -840,12 +840,9 @@ render() {
              <div>Value: {this.state.numberValue}</div>
            </div>
            <div>
-           <textarea className="defaultPatternArea" value = {storedPatterns[0]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
-           <textarea className="defaultPatternArea" value = {storedPatterns[1]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
-           <textarea className="defaultPatternArea" value = {storedPatterns[2]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
-           <textarea className="defaultPatternArea" value = {storedPatterns[3]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
-           <textarea className="defaultPatternArea" value = {storedPatterns[4]}  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'50%'}/>
-           </div>
+           {_.map(channels, c => {
+             return <input className = "defaultPatternArea" id = {c} value={storedPatterns[_.indexOf(channels, c).index]}/>
+           })}</div>
          </div>
       </Layout>
     </Layout>
