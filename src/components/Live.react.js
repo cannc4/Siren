@@ -6,7 +6,6 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timer
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
       startClick,stopClick, changeUsername,continousPattern} from '../actions'
-
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import NumberEditor from 'react-number-editor';
 import Simple from './Simple.react';
@@ -50,12 +49,12 @@ class Live extends Component {
   }
 
   render(){
-
   const ctx = this;
   const {scenes} = ctx.state;
   const { tidal, timer, click } = ctx.props;
   const { patterns, isCanvasOn } = ctx.props;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+
 
 
   return <div>

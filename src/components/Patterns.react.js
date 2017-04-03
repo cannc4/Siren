@@ -15,6 +15,7 @@ class Patterns extends Component {
     this.state = {
       name: '',
       params: '',
+
       modelName: this.constructor.name,
       sceneKey: '',
       uid: ''
@@ -99,15 +100,16 @@ class Patterns extends Component {
     // parameters can be added
     return item.key && (
       <li key={item.key} className="easter" >
-          <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-            <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
-            <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
-            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
-              <button onClick={handleDelete}>{'Delete'} </button>
+        <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+          <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
+            <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+              <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
+              <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
             </div>
-            <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+            <button onClick={handleDelete} style={{justifyContent: 'flex-end' }}>{'Delete'} </button>
           </div>
-
+          <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+        </div>
       </li>
     )
   }

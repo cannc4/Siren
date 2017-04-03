@@ -8,6 +8,7 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timer
       startClick,stopClick, changeUsername,continousPattern} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
+
 import NumberEditor from 'react-number-editor';
 import Simple from './Simple.react';
 import Patterns from './Patterns.react';
@@ -15,21 +16,24 @@ import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
 
-// import CodeMirror from 'react-codemirror';
-// import 'codemirror/lib/codemirror.css';
-// import 'codemirror/theme/base16-light.css';
-// import 'codemirror/mode/elm/elm';
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/addon/dialog/dialog.js';
+import 'codemirror/addon/dialog/dialog.css';
+import '../assets/_style.css';
+import '../assets/_rule.js';
 
 var options = {
-    mode: 'elm',
-    theme: 'base16-light',
-    fixedGutter: true,
+    mode: '_rule',
+    theme: '_style',
+    fixedGutter: false,
     scroll: true,
     styleSelectedText:true,
     showToken:true,
     lineWrapping: true,
     showCursorWhenSelecting: true
 };
+
 
 class Home extends Component {
   constructor(props) {
@@ -56,6 +60,7 @@ class Home extends Component {
       sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
+
       globalTransformations: '',
       username: 'vou',
       numberValue: 12,
@@ -65,7 +70,14 @@ class Home extends Component {
 //Clock for Haskell
 // componentDidMount(props,state){
 //   const ctx = this;
-//    // const ctx = this;
+//   CodeMirror.fromTextArea(document.getElementByClass('defaultPatternArea'), {options: options}).on("keyup", function (cm, event) {
+//     console.log('deneme');
+//     if (!cm.state.completionActive && /*Enables keyboard navigation in autocomplete list*/
+//         event.keyCode != 13) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
+//         CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+//     }
+//   });
+// }
   //
   // var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
   // socket.on("osc", data => {
@@ -231,6 +243,7 @@ consoleSubmit(tidalServerLink, value){
 }
 
 handleSubmit = event => {
+  console.log("HANDLE SUBMIT");
   const body=event.target.value
   const ctx=this;
   const {scPattern, tidalServerLink }=ctx.state;
@@ -238,7 +251,10 @@ handleSubmit = event => {
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
 }
+
 handleGlobalTransformations = event => {
+  console.log("handleGlobalTransformations");
+
   const body=event.target.value
   const ctx=this;
   const {globalTransformations}=ctx.state;
@@ -246,15 +262,19 @@ handleGlobalTransformations = event => {
   ctx.setState({globalTransformations:temp});
 }
 
-handleGlobalCommands = event => {
-  const body=event.target.value
-  const ctx=this;
-  const {globalCommands}=ctx.state;
-  var temp = body;
-  ctx.setState({globalCommands:temp});
+handleGlobalCommands = () => {
+  console.log("GLOBAL COMMANDS SUBMIT");
+
+  // const body=event.target.value
+  // const ctx=this;
+  // const {globalCommands}=ctx.state;
+  // var temp = body;
+  // ctx.setState({globalCommands:temp});
 }
 
 handleConsoleSubmit = event => {
+  console.log("CONSOLE SUBMIT");
+
   const value = event.target.value;
   const ctx = this;
   const {tidalServerLink} = ctx.state;
@@ -482,8 +502,7 @@ renderStep(x, i) {
       // }
       // dynamic cell height
 
-
-      const cellHeight = 85/steps;
+      const cellHeight = 65/steps;
 
       //Timer Check
       var _index = _.indexOf(channels,c);
@@ -533,9 +552,6 @@ handleSubmitCell = event => {
   }
 
   if(event.keyCode === 13 && event.ctrlKey){
-    console.log(event.target.id);
-    console.log(i);
-    console.log(c);
     store.dispatch(assignTimer(timer.timer[c], steps, i))
     ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
   }
@@ -712,15 +728,16 @@ renderMenu(){
   const { tidal, timer, click, patterns }=ctx.props;
   const { scPattern, tidalServerLink, play, values, steps, channels}=ctx.state;
 
-  const updateTidalServerLink=({ target: { value } }) => {
-      ctx.setState({ tidalServerLink: value });
-  }
-
   const updateScPattern = (obj)  => {
     ctx.setState({scPattern: obj.value})
   }
+  const updateTidalServerLink=({ target: { value } }) => {
+    ctx.setState({ tidalServerLink: value });
+  }
   // REPLACING START PAUSE STOP WITH IMAGES
   //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
+
+  // <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -730,8 +747,8 @@ renderMenu(){
     </div>
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-   {!tidal.isActive && <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
-   {tidal.isActive && <button className={'buttonSentinel'}>Running</button>}
+     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} height={32} width={32}/>}
+     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} height={32} width={32}/>}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
     {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
@@ -743,11 +760,6 @@ renderMenu(){
       {!ctx.state.isCanvasOn && <button className={'buttonSentinel'} onClick={ctx.toggleCanvas.bind(ctx)}>{"Canvas On"}</button>}
     </div>
     <br/>
-    <div id="Pattern">
-        <p>  </p>
-        <p>Console</p>
-       <textarea className="defaultPatternArea" value={scPattern} onChange={updateScPattern} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-      </div>
   </div>
 }
 
@@ -771,13 +783,52 @@ renderMenu(){
         //  }
   }
 
+testtest() {
+  const ctx = this;
+  const { channels, steps, channelEnd, solo } = ctx.state;
+
+  channels.push('test');
+
+  ctx.setState({channels: channels});
+
+  const i = _.indexOf(channels, 'test');
+
+  if(i !== -1 ){
+    ctx.createTimer(i, 48, steps);
+    channelEnd[i] = false
+    solo[i] = false;
+  }
+}
+
 render() {
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
   const { patterns, isCanvasOn }=ctx.props;
-  const { scPattern, tidalServerLink, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state;
+  const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
+
+  const updateScPattern = (obj)  => {
+    ctx.setState({scPattern: obj.value})
+  }
+
   const viewPortWidth = '100%'
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+
+  // <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+  //  <NumberEditor
+  //      className="spinner"
+  //      max={1}
+  //      min={0}
+  //      decimals={1}
+  //      onValueChange={ctx._onNumberChange.bind(ctx)}
+  //      step={0.05}
+  //      value={ctx.state.numberValue}
+  //      ref="demo-spinner"/>
+  //    <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>>Value: {this.state.numberValue}</div>
+  // </div>
+
+  // <button className={'buttonSentinel'} onClick={ctx.testtest.bind(ctx)}>TEST</button>
+
+  // <textarea className = "defaultPatternArea" key = {c} value={}/>
 
   return <div >
   <div className={"Home cont"}>
@@ -804,7 +855,41 @@ render() {
       </Layout>
       <LayoutSplitter />
       <Layout layoutWidth='flex'>
-        {ctx.renderPlayer()}
+        <Layout layoutHeight={'flex'}>
+          {ctx.renderPlayer()}
+        </Layout>
+        <LayoutSplitter />
+        <Layout layoutHeight={250}>
+
+          <Layout layoutWidth={200}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Console</p>
+              <CodeMirror className="defaultPatternArea" value={scPattern} onChange={updateScPattern} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} options={options}/>
+              <CodeMirror className="defaultPatternArea" onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" options={options}/>
+            </div>
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={300}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Globals</p>
+              <CodeMirror className="defaultPatternArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command "  options={options}/>
+              <CodeMirror className="defaultPatternArea"  onKeyEvent={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  options={options}/>
+            </div>
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={150}>
+            {ctx.renderMenu()}
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={'flex'}>
+            <div style={{width: '100%', flexDirection: 'column'}}>
+             <p>> Pattern History</p>
+             {_.map(channels, c => {
+                return <CodeMirror className={'defaultPatternArea'} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={options}/>
+              })}
+            </div>
+          </Layout>
+        </Layout>
       </Layout>
       <LayoutSplitter />
       <Layout layoutWidth={250}>
@@ -813,39 +898,8 @@ render() {
             <Patterns active={activeMatrix}/>
           </div>
         </div>
+        </Layout>
       </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth={200}>
-        <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          {ctx.renderMenu()}
-          <div id="Execution" style={{alignSelf:'center'}}>
-            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
-          </div>
-          <div id="Execution" style={{alignSelf:'center'}}>
-            Globals
-            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " width={'70%'}/>
-            <textarea className="defaultPatternArea"  onKeyUp={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation " width={'70%'}/>
-        </div>
-          <div>
-             <NumberEditor
-                 className="spinner"
-                 max={1}
-                 min={0}
-                 decimals={1}
-                 onValueChange={ctx._onNumberChange.bind(ctx)}
-                 step={0.05}
-                 value={ctx.state.numberValue}
-                 ref="demo-spinner"
-             />
-             <div>Value: {this.state.numberValue}</div>
-           </div>
-           <div>
-           {_.map(channels, c => {
-             return <input className = "defaultPatternArea" id = {c} value={storedPatterns[_.indexOf(channels, c).index]}/>
-           })}</div>
-         </div>
-      </Layout>
-    </Layout>
     </div>
   </div>
   }

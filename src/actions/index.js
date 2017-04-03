@@ -453,7 +453,7 @@ var math = require('mathjs');
 export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
 
-  const x =  _.compact(_.map(vals,(v,k) => {
+    const x =  _.compact(_.map(vals,(v,k) => {
     // gets parameters list
     const getParameters = (v) => {
       var param = [];
@@ -564,7 +564,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       console.log(storedPatterns[2]);
       console.log(storedPatterns[3]);
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-
     }
     else
       return false;
@@ -577,6 +576,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
     });
   }
 }
+
 export const continousPattern = (server, pattern) => {
   return dispatch => {
     console.log(pattern);

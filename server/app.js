@@ -64,6 +64,7 @@ class REPL {
         setTimeout(function(){
           const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
           lang.interpret(patterns);
+          
         }, 4000)
       });
     });
@@ -183,7 +184,7 @@ const myApp = () => {
   })
 
   app.get('*', errorHandler);
-  
+
   app.listen(config.port, () => {
     console.log(`Server started at http://localhost:${config.port}`);
   });
