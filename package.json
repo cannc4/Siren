@@ -1,5 +1,5 @@
 {
-  "name": "sq-web",
+  "name": "Siren",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -52,7 +52,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "sq": "node server/start.js",
+    "siren": "node server/start.js",
     "web": "react-scripts start",
     "rename-samples": "node rename-samples-folder.js"
   },

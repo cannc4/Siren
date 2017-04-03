@@ -98,24 +98,9 @@ let (***) = foldl (|*|)
     rand' x = Pattern $ \a -> [(a, a, timeToRand $ (+ x/100) $ midPoint a)]
     quiet = const silence
     oct t = (echo (4*t)) . (quad t)
-    wank p =
-      foldEvery [5, 7] (stut 2 1 2) $
-      foldEvery [6, 10, 15] (slow 2) $
-      foldEvery [7, 11, 13] (# speed "-1") $ p
-
-    fuccup p =
-      every' 2 1 (trunc 0.2) $
-      every' 6 3 (stut 8 1 0.5) $
-      every' 4 3 (# vowel "<a e i>") $
-      every' 3 1 (# legato "0.75") $
-      every' 11 7 (gap 1 . chop 2) $
-      every' 7 4 (|*| speed "-1") $ p # hcutoff 500
-
-    brk2 =
-      slow 8 $ fit' 1 4 (run 4) "0 1 2 1 2 1 2 3" $ chop 8 $ s "breaks165"
-
-
-
+    stretch n p = slow n p |*| speed (pure $ fromRational $ 1/n) # unit "c"
+    repeatCycles n p =  slowcat(replicate n p)
+    degradeOverBy i tx p = unwrap $ (\x -> (fmap fst $ filterValues ((>x) .snd) $ (,) <$> p <*> repeatCycles i rand )) <$> (slow (fromIntegral i) tx )
 
 
     -- params

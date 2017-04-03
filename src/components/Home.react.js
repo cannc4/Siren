@@ -42,8 +42,8 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 12,
-      channels: ['1','2','3', '4', '5', 'cps'],
+      steps: 8,
+      channels: ['1','2','3', '4', '5', 'JV', 'cps'],
       timer: [],
       values: {},
       scPattern: '',
@@ -143,7 +143,9 @@ componentDidUpdate(props, state) {
             store.dispatch(pauseIndividualTimer(i))
             if(ctx.identical(channelEnd ) === true){
               ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
-              // ctx.startTimer();
+              ctx.stopTimer();
+              ctx.startTimer();
+
             }
           }
         }
@@ -208,7 +210,6 @@ progressMatrices(items){
     ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd });
 
   }
-  //}
 }
 
 enableSongmode(){

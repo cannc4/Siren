@@ -472,6 +472,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       var newCommand = cellName;
       return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
+
     else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
       var cellItem = _.slice(getParameters(v), 1);
       console.log("cellitem arr", cellItem);
@@ -513,7 +514,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
         console.log("math eval", newCommand);
       })
-      var chn = k;
+
       var soloHolder = "d"+(k);
       var transitionHolder = "" ;
       var _k = k;
@@ -552,17 +553,16 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       //create a variable/concept that instantly appends the transformer and recompiles the patterns
       //check for conflicts with timers
       //create interface mechanism
+      var pattern;
+      if(_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+        pattern =  "m1 $ " + newCommand;
+      }
+      else
+        pattern = soloHolder +  transitionHolder + globalTransformations + newCommand + globalCommands;
 
-      var pattern = soloHolder +  transitionHolder + globalTransformations + newCommand + globalCommands;
-      console.log(k);
-      //dispatch(storePattern(pattern,chn));
-      storedPatterns[chn-1] = '';
-      storedPatterns[chn-1] = pattern;
-      console.log("STORED PATTERNS");
-      console.log(storedPatterns[0]);
-      console.log(storedPatterns[1]);
-      console.log(storedPatterns[2]);
-      console.log(storedPatterns[3]);
+      storedPatterns[_k-1] = '';
+      storedPatterns[_k-1] = pattern;
+
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
     else

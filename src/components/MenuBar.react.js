@@ -44,7 +44,7 @@ class MenuBar extends Component {
       store.dispatch(logout())
     }
     return (<div className='MenuBar boxshadow'>
-      <Link className="pullleft" to='/'  onClick={updatePath}>sq</Link>
+      <Link className="pullleft" to='/'  onClick={updatePath}>Siren</Link>
       {paths.map((p, i) => {
         return <Link key={i} to={p.url} className={'pullright ' + (p.url === path ? 'active' : '')} onClick={updatePath}>{p.name}</Link>
       })}
