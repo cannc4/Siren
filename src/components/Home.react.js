@@ -5,7 +5,7 @@ import './Home.css';
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
-      startClick,stopClick, changeUsername,continousPattern} from '../actions'
+      startClick,stopClick, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 
@@ -34,7 +34,6 @@ var options = {
     showCursorWhenSelecting: true
 };
 
-
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -62,7 +61,7 @@ class Home extends Component {
       globalCommands: '',
 
       globalTransformations: '',
-      username: 'vou',
+      username: '',
       numberValue: 12,
       storedPatterns: []
     }
@@ -108,6 +107,16 @@ class Home extends Component {
 //     console.log(instance, event);
 // });
 // }
+componentWillReceiveProps(nextProps) {
+  const ctx = this;
+  if(nextProps.user !== undefined && nextProps.user.user.name !== undefined && ctx.state.username === '')
+  {
+    ctx.setState({username: nextProps.user.user.name});
+    var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
+    Firebase.database().ref("/matrices").child(obj.key).remove();
+  }
+}
+
 componentWillMount(props,state){
   const ctx=this;
   var tempEnd = [];
@@ -236,6 +245,7 @@ sendSCMatrix(tidalServerLink, vals, patterns) {
 }
 
 sendScPattern(tidalServerLink, pattern) {
+  console.log(pattern);
   store.dispatch(sendScPattern(tidalServerLink, pattern));
 }
 
@@ -244,7 +254,6 @@ consoleSubmit(tidalServerLink, value){
 }
 
 handleSubmit = event => {
-  console.log("HANDLE SUBMIT");
   const body=event.target.value
   const ctx=this;
   const {scPattern, tidalServerLink }=ctx.state;
@@ -253,9 +262,17 @@ handleSubmit = event => {
   }
 }
 
-handleGlobalTransformations = event => {
-  console.log("handleGlobalTransformations");
 
+handleConsoleSubmit = event => {
+  const value = event.target.value;
+  const ctx = this;
+  const {tidalServerLink} = ctx.state;
+  if(event.keyCode === 13 && event.ctrlKey && value){
+    ctx.consoleSubmit(tidalServerLink, value);
+  }
+}
+
+handleGlobalTransformations = event => {
   const body=event.target.value
   const ctx=this;
   const {globalTransformations}=ctx.state;
@@ -263,33 +280,17 @@ handleGlobalTransformations = event => {
   ctx.setState({globalTransformations:temp});
 }
 
-handleGlobalCommands = () => {
-  console.log("GLOBAL COMMANDS SUBMIT");
 
-  // const body=event.target.value
-  // const ctx=this;
-  // const {globalCommands}=ctx.state;
-  // var temp = body;
-  // ctx.setState({globalCommands:temp});
-}
-
-handleConsoleSubmit = event => {
-  console.log("CONSOLE SUBMIT");
-
-  const value = event.target.value;
-  const ctx = this;
-  const {tidalServerLink} = ctx.state;
-
-  if(event.keyCode === 13 && event.ctrlKey && value){
-    ctx.consoleSubmit(tidalServerLink, value);
-  }
+handleGlobalCommands = event => {
+  const body=event.target.value;
+  const ctx=this;
+  const {globalCommands}=ctx.state;
+  var temp = body;
+  ctx.setState({globalCommands:temp});
 }
 
 updateMatrix(patterns, values, item) {
-
-  // DEBUG
   const items = this.props[this.state.modelName.toLowerCase()]
-  console.log('SCENES: ');
   _.forEach(Object.values(items), function(d){
     console.log(d.matName + ' ' + d.sceneIndex);
   });
@@ -318,7 +319,6 @@ soloChannel =  ({target : {id}}) => {
         solo[i] = false;
     }
     solo[_index] = !solo[_index];
-    console.log(solo);
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
 
   }
@@ -568,10 +568,8 @@ addItem() {
   var patterns = [];
   const { matName, activeMatrix, values, sceneIndex } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  console.log("PROPS: ",ctx.props);
   const { uid } = ctx.props.user.user;
-  // console.log(items);
-  if(uid !== null || uid !== undefined){
+  if(uid !== null && uid !== undefined){
     _.each(items, function(d){
       if(d.uid === uid && d.matName === activeMatrix){
         patterns = d.patterns;
@@ -595,10 +593,7 @@ reorder (index,flag){
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
   if(ctx.props.user !== null && ctx.props.user !== undefined){
-    console.log('items: ', items, Object.values(items));
-
     const vals = _.find(Object.values(items), (d) => d.uid === ctx.props.user.user.uid);
-    // console.log('keys', keys, 'vals', vals);
     const len = vals.length;
 
     if(flag === "up" && index === 0)
@@ -706,45 +701,41 @@ renderMetro(){
 
 clearMatrix(){
   const ctx = this;
-
-
   const { values, channels, steps} = ctx.state;
-  // console.log(values);
   for (var i = 0; i < channels.length*steps; i++) {
-
       values [i] = [];
-
   }
   ctx.setState({values});
+
 }
 
 toggleCanvas(){
   const ctx = this;
-  console.log('props', ctx.props);
   ctx.setState({isCanvasOn: !ctx.state.isCanvasOn});
 }
 
 renderMenu(){
   const ctx=this;
   const { tidal, timer, click, patterns }=ctx.props;
-  const { scPattern, tidalServerLink, play, values, steps, channels}=ctx.state;
+  const { play, values, steps, channels}=ctx.state;
 
-  const updateScPattern = (obj)  => {
-    ctx.setState({scPattern: obj.value})
-  }
-  const updateTidalServerLink=({ target: { value } }) => {
-    ctx.setState({ tidalServerLink: value });
-  }
   // REPLACING START PAUSE STOP WITH IMAGES
   //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
-
   // <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
+
+  const loginGG = () => {
+    store.dispatch(GitHubLogin())
+  }
+  const fblogout = () => {
+    this.setState({username: ''});
+    store.dispatch(logout())
+  }
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      Username
-      {ctx.props.user.user.name && <input type="String" value={ctx.props.user.user.name}/>}
-      {!ctx.props.user.user.name && <input type="String" value={'Please login!'}/>}
+      User
+      {ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
+      {!ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={loginGG}>Login</button>}
     </div>
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -807,8 +798,8 @@ render() {
   const { patterns, isCanvasOn }=ctx.props;
   const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
 
-  const updateScPattern = (obj)  => {
-    ctx.setState({scPattern: obj.value})
+  const updateScPattern = (target)  => {
+    ctx.setState({scPattern: target})
   }
 
   const viewPortWidth = '100%'
@@ -831,12 +822,24 @@ render() {
 
   // <textarea className = "defaultPatternArea" key = {c} value={}/>
 
+  var historyOptions = {
+      mode: '_rule',
+      theme: '_style',
+      fixedGutter: false,
+      scroll: true,
+      styleSelectedText:true,
+      showToken:true,
+      lineWrapping: true,
+      showCursorWhenSelecting: true,
+      readOnly: true
+  };
+
   return <div >
   <div className={"Home cont"}>
   {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
   <Layout fill='window'>
       <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+        <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
             <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
@@ -849,7 +852,8 @@ render() {
           </div>
           <div className={'sceneList'} style={{ width: '100%'}}>
             <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-              {ctx.renderItems(items)}
+              {this.props.user.user.name && ctx.renderItems(items)}
+              {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
             </ul>
           </div>
         </div>
@@ -861,20 +865,19 @@ render() {
         </Layout>
         <LayoutSplitter />
         <Layout layoutHeight={250}>
-
           <Layout layoutWidth={200}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
-              <CodeMirror className="defaultPatternArea" value={scPattern} onChange={updateScPattern} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} options={options}/>
-              <CodeMirror className="defaultPatternArea" onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" options={options}/>
+              <textarea className="defaultPatternArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+              <textarea className="defaultPatternArea" key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
             </div>
           </Layout>
           <LayoutSplitter />
           <Layout layoutWidth={300}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <CodeMirror className="defaultPatternArea"  onKeyUp={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command "  options={options}/>
-              <CodeMirror className="defaultPatternArea"  onKeyEvent={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  options={options}/>
+              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+              <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
             </div>
           </Layout>
           <LayoutSplitter />
@@ -885,8 +888,8 @@ render() {
           <Layout layoutWidth={'flex'}>
             <div style={{width: '100%', flexDirection: 'column'}}>
              <p>> Pattern History</p>
-             {_.map(channels, c => {
-                return <CodeMirror className={'defaultPatternArea'} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={options}/>
+             {_.map(channels, (c, i) => {
+                return <CodeMirror key={i} className={'defaultPatternArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
               })}
             </div>
           </Layout>

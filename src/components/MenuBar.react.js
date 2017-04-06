@@ -15,7 +15,7 @@ class MenuBar extends Component {
         name: 'Home',
         url: '/'
         },  {
-        name: 'Live',
+        name: 'Canvas',
         url:'/live'
       }],
       username: 'vou'
@@ -37,21 +37,12 @@ class MenuBar extends Component {
     const ctx = this;
     const { path, paths } = ctx.state;
     const updatePath = ctx.updatePath.bind(ctx)
-    const loginGG = () => {
-      store.dispatch(GitHubLogin())
-    }
-    const fblogout = () => {
-      store.dispatch(logout())
-    }
+
     return (<div className='MenuBar boxshadow'>
       <Link className="pullleft" to='/'  onClick={updatePath}>Siren</Link>
       {paths.map((p, i) => {
         return <Link key={i} to={p.url} className={'pullright ' + (p.url === path ? 'active' : '')} onClick={updatePath}>{p.name}</Link>
       })}
-      <div className='Account'>
-        {ctx.props.user.user.email && <Link to='/' onClick={fblogout}>Log-out</Link>}
-        {!ctx.props.user.user.email && <Link to='/' onClick={loginGG}>Log-in</Link>}
-      </div>
     </div>)
   }
 }

@@ -108,16 +108,6 @@ String.prototype.replaceAt = function(index, character) {
 //
 
 
-export function changeUsername(username) {
-  // console.log("BEFORE");
-  // console.log(models);
-  // _.forEach(models, function(modelValue) {
-  //   modelValue.dataSource = modelValue.dataSource.child(username);
-  // })
-  // console.log("AFTER");
-  // console.log(models);
-}
-
 export function sendZapier(data) {
   const { url } = data;
   delete data.url;
@@ -140,7 +130,6 @@ export function fetchModel(model) {
 
 export function fbaccount(data) {
   return dispatch => {
-    console.log('FBACCOUNT', data);
     const updates = {}
     updates[data['key']] = data;
 
@@ -158,7 +147,6 @@ export function fbaccount(data) {
 export function fbauth() {
   return dispatch => {
     Firebase.auth().onAuthStateChanged((user) => {
-      console.log("FBAUTH", user);
       if (user !== null) {
         dispatch({
           type: FETCH_ACCOUNTS,
@@ -170,9 +158,6 @@ export function fbauth() {
           }))
         })
       }
-      else {
-        console.log('USER IS NULL');
-      }
     })
 
   }
@@ -180,19 +165,13 @@ export function fbauth() {
 
 export function fbfetch(model) {
   return dispatch => {
-    console.log('FBFETCH');
     models[model].dataSource.ref.on('value', data => {
       if (Firebase.auth().currentUser !== null)
       {
         const { uid } = Firebase.auth().currentUser;
-        console.log("FBFETCH inside data", data.val());
-        console.log("FBFETCH inside currentUser", uid);
-
         const u = _.find(data.val(), (d) => d.uid === uid);
 
         if (u !== null && u !== undefined) {
-          console.log("FBFETCH u !== null", u);
-
           dispatch({
             type: 'FETCH_' + model.toUpperCase(),
             payload: u
@@ -204,14 +183,12 @@ export function fbfetch(model) {
 }
 export function fbfetchscenes(model) {
   return dispatch => {
-
     models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
       var temp = [];
       if (Firebase.auth().currentUser !== null)
       {
         data.forEach(function(c){
           var u_id = Firebase.auth().currentUser.uid;
-          console.log('UIDs : ', u_id, c.val().uid);
           if(c.val().uid === u_id)
             temp.push(c.val());
         })
@@ -302,10 +279,7 @@ export function fbcreateMatrix(model, data) {
       var u_id = Firebase.auth().currentUser.uid;
       if ( u_id !== null)
       {
-        console.log('dat.val()', dat.val());
-        console.log('UIDs: ', u_id, uid, dat.val().uid, data.uid);
         const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
-        console.log('obj: ', obj);
         if(obj !== undefined && obj !== null && u_id === obj.uid){
           console.log('fbcreateMatrix -- OBJ: ', obj);
           datakey = obj.key;
@@ -323,12 +297,10 @@ export function fbcreateMatrix(model, data) {
     if (datakey) {
       data.sceneIndex = sceneIndex;
       data.patterns = patterns;
-      console.log('fbcreateMatrix -- update item', data);
       return models[model].dataSource.child(datakey).update({...data})
     } else {
       if (data.patterns === undefined)
         data.patterns  = [];
-      console.log('fbcreateMatrix -- new addItem', data);
 
       const newObj = models[model].dataSource.push(data);
       return newObj.update({ key: newObj.key })
@@ -343,7 +315,6 @@ export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
 export function fbupdatepatterninscene(model, data, s_key) {
-  // console.log(data);
   models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbdelete(model, data) {
@@ -365,30 +336,23 @@ export function GitHubLogin() {
     Firebase.auth().signInWithRedirect(provider);
 
     Firebase.auth().getRedirectResult().then(result => {
-      console.log("RESULT: ", result);
       if (result.credential) {
         // This gives you a GitHub Access Token. You can use it to access the GitHub API.
         var token = result.credential.accessToken;
         // ...
-        console.log("token");
-        console.log(token);
       }
-      // The signed-in user info.
-      console.log("User:");
+      // The signed-in user info
       var user = result.user;
-      console.log(user);
     }).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
 
-      console.log('ERROR: ', errorCode, errorMessage);
       // The email of the user's account used.
       var email = error.email;
       // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
       // ...
-      console.log(email);
 
       dispatch({
         type: FETCH_ACCOUNTS_ERROR,
@@ -452,7 +416,7 @@ export const assignTimer = (timer,steps, _index) => {
 var math = require('mathjs');
 export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
-
+    console.log("GLOBAL COM" + globalCommands);
     const x =  _.compact(_.map(vals,(v,k) => {
     // gets parameters list
     const getParameters = (v) => {
@@ -462,7 +426,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
         if(p1 !== "") param.push(p1);
       });
-      console.log("param array: ", param);
       return param;
     }
 
@@ -475,17 +438,14 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
     else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
       var cellItem = _.slice(getParameters(v), 1);
-      console.log("cellitem arr", cellItem);
       var newCommand = cmd.pattern;
       var parameters = _.concat( _.split(cmd.params, ','),'t');
 
       //Param parser
       _.forEach(parameters, function(value, i) {
-        console.log("parameters", parameters);
         if(value === 't'){
-          console.log("global timer BEFORE", newCommand);
           newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
-          console.log("global timer AFTER", newCommand);}
+        }
         else if(_.indexOf(cellItem[i], '[') != -1 ) // is random parameter??
         {
           cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
@@ -498,21 +458,15 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
                cellItem[i] = _.random(_.min(bounds), _.max(bounds));
                newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
           }
-          console.log("random parameter", newCommand);
         }
         else {
-          console.log("normal parameter BEFORE", newCommand);
           newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-          console.log("normal parameter AFTER", newCommand);
         }
       });
       //Math Parser
       var re = /(&)(.+)(&)/g;
-      console.log('words', _.words(newCommand, re));
       _.forEach(_.words(newCommand, re), function(val, i){
-        console.log("MATCH "+ i, val);
         newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
-        console.log("math eval", newCommand);
       })
 
       var soloHolder = "d"+(k);
@@ -540,31 +494,23 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
           transitionHolder = " $ ";
         }
       }
-      if(globalTransformations === undefined || globalTransformations === '')
-    {
+      if(globalTransformations === undefined || globalTransformations === ''){
       globalTransformations = '';
-    }
-    else {
-      globalTransformations = globalTransformations + " $ "
-    }
-      console.log("Reconstructed Pattern: ", soloHolder + transitionHolder + newCommand);
-
-      //create a channel array to keep track of running patterns - reducers
-      //create a variable/concept that instantly appends the transformer and recompiles the patterns
-      //check for conflicts with timers
-      //create interface mechanism
-      var pattern;
-      if(_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
-        pattern =  "m1 $ " + newCommand;
       }
-      else
-        pattern = soloHolder +  transitionHolder + globalTransformations + newCommand + globalCommands;
-
+      else {
+      globalTransformations = globalTransformations + " $ "
+      }
+      var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
       storedPatterns[_k-1] = '';
       storedPatterns[_k-1] = pattern;
-
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
+
+    else if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+        pattern =  "m1 $ " + newCommand;
+        return [pattern + "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+    }
+
     else
       return false;
     }))
@@ -579,7 +525,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
 export const continousPattern = (server, pattern) => {
   return dispatch => {
-    console.log(pattern);
+    // console.log(pattern);
     const x = pattern;
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
     .then((response) => {
@@ -694,13 +640,10 @@ export const createTimer = (_index,_duration, _steps) => {
 
     timerWorker[_index] = new Worker("src/actions/tworker.js");
     timerWorker[_index].onmessage = function(e) {
-        if (e.data.type == "tick") {
-             //console.log(_index + "tick!")
-            store.dispatch(updtmr(e.data.id));
-            timer[_index] = e.data.msg;
-        }
-        else
-            console.log("message: " + e.data);
+      if (e.data.type == "tick") {
+          store.dispatch(updtmr(e.data.id));
+          timer[_index] = e.data.msg;
+      }
     }
     return {
     type: 'CREATE_TIMER', payload: _index, duration : _duration

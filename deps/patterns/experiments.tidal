@@ -329,7 +329,7 @@ d1 $ sound "arpy:0(3,8)" # speed "1"
 d1 $ sound "arpy:0(3,8)" # orbit "2"
   # pan "0 1"
 hush
-  t1 (interpolateIn 4) $ sound "arpy:2(3,8)" # speed "4" # shape "0"
+t1 (interpolateIn 4) $ sound "arpy:2(3,8)" # speed "4" # shape "0"
 
 t1 (interpolateIn 4) $ sound "arpy:0(3,8)" # speed "1" # shape "0.2"
 hush
@@ -366,13 +366,3 @@ $ do {
   y <- "<1 2>";
   n (toScale (toInts 12 $ snot $ 4@@x #^^# 3@@0) (fmap (*y) $ every 2 rev $ run (8 `div` y)))}
  # s "superzow" # bandf (density 1.2 $ scalex 500 2000 sine1) # bandq "5"
-
- --phasing
- d1 $ slow 2 $ (now-1) ~> do {
-     x <- slow (12 * 12) $ run 12;
-     jux ((x/12) <~) $ sound "cp ! ! ~ cp ! ~ cp ~ cp ! ~"}
-
-
-     d1 $ slow 2 $ (now-1) ~> do {
-    x <- slow (100) $ run 100;
-    jux ((x/100) <~) $ sound "cp*4"}
