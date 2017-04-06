@@ -1,4 +1,8 @@
 node_modules/
 node_modules/rx/ts/core/observable.ts
+<<<<<<< HEAD
+=======
+deps/
+>>>>>>> master
 npm-debug.log
 config/
