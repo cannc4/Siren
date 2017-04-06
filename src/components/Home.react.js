@@ -145,7 +145,7 @@ componentDidUpdate(props, state) {
       if (ctx.props.timer.timer[i].isActive) {
         runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
 
-        if(ctx.props.timer.timer[i].current % steps === steps-1){
+        if(ctx.props.timer.timer[i].current % steps === 0){
           if(songmodeActive){
             channelEnd[i] = true;
             ctx.setState({channelEnd : channelEnd});
@@ -298,16 +298,6 @@ updateMatrix(patterns, values, item) {
   store.dispatch(updateMatrix(patterns, values, item));
 }
 
-updateDur = ({target : {value, id}}) => {
-
-    const ctx = this;
-    const {channels,steps} = ctx.state;
-    const {timer} = ctx.props;
-    var _index = _.indexOf(channels,id);
-    if(value !== undefined && value !== "")
-      store.dispatch(updateTimerduration(_index,value,steps));
-}
-
 soloChannel =  ({target : {id}}) => {
   const ctx = this;
   const {channels,solo,soloSentinel} = ctx.state;
@@ -343,10 +333,10 @@ renderPlayer() {
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
       <div className={playerClass}>
-        <div className="playbox playbox-cycle" style={{width:"7.5%"}}>/~-~/</div>
+        <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
       {_.map(channels, c => {
         return <input className = "playbox" id = {c} key = {c}
-        placeholder={".^.^."}
+        placeholder={" - "}
         value = {ctx.state.transition[_.indexOf(channels, c)]}
         style = {{margin: 5}}
         onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
@@ -354,7 +344,6 @@ renderPlayer() {
       </div>
   </div>)
 }
-
 updateDur = ({target : {value, id}}) => {
 
     const ctx = this;
@@ -374,9 +363,6 @@ _handleKeyPress = event => {
   var _index = _.indexOf(channels, _key);
 
   if(event.keyCode === 13 && event.ctrlKey){
-    // if( value < "4"){
-    //   value = 4;
-    // }
     if(ctx.props.timer.timer[_index].isActive === true){
       store.dispatch(pauseIndividualTimer(_index));
     }
@@ -384,15 +370,11 @@ _handleKeyPress = event => {
     ctx.setState({play:true});
   }
   else if (event.keyCode === 13 && event.shiftKey){
-    // if( value < "10"){
-    //   value = 10;
-    // }
     if(ctx.props.timer.timer[_index].isActive === true){
       store.dispatch(stopIndividualTimer(_index));
     }
   }
 }
-
 
 
 updateT = ({target : {value, id}}) => {
@@ -575,10 +557,8 @@ addItem() {
         patterns = d.patterns;
       }
     })
-
     if ( matName.length >= 2 && !_.isEmpty(values)) {
       var snd = Object.values(items).length;
-
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid});
       ctx.setState({sceneIndex: snd});
     }
@@ -587,50 +567,52 @@ addItem() {
 }
 
 reorder (index,flag){
-
   const ctx = this;
   const { matName, values, sceneIndex } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-
   if(ctx.props.user !== null && ctx.props.user !== undefined){
-    const vals = _.find(Object.values(items), (d) => d.uid === ctx.props.user.user.uid);
-    const len = vals.length;
+    console.log(items);
+    const vals = _.takeWhile(Object.values(items), function (d) { return d.uid === ctx.props.user.user.uid });
+    if(vals !== undefined){
+      const len = vals.length;
+      console.log(vals);
+      console.log("VALS IN HOME:", vals);
+      if(flag === "up" && index === 0)
+        return;
+      else if(flag === "down" && len-1 === index)
+        return;
+      else{
+        if(flag === "up"){
+          if (vals[index].sceneIndex === index){
+            var upIndex = index - 1;
+            var upMatName = vals[upIndex].matName;
+            var upValues = vals[upIndex].values;
+            var upPatterns = vals[upIndex].patterns;
+            var upUID = vals[upIndex].uid;
+            var downMatName = vals[index].matName;
+            var downValues = vals[index].values;
+            var downPatterns = vals[index].patterns;
+            var downUID = vals[index].uid;
 
-    if(flag === "up" && index === 0)
-      return;
-    else if(flag === "down" && len-1 === index)
-      return;
-    else{
-      if(flag === "up"){
-        if (vals[index].sceneIndex === index){
-          var upIndex = index - 1;
-          var upMatName = vals[upIndex].matName;
-          var upValues = vals[upIndex].values;
-          var upPatterns = vals[upIndex].patterns;
-          var upUID = vals[upIndex].uid;
-          var downMatName = vals[index].matName;
-          var downValues = vals[index].values;
-          var downPatterns = vals[index].patterns;
-          var downUID = vals[index].uid;
-
-          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index, uid: upUID},    keys[upIndex]);
-          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex, uid: downUID},  keys[index]);
+            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index, uid: upUID}, vals[upIndex].key);
+            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex, uid: downUID}, vals[index].key);
+          }
         }
-      }
-      else if (flag === "down") {
-        if (vals[index].sceneIndex === index){
-          var downIndex = index + 1;
-          var downMatName = vals[downIndex].matName;
-          var downPatterns = vals[downIndex].patterns;
-          var downValues = vals[downIndex].values;
-          var downUID = vals[downIndex].uid;
-          var upMatName = vals[index].matName;
-          var upPatterns = vals[index].patterns;
-          var upValues =  vals[index].values;
-          var upUID = vals[index].uid;
+        else if (flag === "down") {
+          if (vals[index].sceneIndex === index){
+            var downIndex = index + 1;
+            var downMatName = vals[downIndex].matName;
+            var downPatterns = vals[downIndex].patterns;
+            var downValues = vals[downIndex].values;
+            var downUID = vals[downIndex].uid;
+            var upMatName = vals[index].matName;
+            var upPatterns = vals[index].patterns;
+            var upValues =  vals[index].values;
+            var upUID = vals[index].uid;
 
-          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, keys[downIndex]);
-          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, keys[index]);
+            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, vals[downIndex].key);
+            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, vals[index].key);
+          }
         }
       }
     }
@@ -719,10 +701,6 @@ renderMenu(){
   const { tidal, timer, click, patterns }=ctx.props;
   const { play, values, steps, channels}=ctx.state;
 
-  // REPLACING START PAUSE STOP WITH IMAGES
-  //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
-  // <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
-
   const loginGG = () => {
     store.dispatch(GitHubLogin())
   }
@@ -747,49 +725,8 @@ renderMenu(){
     {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
                              <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
     </div>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      {ctx.state.isCanvasOn && <button className={'buttonSentinel'} onClick={ctx.toggleCanvas.bind(ctx)}>{"Canvas Off"}</button>}
-      {!ctx.state.isCanvasOn && <button className={'buttonSentinel'} onClick={ctx.toggleCanvas.bind(ctx)}>{"Canvas On"}</button>}
-    </div>
     <br/>
   </div>
-}
-
-
-  _onNumberChange(value) {
-    const ctx = this;
-    const {numberValue, tidalServerLink } = ctx.state;
-    ctx.setState({numberValue: value});
-    var pat = "d1 $ slow 2  $ n \"{0 1 2 }%5 \" #s \"clean\" #speed " + numberValue + "#coarse " + numberValue *10;
-    store.dispatch(continousPattern(tidalServerLink, pat));
-    //onKeyDown={ctx._onKeyDown.bind(ctx)}
-  }
-
-  _onKeyDown(e) {
-        //  var key = e.which;
-        //  var value = this.state.numberValue;
-        //  if(key === KEYS.K) {
-        //      this._onNumberChange(value * 1000);
-        //  } else if(key === KEYS.M) {
-        //      this._onNumberChange(value * 1000000);
-        //  }
-  }
-
-testtest() {
-  const ctx = this;
-  const { channels, steps, channelEnd, solo } = ctx.state;
-
-  channels.push('test');
-
-  ctx.setState({channels: channels});
-
-  const i = _.indexOf(channels, 'test');
-
-  if(i !== -1 ){
-    ctx.createTimer(i, 48, steps);
-    channelEnd[i] = false
-    solo[i] = false;
-  }
 }
 
 render() {
@@ -804,23 +741,6 @@ render() {
 
   const viewPortWidth = '100%'
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-
-  // <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-  //  <NumberEditor
-  //      className="spinner"
-  //      max={1}
-  //      min={0}
-  //      decimals={1}
-  //      onValueChange={ctx._onNumberChange.bind(ctx)}
-  //      step={0.05}
-  //      value={ctx.state.numberValue}
-  //      ref="demo-spinner"/>
-  //    <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>>Value: {this.state.numberValue}</div>
-  // </div>
-
-  // <button className={'buttonSentinel'} onClick={ctx.testtest.bind(ctx)}>TEST</button>
-
-  // <textarea className = "defaultPatternArea" key = {c} value={}/>
 
   var historyOptions = {
       mode: '_rule',

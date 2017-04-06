@@ -6,9 +6,8 @@ s.options.memSize_(65536 * 4);
 s.quit;
 
 s.waitForBoot {
-
- SuperDirt.start
+ SuperDirt.start;
  s.latency = 0.3;
-  }
 
+  }
 )

@@ -18,11 +18,10 @@
 	width: 40px;
 	border: 0;
 	text-align: right;
-	color: #393939;
+	color: #fff;
 	font-weight: bold;
-	border-bottom: 1px dotted #393939;
-
-    margin: 20px;
+	border-bottom: 1px dotted #fff;
+  margin: 20px;
 }
 .Patterns {
   display: flex;
@@ -55,14 +54,12 @@
 
 .matrices {
   display: flex;
-
   flex-grow: 1;
   flex-direction: row;
 }
 
 .sceneList {
   display: flex;
-
   overflow-y: auto;
 }
 
@@ -70,14 +67,10 @@
   display: flex;
   flex-grow: 2;
   flex-direction: column;
-
   overflow-y: auto;
-
 }
 .durInput{
   width: 50%;
-
-
 }
 .transition{
 
@@ -122,18 +115,14 @@
   display: flex;
   flex-direction: column;
   align-self: flex-end;
-
   margin: 5px;
-
-  width: 95%;
+  width: 90%;
   height: 10%;
 }
 
 .Pattern {
-
   margin: 5px;
   background: #CCC;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
