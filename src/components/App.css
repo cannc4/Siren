@@ -4,16 +4,16 @@ body, .fill, .cont {
   bottom: 0;
   left: 0;
   right: 0;
-  overflow-y: auto;
+  overflow-y: none;
   z-index: 0;
   font-size: 12px;
 }
 * {
-  font-family: 'Monaco', Monaco;
+  font-family: 'Courier New';
   font-weight: 40;
 }
 body {
-  /*background: url('http://sut.la/tcab/background.png');*/
+  /*background: url('http://sut.la/tcab/*.css.png');*/
   /*background-position: bottom;;
   background-repeat: no-repeat;
   background-size: cover;

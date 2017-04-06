@@ -1,10 +1,13 @@
-const modelName = 'USER';
-const INITIAL_STATE = {};
+const modelName = 'ACCOUNTS';
+const INITIAL_STATE = {user: {}};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'FETCH_'+modelName:
-      const user = action.payload
-      return user;
+      console.log('REDUCER_ACCOUNTS', action.payload);
+
+      const s = state;
+      s.user = action.payload;
+      return {...s};
     default:
       return state;
   }

@@ -10,20 +10,6 @@ const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var globalCount = 0;
 
-//
-// grid.key(function(x, y, s) {
-//   console.log('key received: ' + x + ', ' + y + ', ' + s);
-// });
-//
-//     for (let y=0;y<8;y++) {
-//       led[y] = [];
-//       for (let x=0;x<16;x++)
-//         led[y][x] = 0;
-//     }
-//     led[0][0] = 15;
-//     led[2][0] = 5;
-//     led[0][2] = 5;
-//     grid.refresh(led);
 // REPL is an GHCI Instance
 class REPL {
 
@@ -41,19 +27,19 @@ class REPL {
 
   initTidal() {
 
-    this.myCommands = { values: [] };
-    const commands = fs.readFileSync(config.tidal_boot).toString().split('\n');
-    for (let i = 0; i < commands.length; i++) {
-      this.tidalSendLine(commands[i]);
+    this.myPatterns = { values: [] };
+    const patterns = fs.readFileSync(config.tidal_boot).toString().split('\n');
+    for (let i = 0; i < patterns.length; i++) {
+      this.tidalSendLine(patterns[i]);
     }
   }
 
-  stdinWrite(command) {
-    this.repl.stdin.write(command);
+  stdinWrite(pattern) {
+    this.repl.stdin.write(pattern);
   }
 
-  tidalSendLine(command) {
-    this.stdinWrite(command);
+  tidalSendLine(pattern) {
+    this.stdinWrite(pattern);
     this.stdinWrite('\n');
   }
 
@@ -75,13 +61,10 @@ class REPL {
       const lang = new SCLang(options);
       lang.boot().then((sclang) => {
         self.sc = lang;
-        // Check users quarks folder
-        // if (notExists) {
-
         setTimeout(function(){
-          const commands = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
-          lang.interpret(commands);
-
+          const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
+          lang.interpret(patterns);
+          
         }, 4000)
       });
     });
@@ -108,24 +91,24 @@ const myApp = () => {
   const app = express();
 
   var udpHosts = [];
-    var dgram = require("dgram");
-    var UDPserver = dgram.createSocket("udp4");
-    var tick = socketIo.listen(3003);
+  var dgram = require("dgram");
+  var UDPserver = dgram.createSocket("udp4");
+  var tick = socketIo.listen(3003);
 
-    //Get tick from sync.hs Port:3002
-    UDPserver.on("listening", function () {
-      var address = UDPserver.address();
-      console.log("UDP server listening on " +
-          address.address + ":" + address.port);
-    });
+  //Get tick from sync.hs Port:3002
+  UDPserver.on("listening", function () {
+    var address = UDPserver.address();
+    console.log("UDP server listening on " +
+        address.address + ":" + address.port);
+  });
 
-    UDPserver.on("message", function (msg, rinfo) {
-      console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
-      tick.sockets.emit('osc', {osc:msg});
-    });
+  UDPserver.on("message", function (msg, rinfo) {
+    console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    tick.sockets.emit('osc', {osc:msg});
+  });
 
-    UDPserver.on("disconnect", function (msg) {
-      tick.sockets.emit('dc', {osc:msg});
+  UDPserver.on("disconnect", function (msg) {
+    tick.sockets.emit('dc', {osc:msg});
   });
 
   UDPserver.bind(3002);
@@ -140,38 +123,38 @@ const myApp = () => {
 
   const startTidal = (reply) => {
     if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed === false) {
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, command: TidalData.myTidal.myCommands });
+      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
     } else {
       if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed) {
         TidalData.myTidal = new REPL();
       }
       TidalData.myTidal.start();
-      TidalData.myTidal.myCommands.values.push('initiate tidal');
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, command: TidalData.myTidal.myCommands });
+      TidalData.myTidal.myPatterns.values.push('initiate tidal');
+      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
 
     }
   };
 
-  const sendCommand = (expr, reply) => {
+  const sendPattern = (expr, reply) => {
     _.each(expr, c => {
       TidalData.myTidal.tidalSendExpression(c);
-      TidalData.myTidal.myCommands.values.push(c);
+      TidalData.myTidal.myPatterns.values.push(c);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
+    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };
 
-  const sendCommands = (commands, reply) => {
-    _.each(commands, c => {
+  const sendPatterns = (patterns, reply) => {
+    _.each(patterns, c => {
       TidalData.myTidal.tidalSendExpression(c[0]);
-      TidalData.myTidal.myCommands.values.push(c[0]);
+      TidalData.myTidal.myPatterns.values.push(c[0]);
 
       TidalData.myTidal.tidalSendExpression(c[1]);
-      TidalData.myTidal.myCommands.values.push(c[1]);
+      TidalData.myTidal.myPatterns.values.push(c[1]);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, commands: TidalData.myTidal.myCommands });
+    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };
 
-  const sendScCommand = (expr, reply) => {
+  const sendScPattern = (expr, reply) => {
     TidalData.myTidal.sendSC(expr);
     console.log(expr);
     reply.status(200).send(expr);
@@ -180,28 +163,28 @@ const myApp = () => {
   app.get('/tidal', (req, reply) => startTidal(reply));
   // app.get('/tidaltick', (req, reply) => startTidal(reply));
 
-  app.post('/command', (req, reply) => {
-    const { command } = req.body;
-    console.log('Command inbound:', command);
-    sendCommand(command, reply);
+  app.post('/pattern', (req, reply) => {
+    const { pattern } = req.body;
+    console.log('Pattern inbound:', pattern);
+    sendPattern(pattern, reply);
   });
 
-  app.post('/commands', (req, reply) => {
-    const { commands } = req.body;
-    console.log('Command inbound:', commands);
-    sendCommands(commands, reply);
+  app.post('/patterns', (req, reply) => {
+    const { patterns } = req.body;
+    console.log('Pattern inbound:', patterns);
+    sendPatterns(patterns, reply);
   });
 
-  app.post('/sccommand', (req, reply) => {
-    const {command} = req.body;
-    _.replace(command, "\\", '');
-    console.log('ScCommand inbound:', command);
+  app.post('/scpattern', (req, reply) => {
+    const {pattern} = req.body;
+    _.replace(pattern, "\\", '');
+    console.log('ScPattern inbound:', pattern);
 
-    sendScCommand(command, reply);
+    sendScPattern(pattern, reply);
   })
 
-
   app.get('*', errorHandler);
+
   app.listen(config.port, () => {
     console.log(`Server started at http://localhost:${config.port}`);
   });

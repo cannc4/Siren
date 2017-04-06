@@ -2,35 +2,34 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fetchModel, fbcreate, fbupdate, fbdelete,
-         fbcreatecommandinscene, fbupdatecommandinscene, fbdeletecommandinscene } from '../actions';
+         fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/base16-light.css';
-import 'codemirror/mode/elm/elm';
-// load math.js
-// use math.js
+import '../assets/_style.css';
+import '../assets/_rule.js';
 
-class Commands extends Component {
+class Patterns extends Component {
   constructor(props) {
     super(props)
     this.state = {
       name: '',
       params: '',
-      modelName: this.constructor.name, // React Class Name set above,
-      sceneKey: ''
+
+      modelName: this.constructor.name,
+      sceneKey: '',
+      uid: ''
     }
   }
-
+  //Pattern Dictionary
   addItem() {
     const ctx = this
-
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === ctx.props.active){
         const { name } = ctx.state
         ctx.setState({sceneKey: d.key});
         if (name.length >= 3) {
-          fbcreatecommandinscene('Matrices', {name}, d.key)
+          fbcreatepatterninscene('Matrices', {name}, d.key)
         }
       }
     })
@@ -45,61 +44,50 @@ class Commands extends Component {
     const ctx = this;
     const model = fetchModel(ctx.state.modelName);
     const { params, sceneKey } = ctx.state;
-    // Item Action Handlers
-    // handle function when any field of the object is modified
     const handleChange = (obj) => {
-      // console.log('---HANDLECHANGE BEGIN---');
       var value, name;
-
       if(obj.target !== undefined){
         value = obj.target.value;
         name = obj.target.name;
       } else {
         value = obj;
       }
-       // 2i
-
-      var re = /&(\w+)&/g, match, matches = [];
+      var re = /`(\w+)`/g, match, matches = [];
       while (match = re.exec(value)) {
         if(_.indexOf(matches, match[1]) === -1)
           matches.push(match[1]);
       }
       _.remove(matches, function(n) {
-      return n === 't';
+        return n === 't';
       });
       ctx.setState({ params: matches.toString()});
-
-
       const payload = { key: dbKey };
-      payload[name === undefined ? 'command' : name] = value;
+      payload[name === undefined ? 'pattern' : name] = value;
       payload['params'] = this.state.params;
 
       _.each(Object.values(ctx.props["matrices"]), function(d){
         if(d.matName === ctx.props.active){
           ctx.setState({sceneKey: d.key});
-            fbupdatecommandinscene('Matrices', payload, d.key)
+            fbupdatepatterninscene('Matrices', payload, d.key)
         }
       })
-
-      // console.log(value);
-      // console.log('---HANDLECHANGE END---');
     }
     // handle function to delete the object
     // gets the dbkey of to-be-deleted item and removes it from db
-    const handleDelete = (/*{ target: obj}*/) => {
+    const handleDelete = () => {
       const payload = { key: item.key };
 
       _.each(Object.values(ctx.props["matrices"]), function(d){
         if(d.matName === ctx.props.active){
           ctx.setState({sceneKey: d.key});
-            fbdeletecommandinscene('Matrices', payload, d.key)
+            fbdeletepatterninscene('Matrices', payload, d.key)
         }
       })
     }
 
     var options = {
-        mode: 'elm',
-        theme: 'base16-light',
+        mode: '_rule',
+        theme: '_style',
         fixedGutter: true,
         scroll: true,
         styleSelectedText:true,
@@ -112,15 +100,16 @@ class Commands extends Component {
     // parameters can be added
     return item.key && (
       <li key={item.key} className="easter" >
-          <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-            <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
-            <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
-            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '2px'}}>
-              <button onClick={handleDelete}>{'Delete'} </button>
+        <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+          <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
+            <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+              <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
+              <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
             </div>
-            <CodeMirror className={'commandDiv'} name={"command"} value={item["command"]} onChange={handleChange.bind(ctx)} options={options}/>
+            <button onClick={handleDelete} style={{justifyContent: 'flex-end' }}>{'Delete'} </button>
           </div>
-
+          <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+        </div>
       </li>
     )
   }
@@ -137,9 +126,9 @@ class Commands extends Component {
     const scenes = Object.values(ctx.props["matrices"]);
     _.each(scenes, function(d){
       if(d.matName === ctx.props.active){
-        const sceneCommands = d.commands;
-        if(sceneCommands !== undefined){
-            items = d.commands;
+        const scenePatterns = d.patterns;
+        if(scenePatterns !== undefined){
+            items = d.patterns;
         }
       }
     })
@@ -153,8 +142,8 @@ class Commands extends Component {
     return (
       <div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
-          <input className={'newCommandInput'} type="text" placeholder={'New Command Name'} value={name} onChange={changeName}/>
-          <button className={'newCommandButton'} onClick={addItem}>Add</button>
+          <input className={'newPatternInput'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
+          <button className={'newPatternButton'} onClick={addItem}>Add</button>
         </div>
         <div style={{ width: viewPortWidth }}>
           <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
@@ -166,4 +155,4 @@ class Commands extends Component {
   }
 }
 
-export default connect(state => state)(Commands);
+export default connect(state => state)(Patterns);

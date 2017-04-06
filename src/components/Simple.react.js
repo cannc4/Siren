@@ -11,7 +11,7 @@ class Simple extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    const N = 5;
+    const N = 50;
 
     this.fog = new THREE.Fog(0x121231, 10, 40);
     //0x001525
@@ -36,7 +36,7 @@ class Simple extends React.Component {
       numBodies: N,
       meshStates: this._getMeshStates(),
       fragmentShaderDepth,
-      vertexShaderDepth,
+      vertexShaderDepth
     };
 
     // check if HMR is enabled
@@ -65,7 +65,7 @@ class Simple extends React.Component {
 
   _onAnimate = () => {
     this._updatePhysics();
-
+    console.log("onAnimate");
     this._updateGraphics();
   };
 
@@ -179,15 +179,16 @@ class Simple extends React.Component {
         shadowMapEnabled
       >
         <resources>
-          <sphereGeometry
-            resourceId="sphereGeo"
+          <boxGeometry
+            resourceId="boxGeo"
 
-            radius={Math.sin(this.props.timer.timer[0].current/2)+1}
-
+            width={0.5}
+            height={0.5}
+            depth={0.5}
           />
           <shaderMaterial
 
-            resourceId="sphereMaterial"
+            resourceId="boxMaterial"
 
             fragmentShader={this.state.fragmentShaderDepth}
             vertexShader={this.state.vertexShaderDepth}
@@ -204,7 +205,7 @@ class Simple extends React.Component {
             fov={30}
             aspect={width / height}
             near={0.5}
-            far={10000}
+            far={100}
 
             position={this.cameraPosition}
             quaternion={this.cameraQuaternion}

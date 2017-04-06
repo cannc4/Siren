@@ -1,58 +1,82 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-//
-// import ReactDOM from 'react-dom';
-// import P5Wrapper from 'react-p5-wrapper';
-// import sketch from './../sketches/sketch';
-import { initMyTidal,sendScCommand, sendSCMatrix, sendCommands,createTimer,timerThread,
+
+import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
-      startClick,stopClick, changeUsername} from '../actions'
+      startClick,stopClick, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
+
 import {Layout, LayoutSplitter} from 'react-flex-layout';
-// import Simple from './examples/Benchmark/RotatingCubesDirectUpdates.js'
-import Simple from './Simple.react'
-import Commands from './Commands.react';
+
+import NumberEditor from 'react-number-editor';
+import Simple from './Simple.react';
+import Patterns from './Patterns.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
 
+import CodeMirror from 'react-codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/addon/dialog/dialog.js';
+import 'codemirror/addon/dialog/dialog.css';
+import '../assets/_style.css';
+import '../assets/_rule.js';
 
+var options = {
+    mode: '_rule',
+    theme: '_style',
+    fixedGutter: false,
+    scroll: true,
+    styleSelectedText:true,
+    showToken:true,
+    lineWrapping: true,
+    showCursorWhenSelecting: true
+};
 
 class Home extends Component {
-constructor(props) {
-super(props);
-this.state={
-  matName: "",
-  modelName : "Matrices",
-  tidalServerLink: 'localhost:3001',
-  steps: 12,
-  channels: ['1','2','3', '4', '5','cps'],
-  timer: [],
-  values: {},
-  scCommand: '',
-  click : {current:null,
-          isActive:false},
-  activeMatrix: '',
-  songmodeActive: false,
-  sceneIndex: '',
-  transition: [],
-  channelEnd :[],
-  play : false,
-  solo : [],
-  soloSentinel: false,
-  sceneSentinel: false,
-  parvalues: '',
-  username: 'vou'
-  //rotation: 1.5,
-  //stateSketch : sketch
-}
-}
+  constructor(props) {
+    super(props);
+    this.state={
+      matName: "",
+      modelName : "Matrices",
+      tidalServerLink: 'localhost:3001',
+      steps: 8,
+      channels: ['1','2','3', '4', '5', 'JV', 'cps'],
+      timer: [],
+      values: {},
+      scPattern: '',
+      click : {current:null,
+              isActive:false},
+      activeMatrix: '',
+      songmodeActive: false,
+      sceneIndex: '',
+      transition: [],
+      channelEnd :[],
+      play : false,
+      solo : [],
+      soloSentinel: false,
+      sceneSentinel: false,
+      parvalues: '',
+      globalCommands: '',
 
+      globalTransformations: '',
+      username: '',
+      numberValue: 12,
+      storedPatterns: []
+    }
+  }
 //Clock for Haskell
 // componentDidMount(props,state){
 //   const ctx = this;
-//    // const ctx = this;
+//   CodeMirror.fromTextArea(document.getElementByClass('defaultPatternArea'), {options: options}).on("keyup", function (cm, event) {
+//     console.log('deneme');
+//     if (!cm.state.completionActive && /*Enables keyboard navigation in autocomplete list*/
+//         event.keyCode != 13) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
+//         CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+//     }
+//   });
+// }
   //
   // var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
   // socket.on("osc", data => {
@@ -62,7 +86,7 @@ this.state={
   //   this.stopClick();
   // })
 //   var socket = io('http://localhost:3001/'); // TIP: io() with no args does auto-discovery
-//   socket.on("/command", data => {
+//   socket.on("/pattern", data => {
 //     console.log(data);
 //     //this.startClick();
 //   })
@@ -77,8 +101,23 @@ this.state={
 //   }
 //   return false;
 // }
+
+// componentDidMount(){
+//   cm.ref.on('keyUp', function(instance, event) {
+//     console.log(instance, event);
+// });
+// }
+componentWillReceiveProps(nextProps) {
+  const ctx = this;
+  if(nextProps.user !== undefined && nextProps.user.user.name !== undefined && ctx.state.username === '')
+  {
+    ctx.setState({username: nextProps.user.user.name});
+    var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
+    Firebase.database().ref("/matrices").child(obj.key).remove();
+  }
+}
+
 componentWillMount(props,state){
-console.log(this.props.location.pathname);
   const ctx=this;
   var tempEnd = [];
   const { channelEnd, channels , steps , timer, solo}=ctx.state;
@@ -90,54 +129,55 @@ console.log(this.props.location.pathname);
      solo[i] = false;
    }
    ctx.setState({channelEnd : tempEnd});
-
 }
 createTimer(i,duration, steps){
   store.dispatch(createTimer(i,duration,steps));
 }
 
 componentDidUpdate(props, state) {
-  var runNo = [];
-  const ctx=this;
-  const { commands, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition }=state;
-  for (var i = 0; i < channels.length; i++) {
+  // if(props.user !== undefined){
+    var runNo = [];
+    const ctx=this;
+    const { patterns, timer, click}=props;
+    const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition }=state;
 
-    if (ctx.props.timer.timer[i].isActive) {
-    runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
+    for (var i = 0; i < channels.length; i++) {
+      if (ctx.props.timer.timer[i].isActive) {
+        runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
 
-    if(ctx.props.timer.timer[i].current % steps === steps-1){
-      if(songmodeActive){
-        channelEnd[i] = true;
-        ctx.setState({channelEnd : channelEnd});
-        store.dispatch(pauseIndividualTimer(i))
-        if(ctx.identical(channelEnd ) === true){
-            ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
-        // ctx.startTimer();
+        if(ctx.props.timer.timer[i].current % steps === steps-1){
+          if(songmodeActive){
+            channelEnd[i] = true;
+            ctx.setState({channelEnd : channelEnd});
+            store.dispatch(pauseIndividualTimer(i))
+            if(ctx.identical(channelEnd ) === true){
+              ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+              ctx.stopTimer();
+              ctx.startTimer();
+
+            }
+          }
+        }
+
+        if(values[runNo[i]]!== undefined){
+          const vals = values[runNo[i]][i];
+          const channel = channels[i];
+          const obj = {[channel]: vals};
+          if (vals !== undefined) {
+            var scenePatterns = [];
+            const items = this.props[this.state.modelName.toLowerCase()]
+            _.each(items, function(d){
+              if(d.matName === activeMatrix)
+              scenePatterns = d.patterns;
+            })
+
+            ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,timer.timer[i]);
+          }
         }
       }
     }
 
-  if(values[runNo[i]]!== undefined){
-    const vals = values[runNo[i]][i];
-    const channel = channels[i];
-    const obj = {[channel]: vals};
-      if (vals !== undefined) {
-        var sceneCommands = [];
-        const items = this.props[this.state.modelName.toLowerCase()]
-        _.each(items, function(d){
-          if(d.matName === activeMatrix)
-            sceneCommands = d.commands;
-        })
-
-        ctx.sendCommands(tidalServerLink, obj , sceneCommands,solo, transition, channels,timer.timer[i]);
-        }
-      }
-    }
-  }
 }
-
-
 
 identical(array) {
     for(var i = 0; i < array.length ; i++) {
@@ -148,16 +188,13 @@ identical(array) {
     return true;
 }
 
-
 progressMatrices(items){
   const ctx = this;
   const { timer } = ctx.props;
   const { channelEnd, values, activeMatrix, steps, songmodeActive} = ctx.state;
-  var commands = [];
+  var patterns = [];
 
 //for (var i = 0; i < channelEnd.length; i++) {
-
-
   //timer[i].isActive = false;
   if(ctx.identical(channelEnd))
   {
@@ -170,19 +207,18 @@ progressMatrices(items){
       if(d.matName === activeMatrix)
       {
         i_save = _.indexOf(Object.values(items), d);
-        commands = d.commands;
+        patterns = d.patterns;
       }
     })
 
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
-    updateMatrix(commands, values, nextObj);
+    updateMatrix(patterns, values, nextObj);
     for (var i = 0; i < channelEnd.length; i++) {
       channelEnd[i] = false;
     }
     ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd });
 
   }
-  //}
 }
 
 enableSongmode(){
@@ -199,15 +235,18 @@ runTidal() {
   store.dispatch(initMyTidal(tidalServerLink));
 }
 
-sendCommands(tidalServerLink, vals, channelcommands, commands,solo,transition, channels) {
-  store.dispatch(sendCommands(tidalServerLink, vals, channelcommands, commands,solo, transition, channels));
+sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
+  const ctx = this;
+  const {globalCommands,globalTransformations, storedPatterns} = ctx.state;
+  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands,storedPatterns));
 }
-sendSCMatrix(tidalServerLink, vals, commands) {
-  store.dispatch(sendSCMatrix(tidalServerLink, vals, commands));
+sendSCMatrix(tidalServerLink, vals, patterns) {
+  store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
 }
 
-sendScCommand(tidalServerLink, command) {
-  store.dispatch(sendScCommand(tidalServerLink, command));
+sendScPattern(tidalServerLink, pattern) {
+  console.log(pattern);
+  store.dispatch(sendScPattern(tidalServerLink, pattern));
 }
 
 consoleSubmit(tidalServerLink, value){
@@ -217,43 +256,48 @@ consoleSubmit(tidalServerLink, value){
 handleSubmit = event => {
   const body=event.target.value
   const ctx=this;
-  const {scCommand, tidalServerLink }=ctx.state;
-
+  const {scPattern, tidalServerLink }=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey && body){
-    ctx.sendScCommand(tidalServerLink, scCommand);
+    ctx.sendScPattern(tidalServerLink, scPattern);
   }
 }
+
 
 handleConsoleSubmit = event => {
   const value = event.target.value;
   const ctx = this;
   const {tidalServerLink} = ctx.state;
-
   if(event.keyCode === 13 && event.ctrlKey && value){
     ctx.consoleSubmit(tidalServerLink, value);
   }
 }
 
-updateMatrix(commands, values, item) {
+handleGlobalTransformations = event => {
+  const body=event.target.value
+  const ctx=this;
+  const {globalTransformations}=ctx.state;
+  var temp = body;
+  ctx.setState({globalTransformations:temp});
+}
 
+
+handleGlobalCommands = event => {
+  const body=event.target.value;
+  const ctx=this;
+  const {globalCommands}=ctx.state;
+  var temp = body;
+  ctx.setState({globalCommands:temp});
+}
+
+updateMatrix(patterns, values, item) {
   const items = this.props[this.state.modelName.toLowerCase()]
-  console.log('SCENES: ');
   _.forEach(Object.values(items), function(d){
     console.log(d.matName + ' ' + d.sceneIndex);
   });
 
-  store.dispatch(updateMatrix(commands, values, item));
+  store.dispatch(updateMatrix(patterns, values, item));
 }
 
-// updateChannelduration(c, channeldur){
-//   const ctx = this;
-//   const {steps, duration, channels} = ctx.state;
-//   duration[c] = channeldur;
-//   var c = channels.indexOf(c)
-//   console.log(c);
-//   ctx.setState({duration:duration});
-//   store.dispatch(updateTimerduration(c,channeldur, steps));
-// }
 updateDur = ({target : {value, id}}) => {
 
     const ctx = this;
@@ -275,12 +319,9 @@ soloChannel =  ({target : {id}}) => {
         solo[i] = false;
     }
     solo[_index] = !solo[_index];
-    console.log(solo);
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
 
   }
-  //add solo channels
-  //const _key = event.target.id;
 }
 
 renderPlayer() {
@@ -302,9 +343,12 @@ renderPlayer() {
     </div>
     {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
       <div className={playerClass}>
-        <div className="playbox playbox-cycle">Transition</div>
+        <div className="playbox playbox-cycle" style={{width:"7.5%"}}>/~-~/</div>
       {_.map(channels, c => {
-        return <input className = "playbox" id = {c} key = {c} value = {ctx.state.transition[_.indexOf(channels, c)]} style = {{margin: 5}}
+        return <input className = "playbox" id = {c} key = {c}
+        placeholder={".^.^."}
+        value = {ctx.state.transition[_.indexOf(channels, c)]}
+        style = {{margin: 5}}
         onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
       })}
       </div>
@@ -359,10 +403,7 @@ updateT = ({target : {value, id}}) => {
   var value = value;
   var _index = _.indexOf(channels, _key);
   var temp = transition;
-  console.log("TRANSITION");
-  console.log(temp);
   temp[_index] = value;
-  console.log(transition[_index]);
   ctx.setState({transition:temp});
 }
 
@@ -378,7 +419,6 @@ _handleKeyPressT = event => {
   if(event.keyCode === 13 && event.ctrlKey){
     var temp = transition;
     temp[_index] = value;
-   console.log(transition[_index]);
    ctx.setState({transition:temp});
   }
 }
@@ -416,14 +456,14 @@ stopTimer() {
 renderStep(x, i) {
   const ctx=this;
   const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, commands }=ctx.props;
+  const { timer, click, patterns }=ctx.props;
 
   var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
 
   var colCount=0;
 
   return <div key={i} className={playerClass}>
-    <div className="playbox playbox-cycle">{i+1}</div>
+    <div className="playbox playbox-cycle" style={{width:"5%"}}>{i+1}</div>
     {_.map(channels, c => {
       const setText=({ target: { value }}) => {
           const {values}=ctx.state;
@@ -446,20 +486,46 @@ renderStep(x, i) {
         return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
       }
 
+      // const getAnimationTime = (className) => {
+      //   var duration = timer.timer[_index].duration;
+      //   var animationTime = duration/steps;
+      //
+      //   var styleCSS = "background-color: rgba(255,255,102,0.15)!important;"
+      //
+      //   if(className.indexOf("active") !== -1){
+      //     styleCSS = "-webkit-transition: "+animationTime+" ease-in-out;\
+      //                     -moz-transition: "+animationTime+" ease-in-out;\
+      //                     -o-transition: "+animationTime+" ease-in-out;\
+      //                     " + styleCSS;
+      //   }
+      //
+      //   return styleCSS;
+      // }
+      // dynamic cell height
+
+      const cellHeight = 65/steps;
+
       //Timer Check
       var _index = _.indexOf(channels,c);
       const currentStep = ctx.props.timer.timer[_index].current % steps;
       var individualClass = "playbox";
+      var translateAmount = 0;
+      var ctrans = 'translate(0px, '+translateAmount+'px)';
+      var durstr = ctx.props.timer.timer[_index].duration + 's ease-in-out';
+      var css = {
+          height: cellHeight+'vh',
+          webkittransition: durstr,
+          moztransition: durstr,
+          otransition: durstr,
+          transform: ctrans
+      }
       if (i === currentStep) {
         individualClass += " playbox-active";
+        translateAmount = cellHeight;
       }
-
-
-      // dynamic cell height
-      const cellHeight = 85/steps;
       // dynamic text size
-      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
-      return <div className={individualClass} style={{height: cellHeight+'vh'}} key={c+'_'+i}>
+      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 20, 30, 1, 0.65)) : 1;
+      return <div className={individualClass} style={css} key={c+'_'+i}>
         <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
       </div>
     })}
@@ -470,28 +536,25 @@ renderStep(x, i) {
 handleSubmitCell = event => {
   const ctx=this;
   const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, commands }=ctx.props;
+  const { timer, click, patterns }=ctx.props;
 
   var body = event.target.id;
   var c = _.split(body,',')[0]-1;
   var i = _.split(body,',')[1];
   var text = event.target.value;
-  const getSceneCommands = () => {
-    var sceneCommands = [];
+  const getScenePatterns = () => {
+    var scenePatterns = [];
     const items = this.props[this.state.modelName.toLowerCase()]
     _.each(items, function(d){
       if(d.matName === activeMatrix)
-        sceneCommands = d.commands;
+        scenePatterns = d.patterns;
     })
-    return sceneCommands;
+    return scenePatterns;
   }
 
   if(event.keyCode === 13 && event.ctrlKey){
-    console.log(event.target.id);
-    console.log(i);
-    console.log(c);
     store.dispatch(assignTimer(timer.timer[c], steps, i))
-    ctx.sendCommands(tidalServerLink,{[c]: text}, getSceneCommands(),solo, transition, channels,timer.timer[c]);
+    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
   }
 }
 
@@ -502,67 +565,73 @@ changeName({target: { value }}) {
 
 addItem() {
   const ctx = this;
-  var commands = [];
+  var patterns = [];
   const { matName, activeMatrix, values, sceneIndex } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  _.each(items, function(d){
-    if(d.matName === activeMatrix){
-      commands = d.commands;
+  const { uid } = ctx.props.user.user;
+  if(uid !== null && uid !== undefined){
+    _.each(items, function(d){
+      if(d.uid === uid && d.matName === activeMatrix){
+        patterns = d.patterns;
+      }
+    })
+
+    if ( matName.length >= 2 && !_.isEmpty(values)) {
+      var snd = Object.values(items).length;
+
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid});
+      ctx.setState({sceneIndex: snd});
     }
-  })
-
-  if ( matName.length >= 2 && _.isEmpty(values) === false) {
-    var snd = Object.values(items).length;
-
-    fbcreateMatrix(ctx.state.modelName, { matName, commands, values, sceneIndex: snd });
-    ctx.setState({sceneIndex: snd});
+    ctx.setState({activeMatrix: matName});
   }
-  ctx.setState({activeMatrix: matName});
 }
 
 reorder (index,flag){
 
   const ctx = this;
-  const { commands }=ctx.props;
-  // const { commands }=ctx.state;
   const { matName, values, sceneIndex } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
-  const keys = Object.keys(items);
-  const vals = Object.values(items);
-  const len = keys.length;
+  if(ctx.props.user !== null && ctx.props.user !== undefined){
+    const vals = _.find(Object.values(items), (d) => d.uid === ctx.props.user.user.uid);
+    const len = vals.length;
 
-  if(flag === "up" && index === 0)
-    return;
-  else if(flag === "down" && len-1 === index)
-    return;
-  else{
-    if(flag === "up"){
-      if (vals[index].sceneIndex === index){
-        var upIndex = index - 1;
-        var upMatName = vals[upIndex].matName;
-        var upValues = vals[upIndex].values;
-        var upCommands = vals[upIndex].commands;
-        var downMatName = vals[index].matName;
-        var downValues = vals[index].values;
-        var downCommands = vals[index].commands;
+    if(flag === "up" && index === 0)
+      return;
+    else if(flag === "down" && len-1 === index)
+      return;
+    else{
+      if(flag === "up"){
+        if (vals[index].sceneIndex === index){
+          var upIndex = index - 1;
+          var upMatName = vals[upIndex].matName;
+          var upValues = vals[upIndex].values;
+          var upPatterns = vals[upIndex].patterns;
+          var upUID = vals[upIndex].uid;
+          var downMatName = vals[index].matName;
+          var downValues = vals[index].values;
+          var downPatterns = vals[index].patterns;
+          var downUID = vals[index].uid;
 
-        fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: index},    keys[upIndex]);
-        fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: upIndex},  keys[index]);
+          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index, uid: upUID},    keys[upIndex]);
+          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex, uid: downUID},  keys[index]);
+        }
       }
-    }
-    else if (flag === "down") {
-      if (vals[index].sceneIndex === index){
-        var downIndex = index + 1;
-        var downMatName = vals[downIndex].matName;
-        var downCommands = vals[downIndex].commands;
-        var downValues = vals[downIndex].values;
-        var upMatName = vals[index].matName;
-        var upCommands = vals[index].commands;
-        var upValues =  vals[index].values;
+      else if (flag === "down") {
+        if (vals[index].sceneIndex === index){
+          var downIndex = index + 1;
+          var downMatName = vals[downIndex].matName;
+          var downPatterns = vals[downIndex].patterns;
+          var downValues = vals[downIndex].values;
+          var downUID = vals[downIndex].uid;
+          var upMatName = vals[index].matName;
+          var upPatterns = vals[index].patterns;
+          var upValues =  vals[index].values;
+          var upUID = vals[index].uid;
 
-        fborder(ctx.state.modelName, {matName: downMatName, commands: downCommands, values: downValues, sceneIndex: index}, keys[downIndex]);
-        fborder(ctx.state.modelName, {matName: upMatName,   commands: upCommands, values: upValues, sceneIndex: downIndex}, keys[index]);
+          fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, keys[downIndex]);
+          fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, keys[index]);
+        }
       }
     }
   }
@@ -572,12 +641,12 @@ reorder (index,flag){
 renderItem(item, dbKey, i) {
   const ctx = this;
   const { values, activeMatrix} = ctx.state;
-  const { commands } = ctx.props;
+  const { patterns } = ctx.props;
   const model = fetchModel(ctx.state.modelName);
 
   const updateMatrix = () => {
     ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
-    ctx.updateMatrix(commands, values, item);
+    ctx.updateMatrix(patterns, values, item);
   }
 
   const handleDelete = ({ target: { value }}) => {
@@ -589,7 +658,7 @@ renderItem(item, dbKey, i) {
       const items = ctx.props[ctx.state.modelName.toLowerCase()];
       ctx.setState({sceneIndex: (Object.values(items).length)});
       _.forEach(Object.values(items), function(d, i){
-        fborder(ctx.state.modelName, {matName: d.matName, commands: d.commands, values: d.values, sceneIndex: i}, d.key);
+        fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
       });
     }, function(error) {
       console.error(error);
@@ -632,143 +701,209 @@ renderMetro(){
 
 clearMatrix(){
   const ctx = this;
-
-
   const { values, channels, steps} = ctx.state;
-  console.log(values);
   for (var i = 0; i < channels.length*steps; i++) {
-
       values [i] = [];
-
   }
   ctx.setState({values});
+
+}
+
+toggleCanvas(){
+  const ctx = this;
+  ctx.setState({isCanvasOn: !ctx.state.isCanvasOn});
 }
 
 renderMenu(){
   const ctx=this;
-  const { tidal, timer, click, commands }=ctx.props;
-  const { scCommand, tidalServerLink, play, values, steps, channels}=ctx.state;
+  const { tidal, timer, click, patterns }=ctx.props;
+  const { play, values, steps, channels}=ctx.state;
 
-  const updateTidalServerLink=({ target: { value } }) => {
-      ctx.setState({ tidalServerLink: value });
-  }
-
-  const updateScCommand=({ target: { value } }) => {
-    ctx.setState({scCommand: value})
-  }
   // REPLACING START PAUSE STOP WITH IMAGES
   //<pre style={{marginTop: '0px'}}>{JSON.stringify(timer, null, 2)}</pre>
+  // <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
+
+  const loginGG = () => {
+    store.dispatch(GitHubLogin())
+  }
+  const fblogout = () => {
+    this.setState({username: ''});
+    store.dispatch(logout())
+  }
 
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      Username
-      <input type="String" value={ctx.state.username}
-      onChange={function(event){
-        ctx.setState({username: event.target.value});
-      }}
-      onKeyUp={function(event){
-        if(event.keyCode === 13 && event.ctrlKey){
-          ctx.setState({username: event.target.value});
-          changeUsername(ctx.state.username);
-        }
-      }}/>
+      User
+      {ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
+      {!ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={loginGG}>Login</button>}
     </div>
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      Tidal Server Link
-      <input type="text" value={tidalServerLink} onChange={updateTidalServerLink}/>
-      {!tidal.isActive && <button className={'buttonSentinel'} onClick={ctx.runTidal.bind(ctx)}>Start SC</button>}
-      {tidal.isActive && <button className={'buttonSentinel'}>Running</button>}
+     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} height={32} width={32}/>}
+     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} height={32} width={32}/>}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
     {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
     {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
                              <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
-
-
     </div>
-    <div id="Command">
-
-        <p>  </p>
-        <p>Console</p>
-       <textarea className="defaultCommandArea" value={scCommand} onChange={updateScCommand} placeholder={'SuperCollider (Ctrl + Enter) '} onKeyUp={ctx.handleSubmit.bind(ctx)} rows="20" cols="30"/>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+      {ctx.state.isCanvasOn && <button className={'buttonSentinel'} onClick={ctx.toggleCanvas.bind(ctx)}>{"Canvas Off"}</button>}
+      {!ctx.state.isCanvasOn && <button className={'buttonSentinel'} onClick={ctx.toggleCanvas.bind(ctx)}>{"Canvas On"}</button>}
+    </div>
+    <br/>
   </div>
 }
 
 
+  _onNumberChange(value) {
+    const ctx = this;
+    const {numberValue, tidalServerLink } = ctx.state;
+    ctx.setState({numberValue: value});
+    var pat = "d1 $ slow 2  $ n \"{0 1 2 }%5 \" #s \"clean\" #speed " + numberValue + "#coarse " + numberValue *10;
+    store.dispatch(continousPattern(tidalServerLink, pat));
+    //onKeyDown={ctx._onKeyDown.bind(ctx)}
+  }
+
+  _onKeyDown(e) {
+        //  var key = e.which;
+        //  var value = this.state.numberValue;
+        //  if(key === KEYS.K) {
+        //      this._onNumberChange(value * 1000);
+        //  } else if(key === KEYS.M) {
+        //      this._onNumberChange(value * 1000000);
+        //  }
+  }
+
+testtest() {
+  const ctx = this;
+  const { channels, steps, channelEnd, solo } = ctx.state;
+
+  channels.push('test');
+
+  ctx.setState({channels: channels});
+
+  const i = _.indexOf(channels, 'test');
+
+  if(i !== -1 ){
+    ctx.createTimer(i, 48, steps);
+    channelEnd[i] = false
+    solo[i] = false;
+  }
+}
 
 render() {
   const ctx=this;
   const { tidal, timer, click }=ctx.props;
-  const { commands }=ctx.props;
-  // const { commands }=ctx.state;
-  const { scCommand, tidalServerLink, values, steps, channels, songmodeActive, activeMatrix }=ctx.state;
+  const { patterns, isCanvasOn }=ctx.props;
+  const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
 
+  const updateScPattern = (target)  => {
+    ctx.setState({scPattern: target})
+  }
 
   const viewPortWidth = '100%'
-
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  var options = {
-      mode: 'elm',
-      theme: 'base16-light',
-      fixedGutter: true,
+
+  // <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+  //  <NumberEditor
+  //      className="spinner"
+  //      max={1}
+  //      min={0}
+  //      decimals={1}
+  //      onValueChange={ctx._onNumberChange.bind(ctx)}
+  //      step={0.05}
+  //      value={ctx.state.numberValue}
+  //      ref="demo-spinner"/>
+  //    <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>>Value: {this.state.numberValue}</div>
+  // </div>
+
+  // <button className={'buttonSentinel'} onClick={ctx.testtest.bind(ctx)}>TEST</button>
+
+  // <textarea className = "defaultPatternArea" key = {c} value={}/>
+
+  var historyOptions = {
+      mode: '_rule',
+      theme: '_style',
+      fixedGutter: false,
       scroll: true,
       styleSelectedText:true,
       showToken:true,
       lineWrapping: true,
-      showCursorWhenSelecting: true
+      showCursorWhenSelecting: true,
+      readOnly: true
   };
-
-//<P5Wrapper sketch={this.state.stateSketch}/>
-//
 
   return <div >
   <div className={"Home cont"}>
-    <Layout fill='window'>
+  {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
+  <Layout fill='window'>
       <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', margin: '2px'}}>
+        <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
-            <input className={'newCommandInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+            <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
             <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
           </div>
-
           <div>
             {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
             {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
           </div>
           <div className={'sceneList'} style={{ width: '100%'}}>
             <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-              {ctx.renderItems(items)}
+              {this.props.user.user.name && ctx.renderItems(items)}
+              {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
             </ul>
           </div>
         </div>
       </Layout>
       <LayoutSplitter />
       <Layout layoutWidth='flex'>
-        {ctx.renderPlayer()}
+        <Layout layoutHeight={'flex'}>
+          {ctx.renderPlayer()}
+        </Layout>
+        <LayoutSplitter />
+        <Layout layoutHeight={250}>
+          <Layout layoutWidth={200}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Console</p>
+              <textarea className="defaultPatternArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+              <textarea className="defaultPatternArea" key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
+            </div>
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={300}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Globals</p>
+              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+              <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
+            </div>
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={150}>
+            {ctx.renderMenu()}
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={'flex'}>
+            <div style={{width: '100%', flexDirection: 'column'}}>
+             <p>> Pattern History</p>
+             {_.map(channels, (c, i) => {
+                return <CodeMirror key={i} className={'defaultPatternArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
+              })}
+            </div>
+          </Layout>
+        </Layout>
       </Layout>
       <LayoutSplitter />
       <Layout layoutWidth={250}>
-        <div className="Commands" >
-          <div className="CommandsColumn" >
-            <Commands active={activeMatrix}/>
-          </div>
-
-        </div>
-      </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth={200}>
-        <div style={{display:'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          {ctx.renderMenu()}
-          <div id="Execution" style={{alignSelf:'center'}}>
-            <textarea className="defaultCommandArea"  onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)" width={'100%'}/>
+        <div className="Patterns" >
+          <div className="PatternsColumn" >
+            <Patterns active={activeMatrix}/>
           </div>
         </div>
+        </Layout>
       </Layout>
-    </Layout>
     </div>
   </div>
   }

@@ -76,7 +76,7 @@ let (***) = foldl (|*|)
     swingEvery n e = inside n (every e $ within (0.5,1) (0.3333 ~>))
     necho x = echo $ negate x
     ntrip x = triple $ negate x
-    somecyclesBy x = when (test x) -- cycle-by-cycle version of sometimesBy
+    somecyclesBy x = when (test x)
       where test x c = (timeToRand $ fromIntegral c) < x
     somecycles = somecyclesBy 0.5
     creak n t p = stack [(x*(x+1)*t/2) ~> p | x <- take n [0..]]
@@ -98,8 +98,12 @@ let (***) = foldl (|*|)
     rand' x = Pattern $ \a -> [(a, a, timeToRand $ (+ x/100) $ midPoint a)]
     quiet = const silence
     oct t = (echo (4*t)) . (quad t)
+    stretch n p = slow n p |*| speed (pure $ fromRational $ 1/n) # unit "c"
+    repeatCycles n p =  slowcat(replicate n p)
+    degradeOverBy i tx p = unwrap $ (\x -> (fmap fst $ filterValues ((>x) .snd) $ (,) <$> p <*> repeatCycles i rand )) <$> (slow (fromIntegral i) tx )
 
-    --- params
+
+    -- params
     mf x = fst $ pF x (Just 0)
     mi x = fst $ pI x (Just 0)
     fm = mf "fm"
@@ -171,5 +175,8 @@ let (***) = foldl (|*|)
     (sfrelease, sfrelease_p) = pF "sfrelease" (Just 0)
     (sfenv, sfenv_p) = pF "sfenv" (Just 0)
     sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
+
+
+
 
 :set prompt "tidal> "
