@@ -1,12 +1,11 @@
 
-
-var bjork = require('bjorklund');
-export const FETCH_USER = 'FETCH_USER';
-export const FETCH_USER_ERROR = 'FETCH_USER_ERROR';
+export const FETCH_ACCOUNTS = 'FETCH_ACCOUNTS';
+export const FETCH_ACCOUNTS_ERROR = 'FETCH_ACCOUNTS_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
+import { handleEnterHome } from '../routes'
 
 Firebase.initializeApp({
 
@@ -20,18 +19,19 @@ const models = {
   Accounts: {
     dataSource: Firebase.database().ref("/accounts"),
     model: {
-      name: 'String',
       email: 'String',
-      providerData: 'Object',
+      name: 'String',
+      uid: 'String',
     }
   },
-  Commands: {
-    dataSource: Firebase.database().ref("/commands"),
+  Patterns: {
+    dataSource: Firebase.database().ref("/patterns"),
     model: {
       name: 'String',
       params: 'String',
-      command: 'String',
-      skey: 'String'
+      pattern: 'String',
+      skey: 'String',
+      uid: 'String'
     }
   },
   Live: {
@@ -46,10 +46,16 @@ const models = {
     model: {
       name: 'String',
       values: 'Object',
-      commands: 'Object',
-      sceneIndex: 'Integer'
+      patterns: 'Object',
+      sceneIndex: 'Integer',
+      uid: 'String'
     }
   }
+}
+
+String.prototype.replaceAt = function(index, character) {
+  return this.substr(0, index) + character + this.substr(index+character.length);
+
 }
 //
 // var client = dgram.createSocket('udp4');
@@ -130,7 +136,7 @@ export function fbaccount(data) {
     models['Accounts'].dataSource.update(updates, () => {
       models['Accounts'].dataSource.child(data['key']).on('value', (account) => {
         dispatch({
-          type: 'FETCH_USER',
+          type: 'FETCH_ACCOUNTS',
           payload: account.val()
         })
       })
@@ -143,7 +149,7 @@ export function fbauth() {
     Firebase.auth().onAuthStateChanged((user) => {
       if (user !== null) {
         dispatch({
-          type: FETCH_USER,
+          type: FETCH_ACCOUNTS,
           payload: dispatch(fbaccount({
             uid: user.uid,
             name: user.displayName,
@@ -166,19 +172,12 @@ export function fbfetch(model) {
         const u = _.find(data.val(), (d) => d.uid === uid);
 
         if (u !== null && u !== undefined) {
-          if (models[model].watch !== undefined) {
-            _.each(models[model].watch, (m,i) => {
-              if (u[i] !== undefined) {
-                dispatch(m(u[i]));
-              }
-            })
-          }
+          dispatch({
+            type: 'FETCH_' + model.toUpperCase(),
+            payload: u
+          })
         }
       }
-      dispatch({
-        type: 'FETCH_' + model.toUpperCase(),
-        payload: data.val()
-      })
     })
   }
 }
@@ -186,24 +185,19 @@ export function fbfetchscenes(model) {
   return dispatch => {
     models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
       var temp = [];
-      data.forEach(function(c){
-        temp.push(c.val());
-      })
       if (Firebase.auth().currentUser !== null)
       {
-        const { uid } = Firebase.auth().currentUser;
-        const u = _.find(data.val(), (d) => d.uid === uid);
-
-        if (u !== null && u !== undefined) {
-          if (models[model].watch !== undefined) {
-            _.each(models[model].watch, (m,i) => {
-              if (u[i] !== undefined) {
-                dispatch(m(u[i]));
-              }
-            })
-          }
-        }
+        data.forEach(function(c){
+          var u_id = Firebase.auth().currentUser.uid;
+          if(c.val().uid === u_id)
+            temp.push(c.val());
+        })
       }
+      // else {
+      //   data.forEach(function(c){
+      //     temp.push(c.val());
+      //   })
+      // }
       dispatch({
         type: 'FETCH_' + model.toUpperCase(),
         payload: temp
@@ -219,11 +213,11 @@ export function fbcreate(model, data) {
     return newObj.update({ key: newObj.key })
   }
 }
-export function fbcreatecommandinscene(model, data, s_key) {
+export function fbcreatepatterninscene(model, data, s_key) {
   if (data['key']) {
     return models[model].dataSource.child(data['key']).update({...data})
   } else {
-    const newObj = models[model].dataSource.child(s_key).child("commands").push(data);
+    const newObj = models[model].dataSource.child(s_key).child("patterns").push(data);
     return newObj.update({ key: newObj.key })
   }
 }
@@ -278,24 +272,39 @@ export function fbSyncMatrix (model,data){
 }
 
 export function fbcreateMatrix(model, data) {
-  console.log('DATA::');
-  console.log(data);
-  var datakey, sceneIndex, values, commands;
-  models[model].dataSource.ref.once('value', dat => {
-    const obj = _.find(dat.val(), (d) => d.matName === data.matName);
-    datakey = obj.key;
-    sceneIndex = obj.sceneIndex;
-    commands = obj.commands;
-  });
+  if (Firebase.auth().currentUser !== null)
+  {
+    var datakey, sceneIndex, values, patterns, uid;
+    models[model].dataSource.ref.once('value', dat => {
+      var u_id = Firebase.auth().currentUser.uid;
+      if ( u_id !== null)
+      {
+        const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
+        if(obj !== undefined && obj !== null && u_id === obj.uid){
+          console.log('fbcreateMatrix -- OBJ: ', obj);
+          datakey = obj.key;
+          sceneIndex = obj.sceneIndex;
+          if (obj.patterns !== undefined)
+          patterns = obj.patterns;
+          uid = obj.uid;
+        }
+      }
+    });
 
-  console.log(commands);
+    if(patterns === undefined)
+      patterns = [];
 
-  if (datakey) {
-    data.sceneIndex = sceneIndex;
-    return models[model].dataSource.child(datakey).update({...data})
-  } else {
-    const newObj = models[model].dataSource.push(data);
-    return newObj.update({ key: newObj.key })
+    if (datakey) {
+      data.sceneIndex = sceneIndex;
+      data.patterns = patterns;
+      return models[model].dataSource.child(datakey).update({...data})
+    } else {
+      if (data.patterns === undefined)
+        data.patterns  = [];
+
+      const newObj = models[model].dataSource.push(data);
+      return newObj.update({ key: newObj.key })
+    }
   }
 }
 export function fbupdateMatrix(model, data) {
@@ -305,29 +314,48 @@ export function fbupdateMatrix(model, data) {
 export function fbupdate(model, data) {
   models[model].dataSource.child(data['key']).update({...data})
 }
-export function fbupdatecommandinscene(model, data, s_key) {
-  // console.log(data);
-  models[model].dataSource.child(s_key).child("commands").child(data['key']).update({...data})
+export function fbupdatepatterninscene(model, data, s_key) {
+  models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbdelete(model, data) {
   models[model].dataSource.child(data['key']).remove();
 }
-export function fbdeletecommandinscene(model, data, s_key) {
-  models[model].dataSource.child(s_key).child("commands").child(data['key']).remove();
+export function fbdeletepatterninscene(model, data, s_key) {
+  models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
 }
 export function fborder(model, data, key) {
   models[model].dataSource.child(key).update({...data})
   models[model].dataSource.orderByChild('sceneIndex');
 }
 
-export function facebookLogin() {
+export function GitHubLogin() {
   return (dispatch) => {
-    const provider = new Firebase.auth.FacebookAuthProvider();
-    Firebase.auth().signInWithPopup(provider).then(result => {
-      console.log('Logged in. You will receive authState from Firebase')
-    }).catch(error => {
+    const provider = new Firebase.auth.GithubAuthProvider();
+    provider.addScope('repo');
+
+    Firebase.auth().signInWithRedirect(provider);
+
+    Firebase.auth().getRedirectResult().then(result => {
+      if (result.credential) {
+        // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+        var token = result.credential.accessToken;
+        // ...
+      }
+      // The signed-in user info
+      var user = result.user;
+    }).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+
+      // The email of the user's account used.
+      var email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      var credential = error.credential;
+      // ...
+
       dispatch({
-        type: FETCH_USER_ERROR,
+        type: FETCH_ACCOUNTS_ERROR,
         payload: error
       })
     });
@@ -341,7 +369,7 @@ export function googleLogin() {
       console.log('Logged in. You will receive authState from Firebase')
     }).catch(error => {
       dispatch({
-        type: FETCH_USER_ERROR,
+        type: FETCH_ACCOUNTS_ERROR,
         payload: error
       })
     });
@@ -351,7 +379,7 @@ export function googleLogin() {
 export function logout() {
   return dispatch => {
     Firebase.auth().signOut();
-    dispatch({ type: FETCH_USER, payload: {} });
+    dispatch({ type: FETCH_ACCOUNTS, payload: {} });
   }
 }
 
@@ -377,63 +405,116 @@ export const initMyTidal = (server) => {
 //     });
 //   }
 // }
-export const sendCommands = (server,vals, commands =[]) => {
-  console.log(vals);
+export const assignTimer = (timer,steps, _index) => {
+  var dum =timer.current + (_index - timer.current%steps);
+  return {
+    type: 'ASSIGN_TIMER', payload: timer.id , current : dum
+  };
+}
+// Context //
+////////////////// PARSER STARTS HERE //////////////////
+var math = require('mathjs');
+export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
+    console.log("GLOBAL COM" + globalCommands);
+    const x =  _.compact(_.map(vals,(v,k) => {
+    // gets parameters list
+    const getParameters = (v) => {
+      var param = [];
+      _.map(_.split(v, /[`]+/g), (p1, p2) => {
+        p1 = _.trim(p1);
 
-  const x =  _.compact(_.map(vals,(v,k) => {
-      const cellName = _.split(v, ' ', 1)[0];
-      const cmd = _.find(commands, c => c.name === cellName);
-      if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
-        var cellItem = _.split(v, ' ');
-        var newCommand = cmd.command;
-        var parameters = _.split(cmd.params, ',');
+        if(p1 !== "") param.push(p1);
+      });
+      return param;
+    }
 
-        _.forEach(parameters, function(value, i) {
-          if(_.indexOf(cellItem[i+1], '[') != -1 ){
-            cellItem[i+1] = cellItem[i+1].substring(1, _.indexOf(cellItem[i+1], ']'));
-            var bounds = _.split(cellItem[i+1], ',');
-            if(bounds[0] !== undefined && bounds[0] !== "" &&
-               bounds[1] !== undefined && bounds[1] !== ""){
-                 bounds[0] = parseFloat(bounds[0]);
-                 bounds[1] = parseFloat(bounds[1]);
+    const cellName = getParameters(v)[0];
+    const cmd = _.find(patterns, c => c.name === cellName);
+    if(_.indexOf(channels,k) === _.indexOf(channels,'cps')){
+      var newCommand = cellName;
+      return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+    }
 
-                 cellItem[i+1] = _.random(_.min(bounds), _.max(bounds));
-                 newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
-            }
+    else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+      var cellItem = _.slice(getParameters(v), 1);
+      var newCommand = cmd.pattern;
+      var parameters = _.concat( _.split(cmd.params, ','),'t');
+
+      //Param parser
+      _.forEach(parameters, function(value, i) {
+        if(value === 't'){
+          newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
+        }
+        else if(_.indexOf(cellItem[i], '[') != -1 ) // is random parameter??
+        {
+          cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
+          var bounds = _.split(cellItem[i], ',');
+          if(bounds[0] !== undefined && bounds[0] !== "" &&
+             bounds[1] !== undefined && bounds[1] !== ""){
+               bounds[0] = parseFloat(bounds[0]);
+               bounds[1] = parseFloat(bounds[1]);
+
+               cellItem[i] = _.random(_.min(bounds), _.max(bounds));
+               newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
           }
-          else {
-            newCommand = _.replace(newCommand, new RegExp("&"+value+"&", "g"), cellItem[i+1]);
-          }
-        });
+        }
+        else {
+          newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+        }
+      });
+      //Math Parser
+      var re = /(&)(.+)(&)/g;
+      _.forEach(_.words(newCommand, re), function(val, i){
+        newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
+      })
 
-        // var append = "";
-        // switch (k) {
-        //   case "d1":
-        //     append = " # orbit \"4\""; break;
-        //   case "d2":
-        //     append = " # orbit \"5\""; break;
-        //   case "d3":
-        //     append = " # orbit \"6\""; break;
-        //   case "d4":
-        //     append = " # orbit \"7\""; break;
-          // case "d5":
-          //   append = " # orbit \"4\""; break;
-          // case "d6":
-          //   append = " # orbit \"5\""; break;
-          //   case "d7":
-          //     append = " # orbit \"6\""; break;
-          //     case "d8":
-          //       append = " # orbit \"6\""; break;
-          // default:
-          //   break;
-        //}
-//, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"
-        return [ k + ' $ ' + newCommand , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      var soloHolder = "d"+(k);
+      var transitionHolder = "" ;
+      var _k = k;
+      if(_.indexOf(channels,_k) === _.indexOf(channels, 'cps')){
+        transitionHolder = k;
+        soloHolder = " ";
+      }
+      else {
+        if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
+          k = "d"+(k);
+          soloHolder = k ;
+          transitionHolder = " $ ";
+        }
 
-      } else return false;
+        if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
+          transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
+          soloHolder = "t"+(k);
+        }
+
+        if(solo[_.indexOf(channels,_k)] === true){
+          k = "d"+(k);
+          soloHolder = "solo $ " + k ;
+          transitionHolder = " $ ";
+        }
+      }
+      if(globalTransformations === undefined || globalTransformations === ''){
+      globalTransformations = '';
+      }
+      else {
+      globalTransformations = globalTransformations + " $ "
+      }
+      var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
+      storedPatterns[_k-1] = '';
+      storedPatterns[_k-1] = pattern;
+      return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+    }
+
+    else if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+        pattern =  "m1 $ " + newCommand;
+        return [pattern + "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+    }
+
+    else
+      return false;
     }))
-    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/commands', { 'commands': x })
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
     .then((response) => {
       //dispatch({ type: 'SET_CC', payload: {channel, command} })
     }).catch(function (error) {
@@ -441,24 +522,44 @@ export const sendCommands = (server,vals, commands =[]) => {
     });
   }
 }
-// export const sendSCMatrix = (server,vals,commands =[]) => {
+
+export const continousPattern = (server, pattern) => {
+  return dispatch => {
+    // console.log(pattern);
+    const x = pattern;
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
+    .then((response) => {
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+}
+
+////////////////// PARSER ENDS HERE //////////////////
+
+//To store last compiled patterns
+//export const storePattern = (pattern,chn) => ({type: 'STORE_PATTERN', payload: pattern, channel: chn})
+
+
+
+// export const sendSCMatrix = (server,vals,patterns =[]) => {
 //
 //   return dispatch => {
 //       const fsc =  _.compact(_.map(vals,(v,k) => {
 //       const sccm = vals['~qcap'];
 //
-//       const cmd = _.find(commands, c => c.name === sccm);
+//       const cmd = _.find(patterns, c => c.name === sccm);
 //       if(cmd !== undefined){
 //         var append = ');';
 //         var prepend = '~qcap'
-//         const msg =  prepend+ '.' + "set(\\obs," + cmd.command + append;
+//         const msg =  prepend+ '.' + "set(\\obs," + cmd.pattern + append;
 //         console.log(msg);
 //         return msg;
 //       }
 //        else return false;
 //     }))
 //     console.log(fsc);
-//     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/sccommand', { 'command': fsc })
+//     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': fsc })
 //
 //     .then((response) => {
 //         dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
@@ -469,7 +570,7 @@ export const sendCommands = (server,vals, commands =[]) => {
 // }
 //
 
-export const updateMatrix = (commands, values, i) => {
+export const updateMatrix = (patterns, values, i) => {
   function placeValue(row, col, item, container){
     if (container[parseInt(row)+1] === undefined)
       container[parseInt(row)+1] = {};
@@ -493,288 +594,11 @@ export const updateMatrix = (commands, values, i) => {
   };
 }
 
-export const celluarFill = (values, commands, density, steps, duration, channels, timer) => {
-  function placeValue(row, col, item, container){
-    if (container[parseInt(row)+1] === undefined)
-      container[parseInt(row)+1] = {};
-    container[parseInt(row)+1][col] = item;
-  }
-  function updateCelluar(){
-    var resultVals = {};
-
-    function pickRandom(x, y){
-      var cmd, randIndex;
-      if(y >= channels.length-4){
-        do{
-          randIndex = _.random(0, Object.keys(commands).length-1);
-        }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
-        cmd = Object.values(commands)[randIndex].name;
-      }
-      else {
-        do{
-          randIndex = _.random(0, Object.keys(commands).length-1);
-        }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
-        cmd = Object.values(commands)[randIndex].name;
-      }
-      return cmd;
-    }
-
-    function _countNeighbours(x, y) {
-        x = parseInt(x);
-        var amount = 0,
-            x_minus_1 = x > 1 ? x-1 : undefined,
-            x_plus_1 = x < steps ? x+1 : undefined,
-            y_minus_1 = _.indexOf(channels, y) > 0 ? _.nth(channels, _.indexOf(channels, y)- 1) : undefined,
-            y_plus_1 = _.indexOf(channels, y) < channels.length-1 ? _.nth(channels, _.indexOf(channels, y) + 1) : undefined;
-
-        function _isFilled(x, y) {
-            if(x === undefined || y === undefined)
-              return false;
-            if(values[x] === undefined || values[x][y] === undefined || values[x][y] === "")
-              return false;
-            return true;
-        }
-
-        if (_isFilled(x_minus_1, y_minus_1)) amount++;
-        if (_isFilled(x,         y_minus_1)) amount++;
-        if (_isFilled(x_plus_1,  y_minus_1)) amount++;
-        if (_isFilled(x_minus_1, y  )) amount++;
-        if (_isFilled(x_plus_1,  y  )) amount++;
-        if (_isFilled(x_minus_1, y_plus_1)) amount++;
-        if (_isFilled(x,         y_plus_1)) amount++;
-        if (_isFilled(x_plus_1,  y_plus_1)) amount++;
-
-        return amount;
-    }
-
-    var counts = {};
-
-    for (var i = 1; i <= steps; i++) {
-      for (var j = 0; j < channels.length; j++) {
-        var count = _countNeighbours(i, _.nth(channels, j)),
-            alive = "";
-
-        placeValue(i-1, _.nth(channels, j), count, counts);
-
-
-        if(values[i] !== undefined){
-          if(values[i][_.nth(channels, j)] === undefined || values[i][_.nth(channels, j)] === ""){
-            alive = count === 3 ? pickRandom(i, j) : "";
-          }
-          else{
-            alive = count === 2 || count === 3 ? pickRandom(i, j) : "";
-          }
-
-          placeValue(i-1, _.nth(channels, j), alive, resultVals);
-        }
-      }
-    }
-
-    _.forEach(resultVals, function(rowValue, rowKey) {
-      _.forEach(rowValue, function(cell, colKey) {
-        placeValue(rowKey-1, colKey, cell, values);
-      });
-    });
-
-    // Cleans up empty values
-    _.forEach(values, function(rowValue, key) {
-      if(rowValue !== undefined){
-        values[key] = _.pickBy(rowValue, function(n){ return n != "";});
-      }
-    });
-  }
-
-  if(timer.current % steps === steps-1 && timer.isCelluarActive)
-  {
-    updateCelluar();
-    return dispatch => {
-    };
-  }
-
-  return dispatch => {
-    dispatch({ type: 'FETCH_TIMER'});
-  }
-}
-export const addValues = (values, commands, density, steps, duration, channels, timer) => {
-  function placeValue(row, col, item, container){
-    if (container[parseInt(row)+1] === undefined)
-      container[parseInt(row)+1] = {};
-    container[parseInt(row)+1][col] = item;
-  }
-
-  function addItems(){
-    var command_len = Object.keys(commands).length;
-    var channel_len = channels.length;
-
-    // Add random
-    var item_count = steps*channels.length*density/100;
-
-    for (var i = 0; i < item_count; i++) {
-      var row = _.random(0, steps-1);
-      var col;
-      var randIndex = _.random(0, command_len-1);
-
-      if(_.includes(Object.values(commands)[randIndex].command, "Message")){
-        col = channels[_.random(channel_len-4, channel_len-1)];
-      }
-      else {
-        col = channels[_.random(0, channel_len-7)];
-      }
-
-      placeValue(row, col, Object.values(commands)[randIndex].name, values);
-    }
-  }
-
-  return dispatch => {
-    addItems();
-    dispatch({ type: 'ADD_TIMER'});
-  }
-}
-export const celluarFillStop = () => {
-  return dispatch => {
-    dispatch({ type: 'FETCH_STOP_TIMER'});
-  }
-}
-
-export const bjorkFill = (values, commands, density, steps, duration, channels, timer) => {
-  function placeValue(row, col, item, container){
-    if (container[parseInt(row)+1] === undefined)
-      container[parseInt(row)+1] = {};
-    container[parseInt(row)+1][col] = item;
-  }
-  function pickRandom(x, y){
-    var cmd, randIndex;
-    if(y >= channels.length-6){
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    else {
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    return cmd;
-  }
-
-  function updateBjork() {
-    var countArr = [];
-    _.forEach(channels, function(channel, c_key){
-      var count = 0;
-      _.forEach(values, function(rowValue, rowKey) {
-        if(values[rowKey] !== undefined && values[rowKey][channel]) {
-          count++;
-        }
-      });
-      countArr[c_key] = count;
-    });
-    var tempArr = [-1, 1];
-    _.forEach(countArr, function(item, key) {
-      countArr[key] = _.clamp(_.nth(tempArr, _.random(0, 1))+item, 1, steps/2);
-    })
-
-    var channel_len = channels.length;
-    // Euclidean Rythm
-    for (var i = 0; i < channel_len; i++) {
-      //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
-      var str = bjork(_.nth(countArr, i), steps);
-
-      for (var j = 0; j < str.length; j++) {
-        var row = j;
-        var col = _.nth(channels, i);
-        if(str[j] === '1'){
-          if(parseInt((i/3)%2) === 0)
-            placeValue(row+1, col, pickRandom(row+1, i), values);
-          else
-            placeValue(row, col, pickRandom(row, i), values);
-        }
-      }
-    }
-    // Cleans up empty values
-    _.forEach(values, function(rowValue, key) {
-      if(rowValue !== undefined){
-        values[key] = _.pickBy(rowValue, function(n){ return n != '';});
-      }
-    });
-  }
-
-  if(timer.current % steps === steps-1 && timer.isBjorkActive)
-  {
-    updateBjork();
-    return dispatch => {};
-  }
-
-  return dispatch => {
-    dispatch({ type: 'FETCH_2_TIMER'});
-  }
-}
-export const addBjorkValues = (values, commands, density, steps, duration, channels, timer) => {
-  function scale(value, r_min, r_max, o_min, o_max) {
-    return parseInt(((value-r_min)/(r_max-r_min))*o_max+o_min);
-  }
-  function placeValue(row, col, item, container){
-    if (container[parseInt(row)+1] === undefined)
-      container[parseInt(row)+1] = {};
-    container[parseInt(row)+1][col] = item;
-  }
-  function pickRandom(x, y){
-    var cmd, randIndex;
-    if(y >= channels.length-4){
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === false);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    else {
-      do{
-        randIndex = _.random(0, Object.keys(commands).length-1);
-      }while(_.includes(Object.values(commands)[randIndex].command, "Message") === true);
-      cmd = Object.values(commands)[randIndex].name;
-    }
-    return cmd;
-  }
-
-  function addItems(){
-    var command_len = Object.keys(commands).length;
-    var channel_len = channels.length;
-
-    // Euclidean Rythm
-    for (var i = 0; i < channel_len; i++) {
-      //var str = bjork(scale(i, 0, channel_len, 3, 7), steps);
-      var str = bjork(_.random(parseInt(steps/8), parseInt(steps/3)), steps);
-
-      for (var j = 0; j < str.length; j++) {
-        var row = j;
-        var col = _.nth(channels, i);
-        if(str[j] === '1'){
-          if(parseInt((i/3)%2) == 0)
-            placeValue(row+1, col, pickRandom(row+1, i), values);
-          else {
-            placeValue(row, col, pickRandom(row, i), values);
-          }
-        }
-      }
-    }
-  }
-
-  return dispatch => {
-    addItems();
-    dispatch({ type: 'ADD_TIMER'});
-  }
-}
-export const bjorkFillStop = () => {
-  return dispatch => {
-    dispatch({ type: 'FETCH_STOP_2_TIMER'});
-  }
-}
-
-export const sendScCommand = (server, expression) => {
+export const sendScPattern = (server, expression) => {
   return dispatch => {
     if (!expression) return;
 
-    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/sccommand', { 'command': expression })
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
     .then((response) => {
       dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
     }).catch(function (error) {
@@ -785,17 +609,17 @@ export const sendScCommand = (server, expression) => {
 
 export const consoleSubmit = (server, expression) => {
   return dispatch => {
-    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/command', { 'command': [expression] })
+    axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
     .then((response) => {
-      //dispatch({ type: 'SET_CC', payload: {channel, command} })
+      //dispatch({ type: 'SET_CC', payload: {channel, pattern} })
     }).catch(function (error) {
       console.log(error);
     });
   }
 }
 
-export const resetCommand = () => ({type: 'RESET_CC'});
-export const fetchCommand = () => ({type: 'FETCH_CC'});
+export const resetPattern = () => ({type: 'RESET_CC'});
+export const fetchPattern = () => ({type: 'FETCH_CC'});
 
 
 
@@ -810,23 +634,22 @@ export const updateTimerduration = (_index,_duration,_steps) => {
     type: 'UPDATE_TIMER', payload: _index, duration : _duration
   }
 }
+
 var timerWorker= [];
 export const createTimer = (_index,_duration, _steps) => {
 
     timerWorker[_index] = new Worker("src/actions/tworker.js");
     timerWorker[_index].onmessage = function(e) {
-        if (e.data.type == "tick") {
-             //console.log(_index + "tick!")
-            store.dispatch(updtmr(e.data.id));
-            timer[_index] = e.data.msg;
-        }
-        else
-            console.log("message: " + e.data);
+      if (e.data.type == "tick") {
+          store.dispatch(updtmr(e.data.id));
+          timer[_index] = e.data.msg;
+      }
     }
     return {
     type: 'CREATE_TIMER', payload: _index, duration : _duration
   }
 }
+
 export const updtmr = (_index) => {
 
   return {
@@ -836,9 +659,6 @@ export const updtmr = (_index) => {
 
 export const pauseIndividualTimer = (_index) => {
   timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
-  //clearInterval(timer[_index]);
-  console.log("PAUSE TIMER");
-  console.log(timer);
   return {
     type: 'PAUSE_TIMER', payload: _index
   }

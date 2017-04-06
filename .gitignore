@@ -1,5 +1,5 @@
 node_modules/
 node_modules/rx/ts/core/observable.ts
-deps/SuperCollider.app
+deps/
 npm-debug.log
 config/

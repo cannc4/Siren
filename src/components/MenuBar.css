@@ -1,11 +1,11 @@
 .MenuBar {
+  background: rgba(27, 27, 27, 1);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  color: #ddd;
   z-index: 1;
-  border-bottom: 2px solid #808080;
+  border-bottom: 2px solid #333;
   padding: 0 30px;
 }
 .pullleft {

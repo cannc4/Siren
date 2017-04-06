@@ -1,33 +1,47 @@
 .Home {
   padding: 15px;
   display: flex;
+  background: rgba(27, 27, 27, 1);
 }
 
 .Tidal {
 
   flex-grow: 1;
   flex-direction: row;
-
 }
 
-.Commands {
+#Execution {
+  margin: 2px;
+}
+
+.spinner {
+	width: 40px;
+	border: 0;
+	text-align: right;
+	color: #393939;
+	font-weight: bold;
+	border-bottom: 1px dotted #393939;
+
+    margin: 20px;
+}
+.Patterns {
   display: flex;
   padding: 10px;
   flex-grow: 2;
   flex-direction:column-reverse;
 }
 
-.CommandsColumn {
+.PatternsColumn {
   overflow-y: auto;
 }
 
-.commandDiv {
+.patternDiv {
   resize:both;
   overflow-y: auto;
   width: 98%;
-  min-height: 70px;
+  min-height: 80px;
   height: 150px;
-  border: 1px solid rgba(125,100,100, 0.8);
+  border: 1px rgba(125,100,100, 0.8);
 }
 
 .matDiv {
@@ -62,7 +76,11 @@
 }
 .durInput{
   width: 50%;
-  
+
+
+}
+.transition{
+
 
 }
 #Celluar {
@@ -79,13 +97,13 @@
   text-align: center;
 }
 
-.newCommandInput {
+.newPatternInput {
   font-size: 12px;
   border: 1px solid rgba(125,125,125, 0.8);
   display: flex;
   flex-grow: 10;
 }
-.newCommandButton {
+.newPatternButton {
   font-size: 12px;
   border: 1px solid rgba(125,125,125, 0.8);
   display: flex;
@@ -95,22 +113,23 @@
 .easter {
   display: flex;
   flex-direction: column;
-
   flex-wrap: wrap;
-  width: 100%;
+  width: 120%;
   height: 150%;
 }
 
-.defaultCommandArea{
+.defaultPatternArea{
   display: flex;
   flex-direction: column;
   align-self: flex-end;
 
-  width: 180px;
-  height: 100px;
+  margin: 5px;
+
+  width: 95%;
+  height: 10%;
 }
 
-.Command {
+.Pattern {
 
   margin: 5px;
   background: #CCC;
@@ -151,7 +170,7 @@
   font-size: 1vw;
   line-height: 24px;
   vertical-align: center;
-  background: none!important;
+  background: rgba(0,0,0,0.3);
 }
 
 .playbox > textarea {
@@ -178,6 +197,7 @@
   align-items: center;
   justify-content: center;
   flex-grow: 2;
+
 }
 
 /* Table column sizing

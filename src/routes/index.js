@@ -10,7 +10,7 @@ import App from '../components/App';
 // import CableSections from '../components/CableSections.react';
 // import Categories from '../components/Categories.react';
 
-import Commands from '../components/Commands.react';
+import Patterns from '../components/Patterns.react';
 import Live from '../components/Live.react';
 import Home from '../components/Home.react';
 
@@ -25,15 +25,15 @@ export default (
       <Route path="/" component={App} onEnter={handleEnterHome}>
         <IndexRoute component={Home}/>
         <Route
-          path="/commands"
-          component={Commands}
+          path="/patterns"
+          component={Patterns}
         />
         </Route>
         <Route path="/live" component={App} onEnter={handleEnterLive}>
       <IndexRoute component={Live}/>
       <Route
-        path="/commands"
-        component={Commands}
+        path="/patterns"
+        component={Patterns}
       />
     </Route>
     </Router>

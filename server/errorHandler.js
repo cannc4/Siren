@@ -6,9 +6,6 @@ const config = {
 const errorHandler = (req, res, next) => {
 
   const errorDetails = 'Undefined path';
-
-  console.error('Yay', res);
-
   res.status(500).format({
     json() {
       const errorInfo = {
