@@ -59,10 +59,8 @@ class Home extends Component {
       sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
-
       globalTransformations: '',
       username: '',
-      numberValue: 12,
       storedPatterns: []
     }
   }
@@ -211,8 +209,14 @@ progressMatrices(items){
       }
     })
 
+    // gets the transition array
+    const { transition } = ctx.state;
+    // gets the duration array
+    var duration = [];
+    _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
+
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
-    updateMatrix(patterns, values, nextObj);
+    updateMatrix(patterns, values, nextObj, transition, duration);
     for (var i = 0; i < channelEnd.length; i++) {
       channelEnd[i] = false;
     }
@@ -288,13 +292,14 @@ handleGlobalCommands = event => {
   ctx.setState({globalCommands:temp});
 }
 
-updateMatrix(patterns, values, item) {
+updateMatrix(patterns, values, item, transition, duration) {
   const items = this.props[this.state.modelName.toLowerCase()]
   _.forEach(Object.values(items), function(d){
     console.log(d.matName + ' ' + d.sceneIndex);
   });
 
-  store.dispatch(updateMatrix(patterns, values, item));
+  console.log(transition, duration);
+  store.dispatch(updateMatrix(patterns, values, item, transition, duration));
 }
 
 soloChannel =  ({target : {id}}) => {
@@ -338,7 +343,8 @@ renderPlayer() {
         placeholder={" - "}
         value = {ctx.state.transition[_.indexOf(channels, c)]}
         style = {{margin: 5}}
-        onChange = {ctx.updateT.bind(ctx)}onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+        onChange = {ctx.updateT.bind(ctx)}
+        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
       })}
       </div>
   </div>)
@@ -546,10 +552,15 @@ changeName({target: { value }}) {
 
 addItem() {
   const ctx = this;
-  var patterns = [];
-  const { matName, activeMatrix, values, sceneIndex } = ctx.state;
+  var patterns = [],
+      duration = [];
+  const { matName, activeMatrix, values, sceneIndex, transition } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const { uid } = ctx.props.user.user;
+
+  // gets the duration array
+  _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
+
   if(uid !== null && uid !== undefined){
     _.each(items, function(d){
       if(d.uid === uid && d.matName === activeMatrix){
@@ -558,7 +569,7 @@ addItem() {
     })
     if ( matName.length >= 2 && !_.isEmpty(values)) {
       var snd = Object.values(items).length;
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid});
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration});
       ctx.setState({sceneIndex: snd});
     }
     ctx.setState({activeMatrix: matName});
@@ -570,12 +581,9 @@ reorder (index,flag){
   const { matName, values, sceneIndex } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   if(ctx.props.user !== null && ctx.props.user !== undefined){
-    console.log(items);
     const vals = _.takeWhile(Object.values(items), function (d) { return d.uid === ctx.props.user.user.uid });
     if(vals !== undefined){
       const len = vals.length;
-      console.log(vals);
-      console.log("VALS IN HOME:", vals);
       if(flag === "up" && index === 0)
         return;
       else if(flag === "down" && len-1 === index)
@@ -621,13 +629,19 @@ reorder (index,flag){
 
 renderItem(item, dbKey, i) {
   const ctx = this;
-  const { values, activeMatrix} = ctx.state;
+  const { values, activeMatrix, transition} = ctx.state;
   const { patterns } = ctx.props;
+
+  // gets the duration array
+  var duration = [];
+  _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)});
+
   const model = fetchModel(ctx.state.modelName);
 
   const updateMatrix = () => {
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true });
-    ctx.updateMatrix(patterns, values, item);
+    console.log("transition (state): ", transition);
+    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions });
+    ctx.updateMatrix(patterns, values, item, transition, duration);
   }
 
   const handleDelete = ({ target: { value }}) => {
@@ -735,7 +749,6 @@ render() {
   const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
 
   const updateScPattern = event  => {
-    console.log(event.target.value);
     ctx.setState({scPattern: event.target.value})
   }
 

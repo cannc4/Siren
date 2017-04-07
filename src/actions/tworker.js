@@ -1,7 +1,4 @@
 self.onmessage=function(e){
-
-  console.log(e.data);
-
   if (e.data.type == "start") {
     var interval= e.data.duration / e.data.steps * 1000;
     console.log("starting");

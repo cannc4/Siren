@@ -45,7 +45,9 @@ const models = {
     dataSource: Firebase.database().ref("/matrices"),
     model: {
       name: 'String',
+      durations: 'Object',
       values: 'Object',
+      transitions: 'Object',
       patterns: 'Object',
       sceneIndex: 'Integer',
       uid: 'String'
@@ -55,7 +57,6 @@ const models = {
 
 String.prototype.replaceAt = function(index, character) {
   return this.substr(0, index) + character + this.substr(index+character.length);
-
 }
 //
 // var client = dgram.createSocket('udp4');
@@ -269,18 +270,18 @@ export function fbSyncMatrix (model,data){
 export function fbcreateMatrix(model, data) {
   if (Firebase.auth().currentUser !== null)
   {
-    var datakey, sceneIndex, values, patterns, uid;
+    var datakey, sceneIndex, values, patterns, uid, transition, duration;
     models[model].dataSource.ref.once('value', dat => {
       var u_id = Firebase.auth().currentUser.uid;
       if ( u_id !== null)
       {
         const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
         if(obj !== undefined && obj !== null && u_id === obj.uid){
-          console.log('fbcreateMatrix -- OBJ: ', obj);
           datakey = obj.key;
           sceneIndex = obj.sceneIndex;
-          if (obj.patterns !== undefined)
-          patterns = obj.patterns;
+          // duration = obj.duration;
+          // if (obj.transitions !== undefined) transition = obj.transitions;
+          if (obj.patterns !== undefined) patterns = obj.patterns;
           uid = obj.uid;
         }
       }
@@ -289,13 +290,20 @@ export function fbcreateMatrix(model, data) {
     if(patterns === undefined)
       patterns = [];
 
+    // if(transition === undefined)
+    //   transition = [];
+
     if (datakey) {
       data.sceneIndex = sceneIndex;
       data.patterns = patterns;
+      // data.transitions = transition;
+
       return models[model].dataSource.child(datakey).update({...data})
     } else {
       if (data.patterns === undefined)
         data.patterns  = [];
+      // if (data.transitions === undefined)
+      //   data.transitions = [];
 
       const newObj = models[model].dataSource.push(data);
       return newObj.update({ key: newObj.key })
@@ -404,8 +412,8 @@ export const assignTimer = (timer,steps, _index) => {
 var math = require('mathjs');
 export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
-    console.log("GLOBAL COM" + globalCommands);
     const x =  _.compact(_.map(vals,(v,k) => {
+
     // gets parameters list
     const getParameters = (v) => {
       var param = [];
@@ -417,24 +425,45 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       return param;
     }
 
+    const getMathExpr = (v) => {
+      var maths = [];
+      _.map(_.split(v, /[&]+/g), (p1, p2) => {
+        console.log(p1, p2);
+        p1 = _.trim(p1);
+
+        if(p1 !== "") maths.push(p1);
+      });
+      return maths;
+    }
+
+    // pattern name
     const cellName = getParameters(v)[0];
+
+    // command of the pattern
     const cmd = _.find(patterns, c => c.name === cellName);
+
+    // CPS channel handling
     if(_.indexOf(channels,k) === _.indexOf(channels,'cps')){
       var newCommand = cellName;
       return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
-
+    // other channels
     else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
       var cellItem = _.slice(getParameters(v), 1);
       var newCommand = cmd.pattern;
+
+      // Construct the parameter list from command
       var parameters = _.concat( _.split(cmd.params, ','),'t');
 
-      //Param parser
+      // For each parameter in parameter list
       _.forEach(parameters, function(value, i) {
+        console.log('PARAMETER '+i+': ', value, value === 't');
+        // Temporal parameter
         if(value === 't'){
           newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
         }
-        else if(_.indexOf(cellItem[i], '[') != -1 ) // is random parameter??
+        // Random parameter
+        else if(_.indexOf(cellItem[i], '[') != -1 )
         {
           cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
           var bounds = _.split(cellItem[i], ',');
@@ -447,16 +476,19 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
                newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
           }
         }
+        // Value parameter
         else {
           newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
         }
       });
-      //Math Parser
-      var re = /(&)(.+)(&)/g;
+
+      // Math Parser
+      var re = /\&(.*?)\&/g;
       _.forEach(_.words(newCommand, re), function(val, i){
         newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
       })
 
+      // solo or not
       var soloHolder = "d"+(k);
       var transitionHolder = "" ;
       var _k = k;
@@ -482,27 +514,27 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
           transitionHolder = " $ ";
         }
       }
+
       if(globalTransformations === undefined || globalTransformations === ''){
-      globalTransformations = '';
+        globalTransformations = '';
       }
       else {
-      globalTransformations = globalTransformations + " $ "
+        globalTransformations = globalTransformations + " $ "
       }
+
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-
       if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
-          pattern =  "m1 $ " + newCommand;
-          storedPatterns[_k-1] = '';
-          storedPatterns[_k-1] = pattern;
-          return [pattern ,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        pattern =  "m1 $ " + newCommand;
+        storedPatterns[_k-1] = '';
+        storedPatterns[_k-1] = pattern;
+        return [pattern ,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
-
       else {
-      storedPatterns[_k-1] = '';
-      storedPatterns[_k-1] = pattern;
-      return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        storedPatterns[_k-1] = '';
+        storedPatterns[_k-1] = pattern;
+        return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      }
     }
-  }
     else
       return false;
     }))
@@ -524,28 +556,43 @@ export const continousPattern = (server, pattern) => {
     });
   }
 }
-
 ////////////////// PARSER ENDS HERE //////////////////
 
+export const updateMatrix = (patterns, values, i, transition, duration) => {
+  function placeValue2D(row, col, item, container){
+    if(item !== undefined){
+      if (container[parseInt(row)+1] === undefined)
+        container[parseInt(row)+1] = {};
+      container[parseInt(row)+1][col] = item;
+    }
+  }
+  function placeValue1D(index, item, container){
+    if(item !== undefined)
+      container[parseInt(index)] = item;
+    else
+      container[parseInt(index)] = '';
 
-export const updateMatrix = (patterns, values, i) => {
-  function placeValue(row, col, item, container){
-    if (container[parseInt(row)+1] === undefined)
-      container[parseInt(row)+1] = {};
-    container[parseInt(row)+1][col] = item;
+      // if (container[parseInt(index)] === undefined)
+      //   container[parseInt(index)] = '';
   }
 
   _.forEach(values, function(rowValue, rowKey) {
     _.forEach(rowValue, function(cell, colKey) {
-      placeValue(rowKey-1, colKey, '', values);
+      placeValue2D(rowKey-1, colKey, '', values);
     });
   });
 
   _.forEach(i.values, function(rowValue, rowKey) {
     _.forEach(rowValue, function(cell, colKey) {
-      placeValue(rowKey-1, colKey, cell, values);
+      placeValue2D(rowKey-1, colKey, cell, values);
     });
   });
+
+  _.forEach(transition, function(obj, index) {
+    placeValue1D(index, obj, transition);
+  });
+
+  // TODO durations
 
   return dispatch => {
     dispatch({ type: 'ADD_TIMER'});

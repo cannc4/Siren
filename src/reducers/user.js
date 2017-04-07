@@ -3,8 +3,6 @@ const INITIAL_STATE = {user: {}};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'FETCH_'+modelName:
-      console.log('REDUCER_ACCOUNTS', action.payload);
-
       const s = state;
       s.user = action.payload;
       return {...s};
