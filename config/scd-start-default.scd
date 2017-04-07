@@ -8,7 +8,7 @@ s.quit;
 s.waitForBoot {
 
  ~dirt = SuperDirt(2, s);
- ~dirt.loadSoundFiles("/Users/canince/dropbox/whalehouse/pure/*");
+ ~dirt.loadSoundFiles("/Users/canince/dropbox/whalehouse/siren/*");
  s.sync;
  ~dirt.start(57120, (0,2 .. 5));
  ~dirt.orderModules([\shape, \lpf]);

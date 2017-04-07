@@ -193,11 +193,6 @@ export function fbfetchscenes(model) {
             temp.push(c.val());
         })
       }
-      // else {
-      //   data.forEach(function(c){
-      //     temp.push(c.val());
-      //   })
-      // }
       dispatch({
         type: 'FETCH_' + model.toUpperCase(),
         payload: temp
@@ -339,21 +334,14 @@ export function GitHubLogin() {
       if (result.credential) {
         // This gives you a GitHub Access Token. You can use it to access the GitHub API.
         var token = result.credential.accessToken;
-        // ...
       }
       // The signed-in user info
       var user = result.user;
     }).catch(function(error) {
-      // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
-
-      // The email of the user's account used.
       var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
-      // ...
-
       dispatch({
         type: FETCH_ACCOUNTS_ERROR,
         payload: error
@@ -501,22 +489,25 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       globalTransformations = globalTransformations + " $ "
       }
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
+
+      if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+          pattern =  "m1 $ " + newCommand;
+          storedPatterns[_k-1] = '';
+          storedPatterns[_k-1] = pattern;
+          return [pattern ,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      }
+
+      else {
       storedPatterns[_k-1] = '';
       storedPatterns[_k-1] = pattern;
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
-
-    else if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
-        pattern =  "m1 $ " + newCommand;
-        return [pattern + "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-    }
-
+  }
     else
       return false;
     }))
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
     .then((response) => {
-      //dispatch({ type: 'SET_CC', payload: {channel, command} })
     }).catch(function (error) {
       console.log(error);
     });
@@ -525,7 +516,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
 export const continousPattern = (server, pattern) => {
   return dispatch => {
-    // console.log(pattern);
     const x = pattern;
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
     .then((response) => {
@@ -537,38 +527,6 @@ export const continousPattern = (server, pattern) => {
 
 ////////////////// PARSER ENDS HERE //////////////////
 
-//To store last compiled patterns
-//export const storePattern = (pattern,chn) => ({type: 'STORE_PATTERN', payload: pattern, channel: chn})
-
-
-
-// export const sendSCMatrix = (server,vals,patterns =[]) => {
-//
-//   return dispatch => {
-//       const fsc =  _.compact(_.map(vals,(v,k) => {
-//       const sccm = vals['~qcap'];
-//
-//       const cmd = _.find(patterns, c => c.name === sccm);
-//       if(cmd !== undefined){
-//         var append = ');';
-//         var prepend = '~qcap'
-//         const msg =  prepend+ '.' + "set(\\obs," + cmd.pattern + append;
-//         console.log(msg);
-//         return msg;
-//       }
-//        else return false;
-//     }))
-//     console.log(fsc);
-//     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': fsc })
-//
-//     .then((response) => {
-//         dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
-//     }).catch(function (error) {
-//       console.log(error);
-//     });
-//   }
-// }
-//
 
 export const updateMatrix = (patterns, values, i) => {
   function placeValue(row, col, item, container){
@@ -597,12 +555,10 @@ export const updateMatrix = (patterns, values, i) => {
 export const sendScPattern = (server, expression) => {
   return dispatch => {
     if (!expression) return;
-
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
     .then((response) => {
       dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
     }).catch(function (error) {
-      console.log(error);
     });
   }
 }
@@ -611,7 +567,6 @@ export const consoleSubmit = (server, expression) => {
   return dispatch => {
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
     .then((response) => {
-      //dispatch({ type: 'SET_CC', payload: {channel, pattern} })
     }).catch(function (error) {
       console.log(error);
     });
@@ -625,6 +580,7 @@ export const fetchPattern = () => ({type: 'FETCH_CC'});
 
 var timer = [];
 export function startIndividualTimer(_index,_duration, _steps) {
+  console.log("HERE");
     timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
 }
 
@@ -666,7 +622,6 @@ export const pauseIndividualTimer = (_index) => {
 
 export const stopIndividualTimer = (_index) => {
   timerWorker[_index].postMessage({type : "stop", id: _index,timer: timer[_index]});
-  //clearInterval(timer[_index]);
   return {
     type: 'STOP_TIMER', payload: _index
   }

@@ -1,4 +1,4 @@
 node_modules/
 node_modules/rx/ts/core/observable.ts
-npm-debug.log
+deps/
 config/
