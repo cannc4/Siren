@@ -489,16 +489,20 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       globalTransformations = globalTransformations + " $ "
       }
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
+
+      if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+          pattern =  "m1 $ " + newCommand;
+          storedPatterns[_k-1] = '';
+          storedPatterns[_k-1] = pattern;
+          return [pattern ,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+      }
+
+      else {
       storedPatterns[_k-1] = '';
       storedPatterns[_k-1] = pattern;
       return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
     }
-
-    else if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
-        pattern =  "m1 $ " + newCommand;
-        return [pattern + "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-    }
-
+  }
     else
       return false;
     }))

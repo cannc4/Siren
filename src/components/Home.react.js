@@ -41,7 +41,7 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 8,
+      steps: 16,
       channels: ['1','2','3', '4', '5', 'JV', 'cps'],
       timer: [],
       values: {},
@@ -245,7 +245,6 @@ sendSCMatrix(tidalServerLink, vals, patterns) {
 }
 
 sendScPattern(tidalServerLink, pattern) {
-  console.log(pattern);
   store.dispatch(sendScPattern(tidalServerLink, pattern));
 }
 
@@ -735,8 +734,9 @@ render() {
   const { patterns, isCanvasOn }=ctx.props;
   const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
 
-  const updateScPattern = (target)  => {
-    ctx.setState({scPattern: target})
+  const updateScPattern = event  => {
+    console.log(event.target.value);
+    ctx.setState({scPattern: event.target.value})
   }
 
   const viewPortWidth = '100%'
