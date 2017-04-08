@@ -279,6 +279,7 @@ export function fbcreateMatrix(model, data) {
         if(obj !== undefined && obj !== null && u_id === obj.uid){
           datakey = obj.key;
           sceneIndex = obj.sceneIndex;
+          // transitions = obj.transition;
           // duration = obj.duration;
           // if (obj.transitions !== undefined) transition = obj.transitions;
           if (obj.patterns !== undefined) patterns = obj.patterns;
@@ -302,8 +303,8 @@ export function fbcreateMatrix(model, data) {
     } else {
       if (data.patterns === undefined)
         data.patterns  = [];
-      // if (data.transitions === undefined)
-      //   data.transitions = [];
+      if (data.transitions === undefined)
+        data.transitions = [];
 
       const newObj = models[model].dataSource.push(data);
       return newObj.update({ key: newObj.key })
@@ -457,7 +458,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
       // For each parameter in parameter list
       _.forEach(parameters, function(value, i) {
-        console.log('PARAMETER '+i+': ', value, value === 't');
         // Temporal parameter
         if(value === 't'){
           newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
@@ -503,12 +503,12 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
           transitionHolder = " $ ";
         }
 
-        if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
+        else if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
           transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
           soloHolder = "t"+(k);
         }
 
-        if(solo[_.indexOf(channels,_k)] === true){
+        else if(solo[_.indexOf(channels,_k)] === true){
           k = "d"+(k);
           soloHolder = "solo $ " + k ;
           transitionHolder = " $ ";
@@ -523,7 +523,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       }
 
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-      if (_.indexOf(channels,_k) === _.indexOf(channels,'JV')){
+      if (_.indexOf(channels,_k) === _.indexOf(channels, 'JV')){
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
@@ -558,7 +558,7 @@ export const continousPattern = (server, pattern) => {
 }
 ////////////////// PARSER ENDS HERE //////////////////
 
-export const updateMatrix = (patterns, values, i, transition, duration) => {
+export const updateMatrix = (patterns, values, i, transition, duration, steps) => {
   function placeValue2D(row, col, item, container){
     if(item !== undefined){
       if (container[parseInt(row)+1] === undefined)
@@ -590,6 +590,10 @@ export const updateMatrix = (patterns, values, i, transition, duration) => {
 
   _.forEach(transition, function(obj, index) {
     placeValue1D(index, obj, transition);
+  });
+
+  _.forEach(duration, function(obj, index) {
+    store.dispatch(updateTimerduration(index,obj,steps));
   });
 
   // TODO durations

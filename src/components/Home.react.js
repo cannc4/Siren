@@ -41,7 +41,7 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 16,
+      steps: 8,
       channels: ['1','2','3', '4', '5', 'JV', 'cps'],
       timer: [],
       values: {},
@@ -61,7 +61,8 @@ class Home extends Component {
       globalCommands: '',
       globalTransformations: '',
       username: '',
-      storedPatterns: []
+      storedPatterns: [],
+      tempDur : []
     }
   }
 //Clock for Haskell
@@ -142,21 +143,7 @@ componentDidUpdate(props, state) {
     for (var i = 0; i < channels.length; i++) {
       if (ctx.props.timer.timer[i].isActive) {
         runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
-
-        if(ctx.props.timer.timer[i].current % steps === 0){
-          if(songmodeActive){
-            channelEnd[i] = true;
-            ctx.setState({channelEnd : channelEnd});
-            store.dispatch(pauseIndividualTimer(i))
-            if(ctx.identical(channelEnd ) === true){
-              ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
-              ctx.stopTimer();
-              ctx.startTimer();
-
-            }
-          }
-        }
-
+        
         if(values[runNo[i]]!== undefined){
           const vals = values[runNo[i]][i];
           const channel = channels[i];
@@ -172,6 +159,22 @@ componentDidUpdate(props, state) {
             ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,timer.timer[i]);
           }
         }
+
+        if(ctx.props.timer.timer[i].current % steps === steps-1){
+          if(songmodeActive){
+            channelEnd[i] = true;
+            ctx.setState({channelEnd : channelEnd});
+            store.dispatch(pauseIndividualTimer(i))
+            if(ctx.identical(channelEnd ) === true){
+              ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+              ctx.stopTimer();
+              ctx.startTimer();
+
+            }
+          }
+        }
+
+
       }
     }
 
@@ -189,39 +192,46 @@ identical(array) {
 progressMatrices(items){
   const ctx = this;
   const { timer } = ctx.props;
-  const { channelEnd, values, activeMatrix, steps, songmodeActive} = ctx.state;
+  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, tempDur, channels} = ctx.state;
   var patterns = [];
-
-//for (var i = 0; i < channelEnd.length; i++) {
-  //timer[i].isActive = false;
+  const { uid } = ctx.props.user.user;
   if(ctx.identical(channelEnd))
   {
+    var duration = [];
+    var transition_next = []
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
       channelEnd[j] = false;
 
     }
     _.each(items, function(d, i, j){
-      if(d.matName === activeMatrix)
+      if(d.uid === uid && d.matName === activeMatrix)
       {
         i_save = _.indexOf(Object.values(items), d);
         patterns = d.patterns;
+
       }
     })
 
-    // gets the transition array
-    const { transition } = ctx.state;
-    // gets the duration array
-    var duration = [];
-    _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
-
+    console.log("BEFORE DEBUG");
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
+    const model = fetchModel(ctx.state.modelName);
+    _.forEach(nextObj.durations, function(d, i){
+      duration.push(d);
+
+    });
+    console.log("DEBUG");
+    console.log(ctx.props.timer.timer);
+    console.log(nextObj);
+    console.log("DEBUG ENDS");
+
+
     updateMatrix(patterns, values, nextObj, transition, duration);
+    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions});
+
     for (var i = 0; i < channelEnd.length; i++) {
       channelEnd[i] = false;
     }
-    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd });
-
   }
 }
 
@@ -293,13 +303,19 @@ handleGlobalCommands = event => {
 }
 
 updateMatrix(patterns, values, item, transition, duration) {
+
+  const ctx = this;
+  const {steps} = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
   _.forEach(Object.values(items), function(d){
     console.log(d.matName + ' ' + d.sceneIndex);
   });
-
   console.log(transition, duration);
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration));
+  // _.forEach(duration, function(d, i){
+  //     store.dispatch(updateTimerduration(i,d,steps));
+  //   });
+  store.dispatch(updateMatrix(patterns, values, item, transition, duration,steps));
+
 }
 
 soloChannel =  ({target : {id}}) => {
@@ -634,13 +650,14 @@ renderItem(item, dbKey, i) {
 
   // gets the duration array
   var duration = [];
-  _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)});
-
   const model = fetchModel(ctx.state.modelName);
+  _.forEach(item.durations, function(d, i){
+    duration.push(d);
+  });
 
   const updateMatrix = () => {
-    console.log("transition (state): ", transition);
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions });
+    console.log(item.transitions);
+    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions});
     ctx.updateMatrix(patterns, values, item, transition, duration);
   }
 
