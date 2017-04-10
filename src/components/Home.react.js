@@ -143,7 +143,7 @@ componentDidUpdate(props, state) {
     for (var i = 0; i < channels.length; i++) {
       if (ctx.props.timer.timer[i].isActive) {
         runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
-        
+
         if(values[runNo[i]]!== undefined){
           const vals = values[runNo[i]][i];
           const channel = channels[i];
@@ -754,8 +754,14 @@ renderMenu(){
     {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
     {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
                              <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
+
     </div>
+
     <br/>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
+    0.1b
+    </div>
+
   </div>
 }
 
@@ -826,8 +832,9 @@ render() {
           <Layout layoutWidth={300}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
               <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
+              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+
             </div>
           </Layout>
           <LayoutSplitter />

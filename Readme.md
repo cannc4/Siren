@@ -49,17 +49,17 @@ Tested on Windows 10 and MacOSX El Capitan.
 ### Scenes
 #### Duration
 
-  Duration of each channel can be specified using the textarea next to channel number. Duration is the time it takes to reach the last step in seconds.
+  Duration of each channel can be specified using the textarea next to channel number on top of the grid. Duration is the time it takes to reach the last step in seconds.
   `ctrl+ enter` starts the timer
   `ctrl+ shift` stops the timers
 
 #### Dictionary
 
-  Tidal patterns are stored here on the right hand side of the interface.
+  Tidal patterns are stored in the `dictionary` on the right hand side of the interface.
 
 #### Pattern Functions
 
-  Patterns can be looked up from the dictionary depending on their names and valid parameters. See `parameters` for various types.
+  Patterns can be looked up from the dictionary with their on their names and valid parameters. See `parameters` for various types.
 
 #### Transitions
   Transitions are stored in the bottom row and unique for each scene
@@ -79,7 +79,7 @@ Mathematical expressions can be used in the patterns in the dictionary, parser e
 
 #### Random Parameters
 
-`[x,y]`returns a random value within the x and y boundaries.
+`[x,y]`returns a random value within the `x` and `y` boundaries.
 
 #### Temporal Parameter
 `t` represents the temporal parameter for each timer and it can be used in expressions to create complex values
