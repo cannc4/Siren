@@ -47,24 +47,24 @@ Tested on Windows 10 and MacOSX El Capitan.
 - Boot `SuperCollider` by pressing the console button
 
 ### Scenes
- - Duration
+#### Duration
 
   Duration of each channel can be specified using the textarea next to channel number. Duration is the time it takes to reach the last step in seconds.
   `ctrl+ enter` starts the timer
   `ctrl+ shift` stops the timers
 
-- Dictionary
+#### Dictionary
 
   Tidal patterns are stored here on the right hand side of the interface.
 
- - Pattern Functions
+#### Pattern Functions
 
   Patterns can be looked up from the dictionary depending on their names and valid parameters. See `parameters` for various types.
 
- - Transitions
+#### Transitions
   Transitions are stored in the bottom row and unique for each scene
 
- - Song mode
+#### Song mode
 
   if toggled, scenes are iterated based on their ordering. It updates the active scene and its values once timers reach to the last step of the scene.
   This mode is currently under development for further functionalities.
