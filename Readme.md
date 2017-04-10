@@ -47,12 +47,11 @@ Tested on Windows 10 and MacOSX El Capitan.
 - Boot `SuperCollider` by pressing the console button
 
 ### Scenes
- - duration
+ - Duration
 
- Duration of each channel can be specified using the textarea next to channel number. Duration is the time it takes to reach the last step in seconds.
-
- `ctrl+ enter` starts the timer
- `ctrl+ shift` stops the timers
+  Duration of each channel can be specified using the textarea next to channel number. Duration is the time it takes to reach the last step in seconds.
+  `ctrl+ enter` starts the timer
+  `ctrl+ shift` stops the timers
 
 - Dictionary
 
@@ -60,15 +59,15 @@ Tested on Windows 10 and MacOSX El Capitan.
 
  - Pattern Functions
 
- Patterns can be looked up from the dictionary depending on their names and valid parameters. See `parameters` for various types.
+  Patterns can be looked up from the dictionary depending on their names and valid parameters. See `parameters` for various types.
 
  - Transitions
-Transitions are stored in the bottom row and unique for each scene
+  Transitions are stored in the bottom row and unique for each scene
 
  - Song mode
 
-if toggled, scenes are iterated based on their ordering. It updates the active scene and its values once timers reach to the last step of the scene.
-This mode is currently under development for further functionalities.
+  if toggled, scenes are iterated based on their ordering. It updates the active scene and its values once timers reach to the last step of the scene.
+  This mode is currently under development for further functionalities.
 
 
 
@@ -80,12 +79,12 @@ Mathematical expressions can be used in the patterns in the dictionary, parser e
 
 #### Random Parameters
 
-[x,y] returns a random value within the x and y boundaries.
+`[x,y]`returns a random value within the x and y boundaries.
 
-#### `t` Parameters
-it represents the temporal parameter for each timer and it can be used in expressions to create complex values
+#### Temporal Parameter
+`t` represents the temporal parameter for each timer and it can be used in expressions to create complex values
 
-### Parameters
+
 
 
 
@@ -97,4 +96,4 @@ it represents the temporal parameter for each timer and it can be used in expres
 ## Known Bugs
 
 - TBA
-It's not a bug free software however it's been tested and no critical issue should occur. Please open an issue if you feel something's missing or not working.
+- It's not a bug free software however it's been tested and no critical issue should occur. Please open an issue if you feel something's missing or not working.
