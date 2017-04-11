@@ -29,6 +29,7 @@ npm i
 ```
 
 In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file. Now you can start the interface
+also copy paste your `scd-start-default.scd` and `tidal-boot-default.hs` into config folder
 ```
 npm start
 ```
@@ -37,6 +38,7 @@ and initialize the backend
 ```
 npm run siren
 ```
+then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser (tested on Chrome)
 
 *Tested on Windows 10 and MacOSX El Capitan*
 
