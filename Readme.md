@@ -28,8 +28,11 @@ cd path/to/siren
 npm i
 ```
 
-In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file. Now you can start the interface
-also copy paste your `scd-start-default.scd` and `tidal-boot-default.hs` into config folder
+In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file. 
+
+Copy paste your startup files to `scd-start-default.scd` and `tidal-boot-default.hs` into config folder or set the appropriate paths `config.json`
+
+Now you can start the interface
 ```
 npm start
 ```
