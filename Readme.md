@@ -15,7 +15,7 @@ git clone https://github.com/cannc4/Siren.git
 ## Build and Run
 
 ### Dependencies:
-Make sure the latest versions of following software are installed in your system
+Make sure the latest versions of following software are installed for your system user 
 
 - [SuperCollider](http://supercollider.github.io/download.html)
 - [NodeJS](https://nodejs.org/en/download/)
@@ -31,6 +31,8 @@ npm i
 In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file. 
 
 Copy paste your startup files to `scd-start-default.scd` and `tidal-boot-default.hs` into config folder or set the appropriate paths in `config.json`
+
+**## Note:** Make sure SuperCollider is either idle or closed before moving on.
 
 Now you can start the interface
 ```
@@ -70,10 +72,10 @@ Duration of each channel can be specified using the textarea next to channel num
 
 ### Dictionary
 
-Tidal patterns are stored in the `dictionary` on the right hand side of the interface.
+Tidal patterns are stored in the `dictionary` on the right hand side of the interface. Please omit the channel number and dollar sign on Tidal commands (instead of `d1 $ sound "bd"` just write `sound "bd"`).
 
 *example in Figure (c)*
-- Patterns named `bt2`, `jvv`, `jvbass`, and `lax` with 2, 1, 0 and 1 parameters, respectively.
+- Patterns named `bt2`, `jvv`, `jvbass`, and `lax` with corresponding Tidal commands and 2, 1, 0 and 1 parameters, respectively.
 
 ### Pattern Functions
 
@@ -109,6 +111,16 @@ Mathematical expressions can be used in the patterns in the dictionary, parser e
 
 *example in Figure (c)*
 - Math expression enclosed by `& ... &` (i.e. in the body of `jvv`: ```... [~ f3 &`t`%3 &] ~ ...```)
+
+### Value Parameters
+Any character sequence inside Tidal command can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want. 
+
+```n `x` # s `y` ```
+
+This can be called with any ``` `x` ``` or ``` `y` ``` value such as (assume it's named as `sq`): 
+``` sq `"{3*4}%3"` `"bd"` ``` or
+``` sq `"{3*4 4*2}%3"` `"bd"` ``` or
+``` sq `"{3*4 4*2}%3"` `"bd"` ```
 
 ### Random Parameters
 ``` `[x,y]` ``` returns a random value within the `x` and `y` boundaries `[x,y)`.
