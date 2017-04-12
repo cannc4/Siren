@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { fetchModel, fbcreate, fbupdate, fbdelete,
-         fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
+import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
@@ -22,17 +21,29 @@ class Patterns extends Component {
     }
   }
   //Pattern Dictionary
-  addItem() {
+  addPattern() {
+    var flag = false;
     const ctx = this
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === ctx.props.active){
         const { name } = ctx.state
         ctx.setState({sceneKey: d.key});
-        if (name.length >= 3) {
+        if (name.length >= 1) {
           fbcreatepatterninscene('Matrices', {name}, d.key)
         }
+        else {
+          alert("Pattern title should contain at least 1 character.");
+        }
+        flag = true;
       }
     })
+    if(!flag) {
+      const size = Object.keys(ctx.props["matrices"]).length;
+      if(size > 0)
+        alert("A scene needs to be active to add pattern.");
+      else
+        alert("You should add a scene first (Tip: on the left)");
+    }
   }
 
   changeName({target: { value }}) {
@@ -42,8 +53,6 @@ class Patterns extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
-    const model = fetchModel(ctx.state.modelName);
-    const { params, sceneKey } = ctx.state;
     const handleChange = (obj) => {
       var value, name;
       if(obj.target !== undefined){
@@ -77,12 +86,13 @@ class Patterns extends Component {
     const handleDelete = () => {
       const payload = { key: item.key };
 
-      _.each(Object.values(ctx.props["matrices"]), function(d){
-        if(d.matName === ctx.props.active){
-          ctx.setState({sceneKey: d.key});
-            fbdeletepatterninscene('Matrices', payload, d.key)
-        }
-      })
+      if(confirm(ctx.props.active + " will be deleted ??"))
+        _.each(Object.values(ctx.props["matrices"]), function(d){
+          if(d.matName === ctx.props.active){
+            ctx.setState({sceneKey: d.key});
+              fbdeletepatterninscene('Matrices', payload, d.key)
+          }
+        })
     }
 
     var options = {
@@ -102,11 +112,13 @@ class Patterns extends Component {
       <li key={item.key} className="easter" >
         <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
           <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
-            <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-              <input type="String" name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)}/>
-              <input type="String" name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)}/>
+            <div key={name} style={{ display: 'flex', flexDirection: 'column', flex: 3}}>
+              <input type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
+              <input type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             </div>
-            <button onClick={handleDelete} style={{justifyContent: 'flex-end' }}>{'Delete'} </button>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: "center" }}>
+              <button onClick={handleDelete}>{'Delete'} </button>
+            </div>
           </div>
           <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
         </div>
@@ -121,7 +133,7 @@ class Patterns extends Component {
 
   render() {
     const ctx = this
-    const { modelName, name, sceneKey } = ctx.state;
+    const { modelName, name } = ctx.state;
     var items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);
     _.each(scenes, function(d){
@@ -134,7 +146,6 @@ class Patterns extends Component {
     })
 
     const changeName = ctx.changeName.bind(ctx);
-    const addItem = ctx.addItem.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
 
     const viewPortWidth = '100%'
@@ -143,7 +154,7 @@ class Patterns extends Component {
       <div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
           <input className={'newPatternInput'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
-          <button className={'newPatternButton'} onClick={addItem}>Add</button>
+          <button className={'newPatternButton'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
         <div style={{ width: viewPortWidth }}>
           <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>

@@ -14,6 +14,18 @@
   margin: 2px;
 }
 
+@keyframes example {
+  from {color: white;}
+  to {color: rgba(255,255,102, 0.75);}
+}
+
+#login {
+  animation-name: example;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
 .spinner {
 	width: 40px;
 	border: 0;

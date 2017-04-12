@@ -2,3 +2,4 @@ node_modules/
 node_modules/rx/ts/core/observable.ts
 deps/
 config/
+.DS_Store

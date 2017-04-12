@@ -65,7 +65,6 @@ class Simple extends React.Component {
 
   _onAnimate = () => {
     this._updatePhysics();
-    console.log("onAnimate");
     this._updateGraphics();
   };
 

@@ -117,7 +117,7 @@ export function sendZapier(data) {
     console.log(response);
   })
   .catch(function (error) {
-    console.log(error);
+    console.error(error);
   });
 }
 
@@ -429,7 +429,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
     const getMathExpr = (v) => {
       var maths = [];
       _.map(_.split(v, /[&]+/g), (p1, p2) => {
-        console.log(p1, p2);
         p1 = _.trim(p1);
 
         if(p1 !== "") maths.push(p1);
@@ -523,7 +522,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       }
 
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-      if (_.indexOf(channels,_k) === _.indexOf(channels, 'JV')){
+      if (_.indexOf(channels,_k) === _.indexOf(channels, 'm1')){
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
@@ -541,7 +540,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
     .then((response) => {
     }).catch(function (error) {
-      console.log(error);
+      console.error(error);
     });
   }
 }
@@ -552,7 +551,7 @@ export const continousPattern = (server, pattern) => {
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
     .then((response) => {
     }).catch(function (error) {
-      console.log(error);
+      console.error(error);
     });
   }
 }
@@ -619,7 +618,7 @@ export const consoleSubmit = (server, expression) => {
     axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
     .then((response) => {
     }).catch(function (error) {
-      console.log(error);
+      console.error(error);
     });
   }
 }
@@ -627,19 +626,16 @@ export const consoleSubmit = (server, expression) => {
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});
 
-
-
 var timer = [];
 export function startIndividualTimer(_index,_duration, _steps) {
-  console.log("HERE");
-    timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
+  timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
 }
 
 export const updateTimerduration = (_index,_duration,_steps) => {
-  //timerWorker[_index].postMessage({type : "update", id: _index, duration: _duration, steps: _steps,timer: timer[_index]});
-  return {
-    type: 'UPDATE_TIMER', payload: _index, duration : _duration
-  }
+  if(_duration === "" || !isNaN(parseInt(_duration)))
+    return {
+      type: 'UPDATE_TIMER', payload: _index, duration : _duration
+    }
 }
 
 var timerWorker= [];

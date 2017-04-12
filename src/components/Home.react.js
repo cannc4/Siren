@@ -42,7 +42,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5', 'JV', 'cps'],
+      channels: ['1','2','3', '4', '5', 'm1', 'cps'],
       timer: [],
       values: {},
       scPattern: '',
@@ -213,18 +213,12 @@ progressMatrices(items){
       }
     })
 
-    console.log("BEFORE DEBUG");
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
     const model = fetchModel(ctx.state.modelName);
     _.forEach(nextObj.durations, function(d, i){
       duration.push(d);
 
     });
-    console.log("DEBUG");
-    console.log(ctx.props.timer.timer);
-    console.log(nextObj);
-    console.log("DEBUG ENDS");
-
 
     updateMatrix(patterns, values, nextObj, transition, duration);
     ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions});
@@ -307,13 +301,11 @@ updateMatrix(patterns, values, item, transition, duration) {
   const ctx = this;
   const {steps} = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
-  _.forEach(Object.values(items), function(d){
-    console.log(d.matName + ' ' + d.sceneIndex);
-  });
-  console.log(transition, duration);
-  // _.forEach(duration, function(d, i){
-  //     store.dispatch(updateTimerduration(i,d,steps));
-  //   });
+  // DEBUG PRINTING
+  // _.forEach(Object.values(items), function(d){
+  //   console.log(d.matName + ' ' + d.sceneIndex);
+  // });
+  // console.log(transition, duration);
   store.dispatch(updateMatrix(patterns, values, item, transition, duration,steps));
 
 }
@@ -339,6 +331,15 @@ renderPlayer() {
   const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
+  const transitionValue = function(c){
+    if(ctx.state.transition){
+      return ctx.state.transition[_.indexOf(channels, c)];
+    }
+    else {
+      return ''
+    }
+  };
+
 
   return (<div className="Player-holder">
     <div className={playerClass}>
@@ -357,7 +358,7 @@ renderPlayer() {
       {_.map(channels, c => {
         return <input className = "playbox" id = {c} key = {c}
         placeholder={" - "}
-        value = {ctx.state.transition[_.indexOf(channels, c)]}
+        value = {transitionValue(c)}
         style = {{margin: 5}}
         onChange = {ctx.updateT.bind(ctx)}
         onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
@@ -371,8 +372,11 @@ updateDur = ({target : {value, id}}) => {
     const {channels,steps} = ctx.state;
     const {timer} = ctx.props;
     var _index = _.indexOf(channels,id);
-    if(value !== undefined && value !== "")
+    try {
       store.dispatch(updateTimerduration(_index,value,steps));
+    } catch (e) {
+        console.error("Please input numbers only.");
+    }
 }
 
 _handleKeyPress = event => {
@@ -384,30 +388,37 @@ _handleKeyPress = event => {
   var _index = _.indexOf(channels, _key);
 
   if(event.keyCode === 13 && event.ctrlKey){
-    if(ctx.props.timer.timer[_index].isActive === true){
-      store.dispatch(pauseIndividualTimer(_index));
+    if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
+      if(ctx.props.timer.timer[_index].isActive === true){
+        store.dispatch(pauseIndividualTimer(_index));
+      }
+      startIndividualTimer(_index, value,steps);
+      ctx.setState({play:true});
     }
-    startIndividualTimer(_index, value,steps);
-    ctx.setState({play:true});
   }
   else if (event.keyCode === 13 && event.shiftKey){
+    // if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
     if(ctx.props.timer.timer[_index].isActive === true){
       store.dispatch(stopIndividualTimer(_index));
     }
+    // }
   }
 }
 
 
 updateT = ({target : {value, id}}) => {
 
-  const ctx=this;
+  const ctx = this;
   const {transition, channels} = ctx.state;
-  const _key =id;
-  var value = value;
-  var _index = _.indexOf(channels, _key);
+  var _index = _.indexOf(channels, id);
   var temp = transition;
-  temp[_index] = value;
-  ctx.setState({transition:temp});
+  if(temp){
+    temp[_index] = value;
+  }
+  else {
+    temp = [];
+  }
+  ctx.setState({transition: temp});
 }
 
 
@@ -430,10 +441,21 @@ startTimer() {
   const ctx = this;
   const {channels, steps, play} = ctx.state;
 
+  var temp = [];
   for (var i = 0; i < channels.length; i++) {
-    startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps);
+    if(isNaN(parseFloat(ctx.props.timer.timer[i].duration)))
+      temp.push(channels[i]);
   }
-  ctx.setState({play:true});
+
+  if(temp.length === 0){
+    for (var i = 0; i < channels.length; i++) {
+      startIndividualTimer(i, ctx.props.timer.timer[i].duration, steps);
+    }
+    ctx.setState({play:true});
+  }
+  else {
+    alert("Invalid duration values for: " + temp.toString())
+  }
 }
 
 pauseTimer() {
@@ -588,6 +610,10 @@ addItem() {
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration});
       ctx.setState({sceneIndex: snd});
     }
+    else {
+      alert("- Scene title should be longer than 1 characters.\n- There should be at least one character on the grid");
+    }
+
     ctx.setState({activeMatrix: matName});
   }
 }
@@ -656,25 +682,26 @@ renderItem(item, dbKey, i) {
   });
 
   const updateMatrix = () => {
-    console.log(item.transitions);
     ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions});
     ctx.updateMatrix(patterns, values, item, transition, duration);
   }
 
   const handleDelete = ({ target: { value }}) => {
-    const payload = { key: dbKey };
-    fbdelete(ctx.state.modelName, payload);
+    if (confirm('Are you sure you want to delete this thing?')) {
+      const payload = { key: dbKey };
+      fbdelete(ctx.state.modelName, payload);
 
-    // re-order all items after delete successfull
-    Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
-      const items = ctx.props[ctx.state.modelName.toLowerCase()];
-      ctx.setState({sceneIndex: (Object.values(items).length)});
-      _.forEach(Object.values(items), function(d, i){
-        fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
+      // re-order all items after delete successfull
+      Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
+        const items = ctx.props[ctx.state.modelName.toLowerCase()];
+        ctx.setState({sceneIndex: (Object.values(items).length)});
+        _.forEach(Object.values(items), function(d, i){
+          fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
+        });
+      }, function(error) {
+        console.error(error);
       });
-    }, function(error) {
-      console.error(error);
-    });
+    }
   }
 
   return item.key && (
@@ -742,24 +769,24 @@ renderMenu(){
   return   <div className="Tidal" style={{margin: '5px'}}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
       User
-      {ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
-      {!ctx.props.user.user.email && <button className={'buttonSentinel'} onClick={loginGG}>Login</button>}
+      {ctx.props.user.user.email && <button className={'buttonSentinel'} id={'logout'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
+      {!ctx.props.user.user.email && <button className={'buttonSentinel'} id={'login'} onClick={loginGG}>Login</button>}
     </div>
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} height={32} width={32}/>}
-     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} height={32} width={32}/>}
+     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
+     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} height={32} width={32}/>}
-    {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} height={32} width={32}/>
-                             <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} height={32} width={32}/> </div>}
+    {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+    {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} role="presentation" height={32} width={32}/>
+                             <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/> </div>}
 
     </div>
 
     <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    0.1b
+    0.1.1b
     </div>
 
   </div>
@@ -767,15 +794,13 @@ renderMenu(){
 
 render() {
   const ctx=this;
-  const { tidal, timer, click }=ctx.props;
-  const { patterns, isCanvasOn }=ctx.props;
-  const { scPattern, tidalServerLink, play, values, steps, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
+  const { timer}=ctx.props;
+  const { scPattern, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
 
   const updateScPattern = event  => {
     ctx.setState({scPattern: event.target.value})
   }
 
-  const viewPortWidth = '100%'
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
   var historyOptions = {
