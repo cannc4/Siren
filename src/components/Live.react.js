@@ -28,6 +28,7 @@ class Live extends Component {
 
   render(){
     const ctx = this;
+    const { timer } = ctx.props;
 
     return <div>
       <div className={"Home cont"}>

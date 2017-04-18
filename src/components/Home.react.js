@@ -108,7 +108,10 @@ class Home extends Component {
 // }
 componentWillReceiveProps(nextProps) {
   const ctx = this;
-  if(nextProps.user !== undefined && nextProps.user.user.name !== undefined && ctx.state.username === '')
+  if(nextProps.user !== undefined &&
+     nextProps.user.user !== undefined &&
+     nextProps.user.user.name !== undefined &&
+     ctx.state.username === '')
   {
     ctx.setState({username: nextProps.user.user.name});
     var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
@@ -299,14 +302,16 @@ handleGlobalCommands = event => {
 updateMatrix(patterns, values, item, transition, duration) {
 
   const ctx = this;
-  const {steps} = ctx.state;
+  const { steps, channels } = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
+
   // DEBUG PRINTING
   // _.forEach(Object.values(items), function(d){
   //   console.log(d.matName + ' ' + d.sceneIndex);
   // });
   // console.log(transition, duration);
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration,steps));
+
+  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels));
 
 }
 
@@ -659,6 +664,9 @@ reorder (index,flag){
             var upValues =  vals[index].values;
             var upUID = vals[index].uid;
 
+            console.log(downMatName ,': ', downPatterns);
+            console.log(upMatName, ': ', upPatterns);
+
             fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, vals[downIndex].key);
             fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, vals[index].key);
           }
@@ -704,14 +712,15 @@ renderItem(item, dbKey, i) {
     }
   }
 
+  const items = ctx.props[ctx.state.modelName.toLowerCase()];
   return item.key && (
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'x'}</button>
           {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
           {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
-          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>
-          <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>
+          {item.sceneIndex !== 0 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>}
+          {item.sceneIndex !== Object.values(items).length-1 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>}
         </div>
       </div>
     )
@@ -772,7 +781,6 @@ renderMenu(){
       {ctx.props.user.user.email && <button className={'buttonSentinel'} id={'logout'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
       {!ctx.props.user.user.email && <button className={'buttonSentinel'} id={'login'} onClick={loginGG}>Login</button>}
     </div>
-    <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
      {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
      {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
@@ -784,9 +792,8 @@ renderMenu(){
 
     </div>
 
-    <br/>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    0.1.1b
+    <a href="https://github.com/cannc4/Siren">0.1.1-beta</a>
     </div>
 
   </div>
