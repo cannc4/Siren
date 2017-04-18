@@ -20,6 +20,7 @@ d_OSC <- openUDP "127.0.0.1" 12000
 devices <- midiDevices
 
 m1 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
 (c3,ct3) <- dirtSetters getNow
