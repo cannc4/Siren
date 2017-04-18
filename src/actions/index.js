@@ -281,7 +281,7 @@ export function fbcreateMatrix(model, data) {
           sceneIndex = obj.sceneIndex;
           // transitions = obj.transition;
           // duration = obj.duration;
-          // if (obj.transitions !== undefined) transition = obj.transitions;
+          if (obj.transitions !== undefined) transition = obj.transitions;
           if (obj.patterns !== undefined) patterns = obj.patterns;
           uid = obj.uid;
         }
@@ -291,8 +291,8 @@ export function fbcreateMatrix(model, data) {
     if(patterns === undefined)
       patterns = [];
 
-    // if(transition === undefined)
-    //   transition = [];
+    if(transition === undefined)
+      transition = [];
 
     if (datakey) {
       data.sceneIndex = sceneIndex;
@@ -328,6 +328,9 @@ export function fbdeletepatterninscene(model, data, s_key) {
   models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
 }
 export function fborder(model, data, key) {
+  if(data.patterns === undefined)
+    data.patterns = {};
+
   models[model].dataSource.child(key).update({...data})
   models[model].dataSource.orderByChild('sceneIndex');
 }
@@ -557,7 +560,7 @@ export const continousPattern = (server, pattern) => {
 }
 ////////////////// PARSER ENDS HERE //////////////////
 
-export const updateMatrix = (patterns, values, i, transition, duration, steps) => {
+export const updateMatrix = (patterns, values, i, transition, duration, steps, channels) => {
   function placeValue2D(row, col, item, container){
     if(item !== undefined){
       if (container[parseInt(row)+1] === undefined)
@@ -587,9 +590,9 @@ export const updateMatrix = (patterns, values, i, transition, duration, steps) =
     });
   });
 
-  _.forEach(transition, function(obj, index) {
-    placeValue1D(index, obj, transition);
-  });
+  for (var i = 0; i < channels.length; i++) {
+    placeValue1D(i, transition[i], transition);
+  }
 
   _.forEach(duration, function(obj, index) {
     store.dispatch(updateTimerduration(index,obj,steps));

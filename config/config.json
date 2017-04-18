@@ -9,5 +9,5 @@
   "samples_path": "C:\\Users\\Mert\\Dropbox\\Whalehouse\\Samples\\*",
   "path": "C:\\GitHub\\Siren\\config\\config.json",
   "tidal_boot": "C:\\GitHub\\Siren\\config\\tidal-boot-default.hs",
-  "scd_start": "C:\\GitHub\\Siren\\config\\scd-start-default.scd",
+  "scd_start": "C:\\GitHub\\Siren\\config\\scd-start-default.scd"
 }
