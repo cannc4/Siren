@@ -1,15 +1,28 @@
 {
   "name": "Siren",
-  "main": "http://localhost:3000",
+  "main": "http://localhost:3001/",
   "version": "0.1.1",
   "private": true,
   "author": "vou",
   "license": "MIT",
+  "node-main": "./server/start.js",
   "build": {
     "nwVersion": "latest",
-  "mac": {
-    "displayName": "Siren",
-    "copyright": "copyright"
+    "mac": {
+      "displayName": "Siren",
+      "copyright": "copyright"
+      },
+    "window": {
+      "title": "Siren",
+      "icon": "favicon.ico",
+      "toolbar": true,
+      "frame": true,
+      "width": 800,
+      "height": 500,
+      "min_width": 400,
+      "min_height": 200,
+      "max_width": 800,
+      "max_height": 600
     }
   },
   "devDependencies": {
@@ -57,6 +70,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startnw": "run .",
+    "buildnw": "build --mac --x64 --mirror https://dl.nwjs.io/ .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",

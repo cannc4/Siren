@@ -20,6 +20,7 @@ import {
 } from './callbacks';
 
 export default (
+  <div>
   <Provider store={store}>
     <Router history={browserHistory}>
       <Route path="/" component={App} onEnter={handleEnterHome}>
@@ -38,6 +39,7 @@ export default (
     </Route>
     </Router>
   </Provider>
+  </div>
 )
 
 

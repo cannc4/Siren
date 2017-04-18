@@ -86,7 +86,7 @@ class Patterns extends Component {
     const handleDelete = () => {
       const payload = { key: item.key };
 
-      if(confirm(ctx.props.active + " will be deleted ??"))
+      if(confirm("This pattern will be deleted from " + ctx.props.active + "scene "))
         _.each(Object.values(ctx.props["matrices"]), function(d){
           if(d.matName === ctx.props.active){
             ctx.setState({sceneKey: d.key});

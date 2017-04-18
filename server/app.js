@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import config from '../config/config.json'
 import fs from 'fs';
+import path from 'path';
 import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
 import express from 'express';
@@ -64,7 +65,7 @@ class REPL {
         setTimeout(function(){
           const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
           lang.interpret(patterns);
-          
+
         }, 4000)
       });
     });
@@ -89,6 +90,8 @@ const TidalData = {
 
 const myApp = () => {
   const app = express();
+
+
 
   var udpHosts = [];
   var dgram = require("dgram");
@@ -159,6 +162,8 @@ const myApp = () => {
     console.log(expr);
     reply.status(200).send(expr);
   }
+
+  app.use("/", express.static(path.join(__dirname, "public")));
 
   app.get('/tidal', (req, reply) => startTidal(reply));
   // app.get('/tidaltick', (req, reply) => startTidal(reply));
