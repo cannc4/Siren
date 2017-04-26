@@ -1,6 +1,6 @@
 {
   "name": "Siren",
-  "main": "http://localhost:3001/",
+  "main": "http://localhost:3000/",
   "version": "0.1.1",
   "private": true,
   "author": "vou",
@@ -11,18 +11,20 @@
     "mac": {
       "displayName": "Siren",
       "copyright": "copyright"
-      },
+    },
+    "win": {
+      "displayName": "Siren",
+      "copyright": "copyright"
+    },
     "window": {
       "title": "Siren",
       "icon": "favicon.ico",
       "toolbar": true,
       "frame": true,
-      "width": 800,
-      "height": 500,
-      "min_width": 400,
-      "min_height": 200,
-      "max_width": 800,
-      "max_height": 600
+      "width": 1024,
+      "height": 720,
+      "min_width": 640,
+      "min_height": 480
     }
   },
   "devDependencies": {
@@ -36,7 +38,7 @@
     "eslint-plugin-react": "^6.1.2",
     "ftp-deploy": "^1.1.0",
     "react-scripts": "0.2.3",
-    "nwjs-builder-phoenix":"^1.9.0"
+    "nwjs-builder-phoenix": "^1.9.0"
   },
   "dependencies": {
     "axios": "^0.14.0",
@@ -70,7 +72,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startnw": "run .",
-    "buildnw": "build --mac --x64 --mirror https://dl.nwjs.io/ .",
+    "buildnw": "build --win --x64 --mirror https://dl.nwjs.io/ .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",

@@ -1,5 +1,6 @@
 self.onmessage=function(e){
   if (e.data.type == "start") {
+    console.log('t', t);
     var interval= e.data.duration / e.data.steps * 1000;
     var t = setInterval(function(){postMessage({type:"tick", id:e.data.id, msg: t});},interval)
   }

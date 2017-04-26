@@ -28,8 +28,8 @@ export default (state = INITIAL_STATE, action) => {
       return {...p}
     case 'STOP_'+modelName:
       const stp = state;
-      stp.timer[action.payload].isActive = false;
       stp.timer[action.payload].current = 0;
+      stp.timer[action.payload].isActive = false;
       return {...stp}
     default:
       return state;

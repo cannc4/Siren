@@ -137,7 +137,7 @@ createTimer(i,duration, steps){
 }
 
 componentDidUpdate(props, state) {
-  // if(props.user !== undefined){
+  // if(props.user !== undefined)
     var runNo = [];
     const ctx=this;
     const { patterns, timer, click}=props;
@@ -454,9 +454,13 @@ startTimer() {
 
   if(temp.length === 0){
     for (var i = 0; i < channels.length; i++) {
-      startIndividualTimer(i, ctx.props.timer.timer[i].duration, steps);
+      if (!ctx.props.timer.timer[i].isActive)
+        startIndividualTimer(i, ctx.props.timer.timer[i].duration, steps);
     }
-    ctx.setState({play:true});
+    setTimeout(function() {
+      ctx.setState({play: true});
+      console.log('button press timeout -- start');
+    },600);
   }
   else {
     alert("Invalid duration values for: " + temp.toString())
@@ -468,9 +472,12 @@ pauseTimer() {
     const ctx = this;
     const {channels, play} = ctx.state;
     for (var i = 0; i < channels.length; i++) {
-      store.dispatch(pauseIndividualTimer(i));
+        store.dispatch(pauseIndividualTimer(i));
     }
-    ctx.setState({play: false});
+    setTimeout(function() {
+      ctx.setState({play: false});
+      console.log('button press timeout -- pause');
+    },600);
 }
 
 stopTimer() {
@@ -478,9 +485,12 @@ stopTimer() {
   const ctx = this;
   const {channels, play} = ctx.state;
   for (var i = 0; i < channels.length; i++) {
-    store.dispatch(stopIndividualTimer(i));
+      store.dispatch(stopIndividualTimer(i));
   }
-  ctx.setState({play: false});
+  setTimeout(function() {
+    ctx.setState({play: false});
+    console.log('button press timeout -- stop');
+  },600);
 }
 
 renderStep(x, i) {
@@ -610,13 +620,13 @@ addItem() {
         patterns = d.patterns;
       }
     })
-    if ( matName.length >= 2 && !_.isEmpty(values)) {
+    if ( matName.length >= 1) {
       var snd = Object.values(items).length;
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration});
       ctx.setState({sceneIndex: snd});
     }
     else {
-      alert("- Scene title should be longer than 1 characters.\n- There should be at least one character on the grid");
+      alert("Scene title should be longer than 1 characters");
     }
 
     ctx.setState({activeMatrix: matName});
@@ -788,12 +798,12 @@ renderMenu(){
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
     {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
     {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} role="presentation" height={32} width={32}/>
-                             <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/> </div>}
+                   <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/> </div>}
 
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.1.1-beta</a>
+    <a href="https://github.com/cannc4/Siren">0.1.3-beta</a>
     </div>
 
   </div>
