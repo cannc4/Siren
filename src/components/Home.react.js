@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
 
+// const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
+
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
@@ -62,7 +64,8 @@ class Home extends Component {
       globalTransformations: '',
       username: '',
       storedPatterns: [],
-      tempDur : []
+      tempDur : [],
+      tidalOnClickClass:  ' '
     }
   }
 //Clock for Haskell
@@ -120,6 +123,8 @@ componentWillReceiveProps(nextProps) {
 }
 
 componentWillMount(props,state){
+  document.addEventListener("keydown", this.handleglobalKeys.bind(this));
+  console.log("here");
   const ctx=this;
   var tempEnd = [];
   const { channelEnd, channels , steps , timer, solo}=ctx.state;
@@ -268,6 +273,8 @@ handleSubmit = event => {
   const ctx=this;
   const {scPattern, tidalServerLink }=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey && body){
+    ctx.setState({tidalOnClickClass: ' Executed'});
+    setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
 }
@@ -348,9 +355,9 @@ renderPlayer() {
 
   return (<div className="Player-holder">
     <div className={playerClass}>
-      <div className="playbox playbox-cycle">cycle</div>
+      <div className="playbox playbox-cycle" style={{width:"6%"}}>-</div>
       {_.map(channels, c => {
-        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
+        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" style = {{margin: 5}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
         onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
         {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
         {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
@@ -564,9 +571,9 @@ renderStep(x, i) {
         translateAmount = cellHeight;
       }
       // dynamic text size
-      const textSize = textval.length > 10 ? Math.max( 0.65, mapNumbers(textval.length, 20, 30, 1, 0.65)) : 1;
+      // const textSize = textval.length > 10 ? Math.max( 1, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
       return <div className={individualClass} style={css} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: textSize+'vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
+        <textarea type="text" style={{fontSize: '1vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
       </div>
     })}
   </div>;
@@ -803,10 +810,48 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.1.3-beta</a>
+    <a href="https://github.com/cannc4/Siren">0.2-beta</a>
     </div>
 
   </div>
+}
+
+handleglobalKeys = event => {
+
+  const ctx = this;
+  const {steps, channels, timer, play} = ctx.state;
+  if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
+    var _index = event.keyCode - 49;
+    if(_index < channels.length){
+      if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
+        if(ctx.props.timer.timer[_index].isActive === true){
+          store.dispatch(pauseIndividualTimer(_index));
+        }
+        startIndividualTimer(_index, ctx.props.timer.timer[_index].duration,steps);
+        ctx.setState({play:true});
+      }
+    }
+  }
+  else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
+    var _index = event.keyCode - 49;
+    if(_index < channels.length){
+      if(ctx.props.timer.timer[_index].isActive === true){
+        store.dispatch(stopIndividualTimer(_index));
+      }
+    }
+  }
+  // Start/stop all timers with ctrl/shift + space
+  else if (event.keyCode === 32 && event.ctrlKey){
+      ctx.startTimer();
+  }
+  else if (event.keyCode === 32 && event.shiftKey){
+      ctx.stopTimer();
+  }
+
+  //Scene bindings
+  else if (event.keyCode === 32 && event.shiftKey){
+      ctx.stopTimer();
+  }
 }
 
 render() {
@@ -863,32 +908,31 @@ render() {
         </Layout>
         <LayoutSplitter />
         <Layout layoutHeight={250}>
-          <Layout layoutWidth={200}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Console</p>
-              <textarea className="defaultPatternArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
-              <textarea className="defaultPatternArea" key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
-            </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={300}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Globals</p>
-              <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
-              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
-
-            </div>
-          </Layout>
-          <LayoutSplitter />
           <Layout layoutWidth={150}>
             {ctx.renderMenu()}
           </Layout>
           <LayoutSplitter />
+          <Layout layoutWidth={250}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Globals</p>
+              <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
+              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+            </div>
+          </Layout>
+          <LayoutSplitter />
+          <Layout layoutWidth={250}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+              <p>> Console</p>
+              <textarea className="defaultPatternArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+              <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
+            </div>
+          </Layout>
+          <LayoutSplitter />
           <Layout layoutWidth={'flex'}>
-            <div style={{width: '100%', flexDirection: 'column'}}>
+            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
              <p>> Pattern History</p>
              {_.map(channels, (c, i) => {
-                return <CodeMirror key={i} className={'defaultPatternArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
+                return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
               })}
             </div>
           </Layout>

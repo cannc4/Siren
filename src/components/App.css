@@ -6,10 +6,10 @@ body, .fill, .cont {
   right: 0;
   overflow-y: none;
   z-index: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 * {
-  font-family: 'Courier New';
+  font-family: 'Inconsolata';
   font-weight: 40;
 }
 body {
