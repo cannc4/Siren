@@ -120,6 +120,8 @@ componentWillReceiveProps(nextProps) {
 }
 
 componentWillMount(props,state){
+  document.addEventListener("keydown", this.handleglobalKeys.bind(this));
+  console.log("here");
   const ctx=this;
   var tempEnd = [];
   const { channelEnd, channels , steps , timer, solo}=ctx.state;
@@ -793,10 +795,48 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.1.1-beta</a>
+    <a href="https://github.com/cannc4/Siren">0.2-beta</a>
     </div>
 
   </div>
+}
+
+handleglobalKeys = event => {
+
+  const ctx = this;
+  const {steps, channels, timer, play} = ctx.state;
+  if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
+    var _index = event.keyCode - 49;
+    if(_index < channels.length){
+      if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
+        if(ctx.props.timer.timer[_index].isActive === true){
+          store.dispatch(pauseIndividualTimer(_index));
+        }
+        startIndividualTimer(_index, ctx.props.timer.timer[_index].duration,steps);
+        ctx.setState({play:true});
+      }
+    }
+  }
+  else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
+    var _index = event.keyCode - 49;
+    if(_index < channels.length){
+      if(ctx.props.timer.timer[_index].isActive === true){
+        store.dispatch(stopIndividualTimer(_index));
+      }
+    }
+  }
+  // Start/stop all timers with ctrl/shift + space
+  else if (event.keyCode === 32 && event.ctrlKey){
+      ctx.startTimer();
+  }
+  else if (event.keyCode === 32 && event.shiftKey){
+      ctx.stopTimer();
+  }
+
+  //Scene bindings
+  else if (event.keyCode === 32 && event.shiftKey){
+      ctx.stopTimer();
+  }
 }
 
 render() {

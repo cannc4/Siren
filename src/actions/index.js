@@ -644,7 +644,7 @@ export const updateTimerduration = (_index,_duration,_steps) => {
 var timerWorker= [];
 export const createTimer = (_index,_duration, _steps) => {
 
-    timerWorker[_index] = new Worker("/tworker.js");
+    timerWorker[_index] = new Worker("./src/actions/tworker.js");
     timerWorker[_index].onmessage = function(e) {
       if (e.data.type == "tick") {
           store.dispatch(updtmr(e.data.id));
