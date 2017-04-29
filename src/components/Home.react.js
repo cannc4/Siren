@@ -65,7 +65,8 @@ class Home extends Component {
       username: '',
       storedPatterns: [],
       tempDur : [],
-      tidalOnClickClass:  ' '
+      tidalOnClickClass:  ' ',
+      stopParam: []
     }
   }
 //Clock for Haskell
@@ -244,36 +245,81 @@ disableSongmode(){
   this.setState({ songmodeActive : false});
 }
 
+////////////////////////////// TIMER STARTS ////////////////////////////
 
-runTidal() {
-  const ctx=this;
-  const { tidalServerLink } = ctx.state;
-  store.dispatch(initMyTidal(tidalServerLink));
-}
-
-sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
+startTimer() {
   const ctx = this;
-  const {globalCommands,globalTransformations, storedPatterns} = ctx.state;
-  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands,storedPatterns));
-}
-sendSCMatrix(tidalServerLink, vals, patterns) {
-  store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
+  const {stopParam,channels, steps, play} = ctx.state;
+
+  var temp = [];
+  for (var i = 0; i < channels.length; i++) {
+    if(isNaN(parseFloat(ctx.props.timer.timer[i].duration)))
+      temp.push(channels[i]);
+  }
+  if(temp.length === 0){
+    for (var i = 0; i < channels.length; i++) {
+      if(!isNaN(parseFloat(ctx.props.timer.timer[i].duration)) && parseFloat(ctx.props.timer.timer[i].duration) >= 1.) {
+        if(stopParam[i] !== true){
+          stopParam[i] = true;
+          startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps);
+          ctx.setState({play:true, stopParam:stopParam});
+        }
+      }
+    }
+    setTimeout(function() {
+      ctx.setState({play: true});
+      console.log('button press timeout -- start');
+    },600);
+  }
+  else {
+    alert("Invalid duration values for: " + temp.toString())
+  }
 }
 
-sendScPattern(tidalServerLink, pattern) {
-  store.dispatch(sendScPattern(tidalServerLink, pattern));
+stopTimer() {
+  const ctx = this;
+  const {stopParam,channels, play} = ctx.state;
+  for (var i = 0; i < channels.length; i++) {
+    if(stopParam[i] === true){
+      stopParam[i] = false;
+      ctx.setState({play:false, stopParam:stopParam});
+      store.dispatch(stopIndividualTimer(i));
+    }
+  }
+  setTimeout(function() {
+    ctx.setState({play: false});
+    console.log('button press timeout -- stop');
+  },600);
 }
 
-consoleSubmit(tidalServerLink, value){
-  store.dispatch(consoleSubmit(tidalServerLink, value));
+pauseTimer() {
+  const ctx = this;
+  const {stopParam,channels, play} = ctx.state;
+  for (var i = 0; i < channels.length; i++) {
+    if(stopParam[i] === true){
+      stopParam[i] = false;
+      ctx.setState({play:false, stopParam:stopParam});
+      store.dispatch(pauseIndividualTimer(i));
+    }
+  }
+  setTimeout(function() {
+    ctx.setState({play: false});
+    console.log('button press timeout -- pause');
+  },600);
 }
+////////////////////////////// TIMER ENDS ////////////////////////////
 
+
+
+////////////////////////////// HANDLERS ////////////////////////////
 handleSubmit = event => {
   const body=event.target.value
   const ctx=this;
-  const {scPattern, tidalServerLink }=ctx.state;
+  const {scPattern, tidalServerLink, tidalOnClickClass }=ctx.state;
+  console.log(tidalOnClickClass);
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
+    console.log(tidalOnClickClass);
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
@@ -281,11 +327,14 @@ handleSubmit = event => {
 
 
 handleConsoleSubmit = event => {
-  const value = event.target.value;
+  const body = event.target.value;
   const ctx = this;
-  const {tidalServerLink} = ctx.state;
-  if(event.keyCode === 13 && event.ctrlKey && value){
-    ctx.consoleSubmit(tidalServerLink, value);
+  const {tidalServerLink, tidalOnClickClass} = ctx.state;
+  if(event.keyCode === 13 && event.ctrlKey && body){
+    ctx.setState({tidalOnClickClass: ' Executed'});
+    console.log(tidalOnClickClass);
+    setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
+    ctx.consoleSubmit(tidalServerLink, body);
   }
 }
 
@@ -305,115 +354,41 @@ handleGlobalCommands = event => {
   var temp = body;
   ctx.setState({globalCommands:temp});
 }
-
-updateMatrix(patterns, values, item, transition, duration) {
-
-  const ctx = this;
-  const { steps, channels } = ctx.state;
-  const items = this.props[this.state.modelName.toLowerCase()]
-
-  // DEBUG PRINTING
-  // _.forEach(Object.values(items), function(d){
-  //   console.log(d.matName + ' ' + d.sceneIndex);
-  // });
-  // console.log(transition, duration);
-
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels));
-
-}
-
-soloChannel =  ({target : {id}}) => {
-  const ctx = this;
-  const {channels,solo,soloSentinel} = ctx.state;
-  var _index = _.indexOf(channels,id);
-  if(_index !== -1 ){
-
-    for (var i = 0; i < solo.length; i++) {
-      if(_index !== i)
-        solo[i] = false;
-    }
-    solo[_index] = !solo[_index];
-    ctx.setState({solo: solo, soloSentinel : solo[_index]});
-
-  }
-}
-
-renderPlayer() {
-  const ctx=this;
-  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
-  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-  var count = 1;
-  const transitionValue = function(c){
-    if(ctx.state.transition){
-      return ctx.state.transition[_.indexOf(channels, c)];
-    }
-    else {
-      return ''
-    }
-  };
-
-
-  return (<div className="Player-holder">
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"6%"}}>-</div>
-      {_.map(channels, c => {
-        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" style = {{margin: 5}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
-        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-         </div>
-      })}
-    </div>
-    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
-      <div className={playerClass}>
-        <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
-      {_.map(channels, c => {
-        return <input className = "playbox" id = {c} key = {c}
-        placeholder={" - "}
-        value = {transitionValue(c)}
-        style = {{margin: 5}}
-        onChange = {ctx.updateT.bind(ctx)}
-        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
-      })}
-      </div>
-  </div>)
-}
 updateDur = ({target : {value, id}}) => {
-
-    const ctx = this;
-    const {channels,steps} = ctx.state;
-    const {timer} = ctx.props;
-    var _index = _.indexOf(channels,id);
-    try {
-      store.dispatch(updateTimerduration(_index,value,steps));
-    } catch (e) {
-        console.error("Please input numbers only.");
+  const ctx = this;
+  const {channels,steps} = ctx.state;
+  const {timer} = ctx.props;
+  var _index = _.indexOf(channels,id);
+  try {
+    store.dispatch(updateTimerduration(_index,value,steps));
+  } catch (e) {
+      console.error("Please input numbers only.");
     }
 }
 
 _handleKeyPress = event => {
 
   const ctx=this;
-  const {steps, channels, timer, play} = ctx.state;
+  const {stopParam, steps, channels, timer, play} = ctx.state;
   const _key = event.target.id;
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
 
   if(event.keyCode === 13 && event.ctrlKey){
     if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-      if(ctx.props.timer.timer[_index].isActive === true){
-        store.dispatch(pauseIndividualTimer(_index));
+      if(stopParam[_index] !== true){
+        stopParam[_index] = true;
+        startIndividualTimer(_index, value,steps);
+        ctx.setState({play:true, stopParam:stopParam});
       }
-      startIndividualTimer(_index, value,steps);
-      ctx.setState({play:true});
     }
   }
   else if (event.keyCode === 13 && event.shiftKey){
-    // if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-    if(ctx.props.timer.timer[_index].isActive === true){
+    if(stopParam[_index] === true){
+      stopParam[_index] = false;
+      ctx.setState({stopParam:stopParam});
       store.dispatch(stopIndividualTimer(_index));
     }
-    // }
   }
 }
 
@@ -448,56 +423,125 @@ _handleKeyPressT = event => {
    ctx.setState({transition:temp});
   }
 }
-startTimer() {
+
+
+handleSubmitCell = event => {
+  const ctx=this;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
+  const { timer, click, patterns }=ctx.props;
+
+  var body = event.target.id;
+  var c = _.split(body,',')[0]-1;
+  var i = _.split(body,',')[1];
+  var text = event.target.value;
+  const getScenePatterns = () => {
+    var scenePatterns = [];
+    const items = this.props[this.state.modelName.toLowerCase()]
+    _.each(items, function(d){
+      if(d.matName === activeMatrix)
+        scenePatterns = d.patterns;
+    })
+    return scenePatterns;
+  }
+
+  if(event.keyCode === 13 && event.ctrlKey){
+    store.dispatch(assignTimer(timer.timer[c], steps, i))
+    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
+  }
+}
+////////////////////////////// HANDLERS ////////////////////////////
+updateMatrix(patterns, values, item, transition, duration) {
 
   const ctx = this;
-  const {channels, steps, play} = ctx.state;
+  const { steps, channels } = ctx.state;
+  const items = this.props[this.state.modelName.toLowerCase()]
 
-  var temp = [];
-  for (var i = 0; i < channels.length; i++) {
-    if(isNaN(parseFloat(ctx.props.timer.timer[i].duration)))
-      temp.push(channels[i]);
-  }
+  // DEBUG PRINTING
+  // _.forEach(Object.values(items), function(d){
+  //   console.log(d.matName + ' ' + d.sceneIndex);
+  // });
+  // console.log(transition, duration);
 
-  if(temp.length === 0){
-    for (var i = 0; i < channels.length; i++) {
-      if (!ctx.props.timer.timer[i].isActive)
-        startIndividualTimer(i, ctx.props.timer.timer[i].duration, steps);
+  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels));
+
+}
+
+soloChannel =  ({target : {id}}) => {
+  const ctx = this;
+  const {channels,solo,soloSentinel} = ctx.state;
+  var _index = _.indexOf(channels,id);
+  if(_index !== -1 ){
+
+    for (var i = 0; i < solo.length; i++) {
+      if(_index !== i)
+        solo[i] = false;
     }
-    setTimeout(function() {
-      ctx.setState({play: true});
-      console.log('button press timeout -- start');
-    },600);
-  }
-  else {
-    alert("Invalid duration values for: " + temp.toString())
+    solo[_index] = !solo[_index];
+    ctx.setState({solo: solo, soloSentinel : solo[_index]});
+
   }
 }
 
-pauseTimer() {
-
-    const ctx = this;
-    const {channels, play} = ctx.state;
-    for (var i = 0; i < channels.length; i++) {
-        store.dispatch(pauseIndividualTimer(i));
-    }
-    setTimeout(function() {
-      ctx.setState({play: false});
-      console.log('button press timeout -- pause');
-    },600);
+runTidal() {
+  const ctx=this;
+  const { tidalServerLink } = ctx.state;
+  store.dispatch(initMyTidal(tidalServerLink));
 }
 
-stopTimer() {
-
+sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
   const ctx = this;
-  const {channels, play} = ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-      store.dispatch(stopIndividualTimer(i));
-  }
-  setTimeout(function() {
-    ctx.setState({play: false});
-    console.log('button press timeout -- stop');
-  },600);
+  const {globalCommands,globalTransformations, storedPatterns} = ctx.state;
+  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands,storedPatterns));
+}
+sendSCMatrix(tidalServerLink, vals, patterns) {
+  store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
+}
+
+sendScPattern(tidalServerLink, pattern) {
+  store.dispatch(sendScPattern(tidalServerLink, pattern));
+}
+
+consoleSubmit(tidalServerLink, value){
+  store.dispatch(consoleSubmit(tidalServerLink, value));
+}
+
+renderPlayer() {
+  const ctx=this;
+  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
+  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
+  var count = 1;
+  const transitionValue = function(c){
+    if(ctx.state.transition){
+      return ctx.state.transition[_.indexOf(channels, c)];
+    }
+    else {
+      return ''
+    }
+  };
+  return (<div className="Player-holder">
+    <div className={playerClass}>
+      <div className="playbox playbox-cycle" style={{width:"6%"}}>-</div>
+      {_.map(channels, c => {
+        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" style = {{margin: 5}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
+        onChange = {ctx.updateDur.bind(ctx)}onKeyUp={ctx._handleKeyPress.bind(ctx)}/>
+        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
+         </div>
+      })}
+    </div>
+    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
+      <div className={playerClass}>
+        <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
+      {_.map(channels, c => {
+        return <input className = "playbox" id = {c} key = {c}
+        placeholder={" - "}
+        value = {transitionValue(c)}
+        style = {{margin: 5}}
+        onChange = {ctx.updateT.bind(ctx)}
+        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      })}
+      </div>
+  </div>)
 }
 
 renderStep(x, i) {
@@ -579,31 +623,6 @@ renderStep(x, i) {
   </div>;
 }
 
-
-handleSubmitCell = event => {
-  const ctx=this;
-  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, patterns }=ctx.props;
-
-  var body = event.target.id;
-  var c = _.split(body,',')[0]-1;
-  var i = _.split(body,',')[1];
-  var text = event.target.value;
-  const getScenePatterns = () => {
-    var scenePatterns = [];
-    const items = this.props[this.state.modelName.toLowerCase()]
-    _.each(items, function(d){
-      if(d.matName === activeMatrix)
-        scenePatterns = d.patterns;
-    })
-    return scenePatterns;
-  }
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    store.dispatch(assignTimer(timer.timer[c], steps, i))
-    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
-  }
-}
 
 changeName({target: { value }}) {
   const ctx = this;
@@ -915,15 +934,15 @@ render() {
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <textarea className="defaultPatternArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
-              <textarea className="defaultPatternArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+              <textarea className="defaultPatternHistoryArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
+              <textarea className="defaultPatternHistoryArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
+              <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
             </div>
           </Layout>
           <LayoutSplitter />
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
-              <textarea className="defaultPatternArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
               <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
             </div>
           </Layout>

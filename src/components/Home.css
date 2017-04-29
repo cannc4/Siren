@@ -29,18 +29,17 @@
   background-color: rgba(255,255,255, 0.05) !important;
 }
 
-@keyframes highlight {
-  from {background: rgb(255,255,102);}
-  to {background: rgba(0,0,0, 0);}
+@keyframes flusa {
+  from {background-color: rgba(255,255,102,0.2);}
+  to {background-color: rgba(0,0,0, 0);}
 }
 .Executed {
-  animation-name: highlight;
+  animation-name: flusa;
   animation-duration: 1s;
 }
 
 .LayoutSplitter {
     background: rgba(255,255,255, 0.5) !important;
-
     -moz-box-sizing: border-box !important;
     -webkit-box-sizing: border-box !important;
     box-sizing: border-box !important;
@@ -151,6 +150,7 @@
 
 .defaultPatternArea{
   display: flex;
+  font-size: 18px;
   flex-direction: column;
   align-self: flex-end;
   margin: 5px;
@@ -160,6 +160,7 @@
 
 .defaultPatternHistoryArea {
   display: flex;
+  font-size: 12px;
   flex-direction: column;
   align-self: flex-end;
   margin: 5px;
