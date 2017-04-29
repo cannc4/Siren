@@ -630,10 +630,6 @@ export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});
 
 var timer = [];
-export function startIndividualTimer(_index,_duration, _steps) {
-  timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
-}
-
 export const updateTimerduration = (_index,_duration,_steps) => {
   if(_duration === "" || !isNaN(parseInt(_duration)))
     return {
@@ -665,7 +661,16 @@ export const updtmr = (_index) => {
      }
 }
 
+var stopParam = [];
+export const startIndividualTimer = (_index,_duration, _steps) => {
+  if(!stopParam[_index]){
+    stopParam[_index] = true;
+    timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
+  }
+}
+
 export const pauseIndividualTimer = (_index) => {
+  stopParam[_index] = false;
   timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
   return {
     type: 'PAUSE_TIMER', payload: _index
@@ -673,12 +678,12 @@ export const pauseIndividualTimer = (_index) => {
 }
 
 export const stopIndividualTimer = (_index) => {
-  timerWorker[_index].postMessage({type : "stop", id: _index,timer: timer[_index]});
+  stopParam[_index] = false;
+  timerWorker[_index].postMessage({type : "stop", id: _index, timer: timer[_index]});
   return {
     type: 'STOP_TIMER', payload: _index
   }
 }
-
 
 export function startClick() {
   return dispatch => {
