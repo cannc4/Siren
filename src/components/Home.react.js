@@ -6,7 +6,7 @@ import './Home.css';
 
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
-      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,
+      consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
       startClick,stopClick, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
@@ -24,7 +24,7 @@ import 'codemirror/addon/dialog/dialog.js';
 import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
-
+var Button = require('react-button')
 var options = {
     mode: '_rule',
     theme: '_style',
@@ -44,7 +44,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5', 'm1'],
+      channels: ['1','2','3', '4', '5'],
       timer: [],
       values: {},
       scPattern: '',
@@ -64,8 +64,10 @@ class Home extends Component {
       globalTransformations: '',
       username: '',
       storedPatterns: [],
+      storedGlobals: [{transform:'', command: ''}],
       tempDur : [],
-      tidalOnClickClass:  ' '
+      tidalOnClickClass:  ' ',
+      pressed : false
     }
   }
 //Clock for Haskell
@@ -127,13 +129,17 @@ componentWillMount(props,state){
   document.addEventListener("keydown", this.handleglobalKeys.bind(this));
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer, solo}=ctx.state;
+  const { channelEnd, channels , steps , timer, solo, storedGlobals}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
    if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
    ctx.createTimer(i, 48, steps);
 
    tempEnd[i] = false
    solo[i] = false;
+
+   storedGlobals[0] = {transform: '', command: ''}
+   ctx.setState({storedGlobals : storedGlobals})
+
  }
  ctx.setState({channelEnd : tempEnd});
 }
@@ -333,7 +339,6 @@ handleGlobalTransformations = event => {
   var temp = body;
   ctx.setState({globalTransformations:temp});
 }
-
 
 handleGlobalCommands = event => {
   const body=event.target.value;
@@ -833,10 +838,32 @@ handleglobalKeys = event => {
   }
 }
 
+clicked = event => {
+  const ctx=this;
+  const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
+
+  if (event.id === 0){
+    ctx.SetState({globalTransformations:'', globalCommands: ''});
+  }
+  else {
+    var ttm = Object.values(storedGlobals[event.target.id]);
+    console.log(ttm);
+    store.dispatch(globalUpdate(ttm[0],ttm[1]));
+    ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+  }
+
+}
+record = event => {
+  const ctx=this;
+  const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
+  var temp = {transform: globalTransformations, command:globalCommands};
+  storedGlobals.push(temp);
+  ctx.setState({storedGlobals:storedGlobals})
+}
 render() {
   const ctx=this;
   const { timer}=ctx.props;
-  const { scPattern, channels, songmodeActive, activeMatrix,storedPatterns }=ctx.state
+  const { scPattern, channels, songmodeActive, activeMatrix,storedPatterns,pressed, storedGlobals,globalTransformations,globalCommands}=ctx.state
 
   const updateScPattern = event  => {
     ctx.setState({scPattern: event.target.value})
@@ -894,9 +921,13 @@ render() {
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <textarea className="defaultPatternHistoryArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} placeholder="Global Transformation "  />
-              <textarea className="defaultPatternHistoryArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} placeholder="Global Command " />
-              <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+              <input className="defaultPatternHistoryArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
+              <input className="defaultPatternHistoryArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
+
+              {_.map(storedGlobals, (c, i) => {
+                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}  activeStyle={{position:'relative', top: 1}} >{i}</Button>
+               })}
+               <Button onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
             </div>
           </Layout>
           <LayoutSplitter />
@@ -904,6 +935,7 @@ render() {
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
               <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
+              <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
             </div>
           </Layout>
           <LayoutSplitter />

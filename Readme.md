@@ -2,7 +2,7 @@
 
 *Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
 
-**Note:** This is a beta release (*v0.1b*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
+**Note:** This is a beta release (*v0.2a*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
 
 ## Download
 
@@ -15,7 +15,7 @@ git clone https://github.com/cannc4/Siren.git
 ## Build and Run
 
 ### Dependencies:
-Make sure the latest versions of following software are installed for your system user 
+Make sure the latest versions of following software are installed for your system user
 
 - [SuperCollider](http://supercollider.github.io/download.html)
 - [NodeJS](https://nodejs.org/en/download/)
@@ -28,7 +28,7 @@ cd path/to/siren
 npm i
 ```
 
-In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file. 
+In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file.
 
 Copy paste your startup files to `scd-start-default.scd` and `tidal-boot-default.hs` into config folder or set the appropriate paths in `config.json`
 
@@ -60,11 +60,13 @@ then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser 
 |---|---|---|
 | **Figure (a)** | **Figure (b)** | **Figure (c)** |
 
-### Duration
+### Duration and Timer
 
 Duration of each channel can be specified using the textarea next to channel number on top of the grid. Duration is the time it takes to reach the last step in seconds.
 
 `ctrl + enter` starts selected timer and `shift + enter` stops it.
+
+Alternatively, `ctrl + channel number` starts the desired channel and `shift + channel number` stops it.
 
 *examples in Figure (b)*
 - Channel number (i.e. `2`)
@@ -113,11 +115,11 @@ Mathematical expressions can be used in the patterns in the dictionary, parser e
 - Math expression enclosed by `& ... &` (i.e. in the body of `jvv`: ```... [~ f3 &`t`%3 &] ~ ...```)
 
 ### Value Parameters
-Any character sequence inside Tidal command can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want. 
+Any character sequence inside Tidal command can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want.
 
 ```n `x` # s `y` ```
 
-This can be called with any ``` `x` ``` or ``` `y` ``` value such as (assume it's named as `sq`): 
+This can be called with any ``` `x` ``` or ``` `y` ``` value such as (assume it's named as `sq`):
 ``` sq `"{3*4}%3"` `"bd"` ``` or
 ``` sq `"{3*4 4*2}%3"` `"bd"` ``` or
 ``` sq `"{3*4 4*2}%3"` `"bd"` ```
@@ -134,6 +136,8 @@ This can be called with any ``` `x` ``` or ``` `y` ``` value such as (assume it'
 - As each cell contains a pattern, having a timer duration like 4 seconds doesn't really makes sense if you have 8 steps (i.e. 4/8 seconds per step)
 
 ## Known Bugs
-- Timer start/stop fails on quick toggle (restart requires)
 - Editing parameters in the patterns fails when timer is active
-- To be listed
+
+## TODO
+- Config generator
+- boot/shut down server from the interface

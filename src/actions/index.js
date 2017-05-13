@@ -465,7 +465,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
           newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
         }
         // Random parameter
-        else if(_.indexOf(cellItem[i], '[') != -1 )
+        else if(_.indexOf(cellItem[i], '|') != -1 )
         {
           cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
           var bounds = _.split(cellItem[i], ',');
@@ -529,12 +529,14 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
-        return [pattern ,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        var orbit = "#orbit " + _.indexOf(channels,_k);
+        return [pattern + orbit,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else {
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
-        return [pattern , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        var orbit = "#orbit " + _.indexOf(channels,_k);
+        return [pattern+ orbit , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
     }
     else
@@ -625,6 +627,14 @@ export const consoleSubmit = (server, expression) => {
     });
   }
 }
+
+
+export const globalUpdate = (t, c) => {
+  return {
+    type: 'UPDATE_GLOBAL', transform: t, command: c
+  }
+}
+
 
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});

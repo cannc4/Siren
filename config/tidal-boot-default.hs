@@ -1,14 +1,10 @@
 :set prompt ""
 :module Sound.Tidal.Context
-:module Sound.Tidal.Context.Time
-import Sound.Tidal.Scales
+import qualified Sound.Tidal.Scales as Scales
 import Sound.OSC.FD
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.Output
-import qualified Sound.Tidal.Scales as Scales
 import Data.Maybe
-
-
 
 
 procF_t <- openUDP "127.0.0.1" 12000
@@ -22,8 +18,8 @@ d_OSC <- openUDP "127.0.0.1" 12000
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
 
-m3 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
-m1 <- midiStream devices "IAC Driver Tidal" 1 synthController
+m1 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+m2 <- midiStream devices "IAC Driver Tidal" 1 synthController
 
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
@@ -49,6 +45,40 @@ m1 <- midiStream devices "IAC Driver Tidal" 1 synthController
 let bps x = cps (x/2)
 let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,c1,c2,c3,c4,c5,c6,c7,c8,c9]
 let solo = (>>) hush
+
+
+
+-- custom Tidal transform/effect functions
+
+let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
+    rip' a b c d e p = within (a, b) (slow 2 . rev . stut c d e) p
+    spike p = ((|+| delaytime (scale 0.001 0.3 $ slow 7.1 sine1)) . (|+| delayfeedback (scale 0.7 0.99 $ slow 6.71 sine1))) $ p
+    spike' p = (|+| delay "0.3") $ spike $ p
+    gtfo p = (const $ sound "~") p
+    shift p = (1024 <~)  p
+    shift' x p = (x <~) p
+    choose xs = (xs !!) <$> (irand $ fromIntegral $ length xs)
+    one p = stut' 1 (0.125/2) (|*| gain "1") $ p
+    one' p = rarely (stut' 1 (0.125/2) (|*| gain "1")) $ shift' 1024 $ p
+    one'' p = sometimes (stut' 1 (0.125/2) (|*| gain "1")) $ shift' 1024 $ p
+    rep n p = stut' (n-1) (0.125*3) (|*| gain "1") $ p
+    rep' n p = stut' (n-1) (0.125/2*3) (|*| gain "1") $ p
+    rep'' n p = stut' (n-1) (0.125/4*3) (|*| gain "1") $ p
+    prog = (|+| note "{0 0 0 2 2}%1")
+    timemod p = whenmod 28 18 (foldEvery [2,3,4] (0.25 <~)) $ p
+    progwav = (|+| up "{0 0 0 2 2}%1")
+
+
+let (degree, degree_p) = pF "degree" (Nothing)
+   (ctranspose, ctranspose_p) = pF "ctranspose" (Nothing)
+   (mtranspose, mtranspose_p) = pF "mtranspose" (Nothing)
+   (gtranspose, gtranspose_p) = pF "gtranspose" (Nothing)
+   (harmonic, harmonic_p) = pF "harmonic" (Nothing)
+   (detune, detune_p) = pF "detune" (Nothing)
+   (scale, scale_p) = pS "scaleName" (Nothing)
+   (tuning, tuning_p) = pS "tuningName" (Nothing)
+   (stepsPerOctave, stepsPerOctave_p) = pI "stepsPerOctave" (Nothing)
+   (octaveRatio, octaveRatio_p) = pF "octaveRatio" (Nothing)
 
 
 -- params
@@ -125,9 +155,12 @@ fmod = grp [fenv_p, fattack_p, fhold_p, frelease_p]
 (sfattack, sfattack_p) = pF "sfattack" (Just 0)
 (sfrelease, sfrelease_p) = pF "sfrelease" (Just 0)
 (sfenv, sfenv_p) = pF "sfenv" (Just 0)
+(pbend, pbend_p) = pF "pbend" (Just 1)
 sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
-
-
+(cpcutoff, cpcutoff_p) = pF "cpcutoff" (Just 500)
+(note3, note3_p) = pF "note3" (Just 44)
+(note2, note2_p) = pF "note2" (Just 48)
+(note, note_p) = pF "note" (Just 0)
 
 
 :set prompt "tidal> "

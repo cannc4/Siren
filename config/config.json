@@ -7,7 +7,7 @@
   "scsynth": "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth",
   "sclang_conf": "/Users/canince/Library/Application Support/SuperCollider/sclang_conf.yaml",
   "port": 3001,
-  "path" : "/Users/canince/Documents/Github/Siren/config/config.json",
-  "tidal_boot": "/Users/canince/Documents/Github/Siren/config/tidal-boot-default.hs",
-  "scd_start": "/Users/canince/Documents/Github/Siren/config/scd-start-default.scd"
+  "path" : "/Users/canince/Documents/git/Siren/config/config.json",
+  "tidal_boot": "/Users/canince/Documents/git/Siren/config/tidal-boot-default.hs",
+  "scd_start": "/Users/canince/Documents/git/Siren/config/scd-start-default.scd"
 }
