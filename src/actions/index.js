@@ -511,7 +511,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         }
 
         else if(solo[_.indexOf(channels,_k)] === true){
-          k = "d"+(k);
+          k = +(k);
           soloHolder = "solo $ " + k ;
           transitionHolder = " $ ";
         }
@@ -525,18 +525,18 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       }
 
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-      if (_.indexOf(channels,_k) === _.indexOf(channels, 'm1')){
+      if (_.indexOf(channels,_k) === _.indexOf(channels, 'MIDI')){
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
-        var orbit = "#orbit " + _.indexOf(channels,_k);
-        return [pattern + orbit,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        //var orbit = "#orbit " + _.indexOf(channels,_k);
+        return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else {
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
         var orbit = "#orbit " + _.indexOf(channels,_k);
-        return [pattern+ orbit , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [pattern + orbit, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
     }
     else

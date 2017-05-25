@@ -169,8 +169,11 @@ componentDidUpdate(props, state) {
             if(d.matName === activeMatrix)
             scenePatterns = d.patterns;
           })
+          // if (i%4 == 0)
+          //   ctx.updateGlobalsTest();
 
           ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,timer.timer[i]);
+
         }
       }
 
@@ -838,6 +841,15 @@ handleglobalKeys = event => {
   }
 }
 
+updateGlobalsTest(){
+  const ctx = this;
+  const {globalTransformations,globalCommands,storedGlobals} = ctx.state;
+  var ttm = Object.values(storedGlobals[_.random(0,storedGlobals.length)]);
+  console.log(storedGlobals);
+  store.dispatch(globalUpdate(ttm[0],ttm[1]));
+  ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+}
+
 clicked = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
@@ -847,7 +859,6 @@ clicked = event => {
   }
   else {
     var ttm = Object.values(storedGlobals[event.target.id]);
-    console.log(ttm);
     store.dispatch(globalUpdate(ttm[0],ttm[1]));
     ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
   }

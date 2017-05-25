@@ -18,8 +18,11 @@ d_OSC <- openUDP "127.0.0.1" 12000
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
 
-m1 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
-m2 <- midiStream devices "IAC Driver Tidal" 1 synthController
+m1 <- midiStream devices "USB MIDI Device Port 2" 1 synthController
+m2 <- midiStream devices "USB MIDI Device Port 2" 2 synthController
+m3 <- midiStream devices "USB MIDI Device Port 2" 3 synthController
+m4 <- midiStream devices "USB MIDI Device Port 2" 4 synthController
+m5 <- midiStream devices "USB MIDI Device Port 1" 5 synthController
 
 (c1,ct1) <- dirtSetters getNow
 (c2,ct2) <- dirtSetters getNow
