@@ -414,6 +414,7 @@ export const assignTimer = (timer,steps, _index) => {
 // Context //
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
+var patListBack = [];
 export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
   return dispatch => {
     const x =  _.compact(_.map(vals,(v,k) => {
@@ -438,6 +439,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       });
       return maths;
     }
+    // function storePatterns(){
+    //
+    //
+    //
+    // }
 
     // pattern name
     const cellName = getParameters(v)[0];
@@ -511,7 +517,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         }
 
         else if(solo[_.indexOf(channels,_k)] === true){
-          k = "d"+(k);
+          k = +(k);
           soloHolder = "solo $ " + k ;
           transitionHolder = " $ ";
         }
@@ -521,22 +527,23 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         globalTransformations = '';
       }
       else {
-        globalTransformations = globalTransformations + " $ "
+        globalTransformations = globalTransformations ;
       }
 
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-      if (_.indexOf(channels,_k) === _.indexOf(channels, 'm1')){
+      if (_.indexOf(channels,_k) === _.indexOf(channels, 'MIDI')){
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
-        var orbit = "#orbit " + _.indexOf(channels,_k);
-        return [pattern + orbit,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        //var orbit = "#orbit " + _.indexOf(channels,_k);
+        return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else {
         storedPatterns[_k-1] = '';
-        storedPatterns[_k-1] = pattern;
         var orbit = "#orbit " + _.indexOf(channels,_k);
-        return [pattern+ orbit , "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        pattern = pattern + orbit ;
+        storedPatterns[_k-1] = pattern;
+        return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
     }
     else
@@ -549,7 +556,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
     });
   }
 }
-
+// export const storePatterns = (sp) => {
+//   return {
+//     type: 'PATTERN_GLOBAL', payload: sp
+//   }
+// }
 export const continousPattern = (server, pattern) => {
   return dispatch => {
     const x = pattern;
@@ -561,6 +572,8 @@ export const continousPattern = (server, pattern) => {
   }
 }
 ////////////////// PARSER ENDS HERE //////////////////
+
+
 
 export const updateMatrix = (patterns, values, i, transition, duration, steps, channels) => {
   function placeValue2D(row, col, item, container){
