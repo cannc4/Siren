@@ -1,3 +1,11 @@
+# Updates
+### Global controls
+There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and
+sections can be recalled by creating presets. 
+
+**Note:** Currently each channel has an dedicated orbit hence total of 5 - you can customize it however you like.
+
+
 # Siren
 
 *Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
@@ -85,6 +93,7 @@ Patterns can be looked up from the dictionary with their names and parameters. S
 
 *example in Figure (b)*
 - Pattern functions in cells (i.e. ```bt2 `every 2(#coarse 12)` `c` ```)
+
 
 ### Transitions
 Transitions are stored in the bottom row of the grid and are unique for each scene.

@@ -68,8 +68,6 @@ class Home extends Component {
       tempDur : [],
       tidalOnClickClass:  ' ',
       pressed : false,
-      active_t : ' ',
-      active_c: ' '
     }
   }
 //Clock for Haskell
@@ -446,13 +444,6 @@ updateMatrix(patterns, values, item, transition, duration) {
   const ctx = this;
   const { steps, channels } = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
-
-  // DEBUG PRINTING
-  // _.forEach(Object.values(items), function(d){
-  //   console.log(d.matName + ' ' + d.sceneIndex);
-  // });
-  // console.log(transition, duration);
-
   store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels));
 
 }
@@ -885,9 +876,7 @@ updatePatterns = event => {
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         var b = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
         tempAr[i] = b;
-        //console.log("FIRST" + tempAr[i]);
         if(transition[i] !== '' && transition[i] !== undefined){
-          //tempAr[i] = 't' + channels[i] + transition[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
           tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
           console.log(tempAr[i]);
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
