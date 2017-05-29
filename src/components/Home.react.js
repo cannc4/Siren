@@ -67,7 +67,9 @@ class Home extends Component {
       storedGlobals: [{transform:'', command: ''}],
       tempDur : [],
       tidalOnClickClass:  ' ',
-      pressed : false
+      pressed : false,
+      active_t : ' ',
+      active_c: ' '
     }
   }
 //Clock for Haskell
@@ -871,6 +873,34 @@ record = event => {
   storedGlobals.push(temp);
   ctx.setState({storedGlobals:storedGlobals})
 }
+
+
+updatePatterns = event => {
+  const body = event.target.value;
+  const ctx = this;
+  const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
+  if(event.keyCode === 13 && event.ctrlKey){
+    var tempAr= [] ;
+    for (var i = 0; i < storedPatterns.length; i++) {
+      if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
+        var b = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+        tempAr[i] = b;
+        //console.log("FIRST" + tempAr[i]);
+        if(transition[i] !== '' && transition[i] !== undefined){
+          //tempAr[i] = 't' + channels[i] + transition[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
+          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
+          console.log(tempAr[i]);
+          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+        }
+        else {
+          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
+          console.log(tempAr[i]);
+          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+        }
+      }
+    }
+  }
+}
 render() {
   const ctx=this;
   const { timer}=ctx.props;
@@ -932,8 +962,8 @@ render() {
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <input className="defaultPatternHistoryArea" key={'globaltransform'} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
-              <input className="defaultPatternHistoryArea" key={'globalcommand'} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
+              <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.updatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
+              <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.updatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
 
               {_.map(storedGlobals, (c, i) => {
                  return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}  activeStyle={{position:'relative', top: 1}} >{i}</Button>

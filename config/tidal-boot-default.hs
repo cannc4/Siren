@@ -18,21 +18,7 @@ d_OSC <- openUDP "127.0.0.1" 12000
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
 
-m1 <- midiStream devices "USB MIDI Device Port 2" 1 synthController
-m2 <- midiStream devices "USB MIDI Device Port 2" 2 synthController
-m3 <- midiStream devices "USB MIDI Device Port 2" 3 synthController
-m4 <- midiStream devices "USB MIDI Device Port 2" 4 synthController
-m5 <- midiStream devices "USB MIDI Device Port 1" 5 synthController
-
-(c1,ct1) <- dirtSetters getNow
-(c2,ct2) <- dirtSetters getNow
-(c3,ct3) <- dirtSetters getNow
-(c4,ct4) <- dirtSetters getNow
-(c5,ct5) <- dirtSetters getNow
-(c6,ct6) <- dirtSetters getNow
-(c7,ct7) <- dirtSetters getNow
-(c8,ct8) <- dirtSetters getNow
-(c9,ct9) <- dirtSetters getNow
+m5 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -46,7 +32,7 @@ m5 <- midiStream devices "USB MIDI Device Port 1" 5 synthController
 
 
 let bps x = cps (x/2)
-let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,c1,c2,c3,c4,c5,c6,c7,c8,c9]
+let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
 
