@@ -161,12 +161,14 @@ componentDidUpdate(props, state) {
         const vals = values[runNo[i]][i];
         const channel = channels[i];
         if (vals !== undefined) {
+
           if(channel === 'G'){
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
             console.log(newGlobals);
             if(newGlobals!== undefined){
               ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
               }
+
           }
           else {
             const obj = {[channel]: vals};
@@ -908,7 +910,8 @@ handleUpdatePatterns = event => {
   const ctx = this;
   const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey){
-  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalCommands,channels, transition);
+
+  ctx.updatePatterns(tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition);
     }
 }
 

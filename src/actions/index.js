@@ -558,11 +558,13 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         pattern =  "m1 $ " + newCommand;
         storedPatterns[_k-1] = '';
         storedPatterns[_k-1] = pattern;
+        console.log(pattern);
         //var orbit = "#orbit " + _.indexOf(channels,_k);
         return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else {
         pattern = pattern + orbit ;
+        console.log(pattern);
         return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
     }
