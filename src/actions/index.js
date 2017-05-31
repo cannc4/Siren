@@ -50,6 +50,7 @@ const models = {
       transitions: 'Object',
       patterns: 'Object',
       sceneIndex: 'Integer',
+      storedGlobals: 'Object',
       uid: 'String'
     }
   }
@@ -270,7 +271,7 @@ export function fbSyncMatrix (model,data){
 export function fbcreateMatrix(model, data) {
   if (Firebase.auth().currentUser !== null)
   {
-    var datakey, sceneIndex, values, patterns, uid, transition, duration;
+    var datakey, sceneIndex, values, patterns, uid, transition, duration, storedGlobals;
     models[model].dataSource.ref.once('value', dat => {
       var u_id = Firebase.auth().currentUser.uid;
       if ( u_id !== null)
@@ -281,7 +282,9 @@ export function fbcreateMatrix(model, data) {
           sceneIndex = obj.sceneIndex;
           // transitions = obj.transition;
           // duration = obj.duration;
+          // storedGlobals = obj.globals;
           if (obj.transitions !== undefined) transition = obj.transitions;
+          if (obj.globals !== undefined) storedGlobals = obj.globals;
           if (obj.patterns !== undefined) patterns = obj.patterns;
           uid = obj.uid;
         }
@@ -294,17 +297,21 @@ export function fbcreateMatrix(model, data) {
     if(transition === undefined)
       transition = [];
 
+    if(storedGlobals === undefined)
+      storedGlobals = [];
+
     if (datakey) {
       data.sceneIndex = sceneIndex;
       data.patterns = patterns;
-      // data.transitions = transition;
-
+      data.globals = storedGlobals;
       return models[model].dataSource.child(datakey).update({...data})
     } else {
       if (data.patterns === undefined)
         data.patterns  = [];
       if (data.transitions === undefined)
         data.transitions = [];
+      if (data.globals === undefined)
+          data.storedGlobals = [];
 
       const newObj = models[model].dataSource.push(data);
       return newObj.update({ key: newObj.key })
@@ -385,6 +392,16 @@ export function logout() {
 
 
 export const initMyTidal = (server) => {
+  return dispatch => {
+    axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+    .then((response) => {
+      dispatch({type: 'FETCH_TIDAL', payload: response.data })
+    }).catch(function (error) {
+      console.error(error);
+    });
+  }
+}
+export const exitSC = (server) => {
   return dispatch => {
     axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
     .then((response) => {
@@ -530,6 +547,12 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         globalTransformations = globalTransformations ;
       }
 
+
+      var storepat= soloHolder+ transitionHolder+ newCommand;
+      var orbit = "#orbit " + _.indexOf(channels,_k);
+      storepat = storepat + orbit;
+      storedPatterns[_k-1] = '';
+      storedPatterns[_k-1] = storepat;
       var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
       if (_.indexOf(channels,_k) === _.indexOf(channels, 'MIDI')){
         pattern =  "m1 $ " + newCommand;
@@ -539,10 +562,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else {
-        storedPatterns[_k-1] = '';
-        var orbit = "#orbit " + _.indexOf(channels,_k);
         pattern = pattern + orbit ;
-        storedPatterns[_k-1] = pattern;
         return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
     }
@@ -647,7 +667,11 @@ export const globalUpdate = (t, c) => {
     type: 'UPDATE_GLOBAL', transform: t, command: c
   }
 }
-
+export const globalStore = (storedG) => {
+  return {
+    type: 'STORE_GLOBAL', storedGlobals: storedG
+  }
+}
 
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});

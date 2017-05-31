@@ -63,15 +63,22 @@ class REPL {
       lang.boot().then((sclang) => {
         self.sc = lang;
         setTimeout(function(){
-          const patterns = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
-          lang.interpret(patterns);
+          const samples = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
+          lang.interpret(samples);
 
         }, 4000)
       });
     });
 
   }
-
+  // exitSC() {
+  //     const self = this;
+  //     supercolliderjs.resolveOptions(config.path).then((options) => {
+  //     const SCLang = supercolliderjs.sclang.SCLang;
+  //     const lang = new SCLang(options);
+  //     lang.quit()
+  //   });
+  // }
   sendSC(message) {
     var self = this;
     self.sc.interpret(message);

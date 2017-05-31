@@ -7,7 +7,7 @@ import './Home.css';
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
-      startClick,stopClick, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
+      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 
@@ -44,7 +44,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5', '6'],
+      channels: ['1','2','3', '4', '5', 'G'],
       timer: [],
       values: {},
       scPattern: '',
@@ -161,11 +161,12 @@ componentDidUpdate(props, state) {
         const vals = values[runNo[i]][i];
         const channel = channels[i];
         if (vals !== undefined) {
-          if(channel === '6'){
-            console.log(vals);
+          if(channel === 'G'){
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
             console.log(newGlobals);
-            ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
+            if(newGlobals!== undefined){
+              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
+              }
           }
           else {
             const obj = {[channel]: vals};
@@ -214,7 +215,7 @@ identical(array) {
 progressMatrices(items){
   const ctx = this;
   const { timer } = ctx.props;
-  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, tempDur, channels} = ctx.state;
+  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, tempDur, channels,storedGlobals} = ctx.state;
   var patterns = [];
   const { uid } = ctx.props.user.user;
   if(ctx.identical(channelEnd))
@@ -242,8 +243,9 @@ progressMatrices(items){
 
     });
 
-    updateMatrix(patterns, values, nextObj, transition, duration);
-    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions});
+    updateMatrix(patterns, values, nextObj, transition, duration,storedGlobals);
+    store.dispatch(globalStore(storedGlobals));
+    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions, storedGlobals: nextObj.globals});
 
     for (var i = 0; i < channelEnd.length; i++) {
       channelEnd[i] = false;
@@ -446,12 +448,12 @@ handleSubmitCell = event => {
   }
 }
 ////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, values, item, transition, duration) {
+updateMatrix(patterns, values, item, transition, duration, storedGlobals) {
 
   const ctx = this;
   const { steps, channels } = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels));
+  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels,storedGlobals));
 
 }
 
@@ -476,6 +478,12 @@ runTidal() {
   const { tidalServerLink } = ctx.state;
   store.dispatch(initMyTidal(tidalServerLink));
 }
+//
+// closeSC() {
+//   const ctx=this;
+//   const { tidalServerLink } = ctx.state;
+//   store.dispatch(initMyTidal(tidalServerLink));
+// }
 
 sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
   const ctx = this;
@@ -606,23 +614,26 @@ changeName({target: { value }}) {
 addItem() {
   const ctx = this;
   var patterns = [],
-      duration = [];
-  const { matName, activeMatrix, values, sceneIndex, transition } = ctx.state;
+      duration = [],
+      globals = [];
+  const { matName, activeMatrix, values, sceneIndex, transition,storedGlobals  } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const { uid } = ctx.props.user.user;
-
+  const propstoredGlobals = ctx.props.globalparams.storedGlobals;
   // gets the duration array
   _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
-
+  globals = storedGlobals;
   if(uid !== null && uid !== undefined){
     _.each(items, function(d){
       if(d.uid === uid && d.matName === activeMatrix){
         patterns = d.patterns;
+      //  globals = d.globals;
       }
     })
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration});
+      console.log(storedGlobals);
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration, storedGlobals});
       ctx.setState({sceneIndex: snd});
     }
     else {
@@ -689,19 +700,26 @@ reorder (index,flag){
 
 renderItem(item, dbKey, i) {
   const ctx = this;
-  const { values, activeMatrix, transition} = ctx.state;
+  const { values, activeMatrix, transition,storedGlobals} = ctx.state;
   const { patterns } = ctx.props;
 
   // gets the duration array
   var duration = [];
+  var sglobals = [];
   const model = fetchModel(ctx.state.modelName);
   _.forEach(item.durations, function(d, i){
     duration.push(d);
   });
 
   const updateMatrix = () => {
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions});
-    ctx.updateMatrix(patterns, values, item, transition, duration);
+    if(sglobals === undefined){
+      sglobals = [];
+    }
+    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: item.storedGlobals, globalTransformations: '', globalCommands: ''});
+    console.log(item.storedGlobals);
+    ctx.updateMatrix(patterns, values, item, transition, duration,item.storedGlobals);
+    store.dispatch(globalStore(item.storedGlobals));
+    //console.log(storedGlobals);
   }
 
   const handleDelete = ({ target: { value }}) => {
@@ -803,11 +821,13 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.2-beta</a>
+    <a href="https://github.com/cannc4/Siren">0.2</a>
     </div>
 
   </div>
 }
+
+//onClick={ctx.closeSC.bind(ctx)}
 
 handleglobalKeys = event => {
   const ctx = this;
@@ -854,22 +874,33 @@ clicked = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
 
-  if (event.id === 0){
+  if (event.target.id === 0){
     ctx.SetState({globalTransformations:'', globalCommands: ''});
   }
   else {
+    console.log(storedGlobals);
     var ttm = Object.values(storedGlobals[event.target.id]);
-    store.dispatch(globalUpdate(ttm[0],ttm[1]));
-    ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+    store.dispatch(globalUpdate(ttm[1],ttm[0]));
+    ctx.setState({globalTransformations:ttm[1], globalCommands: ttm[0]})
   }
 
 }
 record = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
-  var temp = {transform: globalTransformations, command:globalCommands};
-  storedGlobals.push(temp);
-  ctx.setState({storedGlobals:storedGlobals})
+  var ns;
+  var temp = {transform: globalCommands, command:globalTransformations};
+  console.log(storedGlobals);
+  if (storedGlobals === undefined){
+    ns = [];
+    ns.push(temp);
+  }
+  else {
+    ns = storedGlobals;
+    ns.push(temp);
+  }
+  ctx.setState({storedGlobals:ns})
+  store.dispatch(globalStore(ns));
 }
 
 handleUpdatePatterns = event => {
@@ -877,7 +908,7 @@ handleUpdatePatterns = event => {
   const ctx = this;
   const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey){
-  ctx.updatePatterns(tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition);
+  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalCommands,channels, transition);
     }
 }
 
@@ -890,7 +921,7 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
         if(transition[i] !== '' && transition[i] !== undefined){
-          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
+          tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
           console.log(tempAr[i]);
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
           //infinite loop if these lines are commmented out(?)
@@ -899,7 +930,7 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
 
         }
         else {
-          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
+          tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
           //infinite loop if these lines are commmented out(?)
           //store.dispatch(globalUpdate(globalCommands,globalTransformations));
@@ -938,8 +969,8 @@ render() {
   {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
   <Layout fill='window'>
       <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
+        <div id="matrices" style={{width: '100%', height: '1000px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '15px'}}>
             <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
             {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}

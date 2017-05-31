@@ -87,17 +87,20 @@
   min-height: 50px;
   height: 90x;
   border: 1px solid rgba(125,125,125, 0.8);
+  padding-bottom: 5px;
 }
 
 .matrices {
   display: flex;
-  flex-grow: 1;
+  flex-grow: 2;
   flex-direction: row;
+  padding-bottom: 5px;
 }
 
 .sceneList {
   display: flex;
   overflow-y: auto;
+  padding-bottom: 5px;
 }
 
 .Player-holder {
