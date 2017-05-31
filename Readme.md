@@ -1,16 +1,16 @@
 # Updates
 ### Global controls
 There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and
-sections can be recalled by creating presets. 
+sections can be recalled by creating presets.
 
-**Note:** Currently each channel has an dedicated orbit hence total of 5 - you can customize it however you like.
+**Note:** Currently each channel has an dedicated `orbit` hence total of 5 - you can customize it however you like by going into `actions/index.js` and commenting out the `pattern + orbit` code. (after the beta all these will be configurable via interface)
 
 
 # Siren
 
 *Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
 
-**Note:** This is a beta release (*v0.2a*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
+**Note:** This is a beta release (*v0.2*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
 
 ## Download
 
