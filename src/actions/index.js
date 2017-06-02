@@ -540,8 +540,8 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
       }
       else {
         storedPatterns[_k-1] = '';
-        var orbit = "#orbit " + _.indexOf(channels,_k);
-        pattern = pattern + orbit ;
+        // var orbit = "#orbit " + _.indexOf(channels,_k);
+        // pattern = pattern + orbit ;
         storedPatterns[_k-1] = pattern;
         return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
