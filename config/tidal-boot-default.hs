@@ -5,10 +5,12 @@ import Sound.OSC.FD
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
+
 procS1 <- openUDP "127.0.0.1" 12000
 procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
+
 d_OSC <- openUDP "127.0.0.1" 12000
 
 (cps, getNow) <- bpsUtils
