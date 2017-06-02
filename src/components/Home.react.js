@@ -44,7 +44,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5', 'G'],
+      channels: ['1','2','3', '4', '5','MIDI','G'],
       timer: [],
       values: {},
       scPattern: '',
@@ -166,7 +166,7 @@ componentDidUpdate(props, state) {
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
             console.log(newGlobals);
             if(newGlobals!== undefined){
-              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
+              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[1], newGlobals[0],channels, transition);
               }
 
           }
@@ -882,8 +882,8 @@ clicked = event => {
   else {
     console.log(storedGlobals);
     var ttm = Object.values(storedGlobals[event.target.id]);
-    store.dispatch(globalUpdate(ttm[1],ttm[0]));
-    ctx.setState({globalTransformations:ttm[1], globalCommands: ttm[0]})
+    //store.dispatch(globalUpdate(ttm[1],ttm[0]));
+    ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
   }
 
 }

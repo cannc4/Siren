@@ -9,16 +9,18 @@ import Data.Maybe
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
+
 procS1 <- openUDP "127.0.0.1" 12000
 procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
+
 d_OSC <- openUDP "127.0.0.1" 12000
 
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
-
-m5 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+m1 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+m2 <- midiStream devices "USB MIDI Device Port 2" 1 synthController
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
