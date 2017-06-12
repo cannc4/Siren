@@ -7,7 +7,7 @@ import './Home.css';
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
-      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
+      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 
@@ -166,7 +166,7 @@ componentDidUpdate(props, state) {
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
             console.log(newGlobals);
             if(newGlobals!== undefined){
-              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[1], newGlobals[0],channels, transition);
+              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
               }
 
           }
@@ -823,7 +823,7 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.2</a>
+    <a href="https://github.com/cannc4/Siren">0.2.1</a>
     </div>
 
   </div>
@@ -883,15 +883,15 @@ clicked = event => {
     console.log(storedGlobals);
     var ttm = Object.values(storedGlobals[event.target.id]);
     //store.dispatch(globalUpdate(ttm[1],ttm[0]));
-    ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+    ctx.setState({globalTransformations:ttm[1], globalCommands: ttm[0]})
   }
 
 }
 record = event => {
   const ctx=this;
-  const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
+  const {pressed,globalTransformations,globalCommands,storedGlobals, sceneIndex}=ctx.state;
   var ns;
-  var temp = {transform: globalCommands, command:globalTransformations};
+  var temp = {transform: globalTransformations, command:globalCommands};
   console.log(storedGlobals);
   if (storedGlobals === undefined){
     ns = [];
@@ -901,8 +901,20 @@ record = event => {
     ns = storedGlobals;
     ns.push(temp);
   }
-  ctx.setState({storedGlobals:ns})
+
   store.dispatch(globalStore(ns));
+  ctx.setState({storedGlobals:ns})
+  ctx.addItem();
+  //issues here
+//
+  // _.each(Object.values(ctx.props["matrices"]), function(d){
+  //   if(d.matName === ctx.props.active){
+  //
+  //       fbupdateglobalsinscene('Matrices', storedGlobals, d.key);
+  //   }
+  // })
+
+
 }
 
 handleUpdatePatterns = event => {
@@ -924,21 +936,16 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
         if(transition[i] !== '' && transition[i] !== undefined){
-          tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
+          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
           console.log(tempAr[i]);
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          //infinite loop if these lines are commmented out(?)
-          //store.dispatch(globalUpdate(globalCommands,globalTransformations));
-          //ctx.setState({globalTransformations:globalTransformations, globalCommands:globalCommands});
-
         }
         else {
           tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          //infinite loop if these lines are commmented out(?)
-          //store.dispatch(globalUpdate(globalCommands,globalTransformations));
-          //ctx.setState({globalTransformations:globalTransformations, globalCommands:globalCommands})
-        }
+
+
+          }
       }
     }
   }
