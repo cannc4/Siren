@@ -39,7 +39,7 @@ class MenuBar extends Component {
     const updatePath = ctx.updatePath.bind(ctx)
 
     return (<div className='MenuBar boxshadow'>
-      <Link className="pullleft" to='/'  onClick={updatePath}></Link> 
+      <Link className="pullleft" to='/'  onClick={updatePath}>σειρήνα</Link> 
       {paths.map((p, i) => {
         return <Link key={i} to={p.url} className={'pullright ' + (p.url === path ? 'active' : '')} onClick={updatePath}>{p.name}</Link>
       })}
