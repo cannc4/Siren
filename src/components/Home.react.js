@@ -932,7 +932,7 @@ handleUpdatePatterns = event => {
   const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey){
 
-  ctx.updatePatterns(tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition);
+  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,globalCommands,channels, transition);
     }
 }
 
