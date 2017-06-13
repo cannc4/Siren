@@ -44,7 +44,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5','MIDI','G'],
+      channels: ['1','2','3', '4', 'v1','MIDI','G'],
       timer: [],
       values: {},
       scPattern: '',
@@ -863,14 +863,14 @@ handleglobalKeys = event => {
   }
 }
 
-updateGlobalsTest(){
-  const ctx = this;
-  const {globalTransformations,globalCommands,storedGlobals} = ctx.state;
-  var ttm = Object.values(storedGlobals[_.random(0,storedGlobals.length)]);
-  console.log(storedGlobals);
-  store.dispatch(globalUpdate(ttm[0],ttm[1]));
-  ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
-}
+// updateGlobalsTest(){
+//   const ctx = this;
+//   const {globalTransformations,globalCommands,storedGlobals} = ctx.state;
+//   var ttm = Object.values(storedGlobals[_.random(0,storedGlobals.length)]);
+//   console.log(storedGlobals);
+//   store.dispatch(globalUpdate(ttm[0],ttm[1]));
+//   ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+// }
 
 clicked = event => {
   const ctx=this;
@@ -891,8 +891,7 @@ record = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
   var ns;
-  var temp = {transform: globalCommands, command:globalTransformations};
-  console.log(storedGlobals);
+  var temp = {transform: globalTransformations, command: globalCommands};
   if (storedGlobals === undefined){
     ns = [];
     ns.push(temp);
@@ -901,7 +900,7 @@ record = event => {
     ns = storedGlobals;
     ns.push(temp);
   }
-  ctx.setState({storedGlobals:ns})
+  ctx.setState({storedGlobals: ns})
   store.dispatch(globalStore(ns));
 }
 
