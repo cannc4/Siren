@@ -6,7 +6,7 @@ import Sound.OSC.FD
 import ProcessingOSC
 v1 <- testStream
 
-procF_t <- openUDP "127.0.0.1" 12000
+max <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
 
 procS1 <- openUDP "127.0.0.1" 12000

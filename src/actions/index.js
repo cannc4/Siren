@@ -269,6 +269,7 @@ export function fbSyncMatrix (model,data){
 }
 
 export function fbcreateMatrix(model, data) {
+  console.log('here');
   if (Firebase.auth().currentUser !== null)
   {
     var datakey, sceneIndex, values, patterns, uid, transition, duration, storedGlobals;
@@ -327,6 +328,10 @@ export function fbupdate(model, data) {
 }
 export function fbupdatepatterninscene(model, data, s_key) {
   models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
+}
+export function fbupdateglobalsinscene(model, data, s_key) {
+  //--
+  models[model].dataSource.child(s_key).child("storedGlobals").push(data)
 }
 export function fbdelete(model, data) {
   models[model].dataSource.child(data['key']).remove();
@@ -428,7 +433,7 @@ export const assignTimer = (timer,steps, _index) => {
     type: 'ASSIGN_TIMER', payload: timer.id , current : dum
   };
 }
-// Context //
+
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
 var patListBack = [];
@@ -560,7 +565,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
         storedPatterns[_k-1] = pattern;
         console.log(pattern);
         //var orbit = "#orbit " + _.indexOf(channels,_k);
-        return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+        return [pattern, "sendOSC d_OSC $ Message \""+ _.indexOf(channels,_k) + "\" [string \"command\", string \""+cellItem+"\"]"] ;
       }
       else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
         pattern =  "v1 $ " + newCommand;

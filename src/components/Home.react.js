@@ -7,7 +7,7 @@ import './Home.css';
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
       startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
       consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
-      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout} from '../actions'
+      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene} from '../actions'
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 
@@ -25,6 +25,14 @@ import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
 var Button = require('react-button')
+var themeButton = {
+    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
+    disabledStyle: { background: 'gray'},
+    overStyle: { background: 'rgba(255,255,102,0.15)' },
+    activeStyle: { background: 'rgba(255,255,102,0.15)' },
+    pressedStyle: {background: 'green', fontWeight: 'bold'},
+    overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
+}
 var options = {
     mode: '_rule',
     theme: '_style',
@@ -35,6 +43,7 @@ var options = {
     lineWrapping: true,
     showCursorWhenSelecting: true
 };
+
 
 class Home extends Component {
   constructor(props) {
@@ -166,7 +175,7 @@ componentDidUpdate(props, state) {
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
             console.log(newGlobals);
             if(newGlobals!== undefined){
-              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[1], newGlobals[0],channels, transition);
+              ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
               }
 
           }
@@ -747,8 +756,8 @@ renderItem(item, dbKey, i) {
       <div key={item.key} className="matrices" >
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
           <button onClick={handleDelete}>{'x'}</button>
-          {activeMatrix === item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</button>}
-          {activeMatrix !== item.matName && <button className={'buttonSentinel'} onClick={updateMatrix} style={{ color: '#ddd'}}>{item.matName}</button>}
+          {activeMatrix === item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</Button>}
+          {activeMatrix !== item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton}  style={{ color: '#ddd'}}>{item.matName}</Button>}
           {item.sceneIndex !== 0 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>}
           {item.sceneIndex !== Object.values(items).length-1 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>}
         </div>
@@ -823,7 +832,7 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.2</a>
+    <a href="https://github.com/cannc4/Siren">0.2.1</a>
     </div>
 
   </div>
@@ -883,14 +892,15 @@ clicked = event => {
     console.log(storedGlobals);
     var ttm = Object.values(storedGlobals[event.target.id]);
     //store.dispatch(globalUpdate(ttm[1],ttm[0]));
-    ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+    ctx.setState({globalTransformations:ttm[1], globalCommands: ttm[0]})
   }
 
 }
 record = event => {
   const ctx=this;
-  const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
+  const {pressed,globalTransformations,globalCommands,storedGlobals, sceneIndex}=ctx.state;
   var ns;
+
   var temp = {transform: globalTransformations, command: globalCommands};
   if (storedGlobals === undefined){
     ns = [];
@@ -900,8 +910,20 @@ record = event => {
     ns = storedGlobals;
     ns.push(temp);
   }
-  ctx.setState({storedGlobals: ns})
+
   store.dispatch(globalStore(ns));
+  ctx.setState({storedGlobals:ns})
+  ctx.addItem();
+  //issues here
+//
+  // _.each(Object.values(ctx.props["matrices"]), function(d){
+  //   if(d.matName === ctx.props.active){
+  //
+  //       fbupdateglobalsinscene('Matrices', storedGlobals, d.key);
+  //   }
+  // })
+
+
 }
 
 handleUpdatePatterns = event => {
@@ -923,21 +945,16 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
         if(transition[i] !== '' && transition[i] !== undefined){
-          tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
+          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
           console.log(tempAr[i]);
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          //infinite loop if these lines are commmented out(?)
-          //store.dispatch(globalUpdate(globalCommands,globalTransformations));
-          //ctx.setState({globalTransformations:globalTransformations, globalCommands:globalCommands});
-
         }
         else {
           tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          //infinite loop if these lines are commmented out(?)
-          //store.dispatch(globalUpdate(globalCommands,globalTransformations));
-          //ctx.setState({globalTransformations:globalTransformations, globalCommands:globalCommands})
-        }
+
+
+          }
       }
     }
   }
@@ -971,7 +988,7 @@ render() {
   {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
   <Layout fill='window'>
       <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', height: '1000px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
+        <div id="matrices" style={{width: '100%', height: '1500px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '15px'}}>
             <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
             {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
@@ -996,7 +1013,7 @@ render() {
           {ctx.renderPlayer()}
         </Layout>
         <LayoutSplitter />
-        <Layout layoutHeight={250}>
+        <Layout layoutHeight={300}>
           <Layout layoutWidth={150}>
             {ctx.renderMenu()}
           </Layout>
@@ -1008,9 +1025,9 @@ render() {
               <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
 
               {_.map(storedGlobals, (c, i) => {
-                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}  activeStyle={{position:'relative', top: 1}} >{i}</Button>
+                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
                })}
-               <Button onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
+               <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
             </div>
           </Layout>
           <LayoutSplitter />
