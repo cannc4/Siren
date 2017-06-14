@@ -9,10 +9,11 @@
   padding: 0 30px;
 }
 .pullleft {
+  color: rgba(255,255,102, 0.75);
   float: left;
 }
 .pullright {
-  color: #ddd;
+  color: rgba(27, 27, 27, 1) !important;
   float: right;
 }
 
@@ -26,12 +27,27 @@
   font-size: 18px;
 }
 
+.Menux > a {
+  padding: 5px;
+  height: 50px;
+  line-height: 50px;
+  vertical-align: middle;
+  color: rgba(27, 27, 27, 1);
+  font-weight: 400;
+  font-size: 18px;
+}
+
 .MenuBar > a:hover {
   color: #ddd;
   text-decoration: underline;
 }
 
 .MenuBar > a.active {
-  color: #ddd;
+  color: rgba(27, 27, 27, 1);
+  text-decoration: none;
+}
+
+.Menux > a.active {
+  color: rgba(27, 27, 27, 1);
   text-decoration: none;
 }
