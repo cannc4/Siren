@@ -465,13 +465,23 @@ updateMatrix(patterns, values, item, transition, duration, storedGlobals) {
 
 soloChannel =  ({target : {id}}) => {
   const ctx = this;
-  const {channels,solo,soloSentinel} = ctx.state;
+  const {channels,solo,soloSentinel,storedPatterns,tidalServerLink} = ctx.state;
   var _index = _.indexOf(channels,id);
+  var solopattr = "solo $" + storedPatterns[_index];
   if(_index !== -1 ){
-
     for (var i = 0; i < solo.length; i++) {
       if(_index !== i)
         solo[i] = false;
+    }
+    if (solo[_index] === false){
+      ctx.consoleSubmit(tidalServerLink, solopattr);
+    }
+    else {
+      _.forEach(storedPatterns, function(pat, i){
+        if (i !== _index){
+          ctx.consoleSubmit(tidalServerLink, storedPatterns[i]);
+        }
+      });
     }
     solo[_index] = !solo[_index];
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
