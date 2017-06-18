@@ -53,7 +53,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', '5','MIDI','G'],
+      channels: ['1','2','3', '4', 'v1','MIDI','G'],
       timer: [],
       values: {},
       scPattern: '',
@@ -173,7 +173,7 @@ componentDidUpdate(props, state) {
 
           if(channel === 'G'){
             var newGlobals = Object.values(storedGlobals[parseInt(vals)]);
-            console.log(newGlobals);
+            //console.log(newGlobals);
             if(newGlobals!== undefined){
               ctx.updatePatterns(tidalServerLink,storedPatterns,newGlobals[0], newGlobals[1],channels, transition);
               }
@@ -333,10 +333,10 @@ handleSubmit = event => {
   const body=event.target.value
   const ctx=this;
   const {scPattern, tidalServerLink, tidalOnClickClass }=ctx.state;
-  console.log(tidalOnClickClass);
+  //console.log(tidalOnClickClass);
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
-    console.log(tidalOnClickClass);
+    //console.log(tidalOnClickClass);
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
@@ -349,7 +349,7 @@ handleConsoleSubmit = event => {
   const {tidalServerLink, tidalOnClickClass} = ctx.state;
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
-    console.log(tidalOnClickClass);
+    //console.log(tidalOnClickClass);
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
     ctx.consoleSubmit(tidalServerLink, body);
   }
@@ -643,7 +643,7 @@ addItem() {
     })
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
-      console.log(storedGlobals);
+      //console.log(storedGlobals);
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration, storedGlobals});
       ctx.setState({sceneIndex: snd});
     }
@@ -727,7 +727,7 @@ renderItem(item, dbKey, i) {
       sglobals = [];
     }
     ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: item.storedGlobals, globalTransformations: '', globalCommands: ''});
-    console.log(item.storedGlobals);
+    //console.log(item.storedGlobals);
     ctx.updateMatrix(patterns, values, item, transition, duration,item.storedGlobals);
     store.dispatch(globalStore(item.storedGlobals));
     //console.log(storedGlobals);
@@ -872,14 +872,14 @@ handleglobalKeys = event => {
   }
 }
 
-updateGlobalsTest(){
-  const ctx = this;
-  const {globalTransformations,globalCommands,storedGlobals} = ctx.state;
-  var ttm = Object.values(storedGlobals[_.random(0,storedGlobals.length)]);
-  console.log(storedGlobals);
-  store.dispatch(globalUpdate(ttm[0],ttm[1]));
-  ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
-}
+// updateGlobalsTest(){
+//   const ctx = this;
+//   const {globalTransformations,globalCommands,storedGlobals} = ctx.state;
+//   var ttm = Object.values(storedGlobals[_.random(0,storedGlobals.length)]);
+//   console.log(storedGlobals);
+//   store.dispatch(globalUpdate(ttm[0],ttm[1]));
+//   ctx.setState({globalTransformations:ttm[0], globalCommands: ttm[1]})
+// }
 
 clicked = event => {
   const ctx=this;
@@ -900,8 +900,8 @@ record = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals, sceneIndex}=ctx.state;
   var ns;
-  var temp = {transform: globalTransformations, command:globalCommands};
-  console.log(storedGlobals);
+
+  var temp = {transform: globalTransformations, command: globalCommands};
   if (storedGlobals === undefined){
     ns = [];
     ns.push(temp);
@@ -941,16 +941,16 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
   var tempAr = [] ;
   for (var i = 0; i < storedPatterns.length; i++) {
     if(i !== channels.length){
-      console.log(channels.length);
+      //console.log(channels.length);
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
         if(transition[i] !== '' && transition[i] !== undefined){
           tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
-          console.log(tempAr[i]);
+          //console.log(tempAr[i]);
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
         }
         else {
-          tempAr[i] = 'd' + channels[i] + '$' + globalCommands + tempAr[i] + globalTransformations;
+          tempAr[i] = 'd' + channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
 
 
