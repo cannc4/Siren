@@ -33,6 +33,7 @@ m5 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
 
 let bps x = cps (x/2)
 let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+let jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
 
@@ -117,6 +118,9 @@ lrate = mf "lrate"
 lsize = mf "lsize"
 perc = mf "perc"
 percf = mf "percf"
+freeze = mf "freeze"
+ff = mf "ff"
+bsize = mf "bsize"
 (ts, ts_p) = pF "ts" (Just 1)
 (cone, cone_p) = pF "cone" (Just 1)
 (ctwo, ctwo_p) = pF "ctwo" (Just 0)

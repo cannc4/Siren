@@ -485,7 +485,6 @@ soloChannel =  ({target : {id}}) => {
     }
     solo[_index] = !solo[_index];
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
-
   }
 }
 
@@ -737,7 +736,7 @@ renderItem(item, dbKey, i) {
     if(sglobals === undefined){
       sglobals = [];
     }
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: sglobals, globalTransformations: sglobals[0], globalCommands: sglobals[1]});
+    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: sglobals, globalTransformations: ' ', globalCommands:' '});
     //console.log(item.storedGlobals);
     ctx.updateMatrix(patterns, values, item, transition, duration,sglobals);
     store.dispatch(globalStore(sglobals));
@@ -852,44 +851,51 @@ renderMenu(){
 //onClick={ctx.closeSC.bind(ctx)}
 
 handleglobalKeys = event => {
-  const ctx = this;
-  const {steps, channels, timer, play} = ctx.state;
-  if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
-    var _index = event.keyCode - 49;
-    if(_index < channels.length){
-      if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-        startIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-        ctx.setState({play: true});
-      }
-    }
-  }
-  else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
-    var _index = event.keyCode - 49;
-    if(_index < channels.length) {
-      stopIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-    }
-  }
-  // Start/stop all timers with ctrl/shift + space
-  else if (event.keyCode === 32 && event.ctrlKey){
-    ctx.startTimer();
-  }
-  else if (event.keyCode === 32 && event.shiftKey){
-    ctx.stopTimer();
-  }
-
-  //Scene bindings
-  else if (event.keyCode === 32 && event.shiftKey){
-    ctx.stopTimer();
-  }
+  // const ctx = this;
+  // const {steps, channels, timer, play} = ctx.state;
+  // if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
+  //   var _index = event.keyCode - 49;
+  //   if(_index < channels.length){
+  //     if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
+  //       startIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
+  //       ctx.setState({play: true});
+  //     }
+  //   }
+  // }
+  // else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
+  //   var _index = event.keyCode - 49;
+  //   if(_index < channels.length) {
+  //     stopIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
+  //   }
+  // }
+  // // Start/stop all timers with ctrl/shift + space
+  // else if (event.keyCode === 32 && event.ctrlKey){
+  //   ctx.startTimer();
+  // }
+  // else if (event.keyCode === 32 && event.shiftKey){
+  //   ctx.stopTimer();
+  // }
+  //
+  // //Scene bindings
+  // else if (event.keyCode === 32 && event.shiftKey){
+  //   ctx.stopTimer();
+  // }
 }
 
 
 clicked = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
-  var tempgb, tempgbtwo;
+  var temp = {transform: globalTransformations, command: globalCommands};
+  var ns,tempgb, tempgbtwo;
   if (event.target.id === 0){
     ctx.SetState({globalTransformations:'', globalCommands: ''});
+  }
+  else if (event.shiftKey){
+    if(storedGlobals[event.target.id]!== undefined){
+      ns = storedGlobals;
+      ns[event.target.id] = temp;
+    }
   }
   else {
     var ttm = Object.values(storedGlobals[event.target.id]);
@@ -909,9 +915,7 @@ record = event => {
   const ctx=this;
   const {pressed,globalTransformations,globalCommands,storedGlobals, sceneIndex}=ctx.state;
   var ns;
-
   var temp = {transform: globalTransformations, command: globalCommands};
-  console.log(temp);
   if (storedGlobals === undefined){
     ns = [];
     ns.push(temp);
@@ -923,17 +927,6 @@ record = event => {
 
   store.dispatch(globalStore(ns));
   ctx.setState({storedGlobals:ns})
-  //ctx.addItem();
-  //issues here
-//
-  // _.each(Object.values(ctx.props["matrices"]), function(d){
-  //   if(d.matName === ctx.props.active){
-  //
-  //       fbupdateglobalsinscene('Matrices', storedGlobals, d.key);
-  //   }
-  // })
-
-
 }
 
 handleUpdatePatterns = event => {

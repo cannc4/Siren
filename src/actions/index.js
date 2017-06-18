@@ -269,7 +269,6 @@ export function fbSyncMatrix (model,data){
 }
 
 export function fbcreateMatrix(model, data) {
-	console.log('here');
 	if (Firebase.auth().currentUser !== null)
 	{
 		var datakey, sceneIndex, values, patterns, uid, transition, duration, storedGlobals;
@@ -547,12 +546,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			}
 
 			var storepat= soloHolder+ transitionHolder+ newCommand;
-			console.log(storepat);
 			//var orbit = "#orbit " + _.indexOf(channels,_k);
 			//storepat = storepat + orbit;
 			storedPatterns[_.indexOf(channels,_k)] = '';
 			storedPatterns[_.indexOf(channels,_k)] = storepat;
-			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands ;
+			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
 			if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				newCommand = globalTransformations+ newCommand + " " + globalCommands
 				newCommand = newCommand.replaceAll(' s ', ' image ');
@@ -692,13 +690,11 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 		// command of the pattern
 		var currentglobal = Object.values(storedGlobals[globalindex]);
 			var activeChannels = _.slice(getParameters(vals), 1);
-			console.log(activeChannels);
-			// Construct the parameter list from channel list
+			// Construct the active channel list from channel list
 			var tch = [];
 			activeChannels = _.split(activeChannels, ' ');
 			var b = new RegExp("^[A-Za-z0-9() ]+", "g");
 			_.forEach(activeChannels, function(chan, i) {
-				console.log(chan);
 				tch.push (chan);
 				var stp= storedPatterns[parseInt(chan-1)];
 				ch = stp.match(b)[0];
@@ -707,16 +703,10 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 				var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
 				pat.push(pp);
 				});
-				console.log(tch);
 					for (var j = 0; j < storedPatterns.length; j++) {
 								pat.push(storedPatterns[j]);
 					}
 			}
-
-
-			console.log(pat);
-		//	console.log(pat);
-
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
 		.then((response) => {
 		}).catch(function (error) {
@@ -783,9 +773,7 @@ export const createTimer = (_index,_duration, _steps) => {
 		timerWorker[_index].onmessage = function(e) {
 			if (e.data.type == "tick") {
 					store.dispatch(updtmr(e.data.id));
-					//console.log("e.data.msg", e.data.msg);
 					timer[_index] = e.data.msg;
-					//console.log("timer", timer);
 			}
 		}
 		return {
