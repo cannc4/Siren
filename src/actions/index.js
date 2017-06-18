@@ -580,6 +580,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				newCommand = newCommand.replaceAll('end', 'median');
 				newCommand = newCommand.replaceAll('coarse', 'edge');
 				newCommand = newCommand.replaceAll('up', 'hough');
+				newCommand = newCommand.replaceAll('gain', 'means');
 				return [pattern, "v1 $ "+ newCommand] ;
 			}
 			else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
