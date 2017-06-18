@@ -445,7 +445,6 @@ var patListBack = [];
 export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
 	return dispatch => {
 		const x =  _.compact(_.map(vals,(v,k) => {
-
 		// gets parameters list
 		const getParameters = (v) => {
 			var param = [];
@@ -519,28 +518,26 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			})
 
 			// solo or not
-			var soloHolder = "d"+(k);
+			var soloHolder = k;
 			var transitionHolder = "" ;
 			var _k = k;
 			if(_.indexOf(channels,_k) === _.indexOf(channels, 'cps')){
-				transitionHolder = k;
+				transitionHolder = _k;
 				soloHolder = " ";
 			}
 			else {
 				if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
-					k = "d"+(k);
 					soloHolder = k ;
 					transitionHolder = " $ ";
 				}
 
 				else if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
 					transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
-					soloHolder = "t"+(k);
+					soloHolder = "t"+ (_.indexOf(channels,_k)+1);
 				}
 
 				else if(solo[_.indexOf(channels,_k)] === true){
-					k = +(k);
-					soloHolder = "solo $ " + k ;
+					soloHolder = "solo $ " + _k ;
 					transitionHolder = " $ ";
 				}
 			}
@@ -548,30 +545,16 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			if(globalTransformations === undefined || globalTransformations === ''){
 				globalTransformations = '';
 			}
-			else {
-				globalTransformations = globalTransformations ;
-			}
-
 
 			var storepat= soloHolder+ transitionHolder+ newCommand;
-			// var orbit = "#orbit " + _.indexOf(channels,_k);
-			// storepat = storepat + orbit;
-			storedPatterns[_k-1] = '';
-			storedPatterns[_k-1] = storepat;
-			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-			if (_.indexOf(channels,_k) === _.indexOf(channels, 'MIDI')){
-				pattern =  "m1 $ " + newCommand;
-				storedPatterns[_k-1] = '';
-				storedPatterns[_k-1] = pattern;
-				//console.log(pattern);
-				//var orbit = "#orbit " + _.indexOf(channels,_k);
-				return [pattern, "sendOSC d_OSC $ Message \""+ _.indexOf(channels,_k) + "\" [string \"command\", string \""+cellItem+"\"]"] ;
-			}
-			else if (_.indexOf(channels,_k) === _.indexOf(channels, '1')){
+			console.log(storepat);
+			//var orbit = "#orbit " + _.indexOf(channels,_k);
+			//storepat = storepat + orbit;
+			storedPatterns[_.indexOf(channels,_k)] = '';
+			storedPatterns[_.indexOf(channels,_k)] = storepat;
+			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands ;
+			if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				newCommand = globalTransformations+ newCommand + " " + globalCommands
-
-				//newCommand = _.replace(newCommand, 'hype', 'walk');
-
 				newCommand = newCommand.replaceAll(' s ', ' image ');
 				newCommand = newCommand.replaceAll('n ', 'npy ');
 				newCommand = newCommand.replaceAll('speed', 'pspeed');
@@ -585,9 +568,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			}
 			else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
 				pattern =  "v1 $ " + newCommand;
-
-				// newCommand = _.replace(newCommand, 'walk', 'hype');
-
 				newCommand = newCommand.replaceAll('image', 's');
 				newCommand = newCommand.replaceAll('npy', 'n');
 				newCommand = newCommand.replaceAll('pspeed', 'speed');
@@ -601,10 +581,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				return [pattern, "d1 $ "+ newCommand] ;
 			}
 			else {
-				storedPatterns[_k-1] = '';
-				// var orbit = "#orbit " + _.indexOf(channels,_k);
-				// pattern = pattern + orbit ;
-				storedPatterns[_k-1] = pattern;
 				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 			}
 		}
@@ -618,11 +594,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 		});
 	}
 }
-// export const storePatterns = (sp) => {
-//   return {
-//     type: 'PATTERN_GLOBAL', payload: sp
-//   }
-// }
+
 export const continousPattern = (server, pattern) => {
 	return dispatch => {
 		const x = pattern;
@@ -695,6 +667,84 @@ export const sendScPattern = (server, expression) => {
 
 export const consoleSubmit = (server, expression) => {
 	return dispatch => {
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
+		.then((response) => {
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
+	return dispatch => {
+		const getParameters = (v) => {
+				var param = [];
+				_.map(_.split(v, /[`]+/g), (p1, p2) => {
+					p1 = _.trim(p1);
+
+					if(p1 !== "") param.push(p1);
+				});
+				return param;
+			}
+
+		const globalindex = getParameters(vals)[0];
+		if(globalindex !== undefined){
+		var pat = [],ch;
+		// command of the pattern
+		var currentglobal = Object.values(storedGlobals[globalindex]);
+			var activeChannels = _.slice(getParameters(vals), 1);
+			console.log(activeChannels);
+			// Construct the parameter list from channel list
+			var tch = [];
+			activeChannels = _.split(activeChannels, ' ');
+			var b = new RegExp("^[A-Za-z0-9() ]+", "g");
+			_.forEach(activeChannels, function(chan, i) {
+				console.log(chan);
+				tch.push (chan);
+				var stp= storedPatterns[parseInt(chan-1)];
+				ch = stp.match(b)[0];
+				ch = ch + '$';
+				stp = stp.replace(ch,'')
+				var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
+				pat.push(pp);
+				});
+				console.log(tch);
+					for (var j = 0; j < storedPatterns.length; j++) {
+								pat.push(storedPatterns[j]);
+					}
+			}
+
+
+			console.log(pat);
+		//	console.log(pat);
+
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
+		.then((response) => {
+		}).catch(function (error) {
+			console.error(error);
+		});
+
+		}
+
+}
+
+export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {
+	return dispatch => {
+		var b = new RegExp("^[A-Za-z0-9]+", "g");
+		var ch = expression.match(b)[0];
+		if (ch === 'm1' || ch === 'm2' ||  ch === 'm3' ||  ch === 'm4' || ch === 'v1' || ch === 'u1'){
+			storedPatterns[_.indexOf(channels,ch)] = '';
+			storedPatterns[_.indexOf(channels,ch)] = expression;
+		}
+		else if ( expression === 'hush'){
+			for (var i = 0; i < storedPatterns.length; i++) {
+				storedPatterns[i] = channels[i] + ' $ silence' ;
+			}
+
+		}
+		else{
+			storedPatterns[_.indexOf(channels,ch[1])] = '';
+			storedPatterns[_.indexOf(channels,ch[1])] = expression;
+		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
 		}).catch(function (error) {
