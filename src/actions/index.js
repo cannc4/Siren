@@ -499,7 +499,6 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 						 bounds[1] !== undefined && bounds[1] !== ""){
 							 bounds[0] = parseFloat(bounds[0]);
 							 bounds[1] = parseFloat(bounds[1]);
-
 							 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
 							 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
 					}
@@ -515,8 +514,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			_.forEach(_.words(newCommand, re), function(val, i){
 				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 			})
-
-			// solo or not
+			// solo or not (obsolete)
 			var soloHolder = k;
 			var transitionHolder = "" ;
 			var _k = k;
@@ -541,45 +539,54 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				}
 			}
 
-			if(globalTransformations === undefined || globalTransformations === ''){
-				globalTransformations = '';
-			}
+			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
 
-			var storepat= soloHolder+ transitionHolder+ newCommand;
-			var orbit = "#orbit " + _.indexOf(channels,_k);
-			storepat = storepat + orbit;
-			storedPatterns[_.indexOf(channels,_k)] = '';
-			storedPatterns[_.indexOf(channels,_k)] = storepat;
-			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands +orbit;
-			if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
-				newCommand = globalTransformations+ newCommand + " " + globalCommands
-				newCommand = newCommand.replaceAll(' s ', ' image ');
-				newCommand = newCommand.replaceAll('n ', 'npy ');
-				newCommand = newCommand.replaceAll('speed', 'pspeed');
-				newCommand = newCommand.replaceAll('nudge', 'threshold');
-				newCommand = newCommand.replaceAll('room', 'blur');
-				newCommand = newCommand.replaceAll('end', 'median');
-				newCommand = newCommand.replaceAll('coarse', 'edge');
-				newCommand = newCommand.replaceAll('up', 'hough');
-				newCommand = newCommand.replaceAll('gain', 'means');
-				return [pattern, "v1 $ "+ newCommand] ;
-			}
-			else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
-				pattern =  "v1 $ " + newCommand;
-				newCommand = newCommand.replaceAll('image', 's');
-				newCommand = newCommand.replaceAll('npy', 'n');
-				newCommand = newCommand.replaceAll('pspeed', 'speed');
-				newCommand = newCommand.replaceAll('threshold', 'nudge');
-				newCommand = newCommand.replaceAll('blur', 'room');
-				newCommand = newCommand.replaceAll('median', 'end');
-				newCommand = newCommand.replaceAll('edge', 'coarse');
-				newCommand = newCommand.replaceAll('hough', 'up');
+				var storechan = _k + " $ ";
+				pattern = storechan+ newCommand;
+				storedPatterns[_.indexOf(channels,_k)] = '';
+				storedPatterns[_.indexOf(channels,_k)] = pattern;
+				console.log(pattern);
+				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"]
 
-				console.log(pattern, "d1 $ "+ newCommand);
-				return [pattern, "d1 $ "+ newCommand] ;
 			}
 			else {
-				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+				var storechan = "d"+ (_.indexOf(channels,_k)+1) + " $ ";
+				var storepat= storechan+ newCommand;
+				var orbit = " #orbit " + _.indexOf(channels,_k);
+				storepat = storepat + orbit;
+				storedPatterns[_.indexOf(channels,_k)] = '';
+				storedPatterns[_.indexOf(channels,_k)] = storepat;
+				var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands +orbit;
+				if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
+					newCommand = globalTransformations+ newCommand + " " + globalCommands
+					newCommand = newCommand.replaceAll(' s ', ' image ');
+					newCommand = newCommand.replaceAll('n ', 'npy ');
+					newCommand = newCommand.replaceAll('speed', 'pspeed');
+					newCommand = newCommand.replaceAll('nudge', 'threshold');
+					newCommand = newCommand.replaceAll('room', 'blur');
+					newCommand = newCommand.replaceAll('end', 'median');
+					newCommand = newCommand.replaceAll('coarse', 'edge');
+					newCommand = newCommand.replaceAll('up', 'hough');
+					newCommand = newCommand.replaceAll('gain', 'means');
+					return [pattern, "v1 $ "+ newCommand] ;
+				}
+				else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
+					pattern =  "v1 $ " + newCommand;
+					newCommand = newCommand.replaceAll('image', 's');
+					newCommand = newCommand.replaceAll('npy', 'n');
+					newCommand = newCommand.replaceAll('pspeed', 'speed');
+					newCommand = newCommand.replaceAll('threshold', 'nudge');
+					newCommand = newCommand.replaceAll('blur', 'room');
+					newCommand = newCommand.replaceAll('median', 'end');
+					newCommand = newCommand.replaceAll('edge', 'coarse');
+					newCommand = newCommand.replaceAll('hough', 'up');
+
+					console.log(pattern, "d1 $ "+ newCommand);
+					return [pattern, "d1 $ "+ newCommand] ;
+				}
+				else {
+					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+				}
 			}
 		}
 		else

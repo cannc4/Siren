@@ -1,6 +1,6 @@
 (
-s.options.numInputBusChannels = 10;
-s.options.numOutputBusChannels = 10;
+s.options.numInputBusChannels = 12;
+s.options.numOutputBusChannels = 12;
 s.options.numBuffers = 2048 * 32;
 s.options.maxNodes = 1024 * 32;
 s.options.memSize_(65536 * 16);
