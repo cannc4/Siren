@@ -116,6 +116,11 @@ vrate = mf "vrate"
 leslie = mf "leslie"
 lrate = mf "lrate"
 lsize = mf "lsize"
+maxdel = mf "maxdel"
+edel = mf "edel"
+krushf = mf "krushf"
+krush = mf "krush"
+wshap = mf "wshap"
 perc = mf "perc"
 percf = mf "percf"
 freeze = mf "freeze"
@@ -159,6 +164,17 @@ sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
 (note3, note3_p) = pF "note3" (Just 44)
 (note2, note2_p) = pF "note2" (Just 48)
 (note, note_p) = pF "note" (Just 0)
+(octer, octer_p) = pF "octer" (Just 0)
+(octersub, octersub_p) = pF "octer" (Just 0)
+(octersubsub, octersubsub_p) = pF "octersubsub" (Just 0))
+(freeze, freeze_p) = pF "freeze" (Just 0)
+(ff, ff_p) = pF "ff" (Just 0)
+(bsize, bsize_p) = pF "bsize" (Just 1000)
+(kcutoff, kcutoff_p) = pF "kcutoff" (Just 5000)
+(krush, krush_p) = pF "krush" (Just 1)
+(wshap, wshap_p) = pF "wshap" (Just 1)
+(maxdel, maxdel_p) = pF "maxdel" (Just 10)
+(edel, edel_p) = pF "edel" (Just 1)
 
 
 :set prompt "tidal> "

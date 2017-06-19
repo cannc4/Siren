@@ -52,6 +52,7 @@
     "react": "^15.4.2",
     "react-button": "^1.2.1",
     "react-codemirror": "^0.3.0",
+    "react-dd-menu": "^2.0.1",
     "react-dom": "^15.4.2",
     "react-flex-layout": "^0.9.6",
     "react-knob": "^0.1.0",
@@ -73,7 +74,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startnw": "run .",
-    "buildnw": "build --win --x64 --mirror https://dl.nwjs.io/ .",
+    "buildnw": "build --mac --x64 --mirror https://dl.nwjs.io/ .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",

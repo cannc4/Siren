@@ -14,6 +14,7 @@ s.waitForBoot {
  s.sync;
  ~dirt.start(57120, (0,2 .. 9));
   s.sync;
+  "SUPERDIRT LOADED".postln;
   StageLimiter.activate;
   3.wait;
   SuperDirt.default = ~dirt;

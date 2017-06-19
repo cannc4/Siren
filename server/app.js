@@ -156,24 +156,10 @@ const myApp = () => {
   const sendPatterns = (patterns, reply) => {
     _.each(patterns, c => {
       TidalData.myTidal.tidalSendExpression(c[0]);
+      // TidalData.myTidal.myPatterns.values.push(c[0]);
 
       TidalData.myTidal.tidalSendExpression(c[1]);
-
-      if(c[2] !== undefined){
-        TidalData.myTidal.tidalSendExpression(c[2]);
-      }
-      if(c[3] !== undefined){
-        TidalData.myTidal.tidalSendExpression(c[3]);
-      }
-      if(c[4] !== undefined){
-        TidalData.myTidal.tidalSendExpression(c[4]);
-      }
-      if(c[5] !== undefined){
-        TidalData.myTidal.tidalSendExpression(c[5]);
-      }
-      if(c[6] !== undefined){
-        TidalData.myTidal.tidalSendExpression(c[6]);
-      }
+      // TidalData.myTidal.myPatterns.values.push(c[1]);
     })
     reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };

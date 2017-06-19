@@ -546,11 +546,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			}
 
 			var storepat= soloHolder+ transitionHolder+ newCommand;
-			//var orbit = "#orbit " + _.indexOf(channels,_k);
-			//storepat = storepat + orbit;
+			var orbit = "#orbit " + _.indexOf(channels,_k);
+			storepat = storepat + orbit;
 			storedPatterns[_.indexOf(channels,_k)] = '';
 			storedPatterns[_.indexOf(channels,_k)] = storepat;
-			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
+			var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands +orbit;
 			if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				newCommand = globalTransformations+ newCommand + " " + globalCommands
 				newCommand = newCommand.replaceAll(' s ', ' image ');
@@ -693,19 +693,23 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 			// Construct the active channel list from channel list
 			var tch = [];
 			activeChannels = _.split(activeChannels, ' ');
-			var b = new RegExp("^[A-Za-z0-9() ]+", "g");
+			var b = new RegExp("^[A-Za-z0-9]+", "g");
 			_.forEach(activeChannels, function(chan, i) {
 				tch.push (chan);
-				var stp= storedPatterns[parseInt(chan-1)];
-				ch = stp.match(b)[0];
-				ch = ch + '$';
-				stp = stp.replace(ch,'')
-				var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
-				pat.push(pp);
-				});
-					for (var j = 0; j < storedPatterns.length; j++) {
-								pat.push(storedPatterns[j]);
-					}
+				var stp=storedPatterns[chan-1];
+				if(stp !== undefined){
+					ch = stp.match(b)[0];
+					ch = ch + ' $ ';
+					stp = stp.substring(stp.indexOf('$')+1);
+					console.log(stp);
+					var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
+					console.log(pp);
+					pat.push(pp);
+				}
+			});
+					// for (var j = 0; j < storedPatterns.length; j++) {
+					// 			pat.push(storedPatterns[j]);
+					// }
 			}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
 		.then((response) => {
@@ -721,19 +725,20 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 	return dispatch => {
 		var b = new RegExp("^[A-Za-z0-9]+", "g");
 		var ch = expression.match(b)[0];
+		console.log(ch);
 		if (ch === 'm1' || ch === 'm2' ||  ch === 'm3' ||  ch === 'm4' || ch === 'v1' || ch === 'u1'){
 			storedPatterns[_.indexOf(channels,ch)] = '';
 			storedPatterns[_.indexOf(channels,ch)] = expression;
 		}
-		else if ( expression === 'hush'){
+		else if ( expression === 'jou'){
 			for (var i = 0; i < storedPatterns.length; i++) {
 				storedPatterns[i] = channels[i] + ' $ silence' ;
 			}
 
 		}
 		else{
-			storedPatterns[_.indexOf(channels,ch[1])] = '';
-			storedPatterns[_.indexOf(channels,ch[1])] = expression;
+			storedPatterns[_.indexOf(channels,ch)] = '';
+			storedPatterns[_.indexOf(channels,ch)] = expression;
 		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {

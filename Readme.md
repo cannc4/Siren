@@ -5,7 +5,6 @@ sections can be recalled by creating presets. `shift+click` overwrites the prese
 These parameters directly access to the patterns in the history. (i.e active patterns)
 There is now a dedicated channel called `G` to sequence the channels you want to include within global controls. You can specify the index of global and channels like this : `1 `1 2 4`` where first `1` is the index of global and `1 2 4` are the channel numbers.
 
-**Note:** Currently each channel has an dedicated `orbit` hence total of 5 - you can customize it however you like by going into `actions/index.js` and commenting out the `pattern + orbit` code. (after the beta all these will be configurable via interface)
 
 
 # Siren

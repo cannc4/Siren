@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
+import DropdownMenu from 'react-dd-menu';
 
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
@@ -899,7 +900,7 @@ clicked = event => {
   }
   else {
     var ttm = Object.values(storedGlobals[event.target.id]);
-    if(ttm[0][0] === '#'){
+    if(ttm[0][0] === '#' && ttm[0] !== undefined ){
       tempgb = ttm[0];
       tempgbtwo = ttm[1];
     }
@@ -968,6 +969,18 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
     }
   }
 }
+toggle = () => {
+  this.setState({ isMenuOpen: !this.state.isMenuOpen });
+};
+
+close = () => {
+  this.setState({ isMenuOpen: false });
+};
+
+click = () => {
+  console.log('You clicked an item');
+};
+
 
 render() {
   const ctx=this;
