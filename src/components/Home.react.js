@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
+import DropdownMenu from 'react-dd-menu';
 
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
