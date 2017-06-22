@@ -4,8 +4,11 @@ import qualified Sound.Tidal.Scales as Scales
 import Sound.OSC.FD
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.Output
+import Sound.Tidal.MIDI.Machinedrum
 import Data.Maybe
 
+import DxSevenOSC
+z1 <- dxStream
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
@@ -13,12 +16,17 @@ procS1 <- openUDP "127.0.0.1" 12000
 procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
-d_OSC <- openUDP "127.0.0.1" 12000
+scdx <- openUDP "127.0.0.1" 57120
 
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
 
-m5 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
+m1 <- midiStream devices "USB MIDI Device Port 1" 1 machinedrumController
+m2 <- midiStream devices "USB MIDI Device Port 1" 2 machinedrumController
+m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
+m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
+m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
+
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -32,7 +40,9 @@ m5 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
 
 
 let bps x = cps (x/2)
-let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4]
+let mjou = mapM_ ($ silence) [m1,m2,m3,m4]
+let jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
 
@@ -56,6 +66,7 @@ let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     prog = (|+| note "{0 0 0 2 2}%1")
     timemod p = whenmod 28 18 (foldEvery [2,3,4] (0.25 <~)) $ p
     progwav = (|+| up "{0 0 0 2 2}%1")
+
 
 
 let (degree, degree_p) = pF "degree" (Nothing)
@@ -95,6 +106,22 @@ rect = mf "rect"
 rectoff = mf "rectoff"
 envsaw = mf "envsaw"
 envsawf = mf "envsawf"
+envtri = mf "envtri"
+envtrif = mf "envtrif"
+amt = mf "amt"
+ampdtf = mf "ampdtf"
+dtfq = mf "dtfq"
+dtfnoise = mf "dtfnoise"
+dtftype = mf "dtftype"
+rate = mf "rate"
+threshdtf = mf "threshdtf"
+onsetdtf = mf "onsetdtf"
+dtfreq = mf "dtfreq"
+octer = mf "octer"
+octersub = mf "octersub"
+octersubsub = mf "octersubsub"
+ring = mf "ring"
+ringf = mf "ringf"
 comp = mf "comp"
 compa = mf "compa"
 compr = mf "compr"
@@ -110,8 +137,18 @@ vrate = mf "vrate"
 leslie = mf "leslie"
 lrate = mf "lrate"
 lsize = mf "lsize"
+maxdel = mf "maxdel"
+edel = mf "edel"
+krushf = mf "krushf"
+krush = mf "krush"
+wshap = mf "wshap"
 perc = mf "perc"
 percf = mf "percf"
+freeze = mf "freeze"
+thold = mf "thold"
+tlen = mf "tlen"
+trate = mf "trate"
+
 (ts, ts_p) = pF "ts" (Just 1)
 (cone, cone_p) = pF "cone" (Just 1)
 (ctwo, ctwo_p) = pF "ctwo" (Just 0)
@@ -150,6 +187,20 @@ sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
 (note3, note3_p) = pF "note3" (Just 44)
 (note2, note2_p) = pF "note2" (Just 48)
 (note, note_p) = pF "note" (Just 0)
+(octer, octer_p) = pF "octer" (Just 1)
+(octersub, octersub_p) = pF "octer" (Just 1)
+(octersubsub, octersubsub_p) = pF "octersubsub" (Just 01)
+(freeze, freeze_p) = pF "freeze" (Just 1)
+(ff, ff_p) = pF "ff" (Just 440)
+(bsize, bsize_p) = pF "bsize" (Just 2048)
+(kcutoff, kcutoff_p) = pF "kcutoff" (Just 5000)
+(krush, krush_p) = pF "krush" (Just 1)
+(wshap, wshap_p) = pF "wshap" (Just 1)
+(maxdel, maxdel_p) = pF "maxdel" (Just 10)
+(edel, edel_p) = pF "edel" (Just 1)
+(thold, thold_p) = pF "thold" (Just 0)
+(tlen, tlen_p) = pF "tlen" (Just 1)
+(trate, trate_p) = pF "trate" (Just 12)
 
 
 :set prompt "tidal> "

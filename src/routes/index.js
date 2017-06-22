@@ -1,15 +1,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { Router, Route, browserHistory, IndexRoute } from 'react-router';
-
-// import { fetchPlayer } from '../actions';
 import store from '../store';
 import App from '../components/App';
-
-// import Accounts from '../components/Accounts.react';
-// import CableSections from '../components/CableSections.react';
-// import Categories from '../components/Categories.react';
-
 import Patterns from '../components/Patterns.react';
 import Live from '../components/Live.react';
 import Home from '../components/Home.react';
@@ -39,14 +32,3 @@ export default (
     </Router>
   </Provider>
 )
-
-
-// <Route
-//   path="/categories"
-//   component={Categories}
-// />
-
-// <Route
-//   path="/cablesections"
-//   component={CableSections}
-// />

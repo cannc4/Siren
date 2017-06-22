@@ -1,10 +1,10 @@
 (
-s.options.numInputBusChannels = 10;
-s.options.numOutputBusChannels = 10;
+s.options.numInputBusChannels = 6;
+s.options.numOutputBusChannels = 14;
 s.options.numBuffers = 2048 * 32;
 s.options.maxNodes = 1024 * 32;
 s.options.memSize_(65536 * 16);
-
+//s.recorder.recHeaderFormat = "WAV";
 s.quit;
 
 s.waitForBoot {
@@ -12,8 +12,9 @@ s.waitForBoot {
  ~dirt = SuperDirt(2, s);
  ~dirt.loadSoundFiles("/Users/canince/dropbox/whalehouse/99s/*");
  s.sync;
- ~dirt.start(57120, (0,2 .. 9));
+ ~dirt.start(57120, (0,2 .. 7));
   s.sync;
+  "SUPERDIRT LOADED".postln;
   StageLimiter.activate;
   3.wait;
   SuperDirt.default = ~dirt;

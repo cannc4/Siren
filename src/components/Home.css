@@ -80,6 +80,10 @@
   border: 1px rgba(125,100,100, 0.8);
 }
 
+.collapsed {
+  width: 1% !important;
+  }
+
 .matDiv {
   resize:both;
   overflow-y: auto;
@@ -110,7 +114,7 @@
   overflow-y: auto;
 }
 .durInput{
-  width: 50%;
+  width: 25%;
 }
 .transition{
 
@@ -135,6 +139,13 @@
   border: 1px solid rgba(125,125,125, 0.8);
   display: flex;
   width: 90%;
+  flex-grow: 10;
+}
+.newChannelInput {
+  font-size: 10px;
+  border: 1px solid rgba(125,125,125, 0.8);
+  display: flex;
+  width: 40%;
   flex-grow: 10;
 }
 .newPatternButton {
