@@ -4,8 +4,11 @@ import qualified Sound.Tidal.Scales as Scales
 import Sound.OSC.FD
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.Output
+import Sound.Tidal.MIDI.Machinedrum
 import Data.Maybe
 
+import DxSevenOSC
+z1 <- dxStream
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
@@ -13,7 +16,7 @@ procS1 <- openUDP "127.0.0.1" 12000
 procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
-d_OSC <- openUDP "127.0.0.1" 12000
+scdx <- openUDP "127.0.0.1" 57120
 
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
@@ -23,6 +26,7 @@ m2 <- midiStream devices "USB MIDI Device Port 1" 2 machinedrumController
 m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
 m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
 m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
+
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -36,7 +40,8 @@ m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
 
 
 let bps x = cps (x/2)
-let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4]
+let mjou = mapM_ ($ silence) [m1,m2,m3,m4]
 let jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
@@ -61,6 +66,7 @@ let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     prog = (|+| note "{0 0 0 2 2}%1")
     timemod p = whenmod 28 18 (foldEvery [2,3,4] (0.25 <~)) $ p
     progwav = (|+| up "{0 0 0 2 2}%1")
+
 
 
 let (degree, degree_p) = pF "degree" (Nothing)
@@ -192,7 +198,7 @@ sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
 (wshap, wshap_p) = pF "wshap" (Just 1)
 (maxdel, maxdel_p) = pF "maxdel" (Just 10)
 (edel, edel_p) = pF "edel" (Just 1)
-(thold, thold_p) = pF "thold" (Just 1)
+(thold, thold_p) = pF "thold" (Just 0)
 (tlen, tlen_p) = pF "tlen" (Just 1)
 (trate, trate_p) = pF "trate" (Just 12)
 

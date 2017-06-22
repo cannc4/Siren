@@ -80,6 +80,10 @@
   border: 1px rgba(125,100,100, 0.8);
 }
 
+.collapsed {
+  width: 1% !important;
+  }
+
 .matDiv {
   resize:both;
   overflow-y: auto;
@@ -110,7 +114,7 @@
   overflow-y: auto;
 }
 .durInput{
-  width: 50%;
+  width: 25%;
 }
 .transition{
 

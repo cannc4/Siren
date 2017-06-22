@@ -54,7 +54,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['d1','d2','d3', 'd4', 'm1','m2','G'],
+      channels: ['d1','d2','d3','d4', 'm1','m2','m3', 'm4', 'G'],
       timer: [],
       values: {},
       scPattern: '',
@@ -77,6 +77,7 @@ class Home extends Component {
       storedPatterns: [],
       storedGlobals: [{transform:'', command: ''}],
       tempDur : [],
+      isCollapsed:[],
       tidalOnClickClass:  ' ',
       pressed : false,
     }
@@ -140,8 +141,9 @@ componentWillMount(props,state){
   document.addEventListener("keydown", this.handleglobalKeys.bind(this));
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer, solo, storedGlobals,storedPatterns}=ctx.state;
+  const { channelEnd, channels , steps , timer, solo, storedGlobals,storedPatterns, isCollapsed}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
+    isCollapsed[i] = false;
     storedPatterns[i] = '';
    if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
    ctx.createTimer(i, 48, steps);
@@ -162,6 +164,7 @@ createTimer(i,duration, steps){
 }
 
 componentDidUpdate(props, state) {
+  console.log();
   var runNo = [];
   const ctx=this;
   const { patterns, timer, click}=props;
@@ -394,6 +397,8 @@ _handleKeyPress = event => {
 
   const ctx=this;
   const {steps, channels, timer, play} = ctx.state;
+  console.log(timer);
+  console.log(ctx.props.timer.timer);
   const _key = event.target.id;
   var value = event.target.value;
   var _index = _.indexOf(channels, _key);
@@ -530,11 +535,16 @@ consoleSubmit(tidalServerLink, value){
 consoleSubmitHistory(tidalServerLink, value,storedPatterns,channels){
   store.dispatch(consoleSubmitHistory(tidalServerLink, value, storedPatterns,channels));
 }
-
-
+changeCollapse(k){
+  const ctx = this;
+  const {isCollapsed} = ctx.state;
+  isCollapsed[k]= !isCollapsed[k]
+  ctx.setState({isCollapsed : isCollapsed});
+}
+//  <img src={isCollapsed[k]? require('../assets/stop_fill@3x.png') : require('../assets/stop@3x.png')}  id = {k}  onClick={ctx.changeCollapse.bind(ctx,k)} height={20} width={20}/>f
 renderPlayer() {
   const ctx=this;
-  const { channels, steps , timer, solo, soloSentinel,transition}=ctx.state;
+  const { channels, steps , timer, solo, soloSentinel,transition,isCollapsed}=ctx.state;
   const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
   var count = 1;
   const transitionValue = function(c){
@@ -542,15 +552,16 @@ renderPlayer() {
       return ctx.state.transition[_.indexOf(channels, c)];
     }
     else {
-      return ''
+      return '(clutchIn 2)'
     }
   };
   return (<div className="Player-holder">
     <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"6%"}}>-</div>
-      {_.map(channels, c => {
-        return <div className="playbox playbox-cycle" key={c}>{c}<input className = "durInput" style = {{margin: 5}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
+      <div className="playbox playbox-cycle" style={{width:"15%"}}></div>
+      {_.map(channels, (c,k) => {
+        return <div className= {"playbox playbox-cycle" + (isCollapsed[k]? " collapsed": "")} key={c}>{c}<input className = "durInput" style = {{margin: 3}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
         onChange = {ctx.updateDur.bind(ctx)} onKeyDown={ctx._handleKeyPress.bind(ctx)}/>
+
         {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
         {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
          </div>
@@ -581,7 +592,7 @@ renderStep(x, i) {
   var colCount=0;
 
   return <div key={i} className={playerClass}>
-    <div className="playbox playbox-cycle" style={{width:"5%"}}>{i+1}</div>
+    <div className="playbox playbox-cycle" style={{width:"15%"}}>{i+1}</div>
     {_.map(channels, c => {
       const setText=({ target: { value }}) => {
           const {values}=ctx.state;
@@ -604,7 +615,7 @@ renderStep(x, i) {
         return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
       }
 
-      const cellHeight = 65/steps;
+      const cellHeight = 75/steps;
       //Timer Check
       var _index = _.indexOf(channels,c);
       const currentStep = ctx.props.timer.timer[_index].current % steps;
@@ -853,7 +864,7 @@ renderMenu(){
     </div>
 
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.2.1</a>
+    <a href="https://github.com/cannc4/Siren">0.3</a>
     </div>
 
   </div>
@@ -962,7 +973,7 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalComma
   var tempAr = [] ;
   var gbchan = globalChannels.split(" ");
 
-  if (gbchan[0] === undefined || gbchan[0] === ' '){
+  if (gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='a' ){
     for (var i = 0; i < storedPatterns.length; i++) {
       if(i !== channels.length){
         if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){

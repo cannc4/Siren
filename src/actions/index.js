@@ -552,11 +552,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			else {
 				var storechan = "d"+ (_.indexOf(channels,_k)+1) + " $ ";
 				var storepat= storechan+ newCommand;
-				var orbit = " #orbit " + _.indexOf(channels,_k);
-				storepat = storepat + orbit;
+				//var orbit = " #orbit " + _.indexOf(channels,_k);
+				storepat = storepat;
 				storedPatterns[_.indexOf(channels,_k)] = '';
 				storedPatterns[_.indexOf(channels,_k)] = storepat;
-				var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands +orbit;
+				var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
 				if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 					newCommand = globalTransformations+ newCommand + " " + globalCommands
 					newCommand = newCommand.replaceAll(' s ', ' image ');
