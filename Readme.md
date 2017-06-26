@@ -1,8 +1,17 @@
+# Updates
+### Global controls and Pattern History (Experimental)
+There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and
+sections can be recalled by creating presets. `shift+click` overwrites the presets and pressing `rec` creates a new one.
+These parameters directly access to the patterns in the history. (i.e active patterns)
+There is now a dedicated channel called `G` to sequence the channels you want to include within global controls. You can specify the index of global and channels like : "1 `1 2 4`" where first `1` is the index of global and `1 2 4` are the channel numbers.
+
+
+
 # Siren
 
 *Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
 
-**Note:** This is a beta release (*v0.2a*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
+**Note:** This is a beta release (*v0.3*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
 
 ## Download
 
@@ -85,6 +94,7 @@ Patterns can be looked up from the dictionary with their names and parameters. S
 
 *example in Figure (b)*
 - Pattern functions in cells (i.e. ```bt2 `every 2(#coarse 12)` `c` ```)
+
 
 ### Transitions
 Transitions are stored in the bottom row of the grid and are unique for each scene.

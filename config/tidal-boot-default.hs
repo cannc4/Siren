@@ -4,8 +4,11 @@ import qualified Sound.Tidal.Scales as Scales
 import Sound.OSC.FD
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.Output
+import Sound.Tidal.MIDI.Machinedrum
 import Data.Maybe
 
+import DxSevenOSC
+z1 <- dxStream
 
 procF_t <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
@@ -13,23 +16,17 @@ procS1 <- openUDP "127.0.0.1" 12000
 procS2 <- openUDP "127.0.0.1" 12000
 procS3 <- openUDP "127.0.0.1" 12000
 procS4 <- openUDP "127.0.0.1" 12000
-d_OSC <- openUDP "127.0.0.1" 12000
+scdx <- openUDP "127.0.0.1" 57120
 
 (cps, getNow) <- bpsUtils
 devices <- midiDevices
 
-m1 <- midiStream devices "USB MIDI Device Port 1" 1 synthController
-m2 <- midiStream devices "IAC Driver Tidal" 1 synthController
+m1 <- midiStream devices "USB MIDI Device Port 1" 1 machinedrumController
+m2 <- midiStream devices "USB MIDI Device Port 1" 2 machinedrumController
+m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
+m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
+m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
 
-(c1,ct1) <- dirtSetters getNow
-(c2,ct2) <- dirtSetters getNow
-(c3,ct3) <- dirtSetters getNow
-(c4,ct4) <- dirtSetters getNow
-(c5,ct5) <- dirtSetters getNow
-(c6,ct6) <- dirtSetters getNow
-(c7,ct7) <- dirtSetters getNow
-(c8,ct8) <- dirtSetters getNow
-(c9,ct9) <- dirtSetters getNow
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -43,7 +40,9 @@ m2 <- midiStream devices "IAC Driver Tidal" 1 synthController
 
 
 let bps x = cps (x/2)
-let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,c1,c2,c3,c4,c5,c6,c7,c8,c9]
+let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4]
+let mjou = mapM_ ($ silence) [m1,m2,m3,m4]
+let jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
 
@@ -67,7 +66,57 @@ let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     prog = (|+| note "{0 0 0 2 2}%1")
     timemod p = whenmod 28 18 (foldEvery [2,3,4] (0.25 <~)) $ p
     progwav = (|+| up "{0 0 0 2 2}%1")
-
+    direction xs = 1 : zipWith igtr (tail xs) (take (length xs - 1) xs) where igtr a b = if (a>b) then 1 else 0
+    outside n f p = slow n $ f (density n p)
+    (***) = foldl (|*|)
+    (+++) = foldl (|+|)
+    (###) = foldl (#)
+    outside n f p = slow n $ f (density n p)
+    every' n o f = when ((== o) . (`mod` n)) f
+    withArc (s,e) f p = stack [sliceArc (0,s) p, f $ sliceArc (s,e) p, sliceArc (e,1) p]
+    shiftArc (s,e) t = withArc (s,e) (t ~>)
+    beginend bpat durpat = (begin bpat) # (end $ (+) <$> bpat <*> durpat)
+    flange n t p = stack [ (toRational i*t) ~> p # begin (pure $ i/n) # end (pure $ (i+1)/n) | i <- [0..n-1] ]
+    sometimesBy' x f p = (1024 ~>) $ sometimesBy x f p
+    pingpongBy x fb tL tR cps f p = stack [ p,
+                                 (tL ~> (f p)) # pan (pure $ (1-x)/2) |*| ddd,
+                                 ((tL+tR) ~> (f p)) # pan (pure $ (x+1)/2) |*| ddd ]
+              where ddd = delay (pure fb) |*| delaytime (pure $ fromRational $ (tL+tR)/cps) |*| delayfeedback (pure fb)
+    pingpong = pingpongBy 1
+    pingpong0 = pingpong 0
+    padd = liftA2 (+)
+    pfold op xs = foldl1 (liftA2 op) xs
+    psum = pfold (+)
+    rep = replicate
+    juxp panpat f p = stack [p # pan panpat, f $ p # pan (fmap (1-) panpat)]
+    take' n m xs = map (xs!!) [m..n+m-1]
+    ngap n d = inside n (densityGap d)
+    swing n = inside n (within (0.5,1) (0.3333 ~>))
+    swingBy n x = inside n (within (0.5,1) (x ~>))
+    swingEvery n e = inside n (every e $ within (0.5,1) (0.3333 ~>))
+    necho x = echo $ negate x
+    ntrip x = triple $ negate x
+    somecyclesBy x = when (test x) -- cycle-by-cycle version of sometimesBy
+      where test x c = (timeToRand $ fromIntegral c) < x
+    somecycles = somecyclesBy 0.5
+    creak n t p = stack [(x*(x+1)*t/2) ~> p | x <- take n [0..]]
+    dropAfter x = within (x,1) (const silence)
+    fractal3 = lindenmayer 30 "0:0-1-,1:22,2:-2--001-,-:-10-" "0"
+    cyclerand n = Pattern $ \(s,e) -> [((s,e),(s,e),timeToRand $ fromIntegral $ (floor $ sam s) `mod` n)] -- a new random number each cycle, looping after n cycles
+    cycleirand m n = Pattern $ \(s,e) -> [((s,e),(s,e), floor $ (*m) $ timeToRand $ fromIntegral $ (floor $ sam s) `mod` n)] -- a new random number each cycle, looping after n cycles
+    doublejuxBy x fl fr p = stack[p, fl p # pan (pure $ 0.5-x/2), fr p # pan (pure $ 0.5+x/2)]
+    doublejux = doublejuxBy 1
+    decho t p = doublejux (t ~>) ((t+t/2) ~>) p
+    nstep n sd str = Pattern $ \(s,e) -> arc (step sd $ take' n (floor (s+2048) * n) $ cycle str) (s,e) -- the 2048 is a workaround due to shifting from sometimesBy' or other sources
+    scalex from to p = exp <$> scale (log from) (log to) p
+    arp ns t p = stack $ map (tshift p) (zip (0:ns) (fmap (* t) [0.0 ..]))
+      where tshift p (n,t) = t ~> (fmap (+n) p)
+    arp' ns t p = stack $ map (tshift p) (zip ("0":ns) (fmap (* t) [0.0 ..]))
+      where tshift p (n,t) = t ~> (padd p n)
+    funrun m n = every 2 (fmap (+ m)) $ run n
+    irand2 x y = fmap (+x) $ irand (y - x)
+    rand' x = Pattern $ \a -> [(a, a, timeToRand $ (+ x/100) $ midPoint a)]
+    quiet = const silence
 
 let (degree, degree_p) = pF "degree" (Nothing)
    (ctranspose, ctranspose_p) = pF "ctranspose" (Nothing)
@@ -106,6 +155,22 @@ rect = mf "rect"
 rectoff = mf "rectoff"
 envsaw = mf "envsaw"
 envsawf = mf "envsawf"
+envtri = mf "envtri"
+envtrif = mf "envtrif"
+amt = mf "amt"
+ampdtf = mf "ampdtf"
+dtfq = mf "dtfq"
+dtfnoise = mf "dtfnoise"
+dtftype = mf "dtftype"
+rate = mf "rate"
+threshdtf = mf "threshdtf"
+onsetdtf = mf "onsetdtf"
+dtfreq = mf "dtfreq"
+octer = mf "octer"
+octersub = mf "octersub"
+octersubsub = mf "octersubsub"
+ring = mf "ring"
+ringf = mf "ringf"
 comp = mf "comp"
 compa = mf "compa"
 compr = mf "compr"
@@ -121,8 +186,18 @@ vrate = mf "vrate"
 leslie = mf "leslie"
 lrate = mf "lrate"
 lsize = mf "lsize"
+maxdel = mf "maxdel"
+edel = mf "edel"
+krushf = mf "krushf"
+krush = mf "krush"
+wshap = mf "wshap"
 perc = mf "perc"
 percf = mf "percf"
+freeze = mf "freeze"
+thold = mf "thold"
+tlen = mf "tlen"
+trate = mf "trate"
+
 (ts, ts_p) = pF "ts" (Just 1)
 (cone, cone_p) = pF "cone" (Just 1)
 (ctwo, ctwo_p) = pF "ctwo" (Just 0)
@@ -161,6 +236,20 @@ sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
 (note3, note3_p) = pF "note3" (Just 44)
 (note2, note2_p) = pF "note2" (Just 48)
 (note, note_p) = pF "note" (Just 0)
+(octer, octer_p) = pF "octer" (Just 1)
+(octersub, octersub_p) = pF "octer" (Just 1)
+(octersubsub, octersubsub_p) = pF "octersubsub" (Just 01)
+(freeze, freeze_p) = pF "freeze" (Just 1)
+(ff, ff_p) = pF "ff" (Just 440)
+(bsize, bsize_p) = pF "bsize" (Just 2048)
+(kcutoff, kcutoff_p) = pF "kcutoff" (Just 5000)
+(krush, krush_p) = pF "krush" (Just 1)
+(wshap, wshap_p) = pF "wshap" (Just 1)
+(maxdel, maxdel_p) = pF "maxdel" (Just 10)
+(edel, edel_p) = pF "edel" (Just 1)
+(thold, thold_p) = pF "thold" (Just 0)
+(tlen, tlen_p) = pF "tlen" (Just 1)
+(trate, trate_p) = pF "trate" (Just 12)
 
 
 :set prompt "tidal> "
