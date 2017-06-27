@@ -53,7 +53,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['1','2','3', '4', 'v1','MIDI','G'],
+      channels: ['1','2','3', '4', 'v1','u1','G'],
       timer: [],
       values: {},
       scPattern: '',

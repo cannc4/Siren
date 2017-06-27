@@ -600,6 +600,11 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				console.log(pattern, "d1 $ "+ newCommand);
 				return [pattern, "d1 $ "+ newCommand] ;
 			}
+			else if (_.indexOf(channels,_k) === _.indexOf(channels, 'u1')){
+				pattern =  "u1 $ " + newCommand;
+
+				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+			}
 			else {
 				storedPatterns[_k-1] = '';
 				// var orbit = "#orbit " + _.indexOf(channels,_k);

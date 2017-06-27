@@ -6,6 +6,9 @@ import Sound.OSC.FD
 import ProcessingOSC
 v1 <- testStream
 
+import UnityOSC
+u1 <- unityStream
+
 max <- openUDP "127.0.0.1" 12000
 procF_v <- openUDP "127.0.0.1" 12000
 
