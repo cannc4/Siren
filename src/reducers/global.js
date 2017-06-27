@@ -11,7 +11,6 @@ export default (state = INITIAL_STATE, action) => {
     case 'STORE_'+modelName:
       const g = state;
       g.storedGlobals = action.storedGlobals;
-      console.log(g.storedGlobals);
       return {...g}
     default:
       return state;

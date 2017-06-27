@@ -9,11 +9,9 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
       chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern,
-      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,fbcreatechannelinscene} from '../actions'
+      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
+      fbcreatechannelinscene,createChannel,updateChannel} from '../actions'
 
-import DropdownMenu from 'react-dd-menu';
-import Slider from 'rc-slider';
-const style = { height: 600,width: 600, margin: 50 };
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import NumberEditor from 'react-number-editor';
@@ -58,9 +56,6 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 8,
-      channels: [],
-      values: {},
       scPattern: '',
       click : {flag:0,
               times:0,
@@ -69,21 +64,31 @@ class Home extends Component {
       activeMatrix: '',
       songmodeActive: false,
       sceneIndex: '',
-      transition: [],
       channelEnd :[],
-      solo : [],
-      soloSentinel: false,
       sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
       globalTransformations: '',
       globalChannels: '',
       username: '',
+      channels_state: [],
       storedPatterns: [],
       storedGlobals: [{transform:'', command: ''}],
       isCollapsed:[],
       tidalOnClickClass:  ' ',
       pressed : false,
+      c_type: '',
+      c_name: '',
+      c_step: '',
+      c_id: 0,
+      c_transition: '',
+      solo : [],
+      soloSentinel: false,
+      transition: [],
+      steps: 8,
+      channels: [],
+      channels_state: [{}],
+      values: {}
     }
   }
 //Clock for Haskell
@@ -373,35 +378,6 @@ handleGlobalCommands = event => {
 
 
 
-updateT = ({target : {value, id}}) => {
-  const ctx = this;
-  const {transition, channels} = ctx.state;
-  var _index = _.indexOf(channels, id);
-  var temp = transition;
-  if(temp){
-    temp[_index] = value;
-  }
-  else {
-    temp = [];
-  }
-  ctx.setState({transition: temp});
-}
-
-
-_handleKeyPressT = event => {
-  const ctx=this;
-  const {transition, channels} = ctx.state;
-  const _key = event.target.id;
-  var value = event.target.value;
-  var _index = _.indexOf(channels, _key);
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    var temp = transition;
-    temp[_index] = value;
-   ctx.setState({transition:temp});
-  }
-}
-
 
 handleSubmitCell = event => {
   const ctx=this;
@@ -427,12 +403,21 @@ handleSubmitCell = event => {
   }
 }
 ////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, values, item, transition, storedGlobals) {
+updateMatrix(patterns, item, storedGlobals) {
 
   const ctx = this;
-  const { steps, channels } = ctx.state;
-  const items = this.props[this.state.modelName.toLowerCase()]
-  store.dispatch(updateMatrix(patterns, values, item, transition, steps, channels,storedGlobals));
+  var cname = [];
+  var cvals = [];
+  var ctran = [];
+  var cstep = [];
+  _.forEach(item.channels, function(x, i){
+    cname.push(x.name);
+    cvals.push(x.values);
+    cstep.push(x.step);
+    ctran.push(x.transition);
+  })
+
+  store.dispatch(updateMatrix(patterns, cvals, item, ctran, cstep, cname));
 
 }
 
@@ -498,46 +483,56 @@ changeCollapse(k){
   isCollapsed[k]= !isCollapsed[k]
   ctx.setState({isCollapsed : isCollapsed});
 }
-// addChannel = event => {
-//   const ctx=this;
-//   store.dispatch(createChannel());
-// //database
-// //current channel
-// }
+
 addChannel() {
-
-
-  var flag = false;
   const ctx = this
-  const {values,activeMatrix } = ctx.state;
+  const {channels_state, activeMatrix , c_id , c_type,c_name,c_step,c_transition } = ctx.state;
+  var _id = c_id +1;
+  console.log(c_id);
+  ctx.setState({c_id:_id})
+  var nc = {cid: _id , type:c_type, name:c_name, vals:[], transition: c_transition, step: c_step };
+  console.log(nc);
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix){
-      //const { type } = ctx.state
-    //  ctx.setState({sceneKey: d.key});
-    //  if (type.length >= 1) {
-    fbcreatechannelinscene('Matrices', {type:'d', name:'d1', values:[],transitions: '', steps: 8 }, d.key);
-    flag=true;
-    }
+      fbcreatechannelinscene('Matrices', {cid:_id, type:c_type, name:c_name, vals:[], transition: c_transition, step: c_step }, d.key);
+      store.dispatch(createChannel(nc));
+      }
   })
-  if(!flag) {
-    const size = Object.keys(ctx.props["matrices"]).length;
-    if(size > 0)
-      alert("A scene needs to be active to add channel.");
-    else
-      alert("You should add a scene first (Tip: on the left)");
-  }
 }
 
+handleChannelName = event => {
+  const ctx = this;
+  const {c_name} = ctx.state;
+  ctx.setState({c_name: event.target.value});
+}
+handleChannelType = event => {
+  const ctx = this;
+  const {c_type} = ctx.state;
+  ctx.setState({c_type: event.target.value});
+}
 
+handleChannelStep = event => {
+  const ctx = this;
+  const {c_step} = ctx.state;
+  ctx.setState({c_step: event.target.value});
+}
+handleChannelTransition = event => {
+  const ctx = this;
+  const {c_transition} = ctx.state;
+  ctx.setState({c_transition: event.target.value});
+}
 renderPlayer() {
-  const ctx=this;
-  const { channels, steps , click, solo, soloSentinel,transition,isCollapsed,activeMatrix}=ctx.state;
+  const ctx = this;
+  const { activeMatrix, c_type,c_name,c_step,c_transition } = ctx.state;
   return (
     <div className="Player-holder">
-    {<Button onClick={ctx.addChannel.bind(ctx)} theme = {themeButton} activeStyle={{position:'relative', top: 1}}></Button>}
     <Channels active = {activeMatrix}/>
-  </div>
-)
+    {<Button onClick={ctx.addChannel.bind(ctx)} theme = {themeButton} activeStyle={{position:'relative', top: 1}}></Button>}
+    <input className="newChannelInput" onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="type "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="name "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="step "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="transition "/>
+  </div>)
 }
 
 
@@ -552,6 +547,7 @@ addItem() {
       globals = [];
   const { matName, activeMatrix, values, sceneIndex, transition,storedGlobals  } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  const chn = ctx.props['Channels'];
   const { uid } = ctx.props.user.user;
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
 
@@ -566,7 +562,7 @@ addItem() {
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
       //console.log(storedGlobals);
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, storedGlobals});
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels: chn, sceneIndex: snd, uid, transition: transition, storedGlobals});
       ctx.setState({sceneIndex: snd});
     }
     else {
@@ -633,7 +629,7 @@ reorder (index,flag){
 
 renderItem(item, dbKey, i) {
   const ctx = this;
-  const { values, activeMatrix, transition,storedGlobals} = ctx.state;
+  const { activeMatrix, transition,storedGlobals} = ctx.state;
   const { patterns } = ctx.props;
 
   var sglobals = [];
@@ -641,14 +637,22 @@ renderItem(item, dbKey, i) {
   _.forEach(item.storedGlobals, function(d, i){
     sglobals.push(d);
   });
+
   const updateMatrix = () => {
     if(sglobals === undefined){
       sglobals = [];
     }
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: sglobals, globalTransformations: ' ', globalCommands:' '});
-    //console.log(item.storedGlobals);
-    ctx.updateMatrix(patterns, values, item, transition,sglobals);
+    ctx.setState({ activeMatrix: item.matName,
+      matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
+      globalTransformations: ' ', globalCommands:' '});
+
+console.log("HERE");
+    ctx.updateMatrix(patterns, item,sglobals);
+    store.dispatch(updateChannel(item.channels));
+    console.log(item.channels);
     store.dispatch(globalStore(sglobals));
+
+
     //console.log(storedGlobals);
   }
 
@@ -941,17 +945,8 @@ render() {
           <LayoutSplitter />
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Globals</p>
-               <Slider  min ={0.25}  max = {20} maximumTrackStyle={{ backgroundColor: 'red', height: 10 }}
-        minimumTrackStyle={{ backgroundColor: 'blue', height: 10 }}
-        handleStyle={{
-          borderColor: 'blue',
-          height: 28,
-          width: 28,
-          marginLeft: -14,
-          marginTop: -9,
-          backgroundColor: 'black',
-        }}  onChange={ctx.tidalcps.bind(ctx)} defaultValue={ctx.click.flag} />
+              <p>"> Globals"</p>
+
               <input className="newChannelInput" key={'globalchannel'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalChannels.bind(ctx)} value = {globalChannels} placeholder="Channels "/>
               <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
               <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
