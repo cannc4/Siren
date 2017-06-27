@@ -9,11 +9,9 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
       chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern,
-      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,fbcreatechannelinscene} from '../actions'
+      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
+      fbcreatechannelinscene} from '../actions'
 
-import DropdownMenu from 'react-dd-menu';
-import Slider from 'rc-slider';
-const style = { height: 600,width: 600, margin: 50 };
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import NumberEditor from 'react-number-editor';
@@ -58,9 +56,6 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 8,
-      channels: [],
-      values: {},
       scPattern: '',
       click : {flag:0,
               times:0,
@@ -69,10 +64,7 @@ class Home extends Component {
       activeMatrix: '',
       songmodeActive: false,
       sceneIndex: '',
-      transition: [],
       channelEnd :[],
-      solo : [],
-      soloSentinel: false,
       sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
@@ -84,6 +76,13 @@ class Home extends Component {
       isCollapsed:[],
       tidalOnClickClass:  ' ',
       pressed : false,
+
+      solo : [],
+      soloSentinel: false,
+      transition: [],
+      steps: 8,
+      channels: [],
+      values: {}
     }
   }
 //Clock for Haskell
@@ -373,35 +372,6 @@ handleGlobalCommands = event => {
 
 
 
-updateT = ({target : {value, id}}) => {
-  const ctx = this;
-  const {transition, channels} = ctx.state;
-  var _index = _.indexOf(channels, id);
-  var temp = transition;
-  if(temp){
-    temp[_index] = value;
-  }
-  else {
-    temp = [];
-  }
-  ctx.setState({transition: temp});
-}
-
-
-_handleKeyPressT = event => {
-  const ctx=this;
-  const {transition, channels} = ctx.state;
-  const _key = event.target.id;
-  var value = event.target.value;
-  var _index = _.indexOf(channels, _key);
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    var temp = transition;
-    temp[_index] = value;
-   ctx.setState({transition:temp});
-  }
-}
-
 
 handleSubmitCell = event => {
   const ctx=this;
@@ -498,34 +468,15 @@ changeCollapse(k){
   isCollapsed[k]= !isCollapsed[k]
   ctx.setState({isCollapsed : isCollapsed});
 }
-// addChannel = event => {
-//   const ctx=this;
-//   store.dispatch(createChannel());
-// //database
-// //current channel
-// }
+
 addChannel() {
-
-
-  var flag = false;
   const ctx = this
-  const {values,activeMatrix } = ctx.state;
+  const {values, activeMatrix } = ctx.state;
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix){
-      //const { type } = ctx.state
-    //  ctx.setState({sceneKey: d.key});
-    //  if (type.length >= 1) {
-    fbcreatechannelinscene('Matrices', {type:'d', name:'d1', values:[],transitions: '', steps: 8 }, d.key);
-    flag=true;
+      fbcreatechannelinscene('Matrices', {type:'d', name:'d1', values:[], transitions: '', steps: 8 }, d.key);
     }
   })
-  if(!flag) {
-    const size = Object.keys(ctx.props["matrices"]).length;
-    if(size > 0)
-      alert("A scene needs to be active to add channel.");
-    else
-      alert("You should add a scene first (Tip: on the left)");
-  }
 }
 
 
@@ -633,7 +584,7 @@ reorder (index,flag){
 
 renderItem(item, dbKey, i) {
   const ctx = this;
-  const { values, activeMatrix, transition,storedGlobals} = ctx.state;
+  const { activeMatrix, transition,storedGlobals} = ctx.state;
   const { patterns } = ctx.props;
 
   var sglobals = [];
@@ -941,17 +892,8 @@ render() {
           <LayoutSplitter />
           <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Globals</p>
-               <Slider  min ={0.25}  max = {20} maximumTrackStyle={{ backgroundColor: 'red', height: 10 }}
-        minimumTrackStyle={{ backgroundColor: 'blue', height: 10 }}
-        handleStyle={{
-          borderColor: 'blue',
-          height: 28,
-          width: 28,
-          marginLeft: -14,
-          marginTop: -9,
-          backgroundColor: 'black',
-        }}  onChange={ctx.tidalcps.bind(ctx)} defaultValue={ctx.click.flag} />
+              <p>"> Globals"</p>
+
               <input className="newChannelInput" key={'globalchannel'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalChannels.bind(ctx)} value = {globalChannels} placeholder="Channels "/>
               <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
               <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />

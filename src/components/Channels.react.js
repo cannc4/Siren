@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
+import { fbdeletechannelinscene, fbupdatechannelinscene } from '../actions';
 
 // var Button = require('react-button')
 // var themeButton = {
@@ -17,44 +17,39 @@ class Channels extends Component {
     super(props)
     this.state = {
       modelName : 'Matrices',
-      channels_state: ['d1','d2','d3','d4'],
+      channels_state: [],
       name: '',
-      type: null,
+      type: '',
       values: [],
       step: 8
     }
   }
 
-  componentWillMount(props,state){
-
-    const ctx=this;
-
+  updateT = ({target : {value, id}}) => {
+    const ctx = this;
+    const {transition, channels} = ctx.state;
+    var _index = _.indexOf(channels, id);
+    var temp = transition;
+    if(temp){
+      temp[_index] = value;
+    }
+    else {
+      temp = [];
+    }
+    ctx.setState({transition: temp});
   }
 
-  //Channel Dictionary
-  addChannel() {
-    console.log("SLM");
-    var flag = false;
-    const ctx = this
-    _.each(Object.values(ctx.props["matrices"]), function(d){
-      if(d.matName === ctx.props.active){
-        const { type } = ctx.state
-        ctx.setState({sceneKey: d.key});
-        if (type.length >= 1) {
-          fbcreatechannelinscene('Matrices', {type}, d.key);
-        }
-        else {
-          alert("Channel type should contain at least 1 character.");
-        }
-        flag = true;
-      }
-    })
-    if(!flag) {
-      const size = Object.keys(ctx.props["matrices"]).length;
-      if(size > 0)
-        alert("A scene needs to be active to add channel.");
-      else
-        alert("You should add a scene first (Tip: on the left)");
+  _handleKeyPressT = event => {
+    const ctx=this;
+    const {transition, channels} = ctx.state;
+    const _key = event.target.id;
+    var value = event.target.value;
+    var _index = _.indexOf(channels, _key);
+
+    if(event.keyCode === 13 && event.ctrlKey){
+      var temp = transition;
+      temp[_index] = value;
+     ctx.setState({transition:temp});
     }
   }
 
@@ -63,39 +58,78 @@ class Channels extends Component {
     ctx.setState({ type: value });
   }
 
-  renderStep(c,i) {
+  renderStep(c, i) {
+    console.log("RenderStep i :" , i, " c :" , c );
+
     const ctx=this;
-    const { channels_state, steps,values}=ctx.state;
-    const { click,activeMatrix }=ctx.props;
-    console.log("Render Step i :" , i, " c :" , c );
+    const { channels_state, step, values}=ctx.state;
+
+    const transitionValue = function(c){
+      if(ctx.state.transition){
+        return ctx.state.transition[_.indexOf(channels_state, c)];
+      }
+      else {
+        return '(clutchIn 2)'
+      }
+    };
+
+    const handleChange = (obj) => {
+      var value, name;
+      if(obj.target !== undefined){
+        value = obj.target.value;
+        name = obj.target.name;
+      } else {
+        value = obj;
+      }
+
+      _.each(Object.values(ctx.props["matrices"]), function(d){
+        if(d.matName === ctx.props.active){
+          _.each(Object.values(d.channels), function(e){
+            if(e.matName === ctx.props.active){
+
+              fbupdatechannelinscene('Matrices',
+                {type:'d', name:'d1', values:[], transitions: '', steps: 8 },
+                d.key)
+            }
+          })
+        }
+      })
+    }
+
+
+    console.log('RenderStep props: ', ctx.props);
+
+    const { click, active } = ctx.props;
     var playerClass="Player Player--" + (channels_state.length + 1.0) + "cols";
 
     var colCount=0;
 
     return <div key={i} className={playerClass}>
       <div className="playbox playbox-cycle" style={{width:"15%"}}>{i+1}</div>
-      {_.map(channels, c => {
+      {_.map(channels_state, c => {
         const setText=({ target: { value }}) => {
-          if (values[i+1] === undefined) values[i+1]={}
+          if (values[i+1] === undefined)
+            values[i+1]={}
           values[i+1] = value;
           ctx.setState({values : values});
         }
 
         const getValue=() => {
-          if (values[i+1] === undefined) return ''
+          if (values[i+1] === undefined)
+            return ''
           return values[i+1];
         }
 
-        const textval=getValue();
+        const textval = getValue();
 
-        const cellHeight = 75/steps;
+        const cellHeight = 75/step;
         //Timer Check
         var _index = _.indexOf(channels_state,c);
-        const currentStep = click.current% steps;
+        const currentStep = click.current% step;
         var individualClass = "playbox";
         var translateAmount = 0;
         var ctrans = 'translate(0px, '+translateAmount+'px)';
-        var durstr =click.current % steps+ 's ease-in-out';
+        var durstr =click.current % step+ 's ease-in-out';
         var css = {
             height: cellHeight+'vh',
             webkittransition: durstr,
@@ -116,11 +150,11 @@ class Channels extends Component {
           <textarea type="text" style={{fontSize: '1vw'}}value={textval} onChange={setText} id = {i}/>
         </div>
       })}
-      <p> T </p>
-        <input className = "playbox" id = {c} key = {c}
-          placeholder={" - "}  value = {transitionValue(c)}
-          style = {{margin: 5}} onChange = {ctx.updateT.bind(ctx)}
-          onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      <p>" T "</p>
+      <input className = "playbox" id = {c} key = {c}
+        placeholder={" - "}  value = {''}
+        style = {{margin: 5}} onChange = {ctx.updateT.bind(ctx)}
+        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
     </div>
   }
 
@@ -204,24 +238,24 @@ class Channels extends Component {
     const ctx = this
     const { modelName, type } = ctx.state;
     var items = ctx.props[modelName.toLowerCase()];
-    const scenes = Object.values(ctx.props["matrices"]);
+    var chn = []
 
-    _.each(scenes, function(d){
+    _.each(items, function(d){
       if(d.matName === ctx.props.active){
-        const sceneChannels = d.channels;
-        if(sceneChannels !== undefined){
-            items = d.channels;
-        }
+        _.map(Object.values(ctx.props["matrices"]), function(obj, i) {
+          chn.push(Object.values(obj.channels));
+        });
       }
     })
 
-    const changeType = ctx.changeType.bind(ctx);
-    const renderItems = ctx.renderItems.bind(ctx);
+    console.log('Channels Render : ', chn);
+
+    // const changeType = ctx.changeType.bind(ctx);
+    // const renderItems = ctx.renderItems.bind(ctx);
 
     return (
       <div>
-      {renderItems(items)}
-
+      {ctx.renderItems.bind(ctx, chn)}
       </div>
     );
   }
