@@ -2,28 +2,23 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
-import DropdownMenu from 'react-dd-menu';
-import Slider from 'rc-slider';
-
-
-const style = { height: 600,width: 600, margin: 50 };
-
-function log(value) {
-  console.log(value); //eslint-disable-line
-}
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
-import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
-      sendGlobals,startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
-      consoleSubmitHistory,consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
-      chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene} from '../actions'
+import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
+      sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
+      fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
+      chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern,
+      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,fbcreatechannelinscene} from '../actions'
+
+import DropdownMenu from 'react-dd-menu';
+import Slider from 'rc-slider';
+const style = { height: 600,width: 600, margin: 50 };
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
-
 import NumberEditor from 'react-number-editor';
-import Simple from './Simple.react';
 import Patterns from './Patterns.react';
+import Channels from './Channels.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
@@ -35,6 +30,7 @@ import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
 var Button = require('react-button')
+
 var themeButton = {
     style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
     disabledStyle: { background: 'gray'},
@@ -63,8 +59,7 @@ class Home extends Component {
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
       steps: 8,
-      channels: ['d1','d2','d3','d4', 'm1','m2','m3', 'm4', 'G'],
-      timer: [],
+      channels: [],
       values: {},
       scPattern: '',
       click : {flag:0,
@@ -76,7 +71,6 @@ class Home extends Component {
       sceneIndex: '',
       transition: [],
       channelEnd :[],
-      play : false,
       solo : [],
       soloSentinel: false,
       sceneSentinel: false,
@@ -87,7 +81,6 @@ class Home extends Component {
       username: '',
       storedPatterns: [],
       storedGlobals: [{transform:'', command: ''}],
-      tempDur : [],
       isCollapsed:[],
       tidalOnClickClass:  ' ',
       pressed : false,
@@ -107,22 +100,6 @@ componentDidMount(props,state){
   })
 }
 
-// shouldComponentUpdate(nextProps, nextState) {
-//   const {timer} = nextProps;
-//   const {channels} = nextState;
-//   for (var i = 0; i < channels.length; i++) {
-//     if (nextProps.timer.timer[i].isActive) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
-
-// componentDidMount(){
-//   cm.ref.on('keyUp', function(instance, event) {
-//     console.log(instance, event);
-// });
-// }
 
 componentWillReceiveProps(nextProps) {
   const ctx = this;
@@ -138,15 +115,13 @@ componentWillReceiveProps(nextProps) {
 }
 
 componentWillMount(props,state){
-  document.addEventListener("keydown", this.handleglobalKeys.bind(this));
+
   const ctx=this;
   var tempEnd = [];
-  const { channelEnd, channels , steps , timer, solo, storedGlobals,storedPatterns, isCollapsed}=ctx.state;
+  const { channelEnd, channels , steps , solo, storedGlobals,storedPatterns, isCollapsed}=ctx.state;
   for (var i = 0; i < channels.length; i++) {
     isCollapsed[i] = false;
     storedPatterns[i] = '';
-   if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
-   ctx.createTimer(i, 48, steps);
 
    tempEnd[i] = false
    solo[i] = false;
@@ -159,9 +134,6 @@ componentWillMount(props,state){
  ctx.setState({storedPatterns : storedPatterns});
 }
 
-createTimer(i,duration, steps){
-  store.dispatch(createTimer(i,duration,steps));
-}
 
 // componentDidUpdate(props, state) {
 //   console.log();
@@ -218,7 +190,7 @@ componentDidUpdate(props, state) {
   console.log();
   var runNo = [];
   const ctx=this;
-  const { patterns, timer, click}=props;
+  const { patterns,  click}=props;
   const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition, storedPatterns,storedGlobals }=state;
   console.log(ctx.props);
   for (var i = 0; i < channels.length; i++) {
@@ -276,13 +248,12 @@ identical(array) {
 
 progressMatrices(items){
   const ctx = this;
-  const { timer } = ctx.props;
-  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, tempDur, channels,storedGlobals} = ctx.state;
+  const { click } = ctx.props;
+  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, channels,storedGlobals} = ctx.state;
   var patterns = [];
   const { uid } = ctx.props.user.user;
   if(ctx.identical(channelEnd))
   {
-    var duration = [];
     var transition_next = []
     var i_save = -1;
     for (var j = 0; j < channelEnd.length; j++) {
@@ -300,12 +271,9 @@ progressMatrices(items){
 
     const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
     const model = fetchModel(ctx.state.modelName);
-    _.forEach(nextObj.durations, function(d, i){
-      duration.push(d);
 
-    });
 
-    updateMatrix(patterns, values, nextObj, transition, duration,storedGlobals);
+    updateMatrix(patterns, values, nextObj, transition,storedGlobals);
     store.dispatch(globalStore(storedGlobals));
     ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions, storedGlobals: nextObj.globals});
 
@@ -326,7 +294,7 @@ disableSongmode(){
 
 startTimer() {
   const ctx = this;
-  const {channels, steps, play, click} = ctx.state;
+  const {channels, steps,  click} = ctx.state;
   var temp = click;
   temp.isActive = true;
   ctx.setState({click:temp});
@@ -335,7 +303,7 @@ startTimer() {
 
 stopTimer() {
   const ctx = this;
-  const {channels, steps, play, click} = ctx.state;
+  const {channels, steps, click} = ctx.state;
   var temp = [];
   temp = click;
   temp.isActive = false;
@@ -343,18 +311,11 @@ stopTimer() {
   store.dispatch(chokeClick());
 }
 
-// pauseTimer() {
-//   const ctx = this;
-//   const {channels, play} = ctx.state;
-//   for (var i = 0; i < channels.length; i++) {
-//     store.dispatch(pauseIndividualTimer(i));
-//     ctx.setState({play:false});
-//   }
-//   setTimeout(function() {
-//     ctx.setState({play: false});
-//     console.log('button press timeout -- pause');
-//   },600);
-// }
+pauseTimer() {
+  const ctx = this;
+  const {channels, click} = ctx.state;
+
+}
 ////////////////////////////// TIMER ENDS ////////////////////////////
 
 
@@ -410,39 +371,6 @@ handleGlobalCommands = event => {
   ctx.setState({globalCommands:temp});
 }
 
-updateDur = ({target : {value, id}}) => {
-  const ctx = this;
-  const {channels,steps} = ctx.state;
-  const {timer} = ctx.props;
-  var _index = _.indexOf(channels,id);
-
-  if(!isNaN(parseFloat(value)) && parseFloat(value) >= 2.) {
-    store.dispatch(updateTimerduration(_index,value,steps));
-  } else {
-    console.error("Please input numbers only.");
-  }
-}
-
-_handleKeyPress = event => {
-
-  const ctx=this;
-  const {steps, channels, timer, play} = ctx.state;
-  console.log(timer);
-  console.log(ctx.props.timer.timer);
-  const _key = event.target.id;
-  var value = event.target.value;
-  var _index = _.indexOf(channels, _key);
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-      startIndividualTimer(_index, value,steps);
-      ctx.setState({play:true});
-    }
-  }
-  else if (event.keyCode === 13 && event.shiftKey){
-    store.dispatch(stopIndividualTimer(_index));
-  }
-}
 
 
 updateT = ({target : {value, id}}) => {
@@ -478,7 +406,7 @@ _handleKeyPressT = event => {
 handleSubmitCell = event => {
   const ctx=this;
   const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, patterns }=ctx.props;
+  const { click, patterns }=ctx.props;
 
   var body = event.target.id;
   var c = _.split(body,',')[0]-1;
@@ -495,17 +423,16 @@ handleSubmitCell = event => {
   }
 
   if(event.keyCode === 13 && event.ctrlKey){
-    store.dispatch(assignTimer(timer.timer[c], steps, i))
-    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
+    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,click);
   }
 }
 ////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, values, item, transition, duration, storedGlobals) {
+updateMatrix(patterns, values, item, transition, storedGlobals) {
 
   const ctx = this;
   const { steps, channels } = ctx.state;
   const items = this.props[this.state.modelName.toLowerCase()]
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels,storedGlobals));
+  store.dispatch(updateMatrix(patterns, values, item, transition, steps, channels,storedGlobals));
 
 }
 
@@ -571,107 +498,46 @@ changeCollapse(k){
   isCollapsed[k]= !isCollapsed[k]
   ctx.setState({isCollapsed : isCollapsed});
 }
-//  <img src={isCollapsed[k]? require('../assets/stop_fill@3x.png') : require('../assets/stop@3x.png')}  id = {k}  onClick={ctx.changeCollapse.bind(ctx,k)} height={20} width={20}/>f
-renderPlayer() {
-  const ctx=this;
-  const { channels, steps , timer, solo, soloSentinel,transition,isCollapsed}=ctx.state;
-  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-  var count = 1;
-  const transitionValue = function(c){
-    if(ctx.state.transition){
-      return ctx.state.transition[_.indexOf(channels, c)];
+// addChannel = event => {
+//   const ctx=this;
+//   store.dispatch(createChannel());
+// //database
+// //current channel
+// }
+addChannel() {
+
+
+  var flag = false;
+  const ctx = this
+  const {values,activeMatrix } = ctx.state;
+  _.each(Object.values(ctx.props["matrices"]), function(d){
+    if(d.matName === activeMatrix){
+      //const { type } = ctx.state
+    //  ctx.setState({sceneKey: d.key});
+    //  if (type.length >= 1) {
+    fbcreatechannelinscene('Matrices', {type:'d', name:'d1', values:[],transitions: '', steps: 8 }, d.key);
+    flag=true;
     }
-    else {
-      return '(clutchIn 2)'
-    }
-  };
-  return (<div className="Player-holder">
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"15%"}}></div>
-      {_.map(channels, (c,k) => {
-        return <div className= {"playbox playbox-cycle" + (isCollapsed[k]? " collapsed": "")} key={c}>{c}
-        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-         </div>
-      })}
-    </div>
-    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
-      {_.map(channels, c => {
-        return <input className = "playbox" id = {c} key = {c}
-        placeholder={" - "}
-        value = {transitionValue(c)}
-        style = {{margin: 5}}
-        onChange = {ctx.updateT.bind(ctx)}
-        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
-      })}
-    </div>
-  </div>)
+  })
+  if(!flag) {
+    const size = Object.keys(ctx.props["matrices"]).length;
+    if(size > 0)
+      alert("A scene needs to be active to add channel.");
+    else
+      alert("You should add a scene first (Tip: on the left)");
+  }
 }
 
-renderStep(x, i) {
+
+renderPlayer() {
   const ctx=this;
-  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, patterns }=ctx.props;
-
-  var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-
-  var colCount=0;
-
-  return <div key={i} className={playerClass}>
-    <div className="playbox playbox-cycle" style={{width:"15%"}}>{i+1}</div>
-    {_.map(channels, c => {
-      const setText=({ target: { value }}) => {
-          const {values}=ctx.state;
-          if (values[i+1] === undefined) values[i+1]={}
-          values[i+1][_.indexOf(channels,c)] = value;
-          ctx.setState({values});
-      }
-console.log(ctx.props.click);
-      const getValue=() => {
-        const values=ctx.state.values;
-        if (values[i+1] === undefined || values[i+1][_.indexOf(channels,c)] === undefined) return ''
-        return values[i+1][_.indexOf(channels,c)];
-      }
-
-      const textval=getValue();
-
-      const index=channels.length*i+colCount++;
-
-      const mapNumbers =(value, istart, istop, ostart, ostop) => {
-        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
-      }
-
-      const cellHeight = 75/steps;
-      //Timer Check
-      var _index = _.indexOf(channels,c);
-      const currentStep = click.current% steps;
-      var individualClass = "playbox";
-      var translateAmount = 0;
-      var ctrans = 'translate(0px, '+translateAmount+'px)';
-      var durstr = ctx.props.timer.timer[_index].duration + 's ease-in-out';
-      var css = {
-          height: cellHeight+'vh',
-          webkittransition: durstr,
-          moztransition: durstr,
-          otransition: durstr,
-          transform: ctrans
-      }
-      if (i === currentStep) {
-        individualClass += " playbox-active";
-        translateAmount = cellHeight;
-      }
-      if (click.isActive === true) {
-        individualClass += " playbox-highlight";
-      }
-      // dynamic text size
-      // const textSize = textval.length > 10 ? Math.max( 1, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
-      return <div className={individualClass} style={css} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: '1vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
-      </div>
-    })}
-  </div>;
+  const { channels, steps , click, solo, soloSentinel,transition,isCollapsed,activeMatrix}=ctx.state;
+  return (
+    <div className="Player-holder">
+    {<Button onClick={ctx.addChannel.bind(ctx)} theme = {themeButton} activeStyle={{position:'relative', top: 1}}></Button>}
+    <Channels active = {activeMatrix}/>
+  </div>
+)
 }
 
 
@@ -683,14 +549,12 @@ changeName({target: { value }}) {
 addItem() {
   const ctx = this;
   var patterns = [],
-      duration = [],
       globals = [];
   const { matName, activeMatrix, values, sceneIndex, transition,storedGlobals  } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const { uid } = ctx.props.user.user;
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
-  // gets the duration array
-  _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
+
   globals = storedGlobals;
   if(uid !== null && uid !== undefined){
     _.each(items, function(d){
@@ -702,7 +566,7 @@ addItem() {
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
       //console.log(storedGlobals);
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration, storedGlobals});
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, storedGlobals});
       ctx.setState({sceneIndex: snd});
     }
     else {
@@ -772,13 +636,8 @@ renderItem(item, dbKey, i) {
   const { values, activeMatrix, transition,storedGlobals} = ctx.state;
   const { patterns } = ctx.props;
 
-  // gets the duration array
-  var duration = [];
   var sglobals = [];
   const model = fetchModel(ctx.state.modelName);
-  _.forEach(item.durations, function(d, i){
-    duration.push(d);
-  });
   _.forEach(item.storedGlobals, function(d, i){
     sglobals.push(d);
   });
@@ -788,7 +647,7 @@ renderItem(item, dbKey, i) {
     }
     ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: sglobals, globalTransformations: ' ', globalCommands:' '});
     //console.log(item.storedGlobals);
-    ctx.updateMatrix(patterns, values, item, transition, duration,sglobals);
+    ctx.updateMatrix(patterns, values, item, transition,sglobals);
     store.dispatch(globalStore(sglobals));
     //console.log(storedGlobals);
   }
@@ -864,7 +723,7 @@ toggleCanvas(){
 
 renderMenu(){
   const ctx=this;
-  const { tidal, timer, click, patterns }=ctx.props;
+  const { tidal, click, patterns }=ctx.props;
   const { play, values, steps, channels}=ctx.state;
 
   const loginGG = () => {
@@ -898,41 +757,6 @@ renderMenu(){
 
   </div>
 }
-
-//onClick={ctx.closeSC.bind(ctx)}
-
-handleglobalKeys = event => {
-  // const ctx = this;
-  // const {steps, channels, timer, play} = ctx.state;
-  // if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
-  //   var _index = event.keyCode - 49;
-  //   if(_index < channels.length){
-  //     if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-  //       startIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-  //       ctx.setState({play: true});
-  //     }
-  //   }
-  // }
-  // else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
-  //   var _index = event.keyCode - 49;
-  //   if(_index < channels.length) {
-  //     stopIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-  //   }
-  // }
-  // // Start/stop all timers with ctrl/shift + space
-  // else if (event.keyCode === 32 && event.ctrlKey){
-  //   ctx.startTimer();
-  // }
-  // else if (event.keyCode === 32 && event.shiftKey){
-  //   ctx.stopTimer();
-  // }
-  //
-  // //Scene bindings
-  // else if (event.keyCode === 32 && event.shiftKey){
-  //   ctx.stopTimer();
-  // }
-}
-
 
 clicked = event => {
   const ctx=this;
@@ -1060,7 +884,7 @@ ctx.setState({click:temp});
 }
 render() {
   const ctx=this;
-  const { timer,click}=ctx.props;
+  const {click}=ctx.props;
   const { scPattern, channels, songmodeActive, activeMatrix,storedPatterns,pressed, storedGlobals,globalTransformations,globalCommands, globalChannels}=ctx.state
 
   const updateScPattern = event  => {
@@ -1083,7 +907,6 @@ render() {
 
   return <div >
   <div className={"Home cont"}>
-  {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
   <Layout fill='window'>
       <Layout layoutWidth={120}>
         <div id="matrices" style={{width: '100%', height: '1500px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>

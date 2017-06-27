@@ -1,12 +1,9 @@
 import _ from 'lodash';
 import { combineReducers } from 'redux';
-import channelcommands from './channelcommands';
 import user from './user';
 import sccommand from './sccommand';
 import tidal from './tidal';
-import timer from './timer';
 import click from './click';
-import matvals from './matvals';
 import globalparams from './global';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
@@ -29,14 +26,11 @@ _.each(models, (x,key) => {
 })
 
 const rootReducer = combineReducers({
-  channelcommands,
   sccommand,
   tidal,
-  timer,
   user,
   usererror,
   click,
-  matvals,
   globalparams,
   ...keys
 });

@@ -9,7 +9,6 @@ import bodyParser from 'body-parser';
 const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
-var globalCount = 0;
 
 // REPL is an GHCI Instance
 class REPL {
@@ -17,7 +16,6 @@ class REPL {
   hush() {
     this.tidalSendExpression('hush');
   }
-
 
   doSpawn() {
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
@@ -56,9 +54,8 @@ class REPL {
   }
 
   initSC() {
-      const self = this;
-
-      supercolliderjs.resolveOptions(config.path).then((options) => {
+    const self = this;
+    supercolliderjs.resolveOptions(config.path).then((options) => {
       const SCLang = supercolliderjs.sclang.SCLang;
       const lang = new SCLang(options);
       lang.boot().then((sclang) => {
@@ -70,7 +67,6 @@ class REPL {
         }, 4000)
       });
     });
-
   }
   // exitSC() {
   //     const self = this;
@@ -96,10 +92,8 @@ const TidalData = {
   myTidal: new REPL()
 }
 
-const myApp = () => {
+const Siren = () => {
   const app = express();
-
-
 
   var udpHosts = [];
   var dgram = require("dgram");
@@ -114,7 +108,7 @@ const myApp = () => {
   });
 
   UDPserver.on("message", function (msg, rinfo) {
-    console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    //console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
     tick.sockets.emit('osc', {osc:msg});
   });
 
@@ -157,10 +151,7 @@ const myApp = () => {
   const sendPatterns = (patterns, reply) => {
     _.each(patterns, c => {
       TidalData.myTidal.tidalSendExpression(c[0]);
-      // TidalData.myTidal.myPatterns.values.push(c[0]);
-
       TidalData.myTidal.tidalSendExpression(c[1]);
-      // TidalData.myTidal.myPatterns.values.push(c[1]);
     })
     reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
   };
@@ -192,7 +183,6 @@ const myApp = () => {
     const {pattern} = req.body;
     _.replace(pattern, "\\", '');
     console.log('ScPattern inbound:', pattern);
-
     sendScPattern(pattern, reply);
   })
 
@@ -209,4 +199,4 @@ process.on('SIGINT', () => {
   process.exit(1)
 });
 
-module.exports = myApp;
+module.exports = Siren;

@@ -6,7 +6,7 @@ import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
 import { handleEnterHome } from '../routes'
-import worker from './tworker.js'
+
 Firebase.initializeApp({
 
 		 apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -14,46 +14,46 @@ Firebase.initializeApp({
 		 databaseURL: "https://eseq-f5fe0.firebaseio.com"
 
 });
-
 const models = {
-	Accounts: {
-		dataSource: Firebase.database().ref("/accounts"),
-		model: {
-			email: 'String',
-			name: 'String',
-			uid: 'String',
-		}
-	},
-	Patterns: {
-		dataSource: Firebase.database().ref("/patterns"),
-		model: {
-			name: 'String',
-			params: 'String',
-			pattern: 'String',
-			skey: 'String',
-			uid: 'String'
-		}
-	},
-	Live: {
-		dataSource: Firebase.database().ref("/live"),
-		model: {
-			timer: 'Object',
-			values: 'Object'
-		}
-	},
-	Matrices: {
-		dataSource: Firebase.database().ref("/matrices"),
-		model: {
-			name: 'String',
-			durations: 'Object',
-			values: 'Object',
-			transitions: 'Object',
-			patterns: 'Object',
-			sceneIndex: 'Integer',
-			storedGlobals: 'Object',
-			uid: 'String'
-		}
-	}
+  Accounts: {
+    dataSource: Firebase.database().ref("/accounts"),
+    model: {
+      email: 'String',
+      name: 'String',
+      uid: 'String',
+    }
+  },
+  Patterns: {
+    dataSource: Firebase.database().ref("/patterns"),
+    model: {
+      name: 'String',
+      params: 'String',
+      pattern: 'String',
+      skey: 'String',
+      uid: 'String'
+    }
+  },
+  Live: {
+    dataSource: Firebase.database().ref("/live"),
+    model: {
+      timer: 'Object',
+      values: 'Object'
+    }
+  },
+  Matrices: {
+    dataSource: Firebase.database().ref("/matrices"),
+    model: {
+      name: 'String',
+      durations: 'Object',
+      values: 'Object',
+      transitions: 'Object',
+      patterns: 'Object',
+			channels: 'Object',
+      sceneIndex: 'Integer',
+      storedGlobals: 'Object',
+      uid: 'String'
+    }
+  }
 }
 
 String.prototype.replaceAt = function(index, character) {
@@ -168,60 +168,18 @@ export function fbcreatepatterninscene(model, data, s_key) {
 		return newObj.update({ key: newObj.key })
 	}
 }
-export function fbFetchLive (model){
-
-	return dispatch => {
-		models[model].dataSource.ref.on('value', data => {
-
-			if(data.val().timer.notf === "start") {
-				store.dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
-			}
-			else if(data.val().timer.notf === "pause"){
-				store.dispatch(pauseTimer());
-			}
-			else if(data.val().timer.notf === "stop"){
-				store.dispatch(stopTimer());
-			}
-
-			store.dispatch(fbLiveUpdate(data.val().values));
-		});
+export function fbcreatechannelinscene(model, data, s_key){
+	if (data['key']) {
+		return models[model].dataSource.child(data['key']).update({...data})
+	} else {
+		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
+		return newObj.update({ key: newObj.key })
 	}
-
 }
-
-export const fbLiveUpdate = (values) => {
-	function placeValue(row, col, item, container){
-		if (container[parseInt(row)+1] === undefined)
-			container[parseInt(row)+1] = {};
-		container[parseInt(row)+1][col] = item;
-	}
-
-	_.forEach(values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue(rowKey-1, colKey, cell, values);
-		});
-	});
-
-	return dispatch => {
-		dispatch({ type: 'FETCH_LIVE_MAT', payload: values});
-	};
-}
-
-export function fbLiveTimer(model, data) {
-	models[model].dataSource.child('timer').set(data);
-}
-
-export function fbSyncMatrix (model,data){
-	models[model].dataSource.child('timer').set({duration: data.duration,
-							steps: data.steps,
-							notf: "running"});
-	return models[model].dataSource.child('values').update(data.values);
-}
-
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
 	{
-		var datakey, sceneIndex, values, patterns, uid, transition, duration, storedGlobals;
+		var datakey, sceneIndex, values, patterns, uid, transition, storedGlobals;
 		models[model].dataSource.ref.once('value', dat => {
 			var u_id = Firebase.auth().currentUser.uid;
 			if ( u_id !== null)
@@ -230,9 +188,6 @@ export function fbcreateMatrix(model, data) {
 				if(obj !== undefined && obj !== null && u_id === obj.uid){
 					datakey = obj.key;
 					sceneIndex = obj.sceneIndex;
-					// transitions = obj.transition;
-					// duration = obj.duration;
-					// storedGlobals = obj.globals;
 					if (obj.transitions !== undefined) transition = obj.transitions;
 					if (obj.globals !== undefined) storedGlobals = obj.globals;
 					if (obj.patterns !== undefined) patterns = obj.patterns;
@@ -376,12 +331,7 @@ export const TidalTick = (server) => {
     });
   }
 }
-export const assignTimer = (timer,steps, _index) => {
-	var dum =timer.current + (_index - timer.current%steps);
-	return {
-		type: 'ASSIGN_TIMER', payload: timer.id , current : dum
-	};
-}
+
 
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -564,7 +514,7 @@ export const continousPattern = (server, pattern) => {
 
 
 
-export const updateMatrix = (patterns, values, i, transition, duration, steps, channels) => {
+export const updateMatrix = (patterns, values, i, transition, steps, channels) => {
 	function placeValue2D(row, col, item, container){
 		if(item !== undefined){
 			if (container[parseInt(row)+1] === undefined)
@@ -598,15 +548,7 @@ export const updateMatrix = (patterns, values, i, transition, duration, steps, c
 		placeValue1D(i, transition[i], transition);
 	}
 
-	_.forEach(duration, function(obj, index) {
-		store.dispatch(updateTimerduration(index,obj,steps));
-	});
-
-	// TODO durations
-
-	return dispatch => {
-		dispatch({ type: 'ADD_TIMER'});
-	};
+//reducer
 }
 
 export const sendScPattern = (server, expression) => {
@@ -720,63 +662,13 @@ export const globalStore = (storedG) => {
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});
 
-var timer = [];
-export const updateTimerduration = (_index,_duration,_steps) => {
-	if(_duration === "" || !isNaN(parseInt(_duration)))
-		return {
-			type: 'UPDATE_TIMER', payload: _index, duration : _duration
-		}
-}
-
-var timerWorker= [];
-export const createTimer = (_index,_duration, _steps) => {
-
-		timerWorker[_index] = new Worker("./src/actions/tworker.js");
-		timerWorker[_index].onmessage = function(e) {
-			if (e.data.type == "tick") {
-					store.dispatch(updtmr(e.data.id));
-					timer[_index] = e.data.msg;
-			}
-		}
-		return {
-		type: 'CREATE_TIMER', payload: _index, duration : _duration
-	}
-}
-
-export const updtmr = (_index) => {
-
-	return {
-			 type: 'INC_TIMER', payload: _index
-		 }
-}
-
-var stopParam = [];
-export const startIndividualTimer = (_index,_duration, _steps) => {
-	if(!stopParam[_index]){
-		stopParam[_index] = true;
-		timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
-	}
-}
-
-export const pauseIndividualTimer = (_index) => {
-	stopParam[_index] = false;
-	timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
-	return {
-		type: 'PAUSE_TIMER', payload: _index
-	}
-}
-
-export const stopIndividualTimer = (_index) => {
-	stopParam[_index] = false;
-	timerWorker[_index].postMessage({type : "stop", id: _index, timer: timer[_index]});
-	return {
-		type: 'STOP_TIMER', payload: _index
-	}
+export function createChannel() {
+	return  { type: 'CREATE_CHANNEL'};
 }
 
 export function chokeClick() {
 	return  { type: 'TOGGLE_CLICK'};
-	}
+}
 
 
 export function startClick() {
