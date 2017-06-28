@@ -1,3 +1,4 @@
+import _ from 'lodash';
 const modelName = 'CHANNEL';
 const INITIAL_STATE = {channels_state: [{}]};
 export default (state = INITIAL_STATE, action) => {
@@ -8,9 +9,9 @@ export default (state = INITIAL_STATE, action) => {
       return {...p};
     case 'UPDATE_'+modelName:
       const z = state;
-      var zk =  [{}];
-      zk.push(action.payload);
-      z.channels_state = zk;
+      _.forEach(action.payload.channels, function(chan, i) {
+        z.channels_state[i]= chan;
+      });
       return {...z};
     default:
       return state;

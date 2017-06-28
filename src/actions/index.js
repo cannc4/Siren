@@ -175,7 +175,7 @@ export function fbcreatechannelinscene(model, data, s_key){
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
+	models[model].dataSource.child(s_key).child("channel").child(data['key']).update({...data})
 }
 
 export function fbcreateMatrix(model, data) {

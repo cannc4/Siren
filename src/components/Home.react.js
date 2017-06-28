@@ -380,10 +380,10 @@ handleGlobalCommands = event => {
 
 
 handleSubmitCell = event => {
+
   const ctx=this;
   const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
   const { click, patterns }=ctx.props;
-
   var body = event.target.id;
   var c = _.split(body,',')[0]-1;
   var i = _.split(body,',')[1];
@@ -496,7 +496,8 @@ addChannel() {
     if(d.matName === activeMatrix){
       fbcreatechannelinscene('Matrices', {cid:_id, type:c_type, name:c_name, vals:[], transition: c_transition, step: c_step }, d.key);
       store.dispatch(createChannel(nc));
-      }
+      store.dispatch(updateChannel(nc));
+    }
   })
 }
 
@@ -646,14 +647,10 @@ renderItem(item, dbKey, i) {
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
       globalTransformations: ' ', globalCommands:' '});
 
-console.log("HERE");
     ctx.updateMatrix(patterns, item,sglobals);
-    store.dispatch(updateChannel(item.channels));
-    console.log(item.channels);
+    store.dispatch(updateChannel(item.channel));
     store.dispatch(globalStore(sglobals));
 
-
-    //console.log(storedGlobals);
   }
 
   const handleDelete = ({ target: { value }}) => {

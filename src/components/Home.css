@@ -113,6 +113,12 @@
   flex-direction: column;
   overflow-y: auto;
 }
+.step-holder {
+  display: flex;
+  flex-grow: 2;
+  flex-direction: row;
+  overflow-y: auto;
+}
 .durInput{
   width: 25%;
 }
@@ -202,6 +208,7 @@
 
 .Player {
   display: flex;
+  flex-direction: row;
   margin: 0;
   line-height: 20px;
   min-height: 35px;
