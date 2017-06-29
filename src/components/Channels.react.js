@@ -17,7 +17,8 @@ class Channels extends Component {
     super(props)
     this.state = {
       modelName : 'Channels',
-      cid:'',
+      cid: '',
+      scene_name: '',
       name: '',
       type: '',
       vals: [],
@@ -61,21 +62,17 @@ class Channels extends Component {
     ctx.setState({ type: value });
   }
 
-  renderStep(c, i) {
-    console.log("RenderStep i :" , i, " c :" , c );
-    const ctx=this;
-    const {step} = ctx.state;
+  renderStep(item, _, i) {
+    const ctx = this;
+
+    console.log("RenderStep ("+i+") :" , ctx.props);
+
+    const { step } = ctx.state;
     const { click, active } = ctx.props;
-    const channels_state = ctx.props.channel;
-    var playerClass="Player Player--" + (step) + "rows";
-    var colCount=0;
+    const channels = Object.values(ctx.props.channel)
 
+    // console.log("item", item);
 
-    console.log('RenderStep props: ', ctx.props);
-
-    var indents = [];
-
-    //
     const setText=({ target: { value }}) => {
       if (vals[i+1] === undefined)
         vals[i+1]={}
@@ -91,27 +88,25 @@ class Channels extends Component {
     //
     // const textval = getValue();
 
-    const cellHeight = 75/step;
-    //Timer Check
-    var _index = _.indexOf(channels_state,c);
-    const currentStep = click.current% step;
+    const currentStep = click.current % step;
+    const cell_width = 100 / channels.length + '%'
 
-    return <div key={i} className={playerClass}>
-    <div className={playerClass}  key={i}>
-      <textarea type="text" style={{fontSize: '1vw'}}value={5} onChange={setText} id = {i}/>
-    </div>
+    const playerClass="Player Player--" + (step) + "rows";
+    return <div key={(item['scene']+item['name']+i).toString()} className={playerClass}>
+      <textarea type="text" style={{width: cell_width}} value={i} onChange={setText}/>
     </div>
   }
 
-  renderItem(item, dbKey) {
+  renderItem(item) {
     const ctx = this;
-    const {step} = ctx.state;
-    console.log(item);
-    const playerClass="Player"
-    var count = 1;
-    const transitionValue = function(c){
-        return item.transition;
-      }
+
+    if (item.scene !== ctx.props.active)
+      return;
+
+    console.log("renderItem: ", item);
+
+    const { step } = ctx.state;
+    const playerClass = "Player"
 
     // const handleChange = (obj) => {
     //   var value, name;
@@ -140,37 +135,26 @@ class Channels extends Component {
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item && (
-      <div className={playerClass}>
-          {item.name}
-          {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx))}
-          <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
-          <input className = "playbox"
-            placeholder={" - "}  value = {transitionValue(item.transition)}
-            style = {{margin: 5}} onChange = {ctx.updateT.bind(ctx)}
-            onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
-        </div>
-
+      <div key={(item['scene']+item['name']).toString()} className={playerClass}>
+        <p>{item.name}</p>
+        {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
+        <p>Trans.</p>
+        <input className = "playbox"
+          placeholder={" - "}  value = {item.transition}
+          style = {{margin: 5}} onChange = {ctx.updateT.bind(ctx)}
+          onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+      </div>
     )
-  }
-
-  renderItems(items) {
-    const ctx = this;
-    console.log("Renderitems :" , items);
-    return _.map(items, ctx.renderItem.bind(ctx));
   }
 
   render() {
     const ctx = this
-    const { modelName } = ctx.state;
     var items = ctx.props.channel;
-    var chn = [];
 
-    // const changeType = ctx.changeType.bind(ctx);
-    const renderItems = ctx.renderItems.bind(ctx);
-    console.log(items);
+    console.log('channel items: ',items);
     return (
       <div>
-      {renderItems(items)}
+        {_.map(items, ctx.renderItem.bind(ctx))}
       </div>
     );
   }

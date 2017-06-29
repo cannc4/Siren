@@ -151,8 +151,8 @@
   font-size: 10px;
   border: 1px solid rgba(125,125,125, 0.8);
   display: flex;
-  width: 40%;
-  flex-grow: 10;
+  width: 55%;
+  margin: 5px;
 }
 .newPatternButton {
   font-size: 12px;
@@ -208,7 +208,7 @@
 
 .Player {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin: 0;
   line-height: 20px;
   min-height: 35px;
@@ -264,13 +264,13 @@
 
 /* Table column sizing
 ================================== */
-.Player--2cols > .playbox  { width: 50%; }
-.Player--3cols > .playbox  { width: 33.33%; }
-.Player--4cols > .playbox  { width: 25%; }
-.Player--5cols > .playbox  { width: 20%; }
-.Player--6cols > .playbox  { width: 16.6%; }
-.Player--7cols > .playbox  { width: 14.27%; }
-.Player--8cols > .playbox  { width: 12.5%; }
-.Player--13cols > .playbox  { width: 7.5%; }
-.Player--16cols > .playbox  { width: 6.25%; }
-.Player--17cols > .playbox  { width: 5.88%; }
+.Player--2cols > .playbox  { height: 50%; }
+.Player--3cols > .playbox  { height: 33.33%; }
+.Player--4cols > .playbox  { height: 25%; }
+.Player--5cols > .playbox  { height: 20%; }
+.Player--6cols > .playbox  { height: 16.6%; }
+.Player--7cols > .playbox  { height: 14.27%; }
+.Player--8cols > .playbox  { height: 12.5%; }
+.Player--13cols > .playbox  { height: 7.5%; }
+.Player--16cols > .playbox  { height: 6.25%; }
+.Player--17cols > .playbox  { height: 5.88%; }
