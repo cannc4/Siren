@@ -6,8 +6,9 @@
   "scsynth": "C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe",
   "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
   "port": 3001,
-  "path" : "/Users/canince/Documents/git/Siren/config/config.json",
-  "tidal_boot": "/Users/canince/Documents/git/Siren/config/tidal-boot-default.hs",
-  "tidal_sync": "/Users/canince/Documents/git/Siren/deps/sync/sync.hs",
-  "scd_start": "/Users/canince/Documents/git/Siren/config/scd-start-default.scd"
+  "samples_path": "C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*",
+  "path": "C:\\GitHub\\Siren\\config\\config.json",
+  "tidal_boot": "C:\\GitHub\\Siren\\config\\tidal-boot-default.hs",
+  "tidal_sync": "C:\\GitHub\\Siren\\sync\\sync.hs",
+  "scd_start": "C:\\GitHub\\Siren\\config\\scd-start-default.scd"
 }

@@ -47,6 +47,4 @@ class MenuBar extends Component {
   }
 }
 
-
-
 export default connect(state => state)(MenuBar);

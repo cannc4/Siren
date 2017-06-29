@@ -175,13 +175,14 @@ export function fbcreatechannelinscene(model, data, s_key){
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("channel").child(data['key']).update({...data})
+	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
 }
 
+// data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
 	{
-		var datakey, sceneIndex, values, patterns, uid, transition, storedGlobals;
+		var datakey, sceneIndex, values, patterns, uid, channels, storedGlobals;
 		models[model].dataSource.ref.once('value', dat => {
 			var u_id = Firebase.auth().currentUser.uid;
 			if ( u_id !== null)
@@ -190,7 +191,7 @@ export function fbcreateMatrix(model, data) {
 				if(obj !== undefined && obj !== null && u_id === obj.uid){
 					datakey = obj.key;
 					sceneIndex = obj.sceneIndex;
-					if (obj.transitions !== undefined) transition = obj.transitions;
+					if (obj.channels !== undefined) channels = obj.channels;
 					if (obj.globals !== undefined) storedGlobals = obj.globals;
 					if (obj.patterns !== undefined) patterns = obj.patterns;
 					uid = obj.uid;
@@ -201,8 +202,8 @@ export function fbcreateMatrix(model, data) {
 		if(patterns === undefined)
 			patterns = [];
 
-		if(transition === undefined)
-			transition = [];
+		if(channels === undefined)
+			channels = [];
 
 		if(storedGlobals === undefined)
 			storedGlobals = [];
@@ -210,13 +211,19 @@ export function fbcreateMatrix(model, data) {
 		if (datakey) {
 			data.sceneIndex = sceneIndex;
 			data.patterns = patterns;
+			data.channels = channels;
 			data.globals = storedGlobals;
 			return models[model].dataSource.child(datakey).update({...data})
 		} else {
 			if (data.patterns === undefined)
 				data.patterns  = [];
-			if (data.transitions === undefined)
-				data.transitions = [];
+			if (data.channels === undefined)
+				data.channels = [];
+			else {
+				_.each(data.channels, function(x) {
+					x.scene = data.matName
+				})
+			}
 			if (data.globals === undefined)
 					data.storedGlobals = [];
 
@@ -513,46 +520,19 @@ export const continousPattern = (server, pattern) => {
 	}
 }
 ////////////////// PARSER ENDS HERE //////////////////
+export const updateMatrix = (patterns, item) => {
+	console.log('updateMatrix: ', item);
 
 
-
-export const updateMatrix = (patterns, values, item, transition, steps, channels) => {
-	function placeValue2D(row, col, item, container){
-		if(item !== undefined){
-			if (container[parseInt(row)+1] === undefined)
-				container[parseInt(row)+1] = {};
-			container[parseInt(row)+1][col] = item;
-		}
-	}
-	function placeValue1D(index, item, container){
-		if(item !== undefined)
-			container[parseInt(index)] = item;
-		else
-			container[parseInt(index)] = '';
-
-			// if (container[parseInt(index)] === undefined)
-			//   container[parseInt(index)] = '';
-	}
-
-	_.forEach(values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue2D(rowKey-1, colKey, '', values);
-		});
+	_.forEach(Object.values(item.channels), function(x, i) {
+		if(x.vals !== undefined)
+			x.vals = [];
 	});
 
-	_.forEach(item.channels.values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue2D(rowKey-1, colKey, cell, values);
-		});
-	});
-
-	for (var i = 0; i < channels.length; i++) {
-		placeValue1D(i, transition[i], transition);
-	}
+	//reducer
 	return dispatch => {
-			dispatch({ type: 'UPDATE_CHANNEL', payload:item});
-		};
-//reducer
+		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
+	};
 }
 
 export const sendScPattern = (server, expression) => {
