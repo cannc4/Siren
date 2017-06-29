@@ -44,9 +44,6 @@ const models = {
     dataSource: Firebase.database().ref("/matrices"),
     model: {
       name: 'String',
-      durations: 'Object',
-      values: 'Object',
-      transitions: 'Object',
       patterns: 'Object',
 			channels: 'Object',
       sceneIndex: 'Integer',
@@ -178,7 +175,7 @@ export function fbcreatechannelinscene(model, data, s_key){
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
+	models[model].dataSource.child(s_key).child("channel").child(data['key']).update({...data})
 }
 
 export function fbcreateMatrix(model, data) {
@@ -519,7 +516,7 @@ export const continousPattern = (server, pattern) => {
 
 
 
-export const updateMatrix = (patterns, values, i, transition, steps, channels) => {
+export const updateMatrix = (patterns, values, item, transition, steps, channels) => {
 	function placeValue2D(row, col, item, container){
 		if(item !== undefined){
 			if (container[parseInt(row)+1] === undefined)
@@ -543,7 +540,7 @@ export const updateMatrix = (patterns, values, i, transition, steps, channels) =
 		});
 	});
 
-	_.forEach(i.values, function(rowValue, rowKey) {
+	_.forEach(item.channels.values, function(rowValue, rowKey) {
 		_.forEach(rowValue, function(cell, colKey) {
 			placeValue2D(rowKey-1, colKey, cell, values);
 		});
@@ -552,7 +549,9 @@ export const updateMatrix = (patterns, values, i, transition, steps, channels) =
 	for (var i = 0; i < channels.length; i++) {
 		placeValue1D(i, transition[i], transition);
 	}
-
+	return dispatch => {
+			dispatch({ type: 'UPDATE_CHANNEL', payload:item});
+		};
 //reducer
 }
 
@@ -652,7 +651,6 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 	}
 }
 
-
 export const globalUpdate = (t, c) => {
 	return {
 		type: 'UPDATE_GLOBAL', transform: t, command: c
@@ -667,8 +665,12 @@ export const globalStore = (storedG) => {
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});
 
-export function createChannel() {
-	return  { type: 'CREATE_CHANNEL'};
+export const createChannel = (newc) => {
+	return  {
+		type: 'CREATE_CHANNEL',  payload: newc }
+}
+export const updateChannel = (item) => {
+	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
 
 export function chokeClick() {

@@ -10,7 +10,8 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
       fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
       chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern,
       fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
-      fbcreatechannelinscene} from '../actions'
+      fbcreatechannelinscene,createChannel,updateChannel} from '../actions'
+
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
 import NumberEditor from 'react-number-editor';
@@ -47,10 +48,11 @@ var options = {
     showCursorWhenSelecting: true
 };
 
+
 class Home extends Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.state={
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
@@ -69,17 +71,23 @@ class Home extends Component {
       globalTransformations: '',
       globalChannels: '',
       username: '',
+      channels_state: [],
       storedPatterns: [],
       storedGlobals: [{transform:'', command: ''}],
       isCollapsed:[],
       tidalOnClickClass:  ' ',
       pressed : false,
-
+      c_type: '',
+      c_name: '',
+      c_step: '',
+      c_id: 0,
+      c_transition: '',
       solo : [],
       soloSentinel: false,
       transition: [],
       steps: 8,
       channels: [],
+      channels_state: [{}],
       values: {}
     }
   }
@@ -87,12 +95,11 @@ class Home extends Component {
 componentDidMount(props,state){
   const ctx = this;
   var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-
   socket.on("osc", data => {
+
     store.dispatch(startClick());
     console.log(data);
   })
-
   socket.on("dc", data => {
     store.dispatch(stopClick());
   })
@@ -112,8 +119,8 @@ componentWillReceiveProps(nextProps) {
   }
 }
 
-componentWillMount(props,state)
-{
+componentWillMount(props,state){
+
   const ctx=this;
   var tempEnd = [];
   const { channelEnd, channels , steps , solo, storedGlobals,storedPatterns, isCollapsed}=ctx.state;
@@ -121,25 +128,76 @@ componentWillMount(props,state)
     isCollapsed[i] = false;
     storedPatterns[i] = '';
 
-    tempEnd[i] = false
-    solo[i] = false;
+   tempEnd[i] = false
+   solo[i] = false;
 
-    storedGlobals[0] = {transform: '', command: ''}
-    ctx.setState({storedGlobals : storedGlobals})
-  }
-  ctx.setState({channelEnd : tempEnd});
-  ctx.setState({storedPatterns : storedPatterns});
+   storedGlobals[0] = {transform: '', command: ''}
+   ctx.setState({storedGlobals : storedGlobals})
+
+ }
+ ctx.setState({channelEnd : tempEnd});
+ ctx.setState({storedPatterns : storedPatterns});
 }
 
-componentDidUpdate(props, state)
-{
+
+// componentDidUpdate(props, state) {
+//   console.log();
+//   var runNo = [];
+//   const ctx=this;
+//   const { patterns, timer, click}=props;
+//   const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition, storedPatterns,storedGlobals,click }=state;
+//   console.log(ctx.props);
+//   for (var i = 0; i < channels.length; i++) {
+//     if (ctx.props.timer.timer[i].isActive) {
+//       runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
+//       if(values[runNo[i]]!== undefined){
+//         const vals = values[runNo[i]][i];
+//         const channel = channels[i];
+//         if (vals !== undefined) {
+//           if (channel !== 'G') {
+//             const obj = {[channel]: vals};
+//             var scenePatterns = [];
+//             const items = this.props[this.state.modelName.toLowerCase()]
+//             _.each(items, function(d){
+//               if(d.matName === activeMatrix)
+//               scenePatterns = d.patterns;
+//             })
+//             ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,timer.timer[i]);
+//           }
+//           else{
+//
+//             console.log('here');
+//             ctx.sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels);
+//             }
+//           }
+//
+//
+//       }
+//
+//       if(ctx.props.timer.timer[i].current % steps === steps-1){
+//         if(songmodeActive){
+//           channelEnd[i] = true;
+//           ctx.setState({channelEnd : channelEnd});
+//           store.dispatch(pauseIndividualTimer(i))
+//
+//           if(ctx.identical(channelEnd ) === true)
+//           {
+//             ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+//             ctx.stopTimer();
+//             ctx.startTimer();
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+componentDidUpdate(props, state) {
+  console.log();
   var runNo = [];
   const ctx=this;
-  const { patterns,  click } = props;
-  const { channelEnd, steps, tidalServerLink, values, channels,
-          activeMatrix, songmodeActive, sceneEnd, solo, transition,
-          storedPatterns,storedGlobals } = state;
-
+  const { patterns,  click}=props;
+  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition, storedPatterns,storedGlobals }=state;
+  console.log(ctx.props);
   for (var i = 0; i < channels.length; i++) {
     if (click.isActive) {
       runNo[i] = (click.current% steps) + 1;
@@ -155,20 +213,35 @@ componentDidUpdate(props, state)
               if(d.matName === activeMatrix)
               scenePatterns = d.patterns;
             })
-            ctx.sendPatterns(tidalServerLink, obj, scenePatterns,
-                             solo, transition, channels, click);
+            ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,click);
           }
-          else
-          {
+          else{
+
             console.log('here');
             ctx.sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels);
+            }
           }
-        }
+
+
       }
+      //
+      // if(ctx.props.timer.timer[i].current % steps === steps-1){
+      //   if(songmodeActive){
+      //     channelEnd[i] = true;
+      //     ctx.setState({channelEnd : channelEnd});
+      //     store.dispatch(pauseIndividualTimer(i))
+      //
+      //     if(ctx.identical(channelEnd ) === true)
+      //     {
+      //       ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
+      //       ctx.stopTimer();
+      //       ctx.startTimer();
+      //     }
+      //   }
+      //}
     }
   }
 }
-
 identical(array) {
   for(var i = 0; i < array.length ; i++) {
       if(array[i] === false ) {
@@ -192,8 +265,7 @@ progressMatrices(items){
       channelEnd[j] = false;
 
     }
-
-    _.each(items, function(d, i, j) {
+    _.each(items, function(d, i, j){
       if(d.uid === uid && d.matName === activeMatrix)
       {
         i_save = _.indexOf(Object.values(items), d);
@@ -208,10 +280,7 @@ progressMatrices(items){
 
     updateMatrix(patterns, values, nextObj, transition,storedGlobals);
     store.dispatch(globalStore(storedGlobals));
-    ctx.setState({ activeMatrix : nextObj.matName,
-                   channelEnd : channelEnd,
-                   transition: nextObj.transitions,
-                   storedGlobals: nextObj.globals});
+    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions, storedGlobals: nextObj.globals});
 
     for (var i = 0; i < channelEnd.length; i++) {
       channelEnd[i] = false;
@@ -227,6 +296,7 @@ disableSongmode(){
 }
 
 ////////////////////////////// TIMER STARTS ////////////////////////////
+
 startTimer() {
   const ctx = this;
   const {channels, steps,  click} = ctx.state;
@@ -289,6 +359,7 @@ handleGlobalTransformations = event => {
   ctx.setState({globalTransformations:temp});
 }
 
+
 handleGlobalChannels = event => {
   const body=event.target.value
   const ctx=this;
@@ -305,12 +376,14 @@ handleGlobalCommands = event => {
   ctx.setState({globalCommands:temp});
 }
 
-handleSubmitCell = event => {
-  const ctx=this;
-  const { channels, steps, tidalServerLink, solo,
-          transition, activeMatrix} = ctx.state;
-  const { click, patterns } = ctx.props;
 
+
+
+handleSubmitCell = event => {
+
+  const ctx=this;
+  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
+  const { click, patterns }=ctx.props;
   var body = event.target.id;
   var c = _.split(body,',')[0]-1;
   var i = _.split(body,',')[1];
@@ -330,11 +403,22 @@ handleSubmitCell = event => {
   }
 }
 ////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, values, item, transition, storedGlobals) {
+updateMatrix(patterns, item, storedGlobals) {
+
   const ctx = this;
-  const { steps, channels } = ctx.state;
-  const items = this.props[this.state.modelName.toLowerCase()]
-  store.dispatch(updateMatrix(patterns, values, item, transition, steps, channels,storedGlobals));
+  var cname = [];
+  var cvals = [];
+  var ctran = [];
+  var cstep = [];
+  _.forEach(item.channels, function(x, i){
+    cname.push(x.name);
+    cvals.push(x.values);
+    cstep.push(x.step);
+    ctran.push(x.transition);
+  })
+
+  store.dispatch(updateMatrix(patterns, cvals, item, ctran, cstep, cname));
+
 }
 
 soloChannel =  ({target : {id}}) => {
@@ -402,22 +486,54 @@ changeCollapse(k){
 
 addChannel() {
   const ctx = this
-  const {values, activeMatrix } = ctx.state;
+  const {channels_state, activeMatrix , c_id , c_type,c_name,c_step,c_transition } = ctx.state;
+  var _id = c_id +1;
+  console.log(c_id);
+  ctx.setState({c_id:_id})
+  var nc = {cid: _id , type:c_type, name:c_name, vals:[], transition: c_transition, step: c_step };
+  console.log(nc);
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix){
-      fbcreatechannelinscene('Matrices', {type:'d', name:'d1', values:[], transitions: '', steps: 8 }, d.key);
+      fbcreatechannelinscene('Matrices', {cid:_id, type:c_type, name:c_name, vals:[], transition: c_transition, step: c_step }, d.key);
+      store.dispatch(createChannel(nc));
+      store.dispatch(updateChannel(nc));
     }
   })
 }
 
+handleChannelName = event => {
+  const ctx = this;
+  const {c_name} = ctx.state;
+  ctx.setState({c_name: event.target.value});
+}
+handleChannelType = event => {
+  const ctx = this;
+  const {c_type} = ctx.state;
+  ctx.setState({c_type: event.target.value});
+}
 
+handleChannelStep = event => {
+  const ctx = this;
+  const {c_step} = ctx.state;
+  ctx.setState({c_step: event.target.value});
+}
+handleChannelTransition = event => {
+  const ctx = this;
+  const {c_transition} = ctx.state;
+  ctx.setState({c_transition: event.target.value});
+}
 renderPlayer() {
-  const ctx=this;
-  const { channels, steps , click, solo, soloSentinel,transition,isCollapsed,activeMatrix}=ctx.state;
-  return (<div className="Player-holder">
+  const ctx = this;
+  const { activeMatrix, c_type,c_name,c_step,c_transition } = ctx.state;
+  return (
+    <div className="Player-holder">
+    <Channels active = {activeMatrix}/>
     {<Button onClick={ctx.addChannel.bind(ctx)} theme = {themeButton} activeStyle={{position:'relative', top: 1}}></Button>}
-    <Channels active = {activeMatrix}/></div>
-  )
+    <input className="newChannelInput" onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="type "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="name "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="step "/>
+    <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="transition "/>
+  </div>)
 }
 
 
@@ -432,6 +548,7 @@ addItem() {
       globals = [];
   const { matName, activeMatrix, values, sceneIndex, transition,storedGlobals  } = ctx.state;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  const chn = ctx.props['Channels'];
   const { uid } = ctx.props.user.user;
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
 
@@ -446,7 +563,7 @@ addItem() {
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
       //console.log(storedGlobals);
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, storedGlobals});
+      fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels: chn, sceneIndex: snd, uid, transition: transition, storedGlobals});
       ctx.setState({sceneIndex: snd});
     }
     else {
@@ -517,7 +634,6 @@ renderItem(item, dbKey, i) {
   const { patterns } = ctx.props;
 
   var sglobals = [];
-
   const model = fetchModel(ctx.state.modelName);
   _.forEach(item.storedGlobals, function(d, i){
     sglobals.push(d);
@@ -528,13 +644,11 @@ renderItem(item, dbKey, i) {
       sglobals = [];
     }
     ctx.setState({ activeMatrix: item.matName,
-                   matName: item.matName,
-                   sceneSentinel: true,
-                   transition: item.transitions,
-                   storedGlobals: sglobals,
-                   globalTransformations: ' ',
-                   globalCommands:' '});
-    ctx.updateMatrix(patterns, values, item, transition,sglobals);
+      matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
+      globalTransformations: ' ', globalCommands:' '});
+
+    ctx.updateMatrix(patterns, item,sglobals);
+    store.dispatch(updateChannel(item.channel));
     store.dispatch(globalStore(sglobals));
 
   }
@@ -600,6 +714,7 @@ clearMatrix(){
       values [i] = [];
   }
   ctx.setState({values});
+
 }
 
 toggleCanvas(){
@@ -615,7 +730,6 @@ renderMenu(){
   const loginGG = () => {
     store.dispatch(GitHubLogin())
   }
-
   const fblogout = () => {
     this.setState({username: ''});
     store.dispatch(logout())
@@ -696,9 +810,9 @@ handleUpdatePatterns = event => {
   const ctx = this;
   const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey){
-    ctx.updatePatterns( tidalServerLink, storedPatterns, globalTransformations,
-                        globalCommands,channels, transition );
-  }
+
+  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,globalCommands,channels, transition);
+    }
 }
 
 sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels){
@@ -707,9 +821,7 @@ sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels){
 }
 
 
-updatePatterns( tidalServerLink, storedPatterns, globalTransformations,
-                globalCommands, channels, transition)
-{
+updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalCommands,channels, transition) {
   const ctx = this;
   const {globalChannels} = ctx.state;
   var tempAr = [] ;
@@ -732,8 +844,9 @@ updatePatterns( tidalServerLink, storedPatterns, globalTransformations,
       }
     }
   }
+
   else {
-    _.forEach( gbchan, function(chan, j) {
+  _.forEach( gbchan, function(chan, j){
       var i = parseInt(chan) - 1;
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
         tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
@@ -763,14 +876,13 @@ click = () => {
 };
 
 tidalcps (value) {
-  const ctx = this;
-  const {click } = ctx.props;
-  const body = value;
-  var temp = click;
-  temp.times = body;
-  ctx.setState({click:temp});
+const ctx = this;
+const {click } = ctx.props;
+const body = value;
+var temp = click;
+temp.times = body;
+ctx.setState({click:temp});
 }
-
 render() {
   const ctx=this;
   const {click}=ctx.props;
@@ -873,5 +985,4 @@ render() {
   </div>
   }
 }
-
 export default connect(state => state)(Home);
