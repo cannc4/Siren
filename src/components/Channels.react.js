@@ -1,7 +1,9 @@
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { fbdeletechannelinscene, fbupdatechannelinscene,updateChannel } from '../actions';
+import { fbdeletechannelinscene, fbupdatechannelinscene,
+         updateChannel, deleteChannel } from '../actions';
+import store from '../store';
+import _ from 'lodash';
 
 // var Button = require('react-button')
 // var themeButton = {
@@ -27,36 +29,6 @@ class Channels extends Component {
     }
   }
 
-  updateT = ({target : {value, id}}) => {
-    const ctx = this;
-    const channels_state = ctx.props.channel;
-    const {transition} = ctx.state;
-    var _index = _.indexOf(channels_state, id);
-    var temp = transition;
-    if(temp){
-      temp[_index] = value;
-    }
-    else {
-      temp = [];
-    }
-    ctx.setState({transition: temp});
-  }
-
-  _handleKeyPressT = event => {
-    const ctx=this;
-    const channels_state = ctx.props.channel;
-    const {transition} = ctx.state;
-    const _key = event.target.id;
-    var value = event.target.value;
-    var _index = _.indexOf(channels_state, _key);
-
-    if(event.keyCode === 13 && event.ctrlKey){
-      var temp = transition;
-      temp[_index] = value;
-     ctx.setState({transition:temp});
-    }
-  }
-
   changeType({target: { value }}) {
     const ctx = this;
     ctx.setState({ type: value });
@@ -65,35 +37,26 @@ class Channels extends Component {
   renderStep(item, _, i) {
     const ctx = this;
 
-    console.log("RenderStep ("+i+") :" , ctx.props);
+    // console.log("RenderStep ("+i+") :" , ctx.props);
 
     const { step } = ctx.state;
     const { click, active } = ctx.props;
     const channels = Object.values(ctx.props.channel)
 
-    // console.log("item", item);
-
     const setText=({ target: { value }}) => {
-      if (vals[i+1] === undefined)
-        vals[i+1]={}
-      vals[i+1] = value;
-      ctx.setState({vals : vals});
+      item.vals[i] = value;
+
+      const nc = { vals: item.vals,
+                   key: item.key };
+
+      fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key)
     }
-    //
-    // const getValue=() => {
-    //   if (vals[i+1] === undefined)
-    //     return ''
-    //   return vals[i+1];
-    // }
-    //
-    // const textval = getValue();
 
     const currentStep = click.current % step;
-    const cell_width = 100 / channels.length + '%'
 
     const playerClass="Player Player--" + (step) + "rows";
     return <div key={(item['scene']+item['name']+i).toString()} className={playerClass}>
-      <textarea type="text" style={{width: cell_width}} value={i} onChange={setText}/>
+      <textarea type="text" value={item.vals[i]} onChange={setText}/>
     </div>
   }
 
@@ -103,32 +66,41 @@ class Channels extends Component {
     if (item.scene !== ctx.props.active)
       return;
 
+    const deleteChannel = event => {
+      // console.log("DELETE CHANNEL EVENT: ", event);
+
+      if (confirm('Are you sure you want to delete this channel?')) {
+        // TODO item.key olmayacak sanirim
+        var sth_else = item.key
+
+        fbdeletechannelinscene('Matrices', ctx.props.scene_key, item.key)
+      // // re-order all items after deleting successfull
+      // Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
+      //   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+      //   ctx.setState({sceneIndex: (Object.values(items).length)});
+      //   _.forEach(Object.values(items), function(d, i){
+      //     fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
+      //   });
+      // }, function(error) {
+      //   console.error(error);
+      // });
+      }
+    }
+    const updateTransition = ({target : {value}}) => {
+      const ctx = this;
+
+      item.transition = value
+
+      const nc = { transition: value,
+                   key: item.key };
+
+      fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key)
+    }
+
     console.log("renderItem: ", item);
 
-    const { step } = ctx.state;
+    const step = parseInt(item.step);
     const playerClass = "Player"
-
-    // const handleChange = (obj) => {
-    //   var value, name;
-    //   if(obj.target !== undefined){
-    //     value = obj.target.value;
-    //     name = obj.target.name;
-    //   } else {
-    //     value = obj;
-    //   }
-    //
-    //   _.each(Object.values(ctx.props["matrices"]), function(d){
-    //     if(d.matName === ctx.props.active){
-    //       _.each(Object.values(d.channels), function(e){
-    //         if(e.matName === ctx.props.active){
-    //           fbupdatechannelinscene('Matrices',
-    //             {type:'d', name:'d1', values:[], transitions: '', steps: 8 },
-    //             d.key)
-    //         }
-    //       })
-    //     }
-    //   })
-    // }
 
   //  ctx.setState({name:item.name, type:item.type, step: item.step, transition:item.transition, vals:[]})
     //store.dispatch(updateChannel(item));
@@ -136,13 +108,12 @@ class Channels extends Component {
     // parameters can be added
     return item && (
       <div key={(item['scene']+item['name']).toString()} className={playerClass}>
-        <p>{item.name}</p>
+        <div><button onClick={deleteChannel}>{'x'}</button>
+        <p>{'  '+item.name}</p></div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <p>Trans.</p>
         <input className = "playbox"
           placeholder={" - "}  value = {item.transition}
-          style = {{margin: 5}} onChange = {ctx.updateT.bind(ctx)}
-          onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
+          style = {{margin: 5}} onChange = {updateTransition}/>
       </div>
     )
   }
@@ -151,12 +122,12 @@ class Channels extends Component {
     const ctx = this
     var items = ctx.props.channel;
 
-    console.log('channel items: ',items);
+    console.log('channel items: ', items);
     return (
-      <div>
-        {_.map(items, ctx.renderItem.bind(ctx))}
+      <div className="Player-holder">
+      { _.map(items, ctx.renderItem.bind(ctx))}
       </div>
-    );
+    )
   }
 }
 

@@ -475,20 +475,26 @@ addChannel() {
   const ctx = this
   const {channels_state, activeMatrix, c_id, c_type, c_name, c_step, c_transition } = ctx.state;
 
-  var _id = c_id +1;
-  ctx.setState({c_id:_id})
-
-  var nc = { scene: activeMatrix,
-             cid: _id,
-             type: c_type,
-             name: c_name,
-             vals:[],
-             transition: c_transition,
-             step: c_step };
-
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix){
-      fbcreatechannelinscene('Matrices', nc, d.key);
+      console.log('add channel: ', d);
+      ctx.setState({c_id: d.channels === undefined ? 1 : Object.values(d.channels).length })
+
+      var values = {}
+      for(var i = 0; i < c_step; i++){
+        values[i] = '';
+      }
+
+      var nc = { scene: activeMatrix,
+                 cid: c_id,
+                 type: c_type,
+                 name: c_name,
+                 transition: c_transition,
+                 step: c_step,
+                 vals: values
+                };
+      var obj = fbcreatechannelinscene('Matrices', nc, d.key);
+      nc['key'] = obj
       store.dispatch(createChannel(nc));
       // store.dispatch(updateChannel(nc));
     }
@@ -519,9 +525,14 @@ handleChannelTransition = event => {
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
-  return (<div className="Player-holder">
-    <Channels active = {activeMatrix} />
-  </div>)
+  var scene_key;
+  const scenes = Object.values(ctx.props['matrices']);
+  for(var j = 0; j < scenes.length; j++){
+    if (scenes[j].matName === activeMatrix) {
+      scene_key = scenes[j].key
+    }
+  }
+  return (<Channels active = {activeMatrix} scene_key = {scene_key}/>)
 }
 
 
@@ -649,7 +660,7 @@ renderItem(item, dbKey, i) {
 
     console.log('renderItem > updateMatrix: ', item);
 
-    store.dispatch(updateChannel(item.channels));
+    store.dispatch(updateChannel(item));
     store.dispatch(globalStore(sglobals));
   }
 
@@ -962,7 +973,7 @@ render() {
               <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
               <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
               {_.map(storedGlobals, (c, i) => {
-                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
+                 return <Button id={i} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
                })}
                <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
             </div>

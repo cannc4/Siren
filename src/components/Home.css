@@ -110,7 +110,7 @@
 .Player-holder {
   display: flex;
   flex-grow: 2;
-  flex-direction: column;
+  flex-direction: row;
   overflow-y: auto;
 }
 .step-holder {

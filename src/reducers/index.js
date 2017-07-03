@@ -29,9 +29,9 @@ _.each(models, (x,key) => {
 const rootReducer = combineReducers({
   sccommand,
   tidal,
+  channel,
   user,
   usererror,
-  channel,
   click,
   globalparams,
   ...keys

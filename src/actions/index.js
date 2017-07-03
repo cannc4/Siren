@@ -170,12 +170,21 @@ export function fbcreatechannelinscene(model, data, s_key){
 		return models[model].dataSource.child(data['key']).update({...data})
 	} else {
 		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
-		return newObj.update({ key: newObj.key })
+		newObj.update({ key: newObj.key })
+		return newObj.key
 	}
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+}
+
+export function fbdeletechannelinscene(model, s_key, c_key) {
+	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+
+	console.log('Channel deleted from DB');
+
+	store.dispatch(deleteChannel(c_key))
 }
 
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
@@ -214,21 +223,23 @@ export function fbcreateMatrix(model, data) {
 			data.channels = channels;
 			data.globals = storedGlobals;
 			return models[model].dataSource.child(datakey).update({...data})
-		} else {
+		}
+		else {
+			// TODO CHannel ordering after delete
 			if (data.patterns === undefined)
 				data.patterns  = [];
-			if (data.channels === undefined)
-				data.channels = [];
-			else {
-				_.each(data.channels, function(x) {
-					x.scene = data.matName
-				})
-			}
+			channels = data.channels
+			data.channels = []
 			if (data.globals === undefined)
-					data.storedGlobals = [];
+				data.storedGlobals = [];
 
 			const newObj = models[model].dataSource.push(data);
-			return newObj.update({ key: newObj.key })
+			newObj.update({ key: newObj.key })
+
+			_.each(channels, function(x) {
+				x.scene = data.matName
+				models[model].dataSource.child(newObj.key).child('channels').push(x);
+			})
 		}
 	}
 }
@@ -523,12 +534,6 @@ export const continousPattern = (server, pattern) => {
 export const updateMatrix = (patterns, item) => {
 	console.log('updateMatrix: ', item);
 
-
-	_.forEach(Object.values(item.channels), function(x, i) {
-		if(x.vals !== undefined)
-			x.vals = [];
-	});
-
 	//reducer
 	return dispatch => {
 		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
@@ -652,6 +657,11 @@ export const createChannel = (newc) => {
 export const updateChannel = (item) => {
 	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
+
+export const deleteChannel = (key) => {
+	return  { type: 'DELETE_CHANNEL', payload: key }
+}
+
 
 export function chokeClick() {
 	return  { type: 'TOGGLE_CLICK'};
