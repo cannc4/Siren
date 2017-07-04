@@ -241,6 +241,7 @@
 
 /* Table column sizing
 ================================== */
+
 .Channel--2cols > .playbox  { width: 50%; }
 .Channel--3cols > .playbox  { width: 33.33%; }
 .Channel--4cols > .playbox  { width: 25%; }
@@ -343,3 +344,4 @@
   display: block;
   padding: 8px 10px;
 }
+

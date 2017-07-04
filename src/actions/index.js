@@ -170,14 +170,17 @@ export function fbcreatechannelinscene(model, data, s_key){
 		return models[model].dataSource.child(data['key']).update({...data})
 	} else {
 		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
+
 		newObj.update({ key: newObj.key })
 		return newObj.key
+
 	}
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
 }
+
 
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
@@ -186,6 +189,7 @@ export function fbdeletechannelinscene(model, s_key, c_key) {
 
 	store.dispatch(deleteChannel(c_key))
 }
+
 
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
@@ -223,6 +227,7 @@ export function fbcreateMatrix(model, data) {
 			data.channels = channels;
 			data.globals = storedGlobals;
 			return models[model].dataSource.child(datakey).update({...data})
+
 		}
 		else {
 			if (data.patterns === undefined)
@@ -242,6 +247,7 @@ export function fbcreateMatrix(model, data) {
 				const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
 				newChn.update({ key : newChn.key })
 			})
+
 		}
 	}
 }
@@ -535,7 +541,6 @@ export const continousPattern = (server, pattern) => {
 ////////////////// PARSER ENDS HERE //////////////////
 export const updateMatrix = (patterns, item) => {
 	console.log('updateMatrix: ', item);
-
 	//reducer
 	return dispatch => {
 		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
@@ -660,10 +665,10 @@ export const updateChannel = (item) => {
 	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
 
+
 export const deleteChannel = (key) => {
 	return  { type: 'DELETE_CHANNEL', payload: key }
 }
-
 
 export function chokeClick() {
 	return  { type: 'TOGGLE_CLICK'};

@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbdeletechannelinscene, fbupdatechannelinscene,
@@ -19,6 +20,7 @@ class Channels extends Component {
       transition: ''
     }
   }
+
 
   renderStep(item, _, i) {
     const ctx = this;
@@ -48,6 +50,7 @@ class Channels extends Component {
 
     if (item.scene !== ctx.props.active)
       return;
+
 
     const deleteChannel = event => {
       if (confirm('Are you sure you want to delete this channel?')) {
@@ -85,6 +88,7 @@ class Channels extends Component {
   render() {
     const ctx = this
     var items = ctx.props.channel;
+
 
     console.log(ctx.props);
 
