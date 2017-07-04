@@ -34,7 +34,7 @@ class Channels extends Component {
     }
 
     var className = 'playbox';
-    if (currentStep === i && click.isActive)
+    if (currentStep === i)
       className += '-active';
     return <div key={(item['scene']+item['name']+i).toString()}>
       <textarea className={className} type="text"
@@ -85,8 +85,6 @@ class Channels extends Component {
   render() {
     const ctx = this
     var items = ctx.props.channel;
-
-    console.log(ctx.props);
 
     return (
       <div className="ChannelHolder">

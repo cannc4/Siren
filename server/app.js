@@ -108,7 +108,7 @@ const Siren = () => {
   });
 
   UDPserver.on("message", function (msg, rinfo) {
-    //console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    // console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
     tick.sockets.emit('osc', {osc:msg});
   });
 
