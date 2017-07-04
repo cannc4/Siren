@@ -182,7 +182,7 @@ export function fbupdatechannelinscene(model, data, s_key) {
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
 
-	console.log('Channel deleted from DB');
+	console.log('Channel with key '+ c_key +' deleted from DB');
 
 	store.dispatch(deleteChannel(c_key))
 }
@@ -225,11 +225,12 @@ export function fbcreateMatrix(model, data) {
 			return models[model].dataSource.child(datakey).update({...data})
 		}
 		else {
-			// TODO CHannel ordering after delete
 			if (data.patterns === undefined)
 				data.patterns  = [];
+
 			channels = data.channels
 			data.channels = []
+
 			if (data.globals === undefined)
 				data.storedGlobals = [];
 
@@ -238,7 +239,8 @@ export function fbcreateMatrix(model, data) {
 
 			_.each(channels, function(x) {
 				x.scene = data.matName
-				models[model].dataSource.child(newObj.key).child('channels').push(x);
+				const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
+				newChn.update({ key : newChn.key })
 			})
 		}
 	}
