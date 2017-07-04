@@ -170,14 +170,17 @@ export function fbcreatechannelinscene(model, data, s_key){
 		return models[model].dataSource.child(data['key']).update({...data})
 	} else {
 		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
+
 		newObj.update({ key: newObj.key })
 		return newObj.key
+
 	}
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
 }
+
 
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
@@ -186,6 +189,7 @@ export function fbdeletechannelinscene(model, s_key, c_key) {
 
 	store.dispatch(deleteChannel(c_key))
 }
+
 
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
@@ -223,6 +227,7 @@ export function fbcreateMatrix(model, data) {
 			data.channels = channels;
 			data.globals = storedGlobals;
 			return models[model].dataSource.child(datakey).update({...data})
+
 		}
 		else {
 			if (data.patterns === undefined)
@@ -242,6 +247,7 @@ export function fbcreateMatrix(model, data) {
 				const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
 				newChn.update({ key : newChn.key })
 			})
+
 		}
 	}
 }
@@ -256,8 +262,7 @@ export function fbupdatepatterninscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbupdateglobalsinscene(model, data, s_key) {
-	//--
-	models[model].dataSource.child(s_key).child("storedGlobals").push(data)
+	models[model].dataSource.child(s_key).child("storedGlobals").update({...data})
 }
 export function fbdelete(model, data) {
 	models[model].dataSource.child(data['key']).remove();
@@ -363,10 +368,18 @@ String.prototype.replaceAll = function(search, replacement) {
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
 var patListBack = [];
-export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
+export const sendPatterns = (server, channel_namestepvalue ,
+	 channels, scenePatterns, click,storedPatterns) => {
 	return dispatch => {
-		const x =  _.compact(_.map(vals,(v,k) => {
-		// gets parameters list
+		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
+
+			//channel
+		var k = Object.keys(ch);
+
+			//pattern
+		var v = Object.values(ch);
+
+		console.log(k,"_",v);
 		const getParameters = (v) => {
 			var param = [];
 			_.map(_.split(v, /[`]+/g), (p1, p2) => {
@@ -376,7 +389,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			});
 			return param;
 		}
-
+		//gets mathematical expression
 		const getMathExpr = (v) => {
 			var maths = [];
 			_.map(_.split(v, /[&]+/g), (p1, p2) => {
@@ -391,10 +404,10 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 		const cellName = getParameters(v)[0];
 
 		// command of the pattern
-		const cmd = _.find(patterns, c => c.name === cellName);
+		const cmd = _.find(scenePatterns, c => c.name === cellName);
 
 		// CPS channel handling
-		if(_.indexOf(channels,k) === _.indexOf(channels,'cps')){
+		if( k === 'cps'){
 			var newCommand = cellName;
 			return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 		}
@@ -410,7 +423,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 			_.forEach(parameters, function(value, i) {
 				// Temporal parameter
 				if(value === 't'){
-					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
+					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
 				}
 				// Random parameter
 				else if(_.indexOf(cellItem[i], '|') != -1 )
@@ -437,80 +450,96 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 			})
 			// solo or not (obsolete)
-			var soloHolder = k;
-			var transitionHolder = "" ;
-			var _k = k;
-			if(_.indexOf(channels,_k) === _.indexOf(channels, 'cps')){
-				transitionHolder = _k;
-				soloHolder = " ";
-			}
-			else {
-				if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
-					soloHolder = k ;
-					transitionHolder = " $ ";
+			var channel_id,
+			channel_type,
+			channel_transition,
+ 			channel_name,
+			transitionHolder,
+			soloHolder,
+			_k;
+			//check k
+			//need (k-1)
+			//check cid to replace  id
+			_.each(channels, function(chantwo,i){
+				console.log("CHAN", Object.values(chantwo));
+				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
+					console.log("NAME", k[0]);
+					channel_type = chantwo.type;
+					channel_transition = chantwo.transition;
+					channel_name = chantwo.name;
+					channel_id = k[0];
+					soloHolder = k[0];
+				 	transitionHolder = "" ;
+				 	_k = k;
+					console.log(channel_transition);
 				}
+			})
 
-				else if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
-					transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
-					soloHolder = "t"+ (_.indexOf(channels,_k)+1);
-				}
-
-				else if(solo[_.indexOf(channels,_k)] === true){
-					soloHolder = "solo $ " + _k ;
-					transitionHolder = " $ ";
-				}
+			if (channel_transition === "" ||channel_transition === undefined ){
+				soloHolder = k ;
+				transitionHolder = " $ ";
 			}
+
+			else if(channel_transition !== undefined && channel_transition!== ""){
+				transitionHolder = " " + channel_transition+ " $ ";
+				soloHolder = "t"+ (channel_id +1);
+			}
+
 
 			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
 
 				var storechan = _k + " $ ";
-				pattern = storechan+ newCommand;
-				storedPatterns[_.indexOf(channels,_k)] = '';
-				storedPatterns[_.indexOf(channels,_k)] = pattern;
-				console.log(pattern);
-				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"]
+				pattern = storechan + newCommand;
+				storedPatterns[channel_id] = '';
+				storedPatterns[channel_id] = pattern;
+				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
 
 			}
 			else {
-				var storechan = "d"+ (_.indexOf(channels,_k)+1) + " $ ";
-				var storepat= storechan+ newCommand;
-				var orbit = " #orbit " + _.indexOf(channels,_k);
-				storepat = storepat+orbit;
-				storedPatterns[_.indexOf(channels,_k)] = '';
-				storedPatterns[_.indexOf(channels,_k)] = storepat;
-				var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands + orbit;
-				if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
-					newCommand = globalTransformations+ newCommand + " " + globalCommands
-					newCommand = newCommand.replaceAll(' s ', ' image ');
-					newCommand = newCommand.replaceAll('n ', 'npy ');
-					newCommand = newCommand.replaceAll('speed', 'pspeed');
-					newCommand = newCommand.replaceAll('nudge', 'threshold');
-					newCommand = newCommand.replaceAll('room', 'blur');
-					newCommand = newCommand.replaceAll('end', 'median');
-					newCommand = newCommand.replaceAll('coarse', 'edge');
-					newCommand = newCommand.replaceAll('up', 'hough');
-					newCommand = newCommand.replaceAll('gain', 'means');
-					return [pattern, "v1 $ "+ newCommand] ;
-				}
-				else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
-					pattern =  "v1 $ " + newCommand;
-					newCommand = newCommand.replaceAll('image', 's');
-					newCommand = newCommand.replaceAll('npy', 'n');
-					newCommand = newCommand.replaceAll('pspeed', 'speed');
-					newCommand = newCommand.replaceAll('threshold', 'nudge');
-					newCommand = newCommand.replaceAll('blur', 'room');
-					newCommand = newCommand.replaceAll('median', 'end');
-					newCommand = newCommand.replaceAll('edge', 'coarse');
-					newCommand = newCommand.replaceAll('hough', 'up');
-
-					console.log(pattern, "d1 $ "+ newCommand);
-					return [pattern, "d1 $ "+ newCommand] ;
-				}
-				else {
+				//check k
+				//need (k-1)
+				//check cid to replace  id
+				var storechan =  k [0]+ " $ ";
+				console.log(storechan);
+				pattern = storechan + newCommand;
+				storedPatterns[channel_id[1]] = '';
+				storedPatterns[channel_id[1]] = pattern;
+				console.log("STORED PATTERN" , storedPatterns);
+				console.log("FINAL PATTERN" ,pattern);
+				var pattern = soloHolder + transitionHolder + newCommand ;
+				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
+				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
+				// 	newCommand = newCommand.replaceAll(' s ', ' image ');
+				// 	newCommand = newCommand.replaceAll('n ', 'npy ');
+				// 	newCommand = newCommand.replaceAll('speed', 'pspeed');
+				// 	newCommand = newCommand.replaceAll('nudge', 'threshold');
+				// 	newCommand = newCommand.replaceAll('room', 'blur');
+				// 	newCommand = newCommand.replaceAll('end', 'median');
+				// 	newCommand = newCommand.replaceAll('coarse', 'edge');
+				// 	newCommand = newCommand.replaceAll('up', 'hough');
+				// 	newCommand = newCommand.replaceAll('gain', 'means');
+				// 	return [pattern, "v1 $ "+ newCommand] ;
+				// }
+				// else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
+				// 	pattern =  "v1 $ " + newCommand;
+				// 	newCommand = newCommand.replaceAll('image', 's');
+				// 	newCommand = newCommand.replaceAll('npy', 'n');
+				// 	newCommand = newCommand.replaceAll('pspeed', 'speed');
+				// 	newCommand = newCommand.replaceAll('threshold', 'nudge');
+				// 	newCommand = newCommand.replaceAll('blur', 'room');
+				// 	newCommand = newCommand.replaceAll('median', 'end');
+				// 	newCommand = newCommand.replaceAll('edge', 'coarse');
+				// 	newCommand = newCommand.replaceAll('hough', 'up');
+				//
+				// 	console.log(pattern, "d1 $ "+ newCommand);
+				// 	return [pattern, "d1 $ "+ newCommand] ;
+				// }
+				console.log("LAST" ,pattern);
 					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+
 				}
 			}
-		}
+
 		else
 			return false;
 		}))
@@ -534,8 +563,6 @@ export const continousPattern = (server, pattern) => {
 }
 ////////////////// PARSER ENDS HERE //////////////////
 export const updateMatrix = (patterns, item) => {
-	console.log('updateMatrix: ', item);
-
 	//reducer
 	return dispatch => {
 		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
@@ -617,18 +644,19 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 		var ch = expression.match(b)[0];
 		console.log(ch);
 		if (ch === 'm1' || ch === 'm2' ||  ch === 'm3' ||  ch === 'm4' || ch === 'v1' || ch === 'u1'){
-			storedPatterns[_.indexOf(channels,ch)] = '';
-			storedPatterns[_.indexOf(channels,ch)] = expression;
+
+			//storedPatterns[channel_cid] = '';
+			//storedPatterns[_.indexOf(channels,ch)] = expression;
 		}
 		else if ( expression === 'jou'){
 			for (var i = 0; i < storedPatterns.length; i++) {
-				storedPatterns[i] = channels[i] + ' $ silence' ;
+				//storedPatterns[i] = channels[i] + ' $ silence' ;
 			}
 
 		}
 		else{
-			storedPatterns[_.indexOf(channels,ch)] = '';
-			storedPatterns[_.indexOf(channels,ch)] = expression;
+			//storedPatterns[_.indexOf(channels,ch)] = '';
+			//storedPatterns[_.indexOf(channels,ch)] = expression;
 		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
@@ -638,14 +666,14 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 	}
 }
 
-export const globalUpdate = (t, c) => {
+export const globalUpdate = (t, c, d) => {
 	return {
-		type: 'UPDATE_GLOBAL', transform: t, command: c
+		type: 'UPDATE_GLOBAL', transform: t, command: c, selectedChannels:d
 	}
 }
-export const globalStore = (storedG) => {
+export const globalStore = (storedG,storedPatterns) => {
 	return {
-		type: 'STORE_GLOBAL', storedGlobals: storedG
+		type: 'STORE_GLOBAL', storedGlobals: storedG, storedPatterns: storedPatterns
 	}
 }
 
@@ -660,10 +688,10 @@ export const updateChannel = (item) => {
 	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
 
+
 export const deleteChannel = (key) => {
 	return  { type: 'DELETE_CHANNEL', payload: key }
 }
-
 
 export function chokeClick() {
 	return  { type: 'TOGGLE_CLICK'};

@@ -7,7 +7,6 @@ export default (state = INITIAL_STATE, action) => {
     case 'CREATE_'+modelName:
       const p = state;
       p[action.payload.key] = action.payload;
-      // console.log("CREATE REDUCER 2: ", state, action.payload);
       return {...p};
     // action.payload = scene
     case 'UPDATE_'+modelName:

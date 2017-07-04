@@ -218,13 +218,12 @@
   overflow: hidden;
 }
 
-.playbox > div {
-  font-size: 0.88vw;
-  background: none !important;
-}
-
-.playbox-active {
-  background-color: rgba(255,255,102,0.15); 
+.playbox-active > textarea {
+  font-size: 0.8vw;
+  flex-grow: 1;
+  resize: none;
+  overflow: hidden;
+  background-color: rgba(255,255,102,0.15);
 }
 
 .playbox-highlight {
@@ -241,6 +240,7 @@
 
 /* Table column sizing
 ================================== */
+
 .Channel--2cols > .playbox  { width: 50%; }
 .Channel--3cols > .playbox  { width: 33.33%; }
 .Channel--4cols > .playbox  { width: 25%; }
