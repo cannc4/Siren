@@ -20,6 +20,8 @@ import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
 
+import Dropdown from 'react-dropdown'
+
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.js';
@@ -47,6 +49,7 @@ var options = {
     showCursorWhenSelecting: true
 };
 
+const channelOptions = ['Audio', 'Visual', 'MIDI']
 
 class Home extends Component {
   constructor(props) {
@@ -191,12 +194,10 @@ componentWillMount(props,state){
 //   }
 // }
 componentDidUpdate(props, state) {
-  console.log();
   var runNo = [];
   const ctx=this;
   const { patterns,  click}=props;
   const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition, storedPatterns,storedGlobals }=state;
-  console.log(ctx.props);
   for (var i = 0; i < channels.length; i++) {
     if (click.isActive) {
       runNo[i] = (click.current% steps) + 1;
@@ -215,13 +216,9 @@ componentDidUpdate(props, state) {
             ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,click);
           }
           else{
-
-            console.log('here');
             ctx.sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels);
-            }
           }
-
-
+        }
       }
       //
       // if(ctx.props.timer.timer[i].current % steps === steps-1){
@@ -473,24 +470,41 @@ changeCollapse(k){
 
 addChannel() {
   const ctx = this
-  const {channels_state, activeMatrix, c_id, c_type, c_name, c_step, c_transition } = ctx.state;
-
-  var _id = c_id +1;
-  ctx.setState({c_id:_id})
-
-  var nc = { scene: activeMatrix,
-             cid: _id,
-             type: c_type,
-             name: c_name,
-             vals:[],
-             transition: c_transition,
-             step: c_step };
+  const { activeMatrix, c_id, c_type, c_name, c_step, c_transition } = ctx.state;
+  var flag = false;
 
   _.each(Object.values(ctx.props["matrices"]), function(d){
-    if(d.matName === activeMatrix){
-      fbcreatechannelinscene('Matrices', nc, d.key);
-      store.dispatch(createChannel(nc));
-      // store.dispatch(updateChannel(nc));
+    if(d.matName === activeMatrix) {
+      _.each(d.channels, function(c) {
+        if(c.name === c_name) {
+          alert('"' + c_name + '" already exists in "' + d.matName + '"');
+          flag = true;
+        }
+      })
+
+      if (flag === false){
+        console.log('add channel: ', d);
+        ctx.setState({c_id: d.channels === undefined ? 1 : Object.values(d.channels).length })
+
+        var values = {}
+        for(var i = 0; i < c_step; i++){
+          values[i] = '';
+        }
+
+        var nc = { scene: activeMatrix,
+          cid: c_id,
+          type: c_type,
+          name: c_name,
+          transition: c_transition,
+          step: c_step,
+          vals: values
+        };
+        var obj = fbcreatechannelinscene('Matrices', nc, d.key);
+        nc['key'] = obj
+        store.dispatch(createChannel(nc));
+      } else {
+        console.warning('"' + c_name + '" already exists in "' + d.matName + '"');
+      }
     }
   })
 }
@@ -500,10 +514,9 @@ handleChannelName = event => {
   const {c_name} = ctx.state;
   ctx.setState({c_name: event.target.value});
 }
-handleChannelType = event => {
-  const ctx = this;
-  const {c_type} = ctx.state;
-  ctx.setState({c_type: event.target.value});
+
+handleChannelType = (option) => {
+  this.setState( {c_type: option.label} );
 }
 
 handleChannelStep = event => {
@@ -519,9 +532,14 @@ handleChannelTransition = event => {
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
-  return (<div className="Player-holder">
-    <Channels active = {activeMatrix} />
-  </div>)
+  var scene_key;
+  const scenes = Object.values(ctx.props['matrices']);
+  for(var j = 0; j < scenes.length; j++){
+    if (scenes[j].matName === activeMatrix) {
+      scene_key = scenes[j].key
+    }
+  }
+  return (<Channels active = {activeMatrix} scene_key = {scene_key}/>)
 }
 
 
@@ -647,9 +665,7 @@ renderItem(item, dbKey, i) {
 
     ctx.updateMatrix(patterns, item);
 
-    console.log('renderItem > updateMatrix: ', item);
-
-    store.dispatch(updateChannel(item.channels));
+    store.dispatch(updateChannel(item));
     store.dispatch(globalStore(sglobals));
   }
 
@@ -810,8 +826,8 @@ handleUpdatePatterns = event => {
   const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey){
 
-  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,globalCommands,channels, transition);
-    }
+    ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,globalCommands,channels, transition);
+  }
 }
 
 sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels){
@@ -937,16 +953,25 @@ render() {
           {ctx.renderPlayer()}
         </Layout>
         <LayoutSplitter />
+        <Layout layoutHeight={100}>
+          <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
+           <p>> Pattern History</p>
+           {_.map(channels, (c, i) => {
+              return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
+            })}
+          </div>
+        </Layout>
+        <LayoutSplitter />
         <Layout layoutHeight={300}>
-          <Layout layoutWidth={150}>
+          <Layout layoutWidth={250}>
             {ctx.renderMenu()}
           </Layout>
           <LayoutSplitter />
-          <Layout layoutWidth={150}>
+          <Layout layoutWidth={250}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Add Channels</p>
 
-              <input className="newChannelInput" onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="type "/>
+              <Dropdown options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="type" />
               <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="name "/>
               <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="step "/>
               <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="transition "/>
@@ -954,7 +979,7 @@ render() {
             </div>
           </Layout>
           <LayoutSplitter />
-          <Layout layoutWidth={250}>
+          <Layout layoutWidth={350}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
 
@@ -962,26 +987,17 @@ render() {
               <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
               <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
               {_.map(storedGlobals, (c, i) => {
-                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
+                 return <Button id={i} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
                })}
                <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
             </div>
           </Layout>
           <LayoutSplitter />
-          <Layout layoutWidth={250}>
+          <Layout layoutWidth={350}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
               <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
               <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
-            </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={'flex'}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-             <p>> Pattern History</p>
-             {_.map(channels, (c, i) => {
-                return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
-              })}
             </div>
           </Layout>
         </Layout>

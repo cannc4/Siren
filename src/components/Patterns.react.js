@@ -98,7 +98,7 @@ class Patterns extends Component {
         _.each(Object.values(ctx.props["matrices"]), function(d){
           if(d.matName === ctx.props.active){
             ctx.setState({sceneKey: d.key});
-              fbdeletepatterninscene('Matrices', payload, d.key)
+            fbdeletepatterninscene('Matrices', payload, d.key)
           }
         })
     }
