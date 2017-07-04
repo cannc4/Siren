@@ -27,7 +27,6 @@ class Channels extends Component {
     const { patterns,  click  }=props;
     const items = ctx.props.matrices;
       if (click.isActive) {
-        var channel_namestepvalues = [];
         console.log(click.isActive);
         var scenePatterns,channel_type, channel_values,channel_name,channel_id, channel_transition;
         _.each(items, function(d){
@@ -35,22 +34,23 @@ class Channels extends Component {
             scenePatterns = d.patterns;
         })
         const channels = ctx.props.channel;
-
+        var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
           var runNo = (click.current% chan.step);
           var stepvalue;
           channel_values = chan.vals;
-          if(runNo!== undefined && chan.vals !== undefined){
+          if(runNo!== undefined){
             _.each(channel_values, function(sv, j){
               if (j === runNo){
                 stepvalue =  sv;
               }
             })
           channel_namestepvalues =_.concat(channel_namestepvalues ,{[chan.name]: stepvalue});
+          console.log("STEPPAR");
 
         }})
 
-
+        console.log("PAIRS",channel_namestepvalues);
           store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
              channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
         }

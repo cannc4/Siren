@@ -372,8 +372,13 @@ export const sendPatterns = (server, channel_namestepvalue ,
 	 channels, scenePatterns, click,storedPatterns) => {
 	return dispatch => {
 		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
-		var v = Object.values(ch);
+
+			//channel
 		var k = Object.keys(ch);
+
+			//pattern
+		var v = Object.values(ch);
+
 		console.log(k,"_",v);
 		const getParameters = (v) => {
 			var param = [];
@@ -452,10 +457,12 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			transitionHolder,
 			soloHolder,
 			_k;
-
+			//check k
+			//need (k-1)
+			//check cid to replace  id
 			_.each(channels, function(chantwo,i){
 				console.log("CHAN", Object.values(chantwo));
-				if(k[0] === (Object.values(chantwo)[2])){
+				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
 					console.log("NAME", k[0]);
 					channel_type = chantwo.type;
 					channel_transition = chantwo.transition;
@@ -485,11 +492,13 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				pattern = storechan + newCommand;
 				storedPatterns[channel_id] = '';
 				storedPatterns[channel_id] = pattern;
-				console.log(pattern);
-				finalpat = [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
+				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
 
 			}
 			else {
+				//check k
+				//need (k-1)
+				//check cid to replace  id
 				var storechan =  k [0]+ " $ ";
 				console.log(storechan);
 				pattern = storechan + newCommand;

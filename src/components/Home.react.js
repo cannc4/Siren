@@ -288,8 +288,7 @@ handleSubmit = event => {
 handleConsoleSubmit = event => {
   const body = event.target.value;
   const ctx = this;
-  const {tidalServerLink, tidalOnClickClass, storedPatterns} = ctx.state;
-  const channels = ctx.props.channel;
+  const {tidalServerLink, tidalOnClickClass, storedPatterns,channels} = ctx.state;
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
@@ -431,7 +430,7 @@ addChannel() {
         for(var i = 0; i < c_step; i++){
           values[i] = '';
         }
-
+        console.log();
         var nc = { scene: activeMatrix,
           cid: c_id,
           type: c_type,
@@ -470,7 +469,6 @@ handleChannelTransition = event => {
   const ctx = this;
   const {c_transition} = ctx.state;
   ctx.setState({c_transition: event.target.value});
-
 }
 renderPlayer() {
   const ctx = this;
@@ -484,7 +482,10 @@ renderPlayer() {
   }
   return (<Channels active = {activeMatrix} scene_key = {scene_key}/>)
 }
-
+// const channelss = ctx.props.channel;
+//  {_.map(channelss, function(e){
+//   return (<Channels active = {activeMatrix} scene_key = {scene_key} />)
+// })}
 
 changeName({target: { value }}) {
   const ctx = this;
