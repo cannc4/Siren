@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         updateChannel, deleteChannel } from '../actions';
+         updateChannel, deleteChannel,sendPatterns} from '../actions';
 import store from '../store';
 import _ from 'lodash';
 
@@ -20,6 +20,42 @@ class Channels extends Component {
       transition: ''
     }
   }
+
+  componentDidUpdate(props, state) {
+    const ctx=this;
+    const tidalServerLink = 'localhost:3001';
+    const { patterns,  click  }=props;
+    const items = ctx.props.matrices;
+      if (click.isActive) {
+        var channel_namestepvalues = [];
+        console.log(click.isActive);
+        var scenePatterns,channel_type, channel_values,channel_name,channel_id, channel_transition;
+        _.each(items, function(d){
+          if(d.matName === ctx.props.active)
+            scenePatterns = d.patterns;
+        })
+        const channels = ctx.props.channel;
+
+        _.each(channels, function(chan, i){
+          var runNo = (click.current% chan.step);
+          var stepvalue;
+          channel_values = chan.vals;
+          if(runNo!== undefined && chan.vals !== undefined){
+            _.each(channel_values, function(sv, j){
+              if (j === runNo){
+                stepvalue =  sv;
+              }
+            })
+          channel_namestepvalues =_.concat(channel_namestepvalues ,{[chan.name]: stepvalue});
+
+        }})
+
+
+          store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
+             channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
+        }
+
+        }
 
 
   renderStep(item, _, i) {
@@ -88,9 +124,6 @@ class Channels extends Component {
   render() {
     const ctx = this
     var items = ctx.props.channel;
-
-
-    console.log(ctx.props);
 
     return (
       <div className="ChannelHolder">

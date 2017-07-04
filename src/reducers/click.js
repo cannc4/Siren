@@ -1,5 +1,5 @@
 const modelName = 'CLICK';
-const INITIAL_STATE = {flag:0, times:0, current:0 , isActive:false};
+const INITIAL_STATE = {flag:0, times:2, current:0 , isActive:false};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'INC_'+modelName:

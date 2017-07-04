@@ -98,6 +98,7 @@ const Siren = () => {
   var udpHosts = [];
   var dgram = require("dgram");
   var UDPserver = dgram.createSocket("udp4");
+
   var tick = socketIo.listen(3003);
 
   //Get tick from sync.hs Port:3002
