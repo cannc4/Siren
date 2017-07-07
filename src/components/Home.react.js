@@ -423,8 +423,11 @@ addChannel() {
       })
 
       if (flag === false){
-        console.log('add channel: ', d);
-        ctx.setState({c_id: d.channels !== undefined ? Object.values(d.channels).length : 1 })
+        var _index=0;
+        _.each(d.channels, function(chan,i){
+          _index++;
+        })
+        ctx.setState({ c_id : _index });
 
         var values = {}
         for(var i = 0; i < c_step; i++){
@@ -432,7 +435,7 @@ addChannel() {
         }
         console.log();
         var nc = { scene: activeMatrix,
-          cid: c_id,
+          cid: _index,
           type: c_type,
           name: c_name,
           transition: c_transition,
@@ -815,41 +818,41 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
   var tempAr = [] ;
   var gbchan = globalChannels.split(" ");
 
-  if (gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='a' ){
+  if (gbchan === undefined ||gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='a' ){
+
     for (var i = 0; i < storedPatterns.length; i++) {
-      if(i !== channels.length){
         if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-          tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-          if(Object.values(channels[i]).transition!== '' && Object.values(channels[i]).transition !== undefined){
-            tempAr[i] = Object.values(channels[i]).name+ '$' + globalTransformations + tempAr[i] + globalCommands;
+          console.log("UPDATE PATTERNS", storedPatterns);
+          console.log(storedPatterns[i]);
+          var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+          var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+          console.log("PAT CHAN:", patname);
+          tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
+          console.log("BEFORE CONSOLE" , tempAr[i]);
             ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          }
-          else {
-            tempAr[i] = cObject.values(channels[i]).name + '$' + globalTransformations + tempAr[i] + globalCommands;
-            ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          }
+
         }
       }
     }
-  }
 
-  else {
-  _.forEach( gbchan, function(chan, j){
-      var i = parseInt(chan) - 1;
-      if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-        console.log(storedPatterns);
-        tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-        if(Object.values(channels[i]).transition !== '' && Object.values(channels[i]).transition !== undefined){
-          tempAr[i] = Object.values(channels[i]).name+ '$' + globalTransformations + tempAr[i] + globalCommands;
-          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-        }
-        else {
-          tempAr[i] = Object.values(channels[i]).name + '$' + globalTransformations + tempAr[i] + globalCommands;
-          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-        }
-      }
-    });
-  }
+  //
+  // else {
+  // _.forEach( gbchan, function(chan, j){
+  //     var i = parseInt(chan) - 1;
+  //     if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
+  //       console.log(storedPatterns);
+  //       tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+  //       if(Object.values(channels[i]).transition !== '' && Object.values(channels[i]).transition !== undefined){
+  //         tempAr[i] = Object.values(channels[i]).name+ '$' + globalTransformations + tempAr[i] + globalCommands;
+  //         ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+  //       }
+  //       else {
+  //         tempAr[i] = Object.values(channels[i]).name + '$' + globalTransformations + tempAr[i] + globalCommands;
+  //         ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+  //       }
+  //     }
+  //   });
+  // }
 }
 
 toggle = () => {

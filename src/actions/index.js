@@ -437,6 +437,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 			})
 			// solo or not (obsolete)
+<<<<<<< HEAD
 			var soloHolder = k;
 			var transitionHolder = "" ;
 			var _k = k;
@@ -448,6 +449,30 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 				if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
 					soloHolder = k ;
 					transitionHolder = " $ ";
+=======
+			var channel_id,
+			channel_type,
+			channel_transition,
+ 			channel_name,
+			transitionHolder,
+			soloHolder,
+			_k;
+			//check k
+			//need (k-1)
+			//check cid to replace  id
+			_.each(channels, function(chantwo,i){
+				console.log("CHAN", Object.values(chantwo));
+				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
+					console.log("NAME", k[0]);
+					channel_type = chantwo.type;
+					channel_transition = chantwo.transition;
+					channel_name = chantwo.name;
+					channel_id = chantwo.cid;
+					soloHolder = k[0];
+				 	transitionHolder = "" ;
+				 	_k = k;
+					console.log(channel_transition);
+>>>>>>> e02d5d83301d54b7fe4fccf50fe1a6bfb6b8da8b
 				}
 
 				else if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
@@ -472,6 +497,7 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 
 			}
 			else {
+<<<<<<< HEAD
 				var storechan = "d"+ (_.indexOf(channels,_k)+1) + " $ ";
 				var storepat= storechan+ newCommand;
 				var orbit = " #orbit " + _.indexOf(channels,_k);
@@ -507,6 +533,47 @@ export const sendPatterns = (server,vals, patterns =[], solo, transition, channe
 					return [pattern, "d1 $ "+ newCommand] ;
 				}
 				else {
+=======
+				//check k
+				//need (k-1)
+				//check cid to replace  id
+				var storechan =  k [0]+ " $ ";
+				console.log(storechan);
+				pattern = storechan + newCommand;
+				storedPatterns[channel_id] = '';
+				storedPatterns[channel_id] = pattern;
+				console.log("STORED PATTERN" , storedPatterns);
+				console.log("FINAL PATTERN" ,pattern);
+				var pattern = soloHolder + transitionHolder + newCommand ;
+				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
+				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
+				// 	newCommand = newCommand.replaceAll(' s ', ' image ');
+				// 	newCommand = newCommand.replaceAll('n ', 'npy ');
+				// 	newCommand = newCommand.replaceAll('speed', 'pspeed');
+				// 	newCommand = newCommand.replaceAll('nudge', 'threshold');
+				// 	newCommand = newCommand.replaceAll('room', 'blur');
+				// 	newCommand = newCommand.replaceAll('end', 'median');
+				// 	newCommand = newCommand.replaceAll('coarse', 'edge');
+				// 	newCommand = newCommand.replaceAll('up', 'hough');
+				// 	newCommand = newCommand.replaceAll('gain', 'means');
+				// 	return [pattern, "v1 $ "+ newCommand] ;
+				// }
+				// else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
+				// 	pattern =  "v1 $ " + newCommand;
+				// 	newCommand = newCommand.replaceAll('image', 's');
+				// 	newCommand = newCommand.replaceAll('npy', 'n');
+				// 	newCommand = newCommand.replaceAll('pspeed', 'speed');
+				// 	newCommand = newCommand.replaceAll('threshold', 'nudge');
+				// 	newCommand = newCommand.replaceAll('blur', 'room');
+				// 	newCommand = newCommand.replaceAll('median', 'end');
+				// 	newCommand = newCommand.replaceAll('edge', 'coarse');
+				// 	newCommand = newCommand.replaceAll('hough', 'up');
+				//
+				// 	console.log(pattern, "d1 $ "+ newCommand);
+				// 	return [pattern, "d1 $ "+ newCommand] ;
+				// }
+				console.log("LAST" ,pattern);
+>>>>>>> e02d5d83301d54b7fe4fccf50fe1a6bfb6b8da8b
 					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 				}
 			}
