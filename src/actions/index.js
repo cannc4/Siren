@@ -467,7 +467,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 					channel_type = chantwo.type;
 					channel_transition = chantwo.transition;
 					channel_name = chantwo.name;
-					channel_id = k[0];
+					channel_id = chantwo.cid;
 					soloHolder = k[0];
 				 	transitionHolder = "" ;
 				 	_k = k;
@@ -502,8 +502,8 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				var storechan =  k [0]+ " $ ";
 				console.log(storechan);
 				pattern = storechan + newCommand;
-				storedPatterns[channel_id[1]] = '';
-				storedPatterns[channel_id[1]] = pattern;
+				storedPatterns[channel_id] = '';
+				storedPatterns[channel_id] = pattern;
 				console.log("STORED PATTERN" , storedPatterns);
 				console.log("FINAL PATTERN" ,pattern);
 				var pattern = soloHolder + transitionHolder + newCommand ;
