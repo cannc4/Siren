@@ -1,13 +1,13 @@
 const modelName = 'CLICK';
-const INITIAL_STATE = {flag:0, times:2, current:0 , isActive:false};
+const INITIAL_STATE = {flag:0, times: 1, current:0 , isActive:false};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'INC_'+modelName:
       const k = state;
       k.flag++;
       if(k.isActive === true){
-        if(k.flag%k.times===0){
-          k.current = k.current+1;
+        if(k.flag % k.times === 0){
+          k.current = k.current + 1;
         }
       }
       return {...k};

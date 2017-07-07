@@ -7,9 +7,10 @@ import io from 'socket.io-client'
 import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
-      chokeClick,startClick,stopClick,globalStore, changeUsername,continousPattern,
+      startClick,stopClick,globalStore, changeUsername,continousPattern,
       fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
-      fbcreatechannelinscene,createChannel,updateChannel} from '../actions'
+      fbcreatechannelinscene, fbupdatechannelinscene,
+      createChannel,updateChannel} from '../actions'
 
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
@@ -86,6 +87,7 @@ class Home extends Component {
       c_transition: ''
     }
   }
+
 //Clock for Haskell
 componentDidMount(props,state){
   const ctx = this;
@@ -241,36 +243,6 @@ disableSongmode(){
   this.setState({ songmodeActive : false});
 }
 
-////////////////////////////// TIMER STARTS ////////////////////////////
-
-startTimer() {
-  const ctx = this;
-  const {channels, steps,  click} = ctx.state;
-  var temp = click;
-  temp.isActive = true;
-  ctx.setState({click:temp});
-  store.dispatch(chokeClick());
-}
-
-stopTimer() {
-  const ctx = this;
-  const {channels, steps, click} = ctx.state;
-  var temp = [];
-  temp = click;
-  temp.isActive = false;
-  ctx.setState({click:temp});
-  store.dispatch(chokeClick());
-}
-
-pauseTimer() {
-  const ctx = this;
-  const {channels, click} = ctx.state;
-
-}
-////////////////////////////// TIMER ENDS ////////////////////////////
-
-
-
 ////////////////////////////// HANDLERS ////////////////////////////
 //SuperCollider
 handleSubmit = event => {
@@ -349,9 +321,9 @@ handleSubmitCell = event => {
   }
 }
 ////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, item) {
+updateMatrix(item) {
   const ctx = this;
-  store.dispatch(updateMatrix(patterns, item));
+  store.dispatch(updateMatrix(item));
 }
 
 soloChannel =  ({target : {id}}) => {
@@ -377,12 +349,6 @@ soloChannel =  ({target : {id}}) => {
     solo[_index] = !solo[_index];
     ctx.setState({solo: solo, soloSentinel : solo[_index]});
   }
-}
-
-runTidal() {
-  const ctx=this;
-  const { tidalServerLink } = ctx.state;
-  store.dispatch(initMyTidal(tidalServerLink));
 }
 //
 // closeSC() {
@@ -445,6 +411,8 @@ addChannel() {
         var obj = fbcreatechannelinscene('Matrices', nc, d.key);
         nc['key'] = obj
         store.dispatch(createChannel(nc));
+
+        ctx.setState({ activeMatrix: d.matName, matName: d.matName });
 
       } else {
         console.warning('"' + c_name + '" already exists in "' + d.matName + '"');
@@ -595,14 +563,14 @@ renderItem(item, dbKey, i) {
   const { activeMatrix, transition, storedGlobals } = ctx.state;
   const { patterns } = ctx.props;
 
-  const model = fetchModel(ctx.state.modelName);
+  // const model = fetchModel(ctx.state.modelName);
 
   var sglobals = [];
   _.forEach(item.storedGlobals, function(d, i){
     sglobals.push(d);
   });
 
-console.log(sglobals);
+  console.log(sglobals);
   const updateMatrix = () => {
     if(sglobals === undefined){
       sglobals = [];
@@ -611,9 +579,10 @@ console.log(sglobals);
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
       globalTransformations: '', globalCommands:'', globalChannels: '', sceneIndex:item.key});
 
-    ctx.updateMatrix(patterns, item);
+    ctx.updateMatrix(item);
 
     store.dispatch(updateChannel(item));
+
     store.dispatch(globalStore(sglobals,[]));
   }
 
@@ -672,54 +641,31 @@ renderMetro(){
 
 clearMatrix(){
   const ctx = this;
-  const { values, channels, steps} = ctx.state;
-  for (var i = 0; i < channels.length*steps; i++) {
-      values [i] = [];
-  }
-  ctx.setState({values});
+  var { channel, matrices, user} = ctx.props;
+  const { activeMatrix } = ctx.state;
+
+  // Get scene key
+  var s_key;
+  _.each(matrices, function(scene, i){
+    if(scene.uid === user.user.uid && scene.matName === activeMatrix)
+    {
+      s_key = scene.key;
+    }
+  })
+
+  _.each(channel, function(ch) {
+    _.each(ch.vals, function(d, i){
+      ch.vals[i] = '';
+    })
+    ch.transition = ''
+    fbupdatechannelinscene('Matrices', ch, s_key);
+  })
 
 }
 
 toggleCanvas(){
   const ctx = this;
   ctx.setState({isCanvasOn: !ctx.state.isCanvasOn});
-}
-
-renderMenu(){
-  const ctx=this;
-  const { tidal, click, patterns }=ctx.props;
-  const { play, values, steps, channels}=ctx.state;
-
-  const loginGG = () => {
-    store.dispatch(GitHubLogin())
-  }
-  const fblogout = () => {
-    this.setState({username: ''});
-    store.dispatch(logout())
-  }
-
-  return   <div className="Tidal" style={{margin: '5px'}}>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      User
-      {ctx.props.user.user.email && <button className={'buttonSentinel'} id={'logout'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
-      {!ctx.props.user.user.email && <button className={'buttonSentinel'} id={'login'} onClick={loginGG}>Login</button>}
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
-     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-    {click.isActive && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} role="presentation" height={32} width={32}/>
-                   <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/> </div>}
-
-    </div>
-
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.3</a>
-    </div>
-
-  </div>
 }
 
 clicked = event => {
@@ -877,7 +823,7 @@ tidalcps (value) {
 }
 render() {
   const ctx=this;
-  const {click}=ctx.props;
+  const { click }=ctx.props;
   const { scPattern, channels, songmodeActive, activeMatrix, storedPatterns,
           pressed, storedGlobals, globalTransformations, globalCommands,
           globalChannels } = ctx.state
@@ -939,20 +885,16 @@ render() {
           </div>
         </Layout>
         <LayoutSplitter />
-        <Layout layoutHeight={300}>
-          <Layout layoutWidth={250}>
-            {ctx.renderMenu()}
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={250}>
+        <Layout layoutHeight={275}>
+          <Layout layoutWidth={150}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Add Channels</p>
+              <p>> Add Channel</p>
 
-              <Dropdown options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="type" />
-              <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="name "/>
-              <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="step "/>
-              <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="transition "/>
-              {<Button onClick={ctx.addChannel.bind(ctx)} theme = {themeButton} activeStyle={{position:'relative', top: 1}}>Add Channel</Button>}
+              <Dropdown options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="Type" />
+              <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="Name "/>
+              <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="Step "/>
+              <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="Transition (optional)"/>
+              <Button className={"newChannelButton"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
             </div>
           </Layout>
           <LayoutSplitter />

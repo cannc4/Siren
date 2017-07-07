@@ -56,18 +56,18 @@ const models = {
 String.prototype.replaceAt = function(index, character) {
 	return this.substr(0, index) + character + this.substr(index+character.length);
 }
-
-export function sendZapier(data) {
-	const { url } = data;
-	delete data.url;
-	axios.post(url, JSON.stringify(data))
-	.then(function (response) {
-		console.log(response);
-	})
-	.catch(function (error) {
-		console.error(error);
-	});
-}
+//
+// export function sendZapier(data) {
+// 	const { url } = data;
+// 	delete data.url;
+// 	axios.post(url, JSON.stringify(data))
+// 	.then(function (response) {
+// 		console.log(response);
+// 	})
+// 	.catch(function (error) {
+// 		console.error(error);
+// 	});
+// }
 
 export function fetchModels() {
 	return _.map(models, (e, key) => { return key.toLowerCase() })
@@ -369,14 +369,14 @@ String.prototype.replaceAll = function(search, replacement) {
 var math = require('mathjs');
 var patListBack = [];
 export const sendPatterns = (server, channel_namestepvalue ,
-	 channels, scenePatterns, click,storedPatterns) => {
+	 channels, scenePatterns, click, storedPatterns) => {
 	return dispatch => {
 		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
 
-			//channel
+		// channel
 		var k = Object.keys(ch);
 
-			//pattern
+		// pattern
 		var v = Object.values(ch);
 
 		console.log(k,"_",v);
@@ -451,12 +451,12 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			})
 			// solo or not (obsolete)
 			var channel_id,
-			channel_type,
-			channel_transition,
- 			channel_name,
-			transitionHolder,
-			soloHolder,
-			_k;
+					channel_type,
+					channel_transition,
+		 			channel_name,
+					transitionHolder,
+					soloHolder,
+					_k;
 			//check k
 			//need (k-1)
 			//check cid to replace  id
@@ -562,7 +562,7 @@ export const continousPattern = (server, pattern) => {
 	}
 }
 ////////////////// PARSER ENDS HERE //////////////////
-export const updateMatrix = (patterns, item) => {
+export const updateMatrix = (item) => {
 	//reducer
 	return dispatch => {
 		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
@@ -687,8 +687,6 @@ export const createChannel = (newc) => {
 export const updateChannel = (item) => {
 	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
-
-
 export const deleteChannel = (key) => {
 	return  { type: 'DELETE_CHANNEL', payload: key }
 }

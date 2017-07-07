@@ -5,6 +5,7 @@ import sccommand from './sccommand';
 import tidal from './tidal';
 import click from './click';
 import channel from './channel';
+import menu from './menu';
 import globalparams from './global';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   user,
   usererror,
   click,
+  menu,
   globalparams,
   ...keys
 });
