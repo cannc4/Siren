@@ -56,18 +56,7 @@ const models = {
 String.prototype.replaceAt = function(index, character) {
 	return this.substr(0, index) + character + this.substr(index+character.length);
 }
-//
-// export function sendZapier(data) {
-// 	const { url } = data;
-// 	delete data.url;
-// 	axios.post(url, JSON.stringify(data))
-// 	.then(function (response) {
-// 		console.log(response);
-// 	})
-// 	.catch(function (error) {
-// 		console.error(error);
-// 	});
-// }
+
 
 export function fetchModels() {
 	return _.map(models, (e, key) => { return key.toLowerCase() })
@@ -184,9 +173,6 @@ export function fbupdatechannelinscene(model, data, s_key) {
 
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-
-	console.log('Channel with key '+ c_key +' deleted from DB');
-
 	store.dispatch(deleteChannel(c_key))
 }
 
@@ -379,7 +365,6 @@ export const sendPatterns = (server, channel_namestepvalue ,
 		// pattern
 		var v = Object.values(ch);
 
-		console.log(k,"_",v);
 		const getParameters = (v) => {
 			var param = [];
 			_.map(_.split(v, /[`]+/g), (p1, p2) => {
@@ -457,13 +442,9 @@ export const sendPatterns = (server, channel_namestepvalue ,
 					transitionHolder,
 					soloHolder,
 					_k;
-			//check k
-			//need (k-1)
-			//check cid to replace  id
+
 			_.each(channels, function(chantwo,i){
-				console.log("CHAN", Object.values(chantwo));
 				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
-					console.log("NAME", k[0]);
 					channel_type = chantwo.type;
 					channel_transition = chantwo.transition;
 					channel_name = chantwo.name;
@@ -471,7 +452,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 					soloHolder = k[0];
 				 	transitionHolder = "" ;
 				 	_k = k;
-					console.log(channel_transition);
+
 				}
 			})
 
@@ -496,11 +477,8 @@ export const sendPatterns = (server, channel_namestepvalue ,
 
 			}
 			else {
-				//check k
-				//need (k-1)
-				//check cid to replace  id
+
 				var storechan =  k [0]+ " $ ";
-				console.log(storechan);
 				pattern = storechan + newCommand;
 				storedPatterns[channel_id] = '';
 				storedPatterns[channel_id] = pattern;
@@ -618,15 +596,10 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 					ch = stp.match(b)[0];
 					ch = ch + ' $ ';
 					stp = stp.substring(stp.indexOf('$')+1);
-					console.log(stp);
 					var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
-					console.log(pp);
 					pat.push(pp);
 				}
 			});
-					// for (var j = 0; j < storedPatterns.length; j++) {
-					// 			pat.push(storedPatterns[j]);
-					// }
 			}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
 		.then((response) => {
@@ -641,22 +614,27 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {
 	return dispatch => {
 		var b = new RegExp("^[A-Za-z0-9]+", "g");
-		var ch = expression.match(b)[0];
-		console.log(ch);
-		if (ch === 'm1' || ch === 'm2' ||  ch === 'm3' ||  ch === 'm4' || ch === 'v1' || ch === 'u1'){
-
-			//storedPatterns[channel_cid] = '';
-			//storedPatterns[_.indexOf(channels,ch)] = expression;
+		var chan = expression.match(b)[0];
+		if ( expression === 'jou'){
+			_.each(channels, function (ch, i) {
+				if(ch.type === 'Audio'){
+				storedPatterns[ch.cid] = ch.name + '$ silence';
+				}
+			})
 		}
-		else if ( expression === 'jou'){
-			for (var i = 0; i < storedPatterns.length; i++) {
-				//storedPatterns[i] = channels[i] + ' $ silence' ;
-			}
-
+		else if ( expression === 'mjou'){
+			_.each(channels, function (ch, i) {
+				if(ch.type === 'MIDI'){
+					storedPatterns[ch.cid] = ch.name + '$ silence';
+				}
+			})
 		}
 		else{
-			//storedPatterns[_.indexOf(channels,ch)] = '';
-			//storedPatterns[_.indexOf(channels,ch)] = expression;
+			_.each(channels, function (ch, i) {
+				if(chan === ch.name){
+					storedPatterns[ch.cid] = expression;
+				}
+			})
 		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
@@ -668,7 +646,7 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 
 export const globalUpdate = (t, c, d) => {
 	return {
-		type: 'UPDATE_GLOBAL', transform: t, command: c, selectedChannels:d
+		type: 'UPDATE_GLOBAL', transform: t, command: c, channel:d
 	}
 }
 export const globalStore = (storedG,storedPatterns) => {
