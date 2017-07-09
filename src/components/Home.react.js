@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './Home.css';
+import './Menu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
@@ -65,7 +66,6 @@ class Home extends Component {
               current:null,
               isActive:false},
       activeMatrix: '',
-      songmodeActive: false,
       sceneIndex: '',
       channelEnd :[],
       sceneSentinel: false,
@@ -196,51 +196,6 @@ identical(array) {
       }
   }
   return true;
-}
-
-// TODO : Fix this
-progressMatrices(items){
-  const ctx = this;
-  const { click } = ctx.props;
-  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, channels,storedGlobals} = ctx.state;
-  var patterns = [];
-  const { uid } = ctx.props.user.user;
-  if(ctx.identical(channelEnd))
-  {
-    var transition_next = []
-    var i_save = -1;
-    for (var j = 0; j < channelEnd.length; j++) {
-      channelEnd[j] = false;
-
-    }
-    _.each(items, function(d, i, j){
-      if(d.uid === uid && d.matName === activeMatrix)
-      {
-        i_save = _.indexOf(Object.values(items), d);
-        patterns = d.patterns;
-
-      }
-    })
-
-    const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
-    const model = fetchModel(ctx.state.modelName);
-
-
-    updateMatrix(patterns, values, nextObj, transition,storedGlobals);
-    store.dispatch(globalStore(storedGlobals, []));
-    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions, storedGlobals: nextObj.globals});
-
-    for (var i = 0; i < channelEnd.length; i++) {
-      channelEnd[i] = false;
-    }
-  }
-}
-
-enableSongmode(){
-  this.setState({ songmodeActive : true});
-}
-disableSongmode(){
-  this.setState({ songmodeActive : false});
 }
 
 ////////////////////////////// HANDLERS ////////////////////////////
@@ -504,66 +459,10 @@ addItem() {
   }
 }
 
-reorder (index,flag){
-  const ctx = this;
-  const { matName, values, sceneIndex } = ctx.state;
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  if(ctx.props.user !== null && ctx.props.user !== undefined){
-    const vals = _.takeWhile(Object.values(items), function (d) { return d.uid === ctx.props.user.user.uid });
-    if(vals !== undefined){
-      const len = vals.length;
-      if(flag === "up" && index === 0)
-        return;
-      else if(flag === "down" && len-1 === index)
-        return;
-      else{
-        if(flag === "up"){
-          if (vals[index].sceneIndex === index){
-            var upIndex = index - 1;
-            var upMatName = vals[upIndex].matName;
-            var upValues = vals[upIndex].values;
-            var upPatterns = vals[upIndex].patterns;
-            var upUID = vals[upIndex].uid;
-            var downMatName = vals[index].matName;
-            var downValues = vals[index].values;
-            var downPatterns = vals[index].patterns;
-            var downUID = vals[index].uid;
-
-            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index, uid: upUID}, vals[upIndex].key);
-            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex, uid: downUID}, vals[index].key);
-          }
-        }
-        else if (flag === "down") {
-          if (vals[index].sceneIndex === index){
-            var downIndex = index + 1;
-            var downMatName = vals[downIndex].matName;
-            var downPatterns = vals[downIndex].patterns;
-            var downValues = vals[downIndex].values;
-            var downUID = vals[downIndex].uid;
-            var upMatName = vals[index].matName;
-            var upPatterns = vals[index].patterns;
-            var upValues =  vals[index].values;
-            var upUID = vals[index].uid;
-
-            console.log(downMatName ,': ', downPatterns);
-            console.log(upMatName, ': ', upPatterns);
-
-            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, vals[downIndex].key);
-            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, vals[index].key);
-          }
-        }
-      }
-    }
-  }
-}
-
-
-renderItem(item, dbKey, i) {
+renderScene(item, dbKey, i) {
   const ctx = this;
   const { activeMatrix, transition, storedGlobals } = ctx.state;
   const { patterns } = ctx.props;
-
-  // const model = fetchModel(ctx.state.modelName);
 
   var sglobals = [];
   _.forEach(item.storedGlobals, function(d, i){
@@ -582,7 +481,6 @@ renderItem(item, dbKey, i) {
     ctx.updateMatrix(item);
 
     store.dispatch(updateChannel(item));
-
     store.dispatch(globalStore(sglobals,[]));
   }
 
@@ -611,32 +509,14 @@ renderItem(item, dbKey, i) {
         <button onClick={handleDelete}>{'x'}</button>
         {activeMatrix === item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</Button>}
         {activeMatrix !== item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton}  style={{ color: '#ddd'}}>{item.matName}</Button>}
-        {item.sceneIndex !== 0 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>}
-        {item.sceneIndex !== Object.values(items).length-1 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>}
       </div>
     </div>
   )
 }
 
-renderItems(items) {
+renderScenes(items) {
   const ctx = this;
-  return _.map(items, ctx.renderItem.bind(ctx));
-}
-
-renderMetro(){
-  const ctx=this;
-  const { click }=ctx.props;
-  const currentStep=click.current;
-  var metro="metro metro--" ;
-  if (currentStep % 2 == 0 ) {
-    metro += " metro-active";
-  }
-  else {
-    metro = "metro metro--"
-  }
-  return <div className={metro}>{}
-    <input type="text" placeholder= "Metro"/>
-  </div>
+  return _.map(items, ctx.renderScene.bind(ctx));
 }
 
 clearMatrix(){
@@ -824,7 +704,7 @@ tidalcps (value) {
 render() {
   const ctx=this;
   const { click }=ctx.props;
-  const { scPattern, channels, songmodeActive, activeMatrix, storedPatterns,
+  const { scPattern, channels, activeMatrix, storedPatterns,
           pressed, storedGlobals, globalTransformations, globalCommands,
           globalChannels } = ctx.state
   const { c_type, c_name, c_step, c_transition } = ctx.state;
@@ -854,17 +734,13 @@ render() {
         <div id="matrices" style={{width: '100%', height: '1500px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '15px'}}>
             <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
-            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
-            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
-          </div>
-          <div>
-            {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
-            {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
+            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
+            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
           </div>
           <div className={'sceneList'} style={{ width: '100%'}}>
             <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-              {this.props.user.user.name && ctx.renderItems(items)}
+              {this.props.user.user.name && ctx.renderScenes(items)}
               {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
             </ul>
           </div>
@@ -912,7 +788,7 @@ render() {
             </div>
           </Layout>
           <LayoutSplitter />
-          <Layout layoutWidth={350}>
+          <Layout layoutWidth={'flex'}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
               <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
