@@ -9,26 +9,6 @@
   flex-direction: row;
 }
 
-.User{
-  display: inline-flex;
-  flex-direction: row;
-}
-
-.TimerControls{
-
-}
-
-@keyframes flash {
-  from {color: white;}
-  to {color: rgba(255,255,102, 0.75);}
-}
-#login {
-  animation-name: flash;
-  animation-duration: 0.5s;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-
 .CodeMirror {
   background-color: rgba(255,255,255, 0.05) !important;
 }
@@ -104,14 +84,12 @@
   padding-bottom: 5px;
 }
 
-
 .step-holder {
   display: flex;
   flex-grow: 2;
   flex-direction: row;
   overflow-y: auto;
 }
-
 
 .newPatternInput {
   font-size: 12px;
@@ -207,19 +185,6 @@
   opacity: 0.6;
 }
 
-.transition {
-  width: 95%;
-  margin-left: 2.5%;
-  height: 5%;
-  font-size: 1vw;
-  text-align: center;
-  vertical-align: center;
-  overflow-y: auto;
-  border: 1px solid rgba(125,125,125, 0.4);
-  background: rgba(0, 0, 0, 0.8);
-  opacity: 0.6;
-}
-
 .playbox-active {
   background-color: rgba(255, 255, 255, 0.1);
 
@@ -231,6 +196,18 @@
   line-height: 24px;
   vertical-align: center;
   text-align: center;
+}
+.transition {
+  width: 95%;
+  margin-left: 2.5%;
+  height: 5%;
+  font-size: 1vw;
+  text-align: center;
+  vertical-align: center;
+  overflow-y: auto;
+  border: 1px solid rgba(125,125,125, 0.4);
+  background: rgba(0, 0, 0, 0.8);
+  opacity: 0.6;
 }
 
 /* Table column sizing
@@ -246,116 +223,3 @@
 .Channel--13cols > .playbox  { width: 7.5%; }
 .Channel--16cols > .playbox  { width: 6.25%; }
 .Channel--17cols > .playbox  { width: 5.88%; }
-
-/* Dropdown classes
-================================== */
-.Dropdown-root {
-  position: relative;
-}
-
-.newChannelInput {
-  position: relative;
-  overflow: hidden;
-  background-color: none;
-  border: 1px solid rgba(200,200,200,0.3);
-  border-radius: 1px;
-  box-sizing: border-box;
-  cursor: default;
-  outline: none;
-  padding: 5px;
-  margin-right: 5%;
-  transition: all 200ms ease;
-  height: 30px;
-}
-
-.newChannelButton {
-  position: relative;
-  width: 92%;
-}
-
-.Dropdown-control {
-  position: relative;
-  overflow: hidden;
-  background-color: none;
-  border: 1px solid rgba(200,200,200,0.3);
-  border-radius: 1px;
-  box-sizing: border-box;
-  color: #333;
-  cursor: default;
-  outline: none;
-  padding: 5px;
-  margin-right: 5%;
-  transition: all 200ms ease;
-}
-
-.Dropdown-arrow {
-  border-color: #999 transparent transparent;
-  border-style: solid;
-  border-width: 5px 5px 0;
-  content: ' ';
-  display: block;
-  height: 0;
-  margin-top: -ceil(2.5);
-  position: absolute;
-  right: 10px;
-  top: 14px;
-  width: 0
-}
-
-.is-open .Dropdown-arrow {
-  border-color: transparent transparent #999;
-  border-width: 0 5px 5px;
-}
-
-.Dropdown-menu {
-  background-color: rgb(30,30,30);
-  border: 1px solid rgba(200,200,200,0.3);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
-  box-sizing: border-box;
-  margin-top: -1px;
-  max-height: 200px;
-  overflow-y: auto;
-  position: absolute;
-  top: 100%;
-  width: 100%;
-  z-index: 1000;
-  -webkit-overflow-scrolling: touch;
-}
-
-.Dropdown-menu .Dropdown-group > .Dropdown-title {
-  padding: 8px 10px;
-  color: rgba(51, 51, 51, 1.2);
-  font-weight: bold;
-  text-transform: capitalize;
-}
-
-.Dropdown-option {
-  box-sizing: border-box;
-  color: rgba(251, 251, 251, 0.8);
-  cursor: pointer;
-  display: block;
-  padding: 8px 10px;
-}
-
-.Dropdown-option:last-child {
-  border-bottom-right-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
-
-.Dropdown-option:hover {
-  background-color: rgba(255,255,102,0.05);
-  color: #fff;
-}
-
-.Dropdown-option.is-selected {
-  background-color: rgba(255,255,102,0.15);
-  color: #fff;
-}
-
-.Dropdown-noresults {
-  box-sizing: border-box;
-  color: #ccc;
-  cursor: default;
-  display: block;
-  padding: 8px 10px;
-}
