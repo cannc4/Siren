@@ -74,7 +74,8 @@ class Home extends Component {
       username: '',
       storedPatterns: [],
       storedGlobals: [{transform:'', command: '', selectedChannels: ''}],
-      tidalOnClickClass:  ' ',
+      tidalOnClickClass: ' ',
+      globalOnClickClass: ' ',
       pressed : false,
       c_type: '',
       c_name: '',
@@ -264,11 +265,17 @@ addChannel() {
           step: c_step,
           vals: values
         };
-        var obj = fbcreatechannelinscene('Matrices', nc, d.key);
-        nc['key'] = obj
-        store.dispatch(createChannel(nc));
+        //do a proper check here
+        if (c_name === undefined || c_step === undefined ){
+          alert('Invalid step or name');
+        }
+        else{
+          var obj = fbcreatechannelinscene('Matrices', nc, d.key);
+          nc['key'] = obj
+          store.dispatch(createChannel(nc));
 
-        ctx.setState({ activeMatrix: d.matName, matName: d.matName });
+          ctx.setState({ activeMatrix: d.matName, matName: d.matName });
+        }
 
       } else {
         console.warning('"' + c_name + '" already exists in "' + d.matName + '"');
@@ -438,28 +445,48 @@ toggleCanvas(){
 
 clicked = event => {
   const ctx=this;
-  const {activeMatrix,pressed,storedGlobals,storedPatterns} =ctx.state;
-
+  const {activeMatrix,pressed,storedGlobals,storedPatterns, globalChannels,
+        globalCommands,globalTransformations,sceneIndex} =ctx.state;
   var ns,tempgb, tempgbtwo, tempchan;
   var temp ={globalTransformations:'', globalCommands: '', globalChannels:''};
+
   const scenes = ctx.props.matrices;
+  var matkey;
   _.each(scenes , function (sc, i) {
-    if(sc.name === activeMatrix){
+    if(sc.key === sceneIndex){
       ctx.setState({storedGlobals:sc.storedGlobals})
+      matkey = sc.key;
     }
   })
+
   if (event.shiftKey){
-    if(storedGlobals[event.target.id]!== undefined){
-      ns = storedGlobals;
-      ns[event.target.id] = undefined;
-      //TODO: fix delete/update globals(!!)
-      store.dispatch(globalUpdate(ns, storedPatterns));
-    }
+    var ttm = storedGlobals;
+
+    ttm[event.target.id] = {transform:'',
+              command:'',
+              selectedChannels:''};
+
+    fbupdateglobalsinscene('Matrices',ttm,matkey);
+    store.dispatch(globalUpdate('', '', ''));
+    ctx.setState({globalTransformations:'', globalCommands:'',
+                  globalChannels: ''})
+  }
+  else if (event.altKey){
+    var ttm = storedGlobals;
+    ttm[event.target.id] = {transform:globalTransformations,
+              command:globalCommands,
+              selectedChannels:globalChannels};
+
+    fbupdateglobalsinscene('Matrices',ttm,matkey);
+    store.dispatch(globalStore(ttm,storedPatterns));
+    store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
+    ctx.setState({storedGlobals:ttm});
+
   }
   else {
     var ttm = storedGlobals[event.target.id];
+    store.dispatch(globalStore(ttm,storedPatterns));
     store.dispatch(globalUpdate(ttm.command, ttm.transform, ttm.selectedChannels));
-    storedGlobals.selectedChannels = ttm.selectedChannels;
     ctx.setState({globalTransformations:ttm.transform, globalCommands:ttm.command,
                   globalChannels: ttm.selectedChannels, storedGlobals: storedGlobals})
   }
@@ -492,7 +519,7 @@ record = event => {
       key = m;
     }
   })
-  store.dispatch(fbupdateglobalsinscene('Matrices',ns,key.key));
+  fbupdateglobalsinscene('Matrices',ns,key.key);
   store.dispatch(globalStore(ns,storedPatterns));
   ctx.setState({storedGlobals:ns})
 }
@@ -501,11 +528,13 @@ handleUpdatePatterns = event => {
   const body = event.target.value;
   const ctx = this;
   const {tidalServerLink,globalCommands,
-        globalTransformations} = ctx.state;
+        globalTransformations,globalOnClickClass} = ctx.state;
   const channels = ctx.props.channel;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
 
   if(event.keyCode === 13 && event.ctrlKey){
+    ctx.setState({globalOnClickClass: ' Executed'});
+    setTimeout(function(){ ctx.setState({globalOnClickClass: ' '}); }, 500);
     ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
                       globalCommands,channels);
   }
@@ -581,7 +610,7 @@ render() {
   const { scPattern, csize, channels, activeMatrix, storedPatterns,
           pressed, storedGlobals, globalTransformations, globalCommands,
           globalChannels,c_type, c_name, c_step,
-           c_transition } = ctx.state
+           c_transition,globalOnClickClass } = ctx.state
 
   const updateScPattern = event  => {
     ctx.setState({scPattern: event.target.value})
@@ -649,14 +678,14 @@ render() {
           <Layout layoutWidth={350}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <MaskedInput mask= "1 1 1 1 1 1 1 " className="newChannelInput"
+              <MaskedInput mask= "1 1 1 1 1 1 1 " className={"newChannelInput" + ctx.state.globalOnClickClass}
                 key={'globalchannel'}
                 onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)}
                 onChange={ctx.handleGlobalChannels.bind(ctx)}
                 value = {globalChannels}
                 placeholder="Channels "/>
-              <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
-              <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
+              <input className={"defaultPatternHistoryArea" + ctx.state.globalOnClickClass} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
+              <input className={"defaultPatternHistoryArea" + ctx.state.globalOnClickClass} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
               {_.map(storedGlobals, (c, i) => {
                  return <Button id={i} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
                })}

@@ -11,10 +11,11 @@ export default (state = INITIAL_STATE, action) => {
     // action.payload = scene
     case 'UPDATE_'+modelName:
       const z = state;
-      if (action.payload.channels !== undefined)
+      if (action.payload.channels !== undefined){
         _.forEach(action.payload.channels, function(chan, i) {
           z[i] = chan;
         });
+      }
       return {...z};
     // action.payload = channel key
     case 'DELETE_'+modelName:

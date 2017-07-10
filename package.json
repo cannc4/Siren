@@ -18,7 +18,7 @@
     },
     "window": {
       "title": "Siren",
-      "icon": "favicon.ico",
+      "icon": "favicon.icns",
       "toolbar": true,
       "frame": true,
       "width": 1024,
@@ -65,6 +65,7 @@
     "redux": "^3.5.2",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.0.1",
+    "require-haskell": "^1.0.2",
     "socket.io": "^1.7.1",
     "supercolliderjs": "^0.13.0",
     "threads": "^0.7.2",

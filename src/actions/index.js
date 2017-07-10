@@ -6,7 +6,6 @@ import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
 import { handleEnterHome } from '../routes'
-
 Firebase.initializeApp({
 
 		 apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -482,8 +481,6 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				pattern = storechan + newCommand;
 				storedPatterns[channel_id] = '';
 				storedPatterns[channel_id] = pattern;
-				console.log("STORED PATTERN" , storedPatterns);
-				console.log("FINAL PATTERN" ,pattern);
 				var pattern = soloHolder + transitionHolder + newCommand ;
 				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
@@ -512,7 +509,6 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				// 	console.log(pattern, "d1 $ "+ newCommand);
 				// 	return [pattern, "d1 $ "+ newCommand] ;
 				// }
-				console.log("LAST" ,pattern);
 					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 
 				}
@@ -680,8 +676,8 @@ export function startClick() {
 	}
 }
 
-export function stopClick() {
+export function resetClick() {
 	return dispatch => {
-		dispatch({ type: 'STOP_CLICK'});
+		dispatch({ type: 'RESET_CLICK'});
 	}
 }

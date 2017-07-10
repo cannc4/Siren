@@ -25,8 +25,8 @@ m2 <- midiStream devices "USB MIDI Device Port 1" 2 machinedrumController
 m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
 m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
 m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
-
-
+m6 <- midiStream devices "USB MIDI Device Port 1" 6 machinedrumController
+m7 <- midiStream devices "USB MIDI Device Port 1" 7 machinedrumController
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
 (d3,t3) <- superDirtSetters getNow
@@ -39,8 +39,8 @@ m5 <- midiStream devices "USB MIDI Device Port 1" 5 machinedrumController
 
 
 let bps x = cps (x/2)
-let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4]
-let mjou = mapM_ ($ silence) [m1,m2,m3,m4]
+let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4,m5,m6,m7,m8]
+let mjou = mapM_ ($ silence) [m1,m2,m3,m4,m5,m6,m7]
 let jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
 let solo = (>>) hush
 
@@ -50,8 +50,7 @@ let solo = (>>) hush
 
 let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     rip' a b c d e p = within (a, b) (slow 2 . rev . stut c d e) p
-    spike p = ((|+| delaytime (scale 0.001 0.3 $ slow 7.1 sine1)) . (|+| delayfeedback (scale 0.7 0.99 $ slow 6.71 sine1))) $ p
-    spike' p = (|+| delay "0.3") $ spike $ p
+    ripz a b p = within (0.5, 0.85) (trunc 0.5 . iter 3 . stut 4 a b) p
     gtfo p = (const $ sound "~") p
     shift p = (1024 <~)  p
     shift' x p = (x <~) p
@@ -66,21 +65,30 @@ let rip a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     timemod p = whenmod 28 18 (foldEvery [2,3,4] (0.25 <~)) $ p
     progwav = (|+| up "{0 0 0 2 2}%1")
 
-
-
-let (degree, degree_p) = pF "degree" (Nothing)
-   (ctranspose, ctranspose_p) = pF "ctranspose" (Nothing)
-   (mtranspose, mtranspose_p) = pF "mtranspose" (Nothing)
-   (gtranspose, gtranspose_p) = pF "gtranspose" (Nothing)
-   (harmonic, harmonic_p) = pF "harmonic" (Nothing)
-   (detune, detune_p) = pF "detune" (Nothing)
-   (scale, scale_p) = pS "scaleName" (Nothing)
-   (tuning, tuning_p) = pS "tuningName" (Nothing)
-   (stepsPerOctave, stepsPerOctave_p) = pI "stepsPerOctave" (Nothing)
-   (octaveRatio, octaveRatio_p) = pF "octaveRatio" (Nothing)
+let outside n f p = slow n $ f (density n p)
+    every' n o f = when ((== o) . (`mod` n)) f
+    withArc (s,e) f p = stack [sliceArc (0,s) p, f $ sliceArc (s,e) p, sliceArc (e,1) p]
+    shiftArc (s,e) t = withArc (s,e) (t ~>)
+    flange n t p = stack [ (toRational i*t) ~> p # begin (pure $ i/n) # end (pure $ (i+1)/n) | i <- [0..n-1] ]
+    sometimesBy' x f p = (1024 ~>) $ sometimesBy x f p
+    rep = replicate
+    juxp panpat f p = stack [p # pan panpat, f $ p # pan (fmap (1-) panpat)]
+    take' n m xs = map (xs!!) [m..n+m-1]
+    ngap n d = inside n (densityGap d)
+    swing n = inside n (within (0.5,1) (0.3333 ~>))
+    swingBy n x = inside n (within (0.5,1) (x ~>))
+    swingEvery n e = inside n (every e $ within (0.5,1) (0.3333 ~>))
+    necho x = echo $ negate x
+    ntrip x = triple $ negate x
+    somecyclesBy x = when (test x) -- cycle-by-cycle version of sometimesBy
+      where test x c = (timeToRand $ fromIntegral c) < x
+    somecycles = somecyclesBy 0.5
+    dropAfter x = within (x,1) (const silence)
+    quiet = const silence
 
 
 -- params
+
 
 (hpdub, hpdub_p) = pF "hpdub" (Just 0)
 (lpdub, lpdub_p) = pF "lpdub" (Just 0)
@@ -147,6 +155,10 @@ freeze = mf "freeze"
 thold = mf "thold"
 tlen = mf "tlen"
 trate = mf "trate"
+binscr = mf "binscr"
+binshf = mf "binshf"
+binfrz = mf "binfrz"
+conv = mf "conv"
 
 (ts, ts_p) = pF "ts" (Just 1)
 (cone, cone_p) = pF "cone" (Just 1)
@@ -200,6 +212,10 @@ sfmod = grp [sfcutoff_p, sfresonance_p, sfenv_p, sfattack_p, sfrelease_p]
 (thold, thold_p) = pF "thold" (Just 0)
 (tlen, tlen_p) = pF "tlen" (Just 1)
 (trate, trate_p) = pF "trate" (Just 12)
+(binscr, binscr_p) = pF "binscr" (Just 0)
+(binshf, binshf_p) = pF "binshf" (Just 0)
+(binfrz, binfrz_p) = pF "binfrz" (Just 0)
+(conv, conv_p) = pF "conv" (Just 0)
 
 
 :set prompt "tidal> "

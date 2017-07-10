@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         updateChannel, deleteChannel,sendPatterns} from '../actions';
+         deleteChannel,sendPatterns} from '../actions';
 import store from '../store';
 import _ from 'lodash';
 
@@ -28,8 +28,8 @@ class Channels extends Component {
     const { patterns,  click  }=prevProps;
     const items = ctx.props.matrices;
       if (click.isActive) {
-        console.log(click.isActive);
         var scenePatterns,
+            channels,
             channel_type,
             channel_values,
             channel_name,
@@ -39,8 +39,8 @@ class Channels extends Component {
         _.each(items, function(d){
           if(d.matName === ctx.props.active)
             scenePatterns = d.patterns;
+            channels = d.channels;
         })
-        const channels = ctx.props.channel;
         var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
           var runNo = (click.current % chan.step);
@@ -53,12 +53,7 @@ class Channels extends Component {
               }
             })
           channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
-          console.log("STEPPAR");
-
         }})
-        console.log("PAIRS",channel_namestepvalues);
-
-        console.log('channels: ', channels);
         store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
            channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
       }
@@ -71,13 +66,11 @@ class Channels extends Component {
     const step = parseInt(item.step);
     const currentStep = click.current % step;
 
-    const setText=({ target: { value }}) => {
+      const setText=({ target: { value }}) => {
       item.vals[i] = value;
-
       const nc = { vals: item.vals, key: item.key };
-      fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key)
+      fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key);
     }
-
     var className = 'playbox';
     if (currentStep === i)
       className += '-active';
@@ -87,6 +80,7 @@ class Channels extends Component {
                 onChange={setText}/>
     </div>
   }
+
 
   renderItem(item) {
     const ctx = this;
@@ -101,9 +95,7 @@ class Channels extends Component {
     }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
-
       item.transition = value
-
       fbupdatechannelinscene('Matrices',
                 { transition: value, key: item.key },
                 ctx.props.scene_key)

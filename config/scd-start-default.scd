@@ -3,7 +3,7 @@ s.options.numInputBusChannels = 6;
 s.options.numOutputBusChannels = 14;
 s.options.numBuffers = 2048 * 32;
 s.options.maxNodes = 1024 * 32;
-s.options.memSize_(65536 * 16);
+s.options.memSize = 131072 * 16;
 //s.recorder.recHeaderFormat = "WAV";
 s.quit;
 

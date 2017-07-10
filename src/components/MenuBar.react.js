@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import store from '../store';
 import './MenuBar.css'
 
-import { GitHubLogin, logout, chokeClick, initMyTidal} from '../actions'
+import { GitHubLogin, logout, chokeClick,resetClick, initMyTidal} from '../actions'
 
 class MenuBar extends Component {
   constructor(props) {
@@ -36,9 +36,12 @@ class MenuBar extends Component {
     store.dispatch(chokeClick());
   }
 
-  stopTimer() {
+  stopTimer = event =>{
     const ctx = this;
-    store.dispatch(chokeClick());
+    if(event.shiftKey)
+      store.dispatch(resetClick());
+    else
+      store.dispatch(chokeClick());
   }
   ////////////////////////////// TIMER ENDS ////////////////////////////
 
@@ -57,13 +60,12 @@ class MenuBar extends Component {
 
 
     const changeTimes = ({target: {value}}) => {
-      console.log(value);
       if (!isNaN(parseInt(value))){
         ctx.setState({times : parseInt(value)});
-        ctx.props.click.times = parseInt(value)
-        console.log(ctx.props.click);
+        ctx.props.click.times = parseInt(value);
       }
     }
+
     const loginGG = () => {
       store.dispatch(GitHubLogin())
     }
@@ -77,17 +79,8 @@ class MenuBar extends Component {
         σειρήνα
       </a>
       <a href={"https://github.com/cannc4/Siren"}>{version}</a>
-
-      <div className={"TimerControls"}>
-        {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
-        {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        <p> Rate </p>
-        <input className={'newPatternInput'} value={times} onChange={changeTimes}/>
-      </div>
-
       <div className={"User"}>
+      &nbsp;&nbsp;&nbsp;
         <div>
           {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
         </div>
@@ -95,6 +88,14 @@ class MenuBar extends Component {
           {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>Logout</button>}
           {!ctx.props.user.user.email && <button id={'login'} onClick={loginGG}>Login</button>}
         </div>
+      </div>
+      <div className={"TimerControls"}>
+        {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
+        {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
+        {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+        {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+        <p>  Rate&nbsp;&nbsp;  </p>
+        <input className={'TimesInput'} value={times} onChange={changeTimes}/>
       </div>
     </div>)
   }

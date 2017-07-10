@@ -21,6 +21,12 @@ export default (state = INITIAL_STATE, action) => {
       const j = state;
       j.isActive = !j.isActive;
       return {...j};
+    case 'RESET_'+modelName:
+      const b = state;
+      b.isActive = false;
+      b.current = 0;
+      b.flag = 0;
+      return {...b};
     default:
       return state;
   }

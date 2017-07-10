@@ -9,8 +9,10 @@ import bodyParser from 'body-parser';
 const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
+var exec = require('child_process').exec;
+var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
 
-// REPL is an GHCI Instance
+
 class REPL {
 
   hush() {
@@ -85,11 +87,12 @@ class REPL {
     this.doSpawn();
     this.initTidal();
     this.initSC();
+    synchs();
   }
 }
 
 const TidalData = {
-  myTidal: new REPL()
+  TidalConsole: new REPL()
 }
 
 const Siren = () => {
@@ -128,37 +131,36 @@ const Siren = () => {
   });
 
   const startTidal = (reply) => {
-    if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed === false) {
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
+    if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed === false) {
+      reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     } else {
-      if (TidalData.myTidal.repl && TidalData.myTidal.repl.killed) {
-        TidalData.myTidal = new REPL();
+      if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed) {
+        TidalData.TidalConsole = new REPL();
       }
-      TidalData.myTidal.start();
-      TidalData.myTidal.myPatterns.values.push('initiate tidal');
-      reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, pattern: TidalData.myTidal.myPatterns });
-
+      TidalData.TidalConsole.start();
+      TidalData.TidalConsole.myPatterns.values.push('initiate tidal');
+      reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     }
   };
 
   const sendPattern = (expr, reply) => {
     _.each(expr, c => {
-      TidalData.myTidal.tidalSendExpression(c);
-      TidalData.myTidal.myPatterns.values.push(c);
+      TidalData.TidalConsole.tidalSendExpression(c);
+      TidalData.TidalConsole.myPatterns.values.push(c);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
+    reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, patterns: TidalData.TidalConsole.myPatterns });
   };
 
   const sendPatterns = (patterns, reply) => {
     _.each(patterns, c => {
-      TidalData.myTidal.tidalSendExpression(c[0]);
-      TidalData.myTidal.tidalSendExpression(c[1]);
+      TidalData.TidalConsole.tidalSendExpression(c[0]);
+      TidalData.TidalConsole.tidalSendExpression(c[1]);
     })
-    reply.status(200).json({ isActive: !TidalData.myTidal.repl.killed, patterns: TidalData.myTidal.myPatterns });
+    reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, patterns: TidalData.TidalConsole.myPatterns });
   };
 
   const sendScPattern = (expr, reply) => {
-    TidalData.myTidal.sendSC(expr);
+    TidalData.TidalConsole.sendSC(expr);
     console.log(expr);
     reply.status(200).send(expr);
   }
@@ -196,7 +198,7 @@ const Siren = () => {
 }
 
 process.on('SIGINT', () => {
-  if (TidalData.myTidal.repl !== undefined) TidalData.myTidal.repl.kill();
+  if (TidalData.TidalConsole.repl !== undefined) TidalData.TidalConsole.repl.kill();
   process.exit(1)
 });
 
