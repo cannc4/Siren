@@ -75,6 +75,7 @@ class Home extends Component {
       storedPatterns: [],
       storedGlobals: [{transform:'', command: '', selectedChannels: ''}],
       tidalOnClickClass: ' ',
+      SCOnClickClass: ' ',
       globalOnClickClass: ' ',
       pressed : false,
       c_type: '',
@@ -141,10 +142,10 @@ identical(array) {
 handleSubmit = event => {
   const body=event.target.value
   const ctx=this;
-  const {scPattern, tidalServerLink, tidalOnClickClass }=ctx.state;
+  const {scPattern, tidalServerLink, SCOnClickClass }=ctx.state;
   if(event.keyCode === 13 && event.ctrlKey && body){
-    ctx.setState({tidalOnClickClass: ' Executed'});
-    setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
+    ctx.setState({SCOnClickClass: ' Executed'});
+    setTimeout(function(){ ctx.setState({SCOnClickClass: ' '}); }, 500);
     ctx.sendScPattern(tidalServerLink, scPattern);
   }
 }
@@ -606,8 +607,8 @@ tidalcps (value) {
 }
 render() {
   const ctx=this;
-  const { click }=ctx.props;
-  const { scPattern, csize, channels, activeMatrix, storedPatterns,
+  const { click, channel } = ctx.props;
+  const { scPattern, csize, activeMatrix, storedPatterns,
           pressed, storedGlobals, globalTransformations, globalCommands,
           globalChannels,c_type, c_name, c_step,
            c_transition,globalOnClickClass } = ctx.state
@@ -617,11 +618,21 @@ render() {
   }
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
 
+  var activeChannels = []
+  _.each(Object.values(channel), function (d, i) {
+    if (d.scene === activeMatrix)
+      activeChannels = _.concat(activeChannels, d)
+  });
+  console.log(activeChannels);
+  console.log(activeChannels.length);
+  const maskedInputPatterns = "(1) | " + _.repeat("1  ", activeChannels.length);
+  console.log(maskedInputPatterns);
+
   var historyOptions = {
       mode: '_rule',
       theme: '_style',
-      fixedGutter: false,
-      scroll: true,
+      fixedGutter: true,
+      scroll: false,
       styleSelectedText:true,
       showToken:true,
       lineWrapping: true,
@@ -654,7 +665,7 @@ render() {
           {ctx.renderPlayer()}
         </Layout>
         <LayoutSplitter />
-        <Layout layoutHeight={100}>
+        <Layout layoutHeight={150}>
           <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
            <p>> Pattern History</p>
            {_.map(storedPatterns, (c, i) => {
@@ -678,7 +689,7 @@ render() {
           <Layout layoutWidth={350}>
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Globals</p>
-              <MaskedInput mask= "1 1 1 1 1 1 1 " className={"newChannelInput" + ctx.state.globalOnClickClass}
+              <MaskedInput mask={maskedInputPatterns} className={"newChannelInput" + ctx.state.globalOnClickClass}
                 key={'globalchannel'}
                 onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)}
                 onChange={ctx.handleGlobalChannels.bind(ctx)}
@@ -697,7 +708,7 @@ render() {
             <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
               <p>> Console</p>
               <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
-              <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+              <textarea className={"defaultPatternArea" + ctx.state.SCOnClickClass} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
             </div>
           </Layout>
         </Layout>
