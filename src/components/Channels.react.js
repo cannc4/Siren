@@ -3,8 +3,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbdeletechannelinscene, fbupdatechannelinscene,
          deleteChannel,sendPatterns} from '../actions';
+
 import store from '../store';
 import _ from 'lodash';
+
 
 class Channels extends Component {
   constructor(props) {
@@ -37,9 +39,10 @@ class Channels extends Component {
             channel_transition;
 
         _.each(items, function(d){
-          if(d.matName === ctx.props.active)
+          if(d.matName === ctx.props.active){
             scenePatterns = d.patterns;
             channels = d.channels;
+          }
         })
         var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
@@ -52,10 +55,13 @@ class Channels extends Component {
                 stepvalue =  sv;
               }
             })
-          channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
+          if (stepvalue !== '')
+            channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
         }})
-        store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
-           channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
+
+        if (channel_namestepvalues.length !== 0)
+          store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
+             channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
       }
   }
 

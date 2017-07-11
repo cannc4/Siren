@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import store from '../store';
 import './MenuBar.css'
 
-import { GitHubLogin, logout, chokeClick,resetClick, initMyTidal} from '../actions'
+import { GitHubLogin, logout, chokeClick,resetClick, initTidalConsole} from '../actions'
 
 class MenuBar extends Component {
   constructor(props) {
@@ -38,6 +38,10 @@ class MenuBar extends Component {
 
   stopTimer = event =>{
     const ctx = this;
+    console.log(event);
+    console.log(event.shiftKey);
+    console.log(event.ctrlKey);
+
     if(event.shiftKey)
       store.dispatch(resetClick());
     else
@@ -48,7 +52,7 @@ class MenuBar extends Component {
   runTidal() {
     const ctx=this;
     const { tidalServerLink } = ctx.state;
-    store.dispatch(initMyTidal(tidalServerLink));
+    store.dispatch(initTidalConsole(tidalServerLink));
   }
 
   render() {

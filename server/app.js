@@ -12,7 +12,6 @@ const socketIo = require('socket.io');
 var exec = require('child_process').exec;
 var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
 
-
 class REPL {
 
   hush() {

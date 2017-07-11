@@ -7,6 +7,3 @@ vis/
 build/
 .DS_Store
 vis/media/
-sync/sync.hi
-sync/sync.exe
-sync/sync.o

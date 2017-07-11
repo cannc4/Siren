@@ -312,7 +312,7 @@ export function logout() {
 }
 
 
-export const initMyTidal = (server) => {
+export const initTidalConsole = (server) => {
 	return dispatch => {
 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
 		.then((response) => {
@@ -355,6 +355,8 @@ var math = require('mathjs');
 var patListBack = [];
 export const sendPatterns = (server, channel_namestepvalue ,
 	 channels, scenePatterns, click, storedPatterns) => {
+
+
 	return dispatch => {
 		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
 
@@ -614,14 +616,14 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 		if ( expression === 'jou'){
 			_.each(channels, function (ch, i) {
 				if(ch.type === 'Audio'){
-				storedPatterns[ch.cid] = ch.name + '$ silence';
+				storedPatterns[ch.cid] = ch.name + ' $ silence';
 				}
 			})
 		}
 		else if ( expression === 'mjou'){
 			_.each(channels, function (ch, i) {
 				if(ch.type === 'MIDI'){
-					storedPatterns[ch.cid] = ch.name + '$ silence';
+					storedPatterns[ch.cid] = ch.name + ' $ silence';
 				}
 			})
 		}

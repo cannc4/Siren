@@ -5,7 +5,7 @@ import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene 
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-import '../assets/_style.css';
+var CodeMirrorStyle = require('../assets/_style.css');
 import '../assets/_rule.js';
 // var Button = require('react-button')
 // var themeButton = {
@@ -113,6 +113,19 @@ class Patterns extends Component {
         lineWrapping: true,
         showCursorWhenSelecting: true
     };
+
+    function getStyleSheet(unique_title) {
+      for(var i=0; i<document.styleSheets.length; i++) {
+        var sheet = document.styleSheets[i];
+        if(sheet.title == unique_title) {
+          return sheet;
+        }
+      }
+    }
+    //
+    // var sheet = getStyleSheet('_style');
+    // console.log(sheet);
+    // sheet.insertRule(".cm-s-_style.CodeMirror { background: #f5f5f5; color: #202020; height: "+100+"px; }", 0);
 
     // if Item is legit by key, it will be shown
     // parameters can be added
