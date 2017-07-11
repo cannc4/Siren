@@ -97,6 +97,16 @@ class Channels extends Component {
     const deleteChannel = event => {
       if (confirm('Are you sure you want to delete this channel?')) {
         fbdeletechannelinscene('Matrices', ctx.props.scene_key, item.key)
+        var _cid = 0;
+        _.each(Object.values(ctx.props.channel), function(ch,i){
+          if(ch.scene=== ctx.props.active){
+            ch.cid = _cid;
+            _cid++;
+            ctx.props.globalparams.storedPatterns[item.cid] = '';
+            fbupdatechannelinscene('Matrices', ch, ctx.props.scene_key)
+
+          }
+        })
       }
     }
     const updateTransition = ({target : {value}}) => {

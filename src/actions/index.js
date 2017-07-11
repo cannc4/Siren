@@ -172,7 +172,7 @@ export function fbupdatechannelinscene(model, data, s_key) {
 
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-	store.dispatch(deleteChannel(c_key))
+	store.dispatch(deleteChannel(c_key));
 }
 
 

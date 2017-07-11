@@ -20,7 +20,7 @@ export default (state = INITIAL_STATE, action) => {
     // action.payload = channel key
     case 'DELETE_'+modelName:
       var k = state;
-      delete k[action.payload]
+      delete k[action.payload];
       return {...k};
     default:
       return state;
