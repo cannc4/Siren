@@ -86,7 +86,7 @@ class REPL {
     this.doSpawn();
     this.initTidal();
     this.initSC();
-    synchs();
+    //synchs();
   }
 }
 

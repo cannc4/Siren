@@ -347,7 +347,7 @@ addItem() {
     })
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
-
+      store.dispatch(globalStore(globals.storedGlobals, globals.storedPatterns));
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
       ctx.setState({sceneIndex: snd});
     }
@@ -450,7 +450,7 @@ clicked = event => {
         globalCommands,globalTransformations,sceneIndex} =ctx.state;
   var ns,tempgb, tempgbtwo, tempchan;
   var temp ={globalTransformations:'', globalCommands: '', globalChannels:''};
-
+  const globalparams = ctx.props.globalparams;
   const scenes = ctx.props.matrices;
   var matkey;
   _.each(scenes , function (sc, i) {
@@ -462,7 +462,6 @@ clicked = event => {
 
   if (event.shiftKey){
     var ttm = storedGlobals;
-
     ttm[event.target.id] = {transform:'',
               command:'',
               selectedChannels:''};
@@ -479,14 +478,14 @@ clicked = event => {
               selectedChannels:globalChannels};
 
     fbupdateglobalsinscene('Matrices',ttm,matkey);
-    store.dispatch(globalStore(ttm,storedPatterns));
+    store.dispatch(globalStore(globalparams.storedGlobals,globalparams.storedPatterns));
     store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
     ctx.setState({storedGlobals:ttm});
 
   }
   else {
     var ttm = storedGlobals[event.target.id];
-    store.dispatch(globalStore(ttm,storedPatterns));
+    store.dispatch(globalStore(globalparams.storedGlobals,globalparams.storedPatterns));
     store.dispatch(globalUpdate(ttm.command, ttm.transform, ttm.selectedChannels));
     ctx.setState({globalTransformations:ttm.transform, globalCommands:ttm.command,
                   globalChannels: ttm.selectedChannels, storedGlobals: storedGlobals})
@@ -515,14 +514,17 @@ record = event => {
     ns.push(temp);
   }
   var key;
+  var tss;
   _.each(ctx.props.matrices, function(m, i){
     if(i === sceneIndex){
       key = m;
+      //tss = m.globalparams;
     }
   })
-  fbupdateglobalsinscene('Matrices',ns,key.key);
+  fbupdateglobalsinscene('Matrices',ns,sceneIndex);
   store.dispatch(globalStore(ns,storedPatterns));
   ctx.setState({storedGlobals:ns})
+
 }
 
 handleUpdatePatterns = event => {
@@ -625,7 +627,7 @@ render() {
   });
   console.log(activeChannels);
   console.log(activeChannels.length);
-  const maskedInputPatterns = "(1) | " + _.repeat("1  ", activeChannels.length);
+  const maskedInputPatterns = "1 " + _.repeat("1  ", activeChannels.length);
   console.log(maskedInputPatterns);
 
   var historyOptions = {

@@ -4,7 +4,7 @@ export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'UPDATE_'+modelName:
       const p = state;
-      p.globalTransformations = action.tranform;
+      p.globalTransformations = action.transform;
       p.globalCommands = action.command;
       p.globalChannels = action.channel;
       return {...p}

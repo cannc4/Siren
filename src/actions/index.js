@@ -354,7 +354,7 @@ String.prototype.replaceAll = function(search, replacement) {
 var math = require('mathjs');
 var patListBack = [];
 export const sendPatterns = (server, channel_namestepvalue ,
-	 channels, scenePatterns, click, storedPatterns) => {
+	 channels, scenePatterns, click, globalparams) => {
 
 
 	return dispatch => {
@@ -471,19 +471,43 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
 
 				var storechan = _k + " $ ";
-				pattern = storechan + newCommand;
-				storedPatterns[channel_id] = '';
-				storedPatterns[channel_id] = pattern;
-				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
+				var pattern = storechan + newCommand;
+				globalparams.storedPatterns[channel_id] = '';
+				globalparams.storedPatterns[channel_id] = pattern;
+				channel_id++;
+				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
+					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+					}
+					else {
+						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+					}
+				}
+					else {
+						pattern = soloHolder + transitionHolder + newCommand ;
+					}
+					return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
 
 			}
 			else {
 
 				var storechan =  k [0]+ " $ ";
-				pattern = storechan + newCommand;
-				storedPatterns[channel_id] = '';
-				storedPatterns[channel_id] = pattern;
-				var pattern = soloHolder + transitionHolder + newCommand ;
+				var pattern = storechan + newCommand;
+				globalparams.storedPatterns[channel_id] = '';
+				globalparams.storedPatterns[channel_id] = pattern;
+				channel_id++;
+				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
+					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+					}
+					else {
+						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+					}
+				}
+					else {
+						pattern = soloHolder + transitionHolder + newCommand ;
+					}
+
 				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
 				// 	newCommand = newCommand.replaceAll(' s ', ' image ');
@@ -511,8 +535,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				// 	console.log(pattern, "d1 $ "+ newCommand);
 				// 	return [pattern, "d1 $ "+ newCommand] ;
 				// }
-					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-
+				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 				}
 			}
 

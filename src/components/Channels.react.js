@@ -25,7 +25,7 @@ class Channels extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
-
+    const globalparams = ctx.props.globalparams;
     const tidalServerLink = 'localhost:3001';
     const { patterns,  click  }=prevProps;
     const items = ctx.props.matrices;
@@ -46,7 +46,7 @@ class Channels extends Component {
         })
         var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
-          var runNo = (click.current % chan.step);
+          var runNo = Math.floor( click.current % chan.step) ;
           var stepvalue = '';
           channel_values = chan.vals;
           if (runNo !== undefined) {
@@ -58,10 +58,9 @@ class Channels extends Component {
           if (stepvalue !== '')
             channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
         }})
-
-        if (channel_namestepvalues.length !== 0)
+        if(channel_namestepvalues.length > 0)
           store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
-             channels, scenePatterns, click, ctx.props.globalparams.storedPatterns ));
+             channels, scenePatterns, click, ctx.props.globalparams ));
       }
   }
 
@@ -138,6 +137,7 @@ class Channels extends Component {
   render() {
     const ctx = this
     var items = ctx.props.channel;
+
 
     return (
       <div className="ChannelHolder">
