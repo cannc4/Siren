@@ -59,6 +59,14 @@
   min-height: 80px;
   border: 1px rgba(125,100,100, 0.8);
 }
+
+.sqdiv {
+  resize:both;
+  overflow-y: auto;
+  width: 88%;
+  min-height: 10px;
+  border: 1px rgba(125,100,100, 0.8);
+}
 /*
 height can be changed here
 */

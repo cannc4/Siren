@@ -29,27 +29,30 @@ class Channels extends Component {
     const tidalServerLink = 'localhost:3001';
     const { patterns,  click  }=prevProps;
     const items = ctx.props.matrices;
-      if (click.isActive) {
+    console.log();
+      if (click.isActive ) {
         var scenePatterns,
             channels,
             channel_type,
             channel_values,
             channel_name,
             channel_id,
-            channel_transition;
-
+            channel_transition,
+            mat_name;
         _.each(items, function(d){
           if(d.matName === ctx.props.active){
             scenePatterns = d.patterns;
             channels = d.channels;
+            mat_name = d.matName
           }
         })
+        console.log(items);
         var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
           var runNo = Math.floor( click.current % chan.step) ;
           var stepvalue = '';
           channel_values = chan.vals;
-          if (runNo !== undefined) {
+          if (runNo !== undefined && (mat_name === chan.scene)) {
             _.each(channel_values, function(sv, j){
               if (j === runNo){
                 stepvalue =  sv;
@@ -58,9 +61,11 @@ class Channels extends Component {
           if (stepvalue !== '')
             channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
         }})
+        console.log(channel_namestepvalues);
         if(channel_namestepvalues.length > 0)
           store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
              channels, scenePatterns, click, ctx.props.globalparams ));
+
       }
   }
 
@@ -69,7 +74,7 @@ class Channels extends Component {
     const ctx = this;
     const { click, active } = ctx.props;
     const step = parseInt(item.step);
-    const currentStep = click.current % step;
+    const currentStep = Math.floor( click.current % step);
 
       const setText=({ target: { value }}) => {
       item.vals[i] = value;
@@ -83,10 +88,8 @@ class Channels extends Component {
       <textarea className={className} type="text"
                 value={item.vals[i]}
                 onChange={setText}/>
-    </div>
+      </div>
   }
-
-
   renderItem(item) {
     const ctx = this;
 

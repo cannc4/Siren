@@ -31,17 +31,16 @@ class MenuBar extends Component {
   }
 
   ////////////////////////////// TIMER STARTS ////////////////////////////
-  startTimer() {
+  startTimer = event => {
     const ctx = this;
-    store.dispatch(chokeClick());
+    if(event.shiftKey)
+      store.dispatch(resetClick());
+    else
+      store.dispatch(chokeClick());
   }
 
-  stopTimer = event =>{
+  stopTimer = event => {
     const ctx = this;
-    console.log(event);
-    console.log(event.shiftKey);
-    console.log(event.ctrlKey);
-
     if(event.shiftKey)
       store.dispatch(resetClick());
     else
@@ -80,7 +79,7 @@ class MenuBar extends Component {
 
     return (<div className='MenuBar boxshadow'>
       <a href={"https://github.com/cannc4/Siren"}>
-        σειρήνα
+      σειρήνα
       </a>
       <a href={"https://github.com/cannc4/Siren"}>{version}</a>
       <div className={"User"}>
