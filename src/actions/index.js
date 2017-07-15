@@ -350,12 +350,15 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.replace(new RegExp(search, 'g'), replacement);
 };
 
+
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
 var patListBack = [];
+var clickPrev;
 export const sendPatterns = (server, channel_namestepvalue ,
 	 channels, scenePatterns, click, globalparams) => {
-
+console.log('here');
+	// if(clickPrev !== undefined && click.current !== clickPrev){
 
 	return dispatch => {
 		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
@@ -466,7 +469,10 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				transitionHolder = " " + channel_transition+ " $ ";
 				soloHolder = "t"+ (channel_id +1);
 			}
-
+			// else if(solo === k){
+			// 		soloHolder = "solo $ " + _k ;
+			// 		transitionHolder = " $ ";
+			// }
 
 			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
 
@@ -491,8 +497,8 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			}
 			else {
 
-				var storechan =  k [0]+ " $ ";
-				var pattern = storechan + newCommand;
+
+				var pattern = soloHolder  + transitionHolder + newCommand;
 				globalparams.storedPatterns[channel_id] = '';
 				globalparams.storedPatterns[channel_id] = pattern;
 				channel_id++;
@@ -535,6 +541,8 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				// 	console.log(pattern, "d1 $ "+ newCommand);
 				// 	return [pattern, "d1 $ "+ newCommand] ;
 				// }
+
+				console.log(pattern);
 				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 				}
 			}
@@ -547,7 +555,12 @@ export const sendPatterns = (server, channel_namestepvalue ,
 		}).catch(function (error) {
 			console.error(error);
 		});
-	}
+	//}
+	clickPrev = click.current;
+}
+// else {
+// 	return [];
+//}
 }
 
 export const continousPattern = (server, pattern) => {

@@ -19,18 +19,37 @@ class Channels extends Component {
       type: '',
       vals: [],
       step: 8,
-      transition: ''
+      transition: '',
+      solo:''
     }
   }
+//
+// shouldComponentUpdate(nextProps, nextState){
+//   const ctx = this;
+//   const click = ctx.props.click;
+//   if(click.isActive){
+//     if (nextProps.click.current !== click.current){
+//       return true;
+//     }
+//     else {
+//       return false;
+//     }
+//   }
+//     else
+//       return true;
+// }
 
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
     const globalparams = ctx.props.globalparams;
     const tidalServerLink = 'localhost:3001';
     const { patterns,  click  }=prevProps;
+    const {solo} = ctx.state;
     const items = ctx.props.matrices;
     console.log();
+
       if (click.isActive ) {
+
         var scenePatterns,
             channels,
             channel_type,
@@ -46,7 +65,6 @@ class Channels extends Component {
             mat_name = d.matName
           }
         })
-        console.log(items);
         var channel_namestepvalues = [];
         _.each(channels, function(chan, i){
           var runNo = Math.floor( click.current % chan.step) ;
@@ -61,13 +79,16 @@ class Channels extends Component {
           if (stepvalue !== '')
             channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
         }})
-        console.log(channel_namestepvalues);
-        if(channel_namestepvalues.length > 0)
+        console.log('click current', click.current);
+        console.log('click sentinel', click.sentinel);
+        
+        if(channel_namestepvalues.length > 0){
           store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
              channels, scenePatterns, click, ctx.props.globalparams ));
-
+           }
       }
-  }
+    }
+
 
 
   renderStep(item, _, i) {
@@ -111,6 +132,12 @@ class Channels extends Component {
         })
       }
     }
+    const soloChannel = event => {
+    const ctx = this;
+    const {solo} = ctx.state;
+    ctx.setState({solo:item.name});
+
+    }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
       item.transition = value
@@ -121,13 +148,13 @@ class Channels extends Component {
 
     const step = parseInt(item.step);
     const playerClass = "Channel"
-
+    //TYPE : <p style={{opacity:0.5}}>{"  (" + item.type+ ")"}</p>
     return item && (
       <div key={(item['scene']+item['name']).toString()} className={playerClass}>
         <div className = {"channelHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
-          <p>&nbsp;&nbsp;{item.name}&nbsp;</p>
-          <p style={{opacity:0.5}}>{"  (" + item.type+ ")"}</p>
+          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+          <button onClick={soloChannel}>&nbsp;{'S'}</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         <input className = "transition"

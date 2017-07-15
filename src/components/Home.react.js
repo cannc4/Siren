@@ -294,7 +294,7 @@ addItem() {
       globals = [],
       channels = []
 
-  const { matName, activeMatrix, sceneIndex, storedGlobals } = ctx.state;
+  const { matName, activeMatrix, sceneIndex, storedGlobals,pressed } = ctx.state;
   const { uid } = ctx.props.user.user;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
@@ -312,8 +312,8 @@ addItem() {
     })
     _.each(channels,function(ch){
       ch.scene = matName;
-
     })
+
     if ( matName.length >= 1) {
       var snd = Object.values(items).length;
       store.dispatch(globalStore(globals, ctx.props.globalparams.storedPatterns));
@@ -339,12 +339,18 @@ renderScene(item, dbKey, i) {
   });
 
   const updateMatrix = () => {
+    var gpressed = [];
+    _.forEach(item.storedGlobals, function(d, i){
+      gpressed[i] = false;
+    });
+
     if(sglobals === undefined){
       sglobals = [];
     }
     ctx.setState({ activeMatrix: item.matName,
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
-      globalTransformations: '', globalCommands:'', globalChannels: '', sceneIndex:item.key});
+      globalTransformations: '', globalCommands:'', globalChannels: '',
+      pressed:gpressed, sceneIndex:item.key});
 
     ctx.updateMatrix(item);
 
@@ -418,15 +424,18 @@ clicked = event => {
   const globalparams = ctx.props.globalparams;
   const scenes = ctx.props.matrices;
   var matkey;
+
   var pr = pressed;
-  for(var p = 0; p < pressed.lenght; p++){
-    if(event.target.id === p)
-      pr[event.target.id] = !pressed[event.target.id];
+  for(var sp = 0; sp < pr.length; sp++){
+    if(parseInt(event.target.id) === sp){
+      pr[sp] = true;
+    }
     else {
-      pr[p] = !pr[p];
+      pr[sp] = false;
     }
   }
   ctx.setState({pressed:pr});
+
   _.each(scenes , function (sc, i) {
     if(sc.key === sceneIndex){
       ctx.setState({storedGlobals:sc.storedGlobals})
@@ -470,13 +479,13 @@ record = event => {
   const ctx=this;
   const {pressed,globalChannels,globalTransformations,globalCommands,storedGlobals,
         sceneIndex, storedPatterns}=ctx.state;
-  var pr = pressed;
-  pr.push(true);
 
+  var pr = pressed;
   for(var pk = 0; pk < pr.lenght; pk++){
     if(event.target.id !== pk)
       pr[pk] = false;
   }
+
   var ns;
   var temp = {transform: globalTransformations,
               command: globalCommands,
@@ -495,7 +504,7 @@ record = event => {
     ns.push(temp);
   }
   var key;
-  var tss;
+
   _.each(ctx.props.matrices, function(m, i){
     if(i === sceneIndex){
       key = m;
@@ -619,14 +628,23 @@ updateGlobalSq(){
 sequenceGlobals = (selected_global_index) => {
   const ctx = this;
   console.log('here');
-  const {tidalServerLink,globalOnClickClass, storedGlobals} = ctx.state;
+  const {tidalServerLink,globalOnClickClass, storedGlobals,pressed} = ctx.state;
   const channels = ctx.props.channel;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
   console.log("GOBALINDEX " , selected_global_index);
   console.log("globals" , storedGlobals);
   for (var i = 0; i < storedPatterns.length; i++) {
   if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-
+    var pr =pressed;
+    for(var sp = 0; sp < pr.length; sp++){
+      if(selected_global_index === sp){
+        pr[sp] = true;
+      }
+      else {
+        pr[sp] = false;
+      }
+    }
+    console.log(pr);
     var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
     var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
     var tr,cm,slc;
@@ -653,7 +671,8 @@ sequenceGlobals = (selected_global_index) => {
     ctx.consoleSubmit(tidalServerLink, pattern);
     ctx.setState({globalCommands: cm,
                   globalTransformations: tr,
-                  globalChannels:slc });
+                  globalChannels:slc ,
+                  pressed: pr});
 
     }
   }
