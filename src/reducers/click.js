@@ -4,9 +4,9 @@ export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'INC_'+modelName:
       const k = state;
-      k.flag++;
-      if(k.isActive === true){
-        if(k.flag % k.times === 0){
+      if (k.isActive === true){
+        k.flag++;
+        if (k.flag % k.times === 0){
           k.current = k.current + 1;
         }
       }
