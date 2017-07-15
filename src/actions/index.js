@@ -259,6 +259,9 @@ export function fborder(model, data, key) {
 	if(data.patterns === undefined)
 		data.patterns = {};
 
+	if(data.channels === undefined)
+		data.channels = {};
+
 	models[model].dataSource.child(key).update({...data})
 	models[model].dataSource.orderByChild('sceneIndex');
 }

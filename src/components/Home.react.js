@@ -11,7 +11,7 @@ import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
       startClick,stopClick,globalStore, changeUsername,continousPattern,
       fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel,updateChannel} from '../actions'
+      createChannel,updateChannel, deleteChannel} from '../actions'
 
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
@@ -243,7 +243,7 @@ addChannel() {
         }
 
       } else {
-        console.warning('"' + c_name + '" already exists in "' + d.matName + '"');
+        console.log('"' + c_name + '" already exists in "' + d.matName + '"');
       }
     }
   })
@@ -273,6 +273,8 @@ handleChannelTransition = event => {
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
+
+  // Find active scene's key
   var scene_key;
   const scenes = Object.values(ctx.props['matrices']);
   for(var j = 0; j < scenes.length; j++){
@@ -280,7 +282,8 @@ renderPlayer() {
       scene_key = scenes[j].key
     }
   }
-  return (<Channels active = {activeMatrix} scene_key = {scene_key}/>)
+  return (<Channels active = {activeMatrix}
+                    scene_key = {scene_key}/>)
 }
 
 changeName({target: { value }}) {
@@ -294,37 +297,48 @@ addItem() {
       globals = [],
       channels = []
 
-  const { matName, activeMatrix, sceneIndex, storedGlobals,pressed } = ctx.state;
+  const checkSceneName = function(newName, items) {
+    if (newName.length < 1) {
+      return false;
+    }
+
+    _.each(Object.values(items), function(m, i) {
+      if (m.matName === newName) {
+        return false;
+      }
+    })
+    return true;
+  }
+
+  const { matName, activeMatrix, sceneIndex, storedGlobals, pressed } = ctx.state;
   const { uid } = ctx.props.user.user;
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
 
-
   globals = storedGlobals;
   if(uid !== null && uid !== undefined){
     // Get active patterns and channels
-    _.each(items, function(d){
-      if(d.uid === uid && d.matName === activeMatrix){
-        patterns = d.patterns;
-        globals = d.storedGlobals;
-        channels = d.channels;
-      }
-    })
-    _.each(channels,function(ch){
-      ch.scene = matName;
-    })
+    // _.each(items, function(d){
+    //   if(d.uid === uid && d.matName === activeMatrix){
+    //     patterns = d.patterns;
+    //     globals = d.storedGlobals;
+    //     channels = d.channels;
+    //   }
+    // })
+    // _.each(channels,function(ch){
+    //   ch.scene = matName;
+    // })
 
-    if ( matName.length >= 1) {
+    if ( checkSceneName(matName, items) ) {
       var snd = Object.values(items).length;
       store.dispatch(globalStore(globals, ctx.props.globalparams.storedPatterns));
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
-      ctx.setState({sceneIndex: snd});
-      ctx.setState({storedGlobals: globals});
+      ctx.setState({sceneIndex: snd, storedGlobals: globals});
+      ctx.setState({activeMatrix: matName});
     }
     else {
-      alert("Scene title should be longer than 1 characters");
+      alert("Scene title should be unique and longer than 1 character");
     }
-    ctx.setState({activeMatrix: matName});
   }
 }
 
@@ -354,7 +368,6 @@ renderScene(item, dbKey, i) {
 
     ctx.updateMatrix(item);
 
-    store.dispatch(updateChannel(item));
     store.dispatch(globalStore(sglobals,[]));
   }
 
@@ -368,11 +381,16 @@ renderScene(item, dbKey, i) {
         const items = ctx.props[ctx.state.modelName.toLowerCase()];
         ctx.setState({sceneIndex: (Object.values(items).length)});
         _.forEach(Object.values(items), function(d, i){
-          fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
+          fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, channels: d.channels, sceneIndex: i}, d.key);
         });
       }, function(error) {
         console.error(error);
       });
+
+      ctx.setState({activeMatrix: ''})
+      _.each(item.channels, function( ch, key ) {
+        store.dispatch(deleteChannel(key));
+      })
     }
   }
 
@@ -572,13 +590,18 @@ handleGlobalsq = event => {
   const ctx = this;
   const {sqActive_UI, globalOnSqClass} = ctx.state;
   if(event.keyCode === 13 && event.altKey){
+    ctx.setState({sqActive: false, sqActive_UI:false});
+    ctx.setState({globalOnSqClass: ''});
+
+    // CSS
     ctx.setState({globalOnSqClass: ' Executed'});
     setTimeout(function(){ ctx.setState({globalOnSqClass: ' '}); }, 500);
     ctx.setState({sqActive_UI:true});
     ctx.updateGlobalSq();
   }
-  else if(event.keyCode === 32 && event.altKey){
-    ctx.setState({sqActive_UI:false});
+  else if(event.keyCode === 13 && event.shiftKey){
+    ctx.setState({sqActive: false, sqActive_UI:false});
+    ctx.setState({globalOnSqClass: ''});
   }
 }
 
@@ -603,6 +626,7 @@ updateGlobalSq(){
   if(sqActive_UI === true){
     console.log('here');
     if(sqActive === false){
+
       ctx.setState({helperindex:0});
       var compileDuration = gbdur[helperindex] * 1000;
       var selGlobalPair = global_helperindex ;
@@ -610,16 +634,15 @@ updateGlobalSq(){
       ctx.setState({sqActive :true});
     }
     else if (sqActive === true){
-
       var k = helperindex+1;
       var gk = global_helperindex+1;
       ctx.setState({helperindex:k, global_helperindex:gk});
       var compileDuration = gbdur[helperindex] * 1000;
-      var selGlobalPair = _.random(Object.values(storedGlobals).length);
+      var selGlobalPair = _.random(Object.values(storedGlobals).length-1);
       // if(gk < Object.values(storedGlobals).length){
       //   selGlobalPair = gk;
       // }
-
+      // setTimeout(() => ctx.sequenceGlobals(k),compileDuration);
       setTimeout(() => ctx.sequenceGlobals(selGlobalPair),compileDuration);
     }
   }
