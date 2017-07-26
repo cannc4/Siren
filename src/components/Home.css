@@ -186,8 +186,7 @@ div.cm-s-_style.CodeMirror {
 .playbox {
   display: flex;
   flex-grow: 1;
-  width: 95%;
-  margin-left: 2.5%;
+  width: 100%;
   line-height: 24px;
   font-size: 1vw;
   text-align: center;

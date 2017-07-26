@@ -359,7 +359,7 @@ var math = require('mathjs');
 var patListBack = [];
 var clickPrev;
 export const sendPatterns = (server, channel_namestepvalue ,
-	 channels, scenePatterns, click, globalparams) => {
+	 channels, scenePatterns, click, globalparams, solo) => {
 console.log('here');
 	// if(clickPrev !== undefined && click.current !== clickPrev){
 
@@ -463,19 +463,22 @@ console.log('here');
 				}
 			})
 
-			if (channel_transition === "" ||channel_transition === undefined ){
-				soloHolder = k ;
-				transitionHolder = " $ ";
-			}
-
+			if(solo === channel_name){
+		 		console.log(solo);
+		 		console.log(k);
+		 			soloHolder = "solo $ " + solo ;
+		 			transitionHolder = " $ ";
+		 	}
 			else if(channel_transition !== undefined && channel_transition!== ""){
 				transitionHolder = " " + channel_transition+ " $ ";
 				soloHolder = "t"+ (channel_id +1);
 			}
-			// else if(solo === k){
-			// 		soloHolder = "solo $ " + _k ;
-			// 		transitionHolder = " $ ";
-			// }
+
+			else {
+				soloHolder = k ;
+				transitionHolder = " $ ";
+			}
+
 
 			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
 

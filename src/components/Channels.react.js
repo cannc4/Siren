@@ -6,6 +6,15 @@ import { fbdeletechannelinscene, fbupdatechannelinscene,
 
 import store from '../store';
 import _ from 'lodash';
+var Button = require('react-button')
+var themeButton = {
+    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
+    disabledStyle: { background: 'gray'},
+    overStyle: { background: 'rgba(255,255,102,0.15)' },
+    activeStyle: { background: 'rgba(255,255,102,0.15)' },
+    soloPressedStyle: {background: 'rgba(255,255,102,0.75)'},
+    oversoloPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
+}
 
 
 class Channels extends Component {
@@ -20,7 +29,8 @@ class Channels extends Component {
       vals: [],
       step: 8,
       transition: '',
-      solo:''
+      solo:'',
+      soloPressed:[]
     }
   }
 //
@@ -79,12 +89,9 @@ class Channels extends Component {
         if (stepvalue !== '')
           channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
       }})
-      // console.log('click current', click.current);
-      // console.log('click sentinel', click.sentinel);
-
       if(channel_namestepvalues.length > 0){
         store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
-           channels, scenePatterns, click, ctx.props.globalparams ));
+           channels, scenePatterns, click, ctx.props.globalparams, solo ));
       }
     }
   }
@@ -111,7 +118,7 @@ class Channels extends Component {
   }
   renderItem(item) {
     const ctx = this;
-
+    const {soloPressed} = ctx.state;
     if (item.scene !== ctx.props.active)
       return;
 
@@ -132,8 +139,17 @@ class Channels extends Component {
     }
     const soloChannel = event => {
       const ctx = this;
-      const {solo} = ctx.state;
-      ctx.setState({solo:item.name});
+      const {solo, soloPressed} = ctx.state;
+      var pr = soloPressed;
+      _.each(Object.values(ctx.props.channel), function(ch,i){
+        if(ch.scene === ctx.props.active){
+          if(ch.cid !== item.cid){
+            pr[ch.cid]= false;
+          }
+        }
+      })
+      pr[item.cid]= true;
+      ctx.setState({solo:item.name,soloPressed:pr});
     }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
@@ -143,15 +159,17 @@ class Channels extends Component {
                 ctx.props.scene_key)
     }
 
+//soloPressed = {soloPressed[item.key]}
     const step = parseInt(item.step);
     const playerClass = "Channel"
     //TYPE : <p style={{opacity:0.5}}>{"  (" + item.type+ ")"}</p>
     return item && (
-      <div key={(item['key']).toString()} className={playerClass}>
+      <div key={(item['cid']).toString()} className={playerClass}>
         <div className = {"channelHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <button onClick={soloChannel}>&nbsp;{'S'}</button>
+           <Button theme = {themeButton} onClick={soloChannel} activeStyle={{position:'relative', top: 2}} >S< /Button>
+
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         <input className = "transition"
@@ -164,7 +182,7 @@ class Channels extends Component {
   render() {
     const ctx = this
     var items = ctx.props.channel;
-    
+
     return (
       <div className="ChannelHolder">
       {_.map(items, ctx.renderItem.bind(ctx))}
