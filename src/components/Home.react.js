@@ -369,6 +369,7 @@ renderScene(item, dbKey, i) {
     ctx.updateMatrix(item);
 
     store.dispatch(globalStore(sglobals,[]));
+    store.dispatch(globalUpdate('', '', ''));
   }
 
   const handleDelete = ({ target: { value }}) => {
@@ -498,11 +499,6 @@ record = event => {
   const {pressed,globalChannels,globalTransformations,globalCommands,storedGlobals,
         sceneIndex, storedPatterns}=ctx.state;
 
-  var pr = pressed;
-  for(var pk = 0; pk < pr.lenght; pk++){
-    if(event.target.id !== pk)
-      pr[pk] = false;
-  }
 
   var ns;
   var temp = {transform: globalTransformations,
@@ -519,10 +515,25 @@ record = event => {
   }
   else {
     ns = storedGlobals;
+    ns[0]  = {transform: '',
+              command: '',
+              selectedChannels:''};
     ns.push(temp);
   }
-  var key;
 
+  var pr = pressed;
+  for(var pk = 0; pk <= storedGlobals.lenght; pk++){
+    if(storedGlobals.lenght-1 === pk){
+      pr[pk] = true;
+    }
+    else {
+      pr[pk] = false;
+    }
+  }
+
+
+
+  var key;
   _.each(ctx.props.matrices, function(m, i){
     if(i === sceneIndex){
       key = m;
@@ -708,6 +719,7 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
   const { globalChannels} = ctx.state;
   var tempAr = [] ;
   var gbchan = globalChannels.split(" ");
+  console.log("CHANNELS" + gbchan[1]);
 
   if (gbchan === undefined ||gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='0' ){
     for (var i = 0; i < storedPatterns.length; i++) {
@@ -724,14 +736,10 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
   _.forEach( gbchan, function(chan, j){
       var i = parseInt(chan) - 1;
       if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-        tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-        _.each(channels, function (ch, k) {
-          var b = storedPatterns[i][0]+storedPatterns[i][1];
-          if(ch.name=== b){
-            tempAr[i] = ch.name + '$' + globalTransformations + tempAr[i] + globalCommands;
-            ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          }
-        })
+        var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+        var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+        tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
+        ctx.consoleSubmit(tidalServerLink, tempAr[i]);
       }
     });
   }

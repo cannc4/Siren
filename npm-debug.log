@@ -24,7 +24,7 @@
 14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
 15 verbose pkgid Siren@0.2.1
 16 verbose cwd /Users/canince/Documents/Git/Siren
-17 error Darwin 16.6.0
+17 error Darwin 16.7.0
 18 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "run" "siren"
 19 error node v7.1.0
 20 error npm  v3.10.9

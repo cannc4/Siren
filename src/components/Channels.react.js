@@ -30,7 +30,8 @@ class Channels extends Component {
       step: 8,
       transition: '',
       solo:'',
-      soloPressed:[]
+      soloPressed:[],
+      soloActive:false
     }
   }
 //
@@ -54,7 +55,7 @@ class Channels extends Component {
     const globalparams = ctx.props.globalparams;
     const tidalServerLink = 'localhost:3001';
     const { patterns, click } = prevProps;
-    const { solo } = ctx.state;
+    const { solo,soloActive } = ctx.state;
     const items = ctx.props.matrices;
 
     if (click.isActive && click.flag % click.times === 0) {
@@ -90,6 +91,7 @@ class Channels extends Component {
           channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
       }})
       if(channel_namestepvalues.length > 0){
+
         store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
            channels, scenePatterns, click, ctx.props.globalparams, solo ));
       }
@@ -139,7 +141,7 @@ class Channels extends Component {
     }
     const soloChannel = event => {
       const ctx = this;
-      const {solo, soloPressed} = ctx.state;
+      const {solo, soloPressed, soloActive} = ctx.state;
       var pr = soloPressed;
       _.each(Object.values(ctx.props.channel), function(ch,i){
         if(ch.scene === ctx.props.active){
@@ -149,7 +151,7 @@ class Channels extends Component {
         }
       })
       pr[item.cid]= true;
-      ctx.setState({solo:item.name,soloPressed:pr});
+      ctx.setState({solo:item.name,soloPressed:pr, soloActive:true});
     }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
@@ -163,12 +165,13 @@ class Channels extends Component {
     const step = parseInt(item.step);
     const playerClass = "Channel"
     //TYPE : <p style={{opacity:0.5}}>{"  (" + item.type+ ")"}</p>
+    // <Button theme = {themeButton} onClick={soloChannel} activeStyle={{position:'relative', top: 2}} >S< /Button>
     return item && (
       <div key={(item['cid']).toString()} className={playerClass}>
         <div className = {"channelHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-           <Button theme = {themeButton} onClick={soloChannel} activeStyle={{position:'relative', top: 2}} >S< /Button>
+
 
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}

@@ -171,30 +171,29 @@ div.cm-s-_style.CodeMirror {
   line-height: 2px;
   border-style: double;
   border-width: 1px;
-  border-color: rgba(180,180,180, 1);
+  border-color: rgba(100,100,100,1);
 }
 .Visual {
-  background: rgba(144, 48, 90,0.5);
+  background: rgba(144, 48, 90,0.2);
 }
 .Audio {
-  background: rgba(170, 162, 57,0.5);
+  background: rgba(170, 162, 57,0.2);
 }
 .MIDI {
-  background: rgba(255, 175, 63, 0.5)
+  background: rgba(255, 175, 63, 0.2)
 }
 
 .playbox {
   display: flex;
   flex-grow: 1;
   width: 100%;
-  line-height: 24px;
-  font-size: 1vw;
-  text-align: center;
-  vertical-align: center;
-  overflow-y: auto;
-  border: 1px solid rgba(125,125,125, 0.15);
-  background: rgba(0,0,0,0.3);
-  opacity: 0.6;
+  line-height: 20px;
+  font-size: 0.8vw;
+  text-align: left;
+  vertical-align: left;
+  border: 1px solid rgba(125,125,125,0.2);
+  background: rgba(0,0,0,1);
+  opacity: 0.8;
 }
 
 .playbox-active {
@@ -204,10 +203,10 @@ div.cm-s-_style.CodeMirror {
   display: flex;
   flex-grow: 1;
   width: 100%;
-  font-size: 1vw;
-  line-height: 24px;
-  vertical-align: center;
-  text-align: center;
+  line-height: 20px;
+  font-size: 0.8vw;
+  text-align: left;
+  vertical-align: left;
 }
 .transition {
   width: 95%;

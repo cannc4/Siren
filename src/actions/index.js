@@ -463,13 +463,13 @@ console.log('here');
 				}
 			})
 
-			if(solo === channel_name){
-		 		console.log(solo);
-		 		console.log(k);
-		 			soloHolder = "solo $ " + solo ;
-		 			transitionHolder = " $ ";
-		 	}
-			else if(channel_transition !== undefined && channel_transition!== ""){
+			// if(solo === channel_name){
+			// 		console.log(solo);
+			// 		console.log(k);
+		 // 			soloHolder = "solo $ " + solo ;
+		 // 			transitionHolder = " $ ";
+			// 	}
+		 if(channel_transition !== undefined && channel_transition!== ""){
 				transitionHolder = " " + channel_transition+ " $ ";
 				soloHolder = "t"+ (channel_id +1);
 			}

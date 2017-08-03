@@ -20,7 +20,7 @@ class MenuBar extends Component {
       }],
       username: 'vou',
       tidalServerLink: 'localhost:3001',
-      times: 1
+      times: 2
     }
   }
   componentDidUpdate() {
