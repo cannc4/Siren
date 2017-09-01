@@ -35,96 +35,95 @@ class Channels extends Component {
     }
   }
 
-componentDidMount(){
-  const  ctx = this;
-  const soloPressed = ctx.state;
-  var pr = [];
-  for (var i =0 ;i <40; i++){
-    pr[i]=false;
+  componentDidMount(){
+    const  ctx = this;
+    const soloPressed = ctx.state;
+    var pr = [];
+    for (var i =0 ;i <40; i++){
+      pr[i]=false;
+    }
+    ctx.setState({soloPressed: pr });
   }
-  ctx.setState({soloPressed: pr });
-}
 
-sendPatterns(){
-  const ctx = this;
-  const globalparams = ctx.props.globalparams;
-  const tidalServerLink = 'localhost:3001';
-  const { patterns, click } = ctx.props;
-  const { solo,soloActive } = ctx.state;
-  const items = ctx.props.matrices;
+  sendPatterns(){
+    const ctx = this;
+    const globalparams = ctx.props.globalparams;
+    const tidalServerLink = 'localhost:3001';
+    const { patterns, click } = ctx.props;
+    const { solo,soloActive } = ctx.state;
+    const items = ctx.props.matrices;
 
-  if (click.isActive && click.flag % click.times === 0) {
-    var scenePatterns,
-        channels,
-        channel_type,
-        channel_values,
-        channel_name,
-        channel_id,
-        channel_transition,
-        mat_name;
+    if (click.isActive && click.flag % click.times === 0) {
+      var scenePatterns,
+          channels,
+          channel_type,
+          channel_values,
+          channel_name,
+          channel_id,
+          channel_transition,
+          mat_name;
 
-    _.each(items, function(d){
-      if(d.matName === ctx.props.active){
-        scenePatterns = d.patterns;
-        channels = d.channels;
-        mat_name = d.matName
-      }
-    })
+      _.each(items, function(d){
+        if(d.matName === ctx.props.active){
+          scenePatterns = d.patterns;
+          channels = d.channels;
+          mat_name = d.matName
+        }
+      })
 
-    var channel_namestepvalues = [];
-    _.each(channels, function(chan, i) {
-      if( soloActive=== true ){
-        if (chan.name === solo){
+      var channel_namestepvalues = [];
+      _.each(channels, function(chan, i) {
+        if( soloActive=== true ){
+          if (chan.name === solo){
+            var runNo = Math.floor( click.current % chan.step) ;
+            var stepvalue = '';
+            channel_values = chan.vals;
+            if (runNo !== undefined && (mat_name === chan.scene)) {
+              _.each(channel_values, function(sv, j){
+                if (j === runNo){
+                  stepvalue =  sv;
+                }
+              })
+              if (stepvalue !== '')
+                channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
+             }
+          }
+        }
+        else {
           var runNo = Math.floor( click.current % chan.step) ;
           var stepvalue = '';
           channel_values = chan.vals;
-          if (runNo !== undefined && (mat_name === chan.scene)) {
+            if (runNo !== undefined && (mat_name === chan.scene)) {
             _.each(channel_values, function(sv, j){
               if (j === runNo){
                 stepvalue =  sv;
               }
             })
-            if (stepvalue !== '')
-              channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
-           }
-        }
-      }
-      else {
-        var runNo = Math.floor( click.current % chan.step) ;
-        var stepvalue = '';
-        channel_values = chan.vals;
-          if (runNo !== undefined && (mat_name === chan.scene)) {
-          _.each(channel_values, function(sv, j){
-            if (j === runNo){
-              stepvalue =  sv;
-            }
-          })
-        if (stepvalue !== '')
-          channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
-      }}
-    })
-    if(channel_namestepvalues.length > 0){
+          if (stepvalue !== '')
+            channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
+        }}
+      })
+      if(channel_namestepvalues.length > 0){
 
-      store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
-          channels, scenePatterns, click, ctx.props.globalparams, solo ));
+        store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
+            channels, scenePatterns, click, ctx.props.globalparams, solo ));
+      }
     }
   }
-
-}
-
 
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
     ctx.sendPatterns();
   }
 
+  // Cell draw
   renderStep(item, _, i) {
     const ctx = this;
     const { click, active } = ctx.props;
     const step = parseInt(item.step);
     const currentStep = Math.floor( click.current % step);
 
-      const setText=({ target: { value }}) => {
+    const setText=({ target: { value }}) => {
       item.vals[i] = value;
       const nc = { vals: item.vals, key: item.key };
       fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key);
@@ -133,11 +132,13 @@ sendPatterns(){
     if (currentStep === i)
       className += '-active';
     return <div key={(item['key']+'_'+i).toString()}>
-      <textarea className={className} type="text"
-                value={item.vals[i]}
-                onChange={setText}/>
-      </div>
+            <textarea className={className} type="text"
+                      value={item.vals[i]}
+                      onChange={setText}/>
+          </div>
   }
+
+  // Channel draw
   renderItem(item) {
     const ctx = this;
     const {soloPressed} = ctx.state;
@@ -163,7 +164,7 @@ sendPatterns(){
       const ctx = this;
       const {solo, soloPressed, soloActive} = ctx.state;
       var pr = soloPressed;
-     
+
       if(soloActive === false){
         for (var i = 0; i < pr.length; i++){
           pr[i] = false;
@@ -183,9 +184,6 @@ sendPatterns(){
         sel_solo = item.name;
       }
       ctx.setState({solo:sel_solo, soloPressed:pr, soloActive:pr[item.cid]});
-      console.log("solo:" + solo);
-      console.log("soloActive:" + soloActive);
-      console.log("soloPressed:" + soloPressed);
     }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
@@ -195,19 +193,15 @@ sendPatterns(){
                 ctx.props.scene_key)
     }
 
-//soloPressed = {soloPressed[item.key]}
     const step = parseInt(item.step);
     const playerClass = "Channel"
-    //TYPE : <p style={{opacity:0.5}}>{"  (" + item.type+ ")"}</p>
-    
+
     return item && (
       <div key={(item['cid']).toString()} className={playerClass}>
         <div className = {"channelHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}} >S< /Button>
-
-
+          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S< /Button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         <input className = "transition"
@@ -217,9 +211,12 @@ sendPatterns(){
     )
   }
 
+  // Render whole matrix
   render() {
     const ctx = this
     var items = ctx.props.channel;
+
+    console.log(items);
 
     return (
       <div className="ChannelHolder">
