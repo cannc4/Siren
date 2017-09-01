@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import config from '../config/config.json'
+import con from '../config/config.js'
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
@@ -11,6 +11,8 @@ const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var exec = require('child_process').exec;
 var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
+
+var config = con();
 
 class REPL {
 
