@@ -7,15 +7,7 @@ import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 var CodeMirrorStyle = require('../assets/_style.css');
 import '../assets/_rule.js';
-// var Button = require('react-button')
-// var themeButton = {
-//     style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
-//     disabledStyle: { background: 'gray'},
-//     overStyle: { background: 'rgba(255,255,102,0.15)' },
-//     activeStyle: { background: 'rgba(255,255,102,0.15)' },
-//     pressedStyle: {background: 'green', fontWeight: 'bold'},
-//     overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
-// }
+
 class Patterns extends Component {
   constructor(props) {
     super(props)

@@ -1,350 +1,331 @@
-
 export const FETCH_ACCOUNTS = 'FETCH_ACCOUNTS';
 export const FETCH_ACCOUNTS_ERROR = 'FETCH_ACCOUNTS_ERROR';
 import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-import { handleEnterHome } from '../routes'
 Firebase.initializeApp({
 
-		 apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
-		 authDomain: "eseq-f5fe0.firebaseapp.com",
-		 databaseURL: "https://eseq-f5fe0.firebaseio.com"
+    apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
+    authDomain: "eseq-f5fe0.firebaseapp.com",
+    databaseURL: "https://eseq-f5fe0.firebaseio.com"
 
 });
 const models = {
-  Accounts: {
-    dataSource: Firebase.database().ref("/accounts"),
-    model: {
-      email: 'String',
-      name: 'String',
-      uid: 'String',
+    Accounts: {
+        dataSource: Firebase.database().ref("/accounts"),
+        model: {
+            email: 'String',
+            name: 'String',
+            uid: 'String',
+        }
+    },
+    Patterns: {
+        dataSource: Firebase.database().ref("/patterns"),
+        model: {
+            name: 'String',
+            params: 'String',
+            pattern: 'String',
+            skey: 'String',
+            uid: 'String'
+        }
+    },
+    Live: {
+        dataSource: Firebase.database().ref("/live"),
+        model: {
+            timer: 'Object',
+            values: 'Object'
+        }
+    },
+    Matrices: {
+        dataSource: Firebase.database().ref("/matrices"),
+        model: {
+            name: 'String',
+            patterns: 'Object',
+            channels: 'Object',
+            sceneIndex: 'Integer',
+            storedGlobals: 'Object',
+            uid: 'String'
+        }
     }
-  },
-  Patterns: {
-    dataSource: Firebase.database().ref("/patterns"),
-    model: {
-      name: 'String',
-      params: 'String',
-      pattern: 'String',
-      skey: 'String',
-      uid: 'String'
-    }
-  },
-  Live: {
-    dataSource: Firebase.database().ref("/live"),
-    model: {
-      timer: 'Object',
-      values: 'Object'
-    }
-  },
-  Matrices: {
-    dataSource: Firebase.database().ref("/matrices"),
-    model: {
-      name: 'String',
-      patterns: 'Object',
-			channels: 'Object',
-      sceneIndex: 'Integer',
-      storedGlobals: 'Object',
-      uid: 'String'
-    }
-  }
 }
 
 String.prototype.replaceAt = function(index, character) {
-	return this.substr(0, index) + character + this.substr(index+character.length);
+    return this.substr(0, index) + character + this.substr(index + character.length);
 }
 
 
 export function fetchModels() {
-	return _.map(models, (e, key) => { return key.toLowerCase() })
+    return _.map(models, (e, key) => { return key.toLowerCase() })
 }
 
 export function fetchModel(model) {
-	return models[model].model
+    return models[model].model
 }
 
 export function fbaccount(data) {
-	return dispatch => {
-		const updates = {}
-		updates[data['key']] = data;
+    return dispatch => {
+        const updates = {}
+        updates[data['key']] = data;
 
-		models['Accounts'].dataSource.update(updates, () => {
-			models['Accounts'].dataSource.child(data['key']).on('value', (account) => {
-				dispatch({
-					type: 'FETCH_ACCOUNTS',
-					payload: account.val()
-				})
-			})
-		})
-	}
+        models['Accounts'].dataSource.update(updates, () => {
+            models['Accounts'].dataSource.child(data['key']).on('value', (account) => {
+                dispatch({
+                    type: 'FETCH_ACCOUNTS',
+                    payload: account.val()
+                })
+            })
+        })
+    }
 }
 
 export function fbauth() {
-	return dispatch => {
-		Firebase.auth().onAuthStateChanged((user) => {
-			if (user !== null) {
-				dispatch({
-					type: FETCH_ACCOUNTS,
-					payload: dispatch(fbaccount({
-						uid: user.uid,
-						name: user.displayName,
-						email: user.email,
-						key: user.uid
-					}))
-				})
-			}
-		})
+    return dispatch => {
+        Firebase.auth().onAuthStateChanged((user) => {
+            if (user !== null) {
+                dispatch({
+                    type: FETCH_ACCOUNTS,
+                    payload: dispatch(fbaccount({
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        key: user.uid
+                    }))
+                })
+            }
+        })
 
-	}
+    }
 }
 
 export function fbfetch(model) {
-	return dispatch => {
-		models[model].dataSource.ref.on('value', data => {
-			if (Firebase.auth().currentUser !== null)
-			{
-				const { uid } = Firebase.auth().currentUser;
-				const u = _.find(data.val(), (d) => d.uid === uid);
+    return dispatch => {
+        models[model].dataSource.ref.on('value', data => {
+            if (Firebase.auth().currentUser !== null) {
+                const { uid } = Firebase.auth().currentUser;
+                const u = _.find(data.val(), (d) => d.uid === uid);
 
-				if (u !== null && u !== undefined) {
-					dispatch({
-						type: 'FETCH_' + model.toUpperCase(),
-						payload: u
-					})
-				}
-			}
-		})
-	}
+                if (u !== null && u !== undefined) {
+                    dispatch({
+                        type: 'FETCH_' + model.toUpperCase(),
+                        payload: u
+                    })
+                }
+            }
+        })
+    }
 }
 export function fbfetchscenes(model) {
-	return dispatch => {
-		models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
-			var temp = [];
-			if (Firebase.auth().currentUser !== null)
-			{
-				data.forEach(function(c){
-					var u_id = Firebase.auth().currentUser.uid;
-					if(c.val().uid === u_id)
-						temp.push(c.val());
-				})
-			}
-			dispatch({
-				type: 'FETCH_' + model.toUpperCase(),
-				payload: temp
-			})
-		})
-	}
+    return dispatch => {
+        models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
+            var temp = [];
+            if (Firebase.auth().currentUser !== null) {
+                data.forEach(function(c) {
+                    var u_id = Firebase.auth().currentUser.uid;
+                    if (c.val().uid === u_id)
+                        temp.push(c.val());
+                })
+            }
+            dispatch({
+                type: 'FETCH_' + model.toUpperCase(),
+                payload: temp
+            })
+        })
+    }
 }
 export function fbcreate(model, data) {
-	if (data['key']) {
-		return models[model].dataSource.child(data['key']).update({...data})
-	} else {
-		const newObj = models[model].dataSource.push(data);
-		return newObj.update({ key: newObj.key })
-	}
+    if (data['key']) {
+        return models[model].dataSource.child(data['key']).update({...data })
+    } else {
+        const newObj = models[model].dataSource.push(data);
+        return newObj.update({ key: newObj.key })
+    }
 }
 export function fbcreatepatterninscene(model, data, s_key) {
-	if (data['key']) {
-		return models[model].dataSource.child(data['key']).update({...data})
-	} else {
-		const newObj = models[model].dataSource.child(s_key).child("patterns").push(data);
-		return newObj.update({ key: newObj.key })
-	}
+    if (data['key']) {
+        return models[model].dataSource.child(data['key']).update({...data })
+    } else {
+        const newObj = models[model].dataSource.child(s_key).child("patterns").push(data);
+        return newObj.update({ key: newObj.key })
+    }
 }
-export function fbcreatechannelinscene(model, data, s_key){
-	if (data['key']) {
-		return models[model].dataSource.child(data['key']).update({...data})
-	} else {
-		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
+export function fbcreatechannelinscene(model, data, s_key) {
+    if (data['key']) {
+        return models[model].dataSource.child(data['key']).update({...data })
+    } else {
+        const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
 
-		newObj.update({ key: newObj.key })
-		return newObj.key
+        newObj.update({ key: newObj.key })
+        return newObj.key
 
-	}
+    }
 }
 
 export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+    models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data })
 }
 
 
 export function fbdeletechannelinscene(model, s_key, c_key) {
-	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-	store.dispatch(deleteChannel(c_key));
+    models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+    store.dispatch(deleteChannel(c_key));
 }
 
 
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
-	if (Firebase.auth().currentUser !== null)
-	{
-		var datakey, sceneIndex, values, patterns, uid, channels, storedGlobals;
-		models[model].dataSource.ref.once('value', dat => {
-			var u_id = Firebase.auth().currentUser.uid;
-			if ( u_id !== null)
-			{
-				const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
-				if(obj !== undefined && obj !== null && u_id === obj.uid){
-					datakey = obj.key;
-					sceneIndex = obj.sceneIndex;
-					if (obj.channels !== undefined) channels = obj.channels;
-					if (obj.globals !== undefined) storedGlobals = obj.globals;
-					if (obj.patterns !== undefined) patterns = obj.patterns;
-					uid = obj.uid;
-				}
-			}
-		});
+    if (Firebase.auth().currentUser !== null) {
+        var datakey, sceneIndex, patterns, channels, storedGlobals;
+        models[model].dataSource.ref.once('value', dat => {
+            var u_id = Firebase.auth().currentUser.uid;
+            if (u_id !== null) {
+                const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
+                if (obj !== undefined && obj !== null && u_id === obj.uid) {
+                    datakey = obj.key;
+                    sceneIndex = obj.sceneIndex;
+                    if (obj.channels !== undefined) channels = obj.channels;
+                    if (obj.globals !== undefined) storedGlobals = obj.globals;
+                    if (obj.patterns !== undefined) patterns = obj.patterns;
+                }
+            }
+        });
 
-		if(patterns === undefined)
-			patterns = [];
+        if (patterns === undefined)
+            patterns = [];
 
-		if(channels === undefined)
-			channels = [];
+        if (channels === undefined)
+            channels = [];
 
-		if(storedGlobals === undefined)
-			storedGlobals = [];
+        if (storedGlobals === undefined)
+            storedGlobals = [];
 
-		if (datakey) {
-			data.sceneIndex = sceneIndex;
-			data.patterns = patterns;
-			data.channels = channels;
-			data.globals = storedGlobals;
-			return models[model].dataSource.child(datakey).update({...data})
+        if (datakey) {
+            data.sceneIndex = sceneIndex;
+            data.patterns = patterns;
+            data.channels = channels;
+            data.globals = storedGlobals;
+            return models[model].dataSource.child(datakey).update({...data })
 
-		}
-		else {
-			if (data.patterns === undefined)
-				data.patterns  = [];
+        } else {
+            if (data.patterns === undefined)
+                data.patterns = [];
 
-			channels = data.channels
-			data.channels = []
+            channels = data.channels
+            data.channels = []
 
-			if (data.globals === undefined)
-				data.storedGlobals = [];
+            if (data.globals === undefined)
+                data.storedGlobals = [];
 
-			const newObj = models[model].dataSource.push(data);
-			newObj.update({ key: newObj.key })
+            const newObj = models[model].dataSource.push(data);
+            newObj.update({ key: newObj.key })
 
-			_.each(channels, function(x) {
-				x.scene = data.matName
-				const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
-				newChn.update({ key : newChn.key })
-			})
+            _.each(channels, function(x) {
+                x.scene = data.matName
+                const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
+                newChn.update({ key: newChn.key })
+            })
 
-		}
-	}
+        }
+    }
 }
 export function fbupdateMatrix(model, data) {
-	models[model].dataSource.child(data['key']).update({...data})
+    models[model].dataSource.child(data['key']).update({...data })
 }
 
 export function fbupdate(model, data) {
-	models[model].dataSource.child(data['key']).update({...data})
+    models[model].dataSource.child(data['key']).update({...data })
 }
 export function fbupdatepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
+    models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data })
 }
 export function fbupdateglobalsinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("storedGlobals").update({...data})
+    models[model].dataSource.child(s_key).child("storedGlobals").update({...data })
 }
 export function fbdelete(model, data) {
-	models[model].dataSource.child(data['key']).remove();
+    models[model].dataSource.child(data['key']).remove();
 }
 export function fbdeletepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
+    models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
 }
 export function fborder(model, data, key) {
-	if(data.patterns === undefined)
-		data.patterns = {};
+    if (data.patterns === undefined)
+        data.patterns = {};
 
-	if(data.channels === undefined)
-		data.channels = {};
+    if (data.channels === undefined)
+        data.channels = {};
 
-	models[model].dataSource.child(key).update({...data})
-	models[model].dataSource.orderByChild('sceneIndex');
+    models[model].dataSource.child(key).update({...data })
+    models[model].dataSource.orderByChild('sceneIndex');
 }
 
 export function GitHubLogin() {
-	return (dispatch) => {
-		const provider = new Firebase.auth.GithubAuthProvider();
-		provider.addScope('repo');
+    return (dispatch) => {
+        const provider = new Firebase.auth.GithubAuthProvider();
+        provider.addScope('repo');
 
-		Firebase.auth().signInWithRedirect(provider);
+        Firebase.auth().signInWithRedirect(provider);
 
-		Firebase.auth().getRedirectResult().then(result => {
-			if (result.credential) {
-				// This gives you a GitHub Access Token. You can use it to access the GitHub API.
-				var token = result.credential.accessToken;
-			}
-			// The signed-in user info
-			var user = result.user;
-		}).catch(function(error) {
-			var errorCode = error.code;
-			var errorMessage = error.message;
-			var email = error.email;
-			var credential = error.credential;
-			dispatch({
-				type: FETCH_ACCOUNTS_ERROR,
-				payload: error
-			})
-		});
-	}
+        Firebase.auth().getRedirectResult().then(result => {}).catch(function(error) {
+            dispatch({
+                type: FETCH_ACCOUNTS_ERROR,
+                payload: error
+            })
+        });
+    }
 }
 
 export function googleLogin() {
-	return (dispatch) => {
-		const provider = new Firebase.auth.GoogleAuthProvider();
-		Firebase.auth().signInWithPopup(provider).then(result => {
-			console.log('Logged in. You will receive authState from Firebase')
-		}).catch(error => {
-			dispatch({
-				type: FETCH_ACCOUNTS_ERROR,
-				payload: error
-			})
-		});
-	}
+    return (dispatch) => {
+        const provider = new Firebase.auth.GoogleAuthProvider();
+        Firebase.auth().signInWithPopup(provider).then(result => {
+            console.log('Logged in. You will receive authState from Firebase')
+        }).catch(error => {
+            dispatch({
+                type: FETCH_ACCOUNTS_ERROR,
+                payload: error
+            })
+        });
+    }
 }
 
 export function logout() {
-	return dispatch => {
-		Firebase.auth().signOut();
-		dispatch({ type: FETCH_ACCOUNTS, payload: {} });
-	}
+    return dispatch => {
+        Firebase.auth().signOut();
+        dispatch({ type: FETCH_ACCOUNTS, payload: {} });
+    }
 }
 
 
 export const initTidalConsole = (server) => {
-	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
-		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
+    return dispatch => {
+        axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+            .then((response) => {
+                dispatch({ type: 'FETCH_TIDAL', payload: response.data })
+            }).catch(function(error) {
+                console.error(error);
+            });
+    }
 }
 export const exitSC = (server) => {
-	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
-		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
+    return dispatch => {
+        axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+            .then((response) => {
+                dispatch({ type: 'FETCH_TIDAL', payload: response.data })
+            }).catch(function(error) {
+                console.error(error);
+            });
+    }
 }
 
 export const TidalTick = (server) => {
-  return dispatch => {
-    axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
-    .then((response) => {
-      dispatch({type: 'FETCH_TIDAL', payload: response.data })
-    }).catch(function (error) {
-      console.log(error);
-    });
-  }
+    return dispatch => {
+        axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
+            .then((response) => {
+                dispatch({ type: 'FETCH_TIDAL', payload: response.data })
+            }).catch(function(error) {
+                console.log(error);
+            });
+    }
 }
 
 
@@ -356,372 +337,372 @@ String.prototype.replaceAll = function(search, replacement) {
 
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
-var patListBack = [];
-var clickPrev;
-export const sendPatterns = (server, channel_namestepvalue ,
-	 channels, scenePatterns, click, globalparams, solo) => {
-console.log('here');
-	// if(clickPrev !== undefined && click.current !== clickPrev){
+export const sendPatterns = (server, channel_namestepvalue,
+    channels, scenePatterns, click, globalparams, solo) => {
+    return dispatch => {
+        const x = _.compact(_.map(channel_namestepvalue, function(ch, j) {
 
-	return dispatch => {
-		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
+            // channel
+            var k = Object.keys(ch);
 
-		// channel
-		var k = Object.keys(ch);
+            // pattern
+            var v = Object.values(ch);
 
-		// pattern
-		var v = Object.values(ch);
+            const getParameters = (v) => {
+                    var param = [];
+                    _.map(_.split(v, /[`]+/g), (p1, p2) => {
+                        p1 = _.trim(p1);
 
-		const getParameters = (v) => {
-			var param = [];
-			_.map(_.split(v, /[`]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
+                        if (p1 !== "") param.push(p1);
+                    });
+                    return param;
+                }
+                //gets mathematical expression
+            const getMathExpr = (v) => {
+                var maths = [];
+                _.map(_.split(v, /[&]+/g), (p1, p2) => {
+                    p1 = _.trim(p1);
 
-				if(p1 !== "") param.push(p1);
-			});
-			return param;
-		}
-		//gets mathematical expression
-		const getMathExpr = (v) => {
-			var maths = [];
-			_.map(_.split(v, /[&]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
+                    if (p1 !== "") maths.push(p1);
+                });
+                return maths;
+            }
 
-				if(p1 !== "") maths.push(p1);
-			});
-			return maths;
-		}
+            // pattern name
+            const cellName = getParameters(v)[0];
 
-		// pattern name
-		const cellName = getParameters(v)[0];
+            // command of the pattern
+            const cmd = _.find(scenePatterns, c => c.name === cellName);
 
-		// command of the pattern
-		const cmd = _.find(scenePatterns, c => c.name === cellName);
+            // CPS channel handling
+            if (k === 'cps') {
+                var newCommand = cellName;
+                return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \"" + cellItem + "\"]"];
+            }
+            // other channels
+            else if (cmd !== undefined && cmd !== null && cmd !== "" && v !== "") {
+                var cellItem = _.slice(getParameters(v), 1);
+                var newCommand = cmd.pattern;
 
-		// CPS channel handling
-		if( k === 'cps'){
-			var newCommand = cellName;
-			return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-		}
-		// other channels
-		else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
-			var cellItem = _.slice(getParameters(v), 1);
-			var newCommand = cmd.pattern;
+                // Construct the parameter list from command
+                var parameters = _.concat(_.split(cmd.params, ','), 't');
 
-			// Construct the parameter list from command
-			var parameters = _.concat( _.split(cmd.params, ','),'t');
+                // For each parameter in parameter list
+                _.forEach(parameters, function(value, i) {
+                    // Temporal parameter
+                    if (value === 't') {
+                        newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
+                    }
+                    // Random parameter
+                    else if (_.indexOf(cellItem[i], '|') != -1) {
+                        cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
+                        var bounds = _.split(cellItem[i], ',');
+                        if (bounds[0] !== undefined && bounds[0] !== "" &&
+                            bounds[1] !== undefined && bounds[1] !== "") {
+                            bounds[0] = parseFloat(bounds[0]);
+                            bounds[1] = parseFloat(bounds[1]);
+                            cellItem[i] = _.random(_.min(bounds), _.max(bounds));
+                            newCommand = _.replace(newCommand, new RegExp("`" + value + "`", "g"), cellItem[i]);
+                        }
+                    }
+                    // Value parameter
+                    else {
+                        newCommand = _.replace(newCommand, new RegExp("`" + value + "`", "g"), cellItem[i]);
+                    }
+                });
 
-			// For each parameter in parameter list
-			_.forEach(parameters, function(value, i) {
-				// Temporal parameter
-				if(value === 't'){
-					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
-				}
-				// Random parameter
-				else if(_.indexOf(cellItem[i], '|') != -1 )
-				{
-					cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
-					var bounds = _.split(cellItem[i], ',');
-					if(bounds[0] !== undefined && bounds[0] !== "" &&
-						 bounds[1] !== undefined && bounds[1] !== ""){
-							 bounds[0] = parseFloat(bounds[0]);
-							 bounds[1] = parseFloat(bounds[1]);
-							 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
-							 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-					}
-				}
-				// Value parameter
-				else {
-					newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-				}
-			});
+                // Math Parser
+                var re = /\&(.*?)\&/g;
+                _.forEach(_.words(newCommand, re), function(val, i) {
+                        newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val, "&")), "[]"));
+                    })
+                    // solo or not (obsolete)
+                var channel_id,
+                    channel_type,
+                    channel_transition,
+                    channel_name,
+                    transitionHolder,
+                    soloHolder,
+                    _k;
 
-			// Math Parser
-			var re = /\&(.*?)\&/g;
-			_.forEach(_.words(newCommand, re), function(val, i){
-				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
-			})
-			// solo or not (obsolete)
-			var channel_id,
-					channel_type,
-					channel_transition,
-		 			channel_name,
-					transitionHolder,
-					soloHolder,
-					_k;
+                _.each(channels, function(chantwo, i) {
+                    if (k[0] === (Object.values(chantwo)[2])) { //check if the right channel
+                        channel_type = chantwo.type;
+                        channel_transition = chantwo.transition;
+                        channel_name = chantwo.name;
+                        channel_id = chantwo.cid;
+                        soloHolder = k[0];
+                        transitionHolder = "";
+                        _k = k;
 
-			_.each(channels, function(chantwo,i){
-				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
-					channel_type = chantwo.type;
-					channel_transition = chantwo.transition;
-					channel_name = chantwo.name;
-					channel_id = chantwo.cid;
-					soloHolder = k[0];
-				 	transitionHolder = "" ;
-				 	_k = k;
+                    }
+                })
 
-				}
-			})
-
-			// if(solo === channel_name){
-			// 		console.log(solo);
-			// 		console.log(k);
-		 // 			soloHolder = "solo $ " + solo ;
-		 // 			transitionHolder = " $ ";
-			// 	}
-		 if(channel_transition !== undefined && channel_transition!== ""){
-				transitionHolder = " " + channel_transition+ " $ ";
-				soloHolder = "t"+ (channel_id +1);
-			}
-
-			else {
-				soloHolder = k ;
-				transitionHolder = " $ ";
-			}
+                // if(solo === channel_name){
+                // 		console.log(solo);
+                // 		console.log(k);
+                // 			soloHolder = "solo $ " + solo ;
+                // 			transitionHolder = " $ ";
+                // 	}
+                if (channel_transition !== undefined && channel_transition !== "") {
+                    transitionHolder = " " + channel_transition + " $ ";
+                    soloHolder = "t" + (channel_id + 1);
+                } else {
+                    soloHolder = k;
+                    transitionHolder = " $ ";
+                }
 
 
-			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
+                if (_k === 'm1' || _k === 'm2' || _k === 'm3' || _k === 'm4' || _k === 'v1' || _k === 'u1') {
 
-				var storechan = _k + " $ ";
-				var pattern = storechan + newCommand;
-				globalparams.storedPatterns[channel_id] = '';
-				globalparams.storedPatterns[channel_id] = pattern;
-				channel_id++;
-				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
-					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
-					}
-					else {
-						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
-					}
-				}
-					else {
-						pattern = soloHolder + transitionHolder + newCommand ;
-					}
-					return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
+                    var storechan = _k + " $ ";
+                    var pattern = storechan + newCommand;
+                    globalparams.storedPatterns[channel_id] = '';
+                    globalparams.storedPatterns[channel_id] = pattern;
+                    channel_id++;
+                    if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)) {
+                        if (globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+' || globalparams.globalCommands[1] === '*') {
+                            pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+                        } else {
+                            pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+                        }
+                    } else {
+                        pattern = soloHolder + transitionHolder + newCommand;
+                    }
+                    return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \"" + cellItem + "\"]"];
 
-			}
-			else {
+                }
+                // else if (_k === 'dx2'){
+                //
+                // 	var storechan = _k + " $ ";
+                // 	var pattern = storechan + newCommand;
+                // 	globalparams.storedPatterns[channel_id] = '';
+                // 	globalparams.storedPatterns[channel_id] = pattern;
+                // 	channel_id++;
+                // 	if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
+                // 		if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+                // 			pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+                // 		}
+                // 		else {
+                // 			pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+                // 		}
+                // 	}
+                // 		else {
+                // 			pattern = soloHolder + transitionHolder + newCommand ;
+                // 		}
+                // 		return [pattern,"x"];
+                //
+                // }
+                else {
+                    var pattern = soloHolder + transitionHolder + newCommand;
+                    globalparams.storedPatterns[channel_id] = '';
+                    globalparams.storedPatterns[channel_id] = pattern;
+                    channel_id++;
+                    if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)) {
+                        if (globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+' || globalparams.globalCommands[1] === '*') {
+                            pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+                        } else {
+                            pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+                        }
+                    } else {
+                        pattern = soloHolder + transitionHolder + newCommand;
+                    }
 
+                    // if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
+                    // 	newCommand = globalTransformations+ newCommand + " " + globalCommands
+                    // 	newCommand = newCommand.replaceAll(' s ', ' image ');
+                    // 	newCommand = newCommand.replaceAll('n ', 'npy ');
+                    // 	newCommand = newCommand.replaceAll('speed', 'pspeed');
+                    // 	newCommand = newCommand.replaceAll('nudge', 'threshold');
+                    // 	newCommand = newCommand.replaceAll('room', 'blur');
+                    // 	newCommand = newCommand.replaceAll('end', 'median');
+                    // 	newCommand = newCommand.replaceAll('coarse', 'edge');
+                    // 	newCommand = newCommand.replaceAll('up', 'hough');
+                    // 	newCommand = newCommand.replaceAll('gain', 'means');
+                    // 	return [pattern, "v1 $ "+ newCommand] ;
+                    // }
+                    // else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
+                    // 	pattern =  "v1 $ " + newCommand;
+                    // 	newCommand = newCommand.replaceAll('image', 's');
+                    // 	newCommand = newCommand.replaceAll('npy', 'n');
+                    // 	newCommand = newCommand.replaceAll('pspeed', 'speed');
+                    // 	newCommand = newCommand.replaceAll('threshold', 'nudge');
+                    // 	newCommand = newCommand.replaceAll('blur', 'room');
+                    // 	newCommand = newCommand.replaceAll('median', 'end');
+                    // 	newCommand = newCommand.replaceAll('edge', 'coarse');
+                    // 	newCommand = newCommand.replaceAll('hough', 'up');
+                    //
+                    // 	console.log(pattern, "d1 $ "+ newCommand);
+                    // 	return [pattern, "d1 $ "+ newCommand] ;
+                    // }
 
-				var pattern = soloHolder  + transitionHolder + newCommand;
-				globalparams.storedPatterns[channel_id] = '';
-				globalparams.storedPatterns[channel_id] = pattern;
-				channel_id++;
-				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
-					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
-					}
-					else {
-						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
-					}
-				}
-					else {
-						pattern = soloHolder + transitionHolder + newCommand ;
-					}
-
-				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
-				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
-				// 	newCommand = newCommand.replaceAll(' s ', ' image ');
-				// 	newCommand = newCommand.replaceAll('n ', 'npy ');
-				// 	newCommand = newCommand.replaceAll('speed', 'pspeed');
-				// 	newCommand = newCommand.replaceAll('nudge', 'threshold');
-				// 	newCommand = newCommand.replaceAll('room', 'blur');
-				// 	newCommand = newCommand.replaceAll('end', 'median');
-				// 	newCommand = newCommand.replaceAll('coarse', 'edge');
-				// 	newCommand = newCommand.replaceAll('up', 'hough');
-				// 	newCommand = newCommand.replaceAll('gain', 'means');
-				// 	return [pattern, "v1 $ "+ newCommand] ;
-				// }
-				// else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
-				// 	pattern =  "v1 $ " + newCommand;
-				// 	newCommand = newCommand.replaceAll('image', 's');
-				// 	newCommand = newCommand.replaceAll('npy', 'n');
-				// 	newCommand = newCommand.replaceAll('pspeed', 'speed');
-				// 	newCommand = newCommand.replaceAll('threshold', 'nudge');
-				// 	newCommand = newCommand.replaceAll('blur', 'room');
-				// 	newCommand = newCommand.replaceAll('median', 'end');
-				// 	newCommand = newCommand.replaceAll('edge', 'coarse');
-				// 	newCommand = newCommand.replaceAll('hough', 'up');
-				//
-				// 	console.log(pattern, "d1 $ "+ newCommand);
-				// 	return [pattern, "d1 $ "+ newCommand] ;
-				// }
-
-				console.log(pattern);
-				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-				}
-			}
-
-		else
-			return false;
-		}))
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
-	//}
-	clickPrev = click.current;
-}
-// else {
-// 	return [];
-//}
+                    console.log(pattern);
+                    return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \"" + cellItem + "\"]"];
+                }
+            } else
+                return false;
+        }))
+        axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
+            .then((response) => {}).catch(function(error) {
+                console.error(error);
+            });
+    }
 }
 
 export const continousPattern = (server, pattern) => {
-	return dispatch => {
-		const x = pattern;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
-////////////////// PARSER ENDS HERE //////////////////
+        return dispatch => {
+            const x = pattern;
+            axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \"" + 6 + "\"]"] })
+                .then((response) => {}).catch(function(error) {
+                    console.error(error);
+                });
+        }
+    }
+    ////////////////// PARSER ENDS HERE //////////////////
 export const updateMatrix = (item) => {
-	//reducer
-	return dispatch => {
-		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
-	};
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'UPDATE_CHANNEL', payload: item });
+    };
 }
 
 export const sendScPattern = (server, expression) => {
-	return dispatch => {
-		if (!expression) return;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
-		.then((response) => {
-			dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
-		}).catch(function (error) {
-		});
-	}
+    return dispatch => {
+        if (!expression) return;
+        axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
+            .then((response) => {
+                dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
+            }).catch(function(error) {});
+    }
 }
 
 export const consoleSubmit = (server, expression) => {
-	return dispatch => {
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
+    return dispatch => {
+        axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
+            .then((response) => {}).catch(function(error) {
+                console.error(error);
+            });
+    }
 }
-export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
-	return dispatch => {
-		const getParameters = (v) => {
-				var param = [];
-				_.map(_.split(v, /[`]+/g), (p1, p2) => {
-					p1 = _.trim(p1);
+export const sendGlobals = (server, storedPatterns, storedGlobals, vals, channels) => {
+    return dispatch => {
+        const getParameters = (v) => {
+            var param = [];
+            _.map(_.split(v, /[`]+/g), (p1, p2) => {
+                p1 = _.trim(p1);
 
-					if(p1 !== "") param.push(p1);
-				});
-				return param;
-			}
+                if (p1 !== "") param.push(p1);
+            });
+            return param;
+        }
 
-		const globalindex = getParameters(vals)[0];
-		if(globalindex !== undefined){
-		var pat = [],ch;
-		// command of the pattern
-		var currentglobal = Object.values(storedGlobals[globalindex]);
-			var activeChannels = _.slice(getParameters(vals), 1);
-			// Construct the active channel list from channel list
-			var tch = [];
-			activeChannels = _.split(activeChannels, ' ');
-			var b = new RegExp("^[A-Za-z0-9]+", "g");
-			_.forEach(activeChannels, function(chan, i) {
-				tch.push (chan);
-				var stp=storedPatterns[chan-1];
-				if(stp !== undefined){
-					ch = stp.match(b)[0];
-					ch = ch + ' $ ';
-					stp = stp.substring(stp.indexOf('$')+1);
-					var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
-					pat.push(pp);
-				}
-			});
-			}
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
+        const globalindex = getParameters(vals)[0];
+        if (globalindex !== undefined) {
+            var pat = [],
+                ch;
+            // command of the pattern
+            var currentglobal = Object.values(storedGlobals[globalindex]);
+            var activeChannels = _.slice(getParameters(vals), 1);
+            // Construct the active channel list from channel list
+            var tch = [];
+            activeChannels = _.split(activeChannels, ' ');
+            var b = new RegExp("^[A-Za-z0-9]+", "g");
+            _.forEach(activeChannels, function(chan, i) {
+                tch.push(chan);
+                var stp = storedPatterns[chan - 1];
+                if (stp !== undefined) {
+                    ch = stp.match(b)[0];
+                    ch = ch + ' $ ';
+                    stp = stp.substring(stp.indexOf('$') + 1);
+                    var pp = ch + currentglobal[1] + stp + currentglobal[0];
+                    pat.push(pp);
+                }
+            });
+        }
+        axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
+            .then((response) => {}).catch(function(error) {
+                console.error(error);
+            });
 
-		}
+    }
 
 }
 
-export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {
-	return dispatch => {
-		var b = new RegExp("^[A-Za-z0-9]+", "g");
-		var chan = expression.match(b)[0];
-		if ( expression === 'jou'){
-			_.each(channels, function (ch, i) {
-				if(ch.type === 'Audio'){
-				storedPatterns[ch.cid] = ch.name + ' $ silence';
-				}
-			})
-		}
-		else if ( expression === 'mjou'){
-			_.each(channels, function (ch, i) {
-				if(ch.type === 'MIDI'){
-					storedPatterns[ch.cid] = ch.name + ' $ silence';
-				}
-			})
-		}
-		else{
-			_.each(channels, function (ch, i) {
-				if(chan === ch.name){
-					storedPatterns[ch.cid] = expression;
-				}
-			})
-		}
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
+export const consoleSubmitHistory = (server, expression, storedPatterns, channels) => {
+    return dispatch => {
+        var chan = expression.substring(0,_.indexOf(expression, "$"));
+        if (expression === 'jou') {
+            _.each(channels, function(ch, i) {
+                if (ch.type === 'SCSynth') {
+                    storedPatterns[ch.cid] = ch.name + ' $ silence';
+                }
+            })
+        } else if (expression === 'mjou') {
+            _.each(channels, function(ch, i) {
+                if (ch.type === 'MIDI') {
+                    storedPatterns[ch.cid] = ch.name + ' $ silence';
+                }
+            })
+        } else {
+            _.each(channels, function(ch, i) {
+                if (chan.toString() == ch.name.toString()) {
+                    console.log("INSIDE");
+                    storedPatterns[ch.cid] = expression;
+                }
+            })
+        }
+        axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
+            .then((response) => {}).catch(function(error) {
+                console.error(error);
+            });
+    }
 }
 
 export const globalUpdate = (t, c, d) => {
-	return {
-		type: 'UPDATE_GLOBAL', transform: t, command: c, channel:d
-	}
+    return {
+        type: 'UPDATE_GLOBAL',
+        transform: t,
+        command: c,
+        channel: d
+    }
 }
-export const globalStore = (storedG,storedPatterns) => {
-	return {
-		type: 'STORE_GLOBAL', storedGlobals: storedG, storedPatterns: storedPatterns
-	}
+export const globalStore = (storedG, storedPatterns) => {
+    return {
+        type: 'STORE_GLOBAL',
+        storedGlobals: storedG,
+        storedPatterns: storedPatterns
+    }
 }
 
-export const resetPattern = () => ({type: 'RESET_CC'});
-export const fetchPattern = () => ({type: 'FETCH_CC'});
+export const resetPattern = () => ({ type: 'RESET_CC' });
+export const fetchPattern = () => ({ type: 'FETCH_CC' });
 
 export const createChannel = (newc) => {
-	return  {
-		type: 'CREATE_CHANNEL',  payload: newc }
+    return {
+        type: 'CREATE_CHANNEL',
+        payload: newc
+    }
 }
 export const updateChannel = (item) => {
-	return  { type: 'UPDATE_CHANNEL', payload: item }
+    return { type: 'UPDATE_CHANNEL', payload: item }
 }
 export const deleteChannel = (key) => {
-	return  { type: 'DELETE_CHANNEL', payload: key }
+    return { type: 'DELETE_CHANNEL', payload: key }
 }
 
 export function chokeClick() {
-	return  { type: 'TOGGLE_CLICK'};
+    return { type: 'TOGGLE_CLICK' };
 }
 
 
 export function startClick() {
-	return dispatch => {
-		dispatch({ type: 'INC_CLICK'});
-	}
+    return dispatch => {
+        dispatch({ type: 'INC_CLICK' });
+    }
 }
 
 export function resetClick() {
-	return dispatch => {
-		dispatch({ type: 'RESET_CLICK'});
-	}
+    return dispatch => {
+        dispatch({ type: 'RESET_CLICK' });
+    }
 }

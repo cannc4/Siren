@@ -5,17 +5,15 @@ import './Menu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
-import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,
+import {sendScPattern, sendSCMatrix, sendPatterns,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
-      fbdelete, fborder, fetchModel, updateMatrix,globalUpdate,
-      startClick,stopClick,globalStore, changeUsername,continousPattern,
-      fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene,
+      fbdelete, fborder, updateMatrix,globalUpdate,
+      startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel,updateChannel, deleteChannel} from '../actions'
+      createChannel, deleteChannel} from '../actions'
 
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
-import NumberEditor from 'react-number-editor';
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Firebase from 'firebase';
@@ -51,7 +49,7 @@ var options = {
     showCursorWhenSelecting: true
 };
 
-const channelOptions = ['Audio', 'Visual', 'MIDI']
+const channelOptions = ['SCSynth', 'Visual', 'MIDI']
 
 class Home extends Component {
   constructor(props) {
@@ -311,8 +309,8 @@ addItem() {
   }
 
   const { matName, activeMatrix, sceneIndex, storedGlobals, pressed } = ctx.state;
-  const { uid } = ctx.props.user.user;
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  const { uid } =ctx.props.user.user;
+  const items =ctx.props[ctx.state.modelName.toLowerCase()];
   const propstoredGlobals = ctx.props.globalparams.storedGlobals;
 
   globals = storedGlobals;
@@ -436,10 +434,8 @@ clearMatrix(){
 
 clicked = event => {
   const ctx=this;
-  const {activeMatrix,pressed,storedGlobals,storedPatterns, globalChannels,
+  const {pressed, storedGlobals, globalChannels,
         globalCommands,globalTransformations,sceneIndex} =ctx.state;
-  var ns,tempgb, tempgbtwo, tempchan;
-  var temp ={globalTransformations:'', globalCommands: '', globalChannels:''};
   const globalparams = ctx.props.globalparams;
   const scenes = ctx.props.matrices;
   var matkey;
@@ -474,17 +470,17 @@ clicked = event => {
                   globalChannels: ''})
   }
   else if (event.altKey){
+
     var ttm = storedGlobals;
     ttm[event.target.id] = {transform:globalTransformations,
               command:globalCommands,
               selectedChannels:globalChannels};
-
     fbupdateglobalsinscene('Matrices',ttm,matkey);
     store.dispatch(globalStore(ttm,globalparams.storedPatterns));
     store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
     ctx.setState({storedGlobals:ttm});
-
   }
+
   else {
     var ttm = storedGlobals[event.target.id];
     store.dispatch(globalStore(globalparams.storedGlobals,globalparams.storedPatterns));
@@ -661,12 +657,11 @@ updateGlobalSq(){
 
 sequenceGlobals = (selected_global_index) => {
   const ctx = this;
-  console.log('here');
+  
   const {tidalServerLink,globalOnClickClass, storedGlobals,pressed} = ctx.state;
   const channels = ctx.props.channel;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
-  console.log("GOBALINDEX " , selected_global_index);
-  console.log("globals" , storedGlobals);
+  
   for (var i = 0; i < storedPatterns.length; i++) {
   if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
     var pr =pressed;
@@ -678,7 +673,7 @@ sequenceGlobals = (selected_global_index) => {
         pr[sp] = false;
       }
     }
-    console.log(pr);
+    
     var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
     var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
     var tr,cm,slc;
@@ -852,12 +847,12 @@ render() {
                 onChange={ctx.handleGlobalChannels.bind(ctx)}
                 value = {globalChannels}
                 placeholder="Channels "/>
-              <input className={"defaultPatternHistoryArea" + ctx.state.globalOnClickClass} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
-              <input className={"defaultPatternHistoryArea" + ctx.state.globalOnClickClass} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
+              <input className={"defaultArea" + ctx.state.globalOnClickClass} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
+              <input className={"defaultArea" + ctx.state.globalOnClickClass} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
               {_.map(storedGlobals, (c, i) => {
                  return <Button id={i} pressed = {pressed[i]} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
                })}
-               <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
+               <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec</Button>
             </div>
           </Layout>
           <LayoutSplitter />

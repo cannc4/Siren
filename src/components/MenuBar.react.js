@@ -87,7 +87,7 @@ class MenuBar extends Component {
         {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
         {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
         {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        <p>  Rate&nbsp;&nbsp;  </p>
+        <p>  Rate &nbsp;&nbsp;  </p>
         <input className={'TimesInput'} value={times} onChange={changeTimes}/>
       </div>
       <div className={"User"}>

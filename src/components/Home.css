@@ -121,7 +121,7 @@ div.cm-s-_style.CodeMirror {
 
 .defaultPatternArea{
   display: flex;
-  font-size: 18px;
+  font-size: 12px;
   flex-direction: column;
   align-self: flex-end;
   margin: 5px;
@@ -137,6 +137,17 @@ div.cm-s-_style.CodeMirror {
   margin: 5px;
   width: 95%;
   height: 15%;
+  background: rgba(36, 67, 67,0.1);
+}
+.defaultArea {
+  display: flex;
+  font-size: 12px;
+  flex-direction: column;
+  align-self: flex-end;
+  margin: 5px;
+  width: 95%;
+  height: 15%;
+
 }
 
 .Pattern {
@@ -176,7 +187,7 @@ div.cm-s-_style.CodeMirror {
 .Visual {
   background: rgba(144, 48, 90,0.2);
 }
-.Audio {
+.SCSynth {
   background: rgba(170, 162, 57,0.2);
 }
 .MIDI {
@@ -192,7 +203,7 @@ div.cm-s-_style.CodeMirror {
   text-align: left;
   vertical-align: left;
   border: 1px solid rgba(125,125,125,0.2);
-  background: rgba(0,0,0,1);
+  background: rgba(36, 67, 67,0.1);
   opacity: 0.8;
 }
 
