@@ -9,12 +9,12 @@ import { fbdeletechannelinscene, fbupdatechannelinscene,
 
 var Button = require('react-button')
 var themeButton = {
-    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
-    disabledStyle: { background: 'gray'},
-    overStyle: { background: 'rgba(2,4,2,0.15)' },
-    activeStyle: { background: 'rgba(44,44,44,0.15)' },
-    pressedStyle: {background: 'rgba(200,200,200,0.75)'},
-    overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
+  style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
+  disabledStyle: { background: 'gray'},
+  overStyle: { background: 'rgba(2,4,2,0.15)' },
+  activeStyle: { background: 'rgba(44,44,44,0.15)' },
+  pressedStyle: {background: 'rgba(200,200,200,0.75)'},
+  overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
 }
 
 class Channels extends Component {
@@ -36,7 +36,7 @@ class Channels extends Component {
   }
 
   componentDidMount(){
-    const  ctx = this;
+    const ctx = this;
     const soloPressed = ctx.state;
     var pr = [];
     for (var i =0 ;i <40; i++){
@@ -55,13 +55,13 @@ class Channels extends Component {
 
     if (click.isActive && click.flag % click.times === 0) {
       var scenePatterns,
-          channels,
-          channel_type,
-          channel_values,
-          channel_name,
-          channel_id,
-          channel_transition,
-          mat_name;
+        channels,
+        channel_type,
+        channel_values,
+        channel_name,
+        channel_id,
+        channel_transition,
+        mat_name;
 
       _.each(items, function(d){
         if(d.matName === ctx.props.active){
@@ -104,7 +104,6 @@ class Channels extends Component {
         }}
       })
       if(channel_namestepvalues.length > 0){
-
         store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
             channels, scenePatterns, click, ctx.props.globalparams, solo ));
       }
@@ -138,12 +137,16 @@ class Channels extends Component {
           </div>
   }
 
-  // Channel draw
-  renderItem(item) {
+  // Render whole matrix
+  render() {
     const ctx = this;
     const {soloPressed} = ctx.state;
+    const item = ctx.props.item;
+
     if (item.scene !== ctx.props.active)
-      return;
+      return item && (
+        <div key={(item['cid']).toString()} className={"Channel"}></div>
+      );
 
     const deleteChannel = event => {
       if (confirm('Are you sure you want to delete this channel?')) {
@@ -201,26 +204,12 @@ class Channels extends Component {
         <div className = {"channelHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S< /Button>
+          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S</Button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         <input className = "transition"
           placeholder={" - "}  value = {item.transition}
           onChange = {updateTransition}/>
-      </div>
-    )
-  }
-
-  // Render whole matrix
-  render() {
-    const ctx = this
-    var items = ctx.props.channel;
-
-    console.log(items);
-
-    return (
-      <div className="ChannelHolder">
-      {_.map(items, ctx.renderItem.bind(ctx))}
       </div>
     )
   }

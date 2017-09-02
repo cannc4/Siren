@@ -57,6 +57,7 @@
     "react-dom": "^15.4.2",
     "react-dropdown": "^1.2.5",
     "react-flex-layout": "^0.9.6",
+    "react-grid-layout": "^0.15.0",
     "react-maskedinput": "^4.0.0",
     "react-number-editor": "^4.0.2",
     "react-redux": "^4.4.5",

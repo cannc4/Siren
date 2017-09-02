@@ -28,6 +28,13 @@ import 'codemirror/addon/dialog/dialog.js';
 import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
+
+// Grid Layout
+// var PureRenderMixin = require('react/lib/ReactComponentWithPureRenderMixin');
+// var WidthProvider = require('react-grid-layout').WidthProvider;
+// var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
+// ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
 var Button = require('react-button')
 var MaskedInput = require('react-maskedinput')
 var themeButton = {
@@ -268,7 +275,7 @@ handleChannelTransition = event => {
   ctx.setState({c_transition: event.target.value});
 }
 
-renderPlayer() {
+renderChannel(item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
 
@@ -280,8 +287,19 @@ renderPlayer() {
       scene_key = scenes[j].key
     }
   }
-  return (<Channels active = {activeMatrix}
-                    scene_key = {scene_key}/>)
+
+  return <Channels active = {activeMatrix}
+            scene_key = {scene_key}
+            item = {item}/>
+}
+
+renderPlayer() {
+  const ctx = this;
+  var items = ctx.props.channel;
+
+  return (<div className="ChannelHolder">
+          {_.map(items, ctx.renderChannel.bind(ctx))}
+          </div>)
 }
 
 changeName({target: { value }}) {
@@ -657,11 +675,11 @@ updateGlobalSq(){
 
 sequenceGlobals = (selected_global_index) => {
   const ctx = this;
-  
+
   const {tidalServerLink,globalOnClickClass, storedGlobals,pressed} = ctx.state;
   const channels = ctx.props.channel;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
-  
+
   for (var i = 0; i < storedPatterns.length; i++) {
   if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
     var pr =pressed;
@@ -673,7 +691,7 @@ sequenceGlobals = (selected_global_index) => {
         pr[sp] = false;
       }
     }
-    
+
     var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
     var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
     var tr,cm,slc;
