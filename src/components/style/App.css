@@ -1,0 +1,119 @@
+body, .fill, .cont {
+  position: fixed;
+  top: 62px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-y: none;
+  z-index: 0;
+  font-size: 14px;
+}
+* {
+  font-family: 'Inconsolata';
+  font-weight: 40;
+}
+body {
+  /*background: url('http://sut.la/tcab/*.css.png');*/
+  /*background-position: bottom;;
+  background-repeat: no-repeat;
+  background-size: cover;
+  max-height: 100%;*/
+}
+
+.logo {
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 100px;
+  height: 100%;
+}
+
+*:focus {
+    outline: none;
+}
+
+* > button, input {
+  padding: 4px;
+  font-size: 10px;
+  border: none;
+}
+
+.buttonSentinel {
+  padding: 6px;
+  font-size: 12px;
+  border: none;
+}
+
+ input {
+  background: none;
+  color: #ddd;
+  border-bottom: 1px solid rgba(125,125,125, 0.8);
+  font-size: 10px;
+  width: 95%;
+}
+
+
+* > input .light {
+  border-bottom: 2px solid #fff;
+}
+
+button:hover {
+  cursor: pointer;
+  color: rgba(255,255,102, 0.75);
+}
+
+.action {
+  background: none;
+  border-bottom: 2px solid rgb(25,77,110);
+  color: rgb(25,77,110);
+}
+
+.action:hover {
+  background: rgb(25,77,110);
+  color: #eee;
+}
+
+
+.view {
+  background: none;
+  border-bottom: 2px solid #a00;
+  color: #a00;
+}
+
+.view:hover {
+  background: #a00;
+  color: #eee;
+}
+
+pre {
+  color: #ddd;
+  background: none;
+}
+
+b, p {
+  padding: 0;
+  margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.boxshadow {
+  -webkit-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+  -moz-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+}
+
+.boxshadowr {
+  -webkit-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+  -moz-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 2px 0px 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+}
+
+.boxshadown {
+  -webkit-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+  -moz-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+}

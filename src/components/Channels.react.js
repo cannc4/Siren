@@ -12,7 +12,6 @@ var themeButton = {
   style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
   disabledStyle: { background: 'gray'},
   overStyle: { background: 'rgba(2,4,2,0.15)' },
-  activeStyle: { background: 'rgba(44,44,44,0.15)' },
   pressedStyle: {background: 'rgba(200,200,200,0.75)'},
   overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
 }
@@ -58,6 +57,7 @@ class Channels extends Component {
 	// 		});
 	// 	}
 	// }
+  
   sendPatterns(){
     const ctx = this;
     const globalparams = ctx.props.globalparams;
@@ -128,14 +128,12 @@ class Channels extends Component {
     ctx.sendPatterns();
   }
 
-
   handleSelection (selectedKeys) {
-  const ctx = this;
-  //const {selectedCells} = ctx.state;
-  var b = [];
-  console.log(selectedKeys);
-  store.dispatch(selectCell(selectedKeys));
-  
+    const ctx = this;
+    //const {selectedCells} = ctx.state;
+    var b = [];
+    console.log(selectedKeys);
+    store.dispatch(selectCell(selectedKeys));
   }
   // Cell draw
   // renderStep(item, _, i) {
@@ -151,6 +149,24 @@ class Channels extends Component {
     const { click, active } = ctx.props;
     const step = parseInt(item.step);
     const currentStep = Math.floor( click.current % step);
+
+    
+    /////////////////////////////
+
+    const setText=({ target: { value }}) => {
+      item.vals[i] = value;
+      const nc = { vals: item.vals, key: item.key };
+      fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key);
+    }
+    var className = 'GridItem';
+    if (currentStep === i)
+      className += '-active';
+    return <div key={(item['key']+'_'+i).toString()}>
+            <textarea className={className + " draggableCancel"} type="text"
+                      value={item.vals[i]}
+                      onChange={setText}/>
+          </div>
+    //////////////////////////////////////
     
     return(
           <SelectableComponent item = {item} index={i} c_cid = {item.cid} 
@@ -158,6 +174,7 @@ class Channels extends Component {
           </SelectableComponent>
     )
     
+    //////////////////////////////////////
   }
 
   // Render whole matrix
@@ -220,18 +237,13 @@ class Channels extends Component {
     }
 
     const step = parseInt(item.step);
-    const currentStep = Math.floor( ctx.props.click.current % step);
-    const playerClass = "Channel"
-    //const selected = this.state.selectedCells.indexOf(9) > -1;
-    //selected={selected}
-    var cssname = 'playbox';
-    
+
     return item && (
-      <div key={(item['cid']).toString()} className={playerClass}>
-        <div className = {"channelHeader " + item.type }>
+      <div key={(item['cid']).toString()} className={"ChannelItem"}>
+        <div className = {"ChannelItemHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S</Button>
+          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel}>S</Button>
         </div>
         <SelectableGroup onSelection={ctx.handleSelection.bind(ctx)}
           tolerance={this.state.tolerance}
@@ -240,7 +252,7 @@ class Channels extends Component {
           selectableKey={(item.cid +'_').toString()}>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         </SelectableGroup>
-        <input className = "transition"
+        <input className = {"GridItem-transition draggableCancel"}
           placeholder={" - "}  value = {item.transition}
           onChange = {updateTransition}/>
       </div>

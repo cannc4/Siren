@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import './Home.css';
-import './Menu.css';
+import './style/Layout.css';
+import './style/Dropdown.css';
+import './style/Home.css';
+import './style/Menu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
@@ -10,10 +12,8 @@ import {sendScPattern, sendSCMatrix,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel, deleteChannel,createCell,bootCells} from '../actions'
+      createChannel, deleteChannel, createCell, bootCells, updateLayout} from '../actions'
 
-
-import {Layout, LayoutSplitter} from 'react-flex-layout';
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Firebase from 'firebase';
@@ -28,13 +28,20 @@ import 'codemirror/addon/dialog/dialog.js';
 import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
+
+// Grid Layout
+var WidthProvider = require('react-grid-layout').WidthProvider;
+var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
+var keymaster = require('keymaster');
+
 var Button = require('react-button')
 var MaskedInput = require('react-maskedinput')
 var themeButton = {
-    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
+    style : {borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(125,125,125, 0.8)'},
     disabledStyle: { background: 'gray'},
     overStyle: { background: 'rgba(255,255,102,0.15)' },
-    activeStyle: { background: 'rgba(255,255,102,0.15)' },
     pressedStyle: {background: 'rgba(255,255,102,0.75)'},
     overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
 }
@@ -89,6 +96,14 @@ class Home extends Component {
       c_transition: '',
       csize: 1
     }
+
+    store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                                 {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                                 {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                                 {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                                 {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
+                                 {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
+                                 {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
   }
 
 //Clock for Haskell
@@ -101,8 +116,16 @@ componentDidMount(props,state){
   socket.on("dc", data => {
     store.dispatch(stopClick());
   })
+
+  keymaster('shift+r', ctx.resetLayout.bind(ctx));
+  keymaster('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
 }
 
+componentWillUnmount(props, state) {
+  const ctx = this;
+  keymaster.unbind('shift+r', ctx.resetLayout.bind(ctx));
+  keymaster.unbind('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
+}
 
 componentWillReceiveProps(nextProps) {
   const ctx = this;
@@ -115,8 +138,6 @@ componentWillReceiveProps(nextProps) {
     var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
     Firebase.database().ref("/matrices").child(obj.key).remove();
   }
-
-
 }
 
 componentDidUpdate(prevProps, prevState) {
@@ -163,7 +184,6 @@ handleConsoleSubmit = event => {
   const {tidalServerLink, tidalOnClickClass} = ctx.state;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
   const channels = ctx.props.channel;
-  console.log(channels);
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
@@ -291,7 +311,7 @@ renderPlayer() {
   const ctx = this;
   var items = ctx.props.channel;
 
-  return (<div className="ChannelHolder">
+  return (<div className={"AllChannels"}>
           {_.map(items, ctx.renderChannel.bind(ctx))}
           </div>)
 }
@@ -413,12 +433,12 @@ renderScene(item, dbKey, i) {
   }
 
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  const className = activeMatrix === item.matName ? "SceneItem-active" : "SceneItem";
   return item.key && (
-    <div key={item.key} className="matrices" >
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
-        <button onClick={handleDelete}>{'x'}</button>
-        {activeMatrix === item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</Button>}
-        {activeMatrix !== item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton}  style={{ color: '#ddd'}}>{item.matName}</Button>}
+    <div key={item.key} className={className+ " draggableCancel"}>
+      <div>
+        <button onClick={handleDelete}>{'X'}</button>
+        <button onClick={updateMatrix}>{item.matName}</button>
       </div>
     </div>
   )
@@ -676,11 +696,11 @@ updateGlobalSq(){
 
 sequenceGlobals = (selected_global_index) => {
   const ctx = this;
-  
+
   const {tidalServerLink,globalOnClickClass, storedGlobals,pressed} = ctx.state;
   const channels = ctx.props.channel;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
-  
+
   for (var i = 0; i < storedPatterns.length; i++) {
   if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
     var pr =pressed;
@@ -692,7 +712,7 @@ sequenceGlobals = (selected_global_index) => {
         pr[sp] = false;
       }
     }
-    
+
     var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
     var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
     var tr,cm,slc;
@@ -779,6 +799,52 @@ tidalcps (value) {
   temp.times = body;
   ctx.setState({click:temp});
 }
+
+onRemoveItem(key){
+  console.log(key + ' removing.');
+  console.log(this.props.layout.windows);
+  console.log(_.reject(this.props.layout.windows, {i: key}));
+  store.dispatch(updateLayout(_.reject(this.props.layout.windows, {i: key})));
+
+  console.log(this.props.layout.windows);
+  console.log(_.reject(this.props.layout.windows, {i: key}));
+}
+onLayoutChange(layout, layouts) {
+  // SAVE DB
+  console.log('onLayoutChange');
+  console.log(layout, layouts);
+  var temp_layouts = []
+  _.forEach(layout, function(l) {
+    temp_layouts = _.concat(temp_layouts, _.omitBy(l, _.isUndefined));
+  })
+  console.log(temp_layouts);
+
+  store.dispatch(updateLayout(temp_layouts));
+}
+
+makeMatrixFullscreen() {
+  console.log("FULLSCREEN LAYOUT");
+  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 20, w: 3, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'matrix', x: 0, y: 0, w: 24, h: 20, minW: 5, moved: false, static: false},
+                               {i: 'patterns', x: 16, y: 20, w: 8, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'pattern_history', x: 23, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                               {i: 'channel_add', x: 3, y: 36, w: 3, h: 4, minW: 2, moved: false, static: false},
+                               {i: 'globals', x: 6, y: 36, w: 5, h: 4, minW: 4, moved: false, static: false},
+                               {i: 'console', x: 11, y: 36, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+}
+
+resetLayout() {
+  console.log("RESET LAYOUT");
+  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                               {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                               {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
+                               {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
+                               {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+}
+
+
 render() {
   const ctx=this;
   const { click, channel } = ctx.props;
@@ -805,96 +871,123 @@ render() {
       readOnly: true
   };
 
-  return <div >
+  // Layout height params for fullscreen
+  var vertical_n = 20,
+      h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
+      margin = 7,
+      row_height = (h-(vertical_n+1)*margin)/vertical_n;
+
+  const layouts = ctx.props.layout.windows;
+  console.log( "only is number" , _.omitBy(_.find(layouts, ['i', 'matrix']), _.isString));
+  console.log(layouts);
+  console.log(_.find(layouts, ['i', 'scenes']));
+  return <div>
   <div className={"Home cont"}>
-  <Layout fill='window'>
-      <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', height: '1500px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '15px'}}>
-            <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
-            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+    <ResponsiveReactGridLayout
+        className={"layout"}
+        layouts={ctx.props.layout.windows}
+        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480}}
+        cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+        draggableCancel={'.draggableCancel'}
+        margin={[margin, margin]}
+        rowHeight={row_height}
+        onLayoutChange={ctx.onLayoutChange.bind(ctx)}
+      >
+      <div key={"scenes"} data-grid={_.omitBy(_.find(layouts, ['i', 'scenes']), _.isString)}>
+        <div className={"PanelHeader"}> ■ All Scenes
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
+        </div>
+        <div>
+          <div>
+            <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+            {this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+            {!this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
+            <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
           </div>
-          <div className={'sceneList'} style={{ width: '100%'}}>
-            <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
+          <div className={'AllScenes'}>
+            <div>
               {this.props.user.user.name && ctx.renderScenes(items)}
-              {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
-            </ul>
+              {!this.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+            </div>
           </div>
         </div>
-      </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth='flex'>
-        <Layout layoutHeight={'flex'}>
-          {ctx.renderPlayer()}
-        </Layout>
-        <LayoutSplitter />
-        <Layout layoutHeight={150}>
-          <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-           <p>> Pattern History</p>
-           {_.map(storedPatterns, (c, i) => {
-              return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[i]} options={historyOptions}/>
-            })}
-          </div>
-        </Layout>
-        <LayoutSplitter />
-        <Layout layoutHeight={275}>
-          <Layout layoutWidth={150}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Add Channel</p>
-              <Dropdown options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="Type" />
-              <input className="newChannelInput" onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="Name "/>
-              <input className="newChannelInput" onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="Step "/>
-              <input className="newChannelInput" onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="Transition (optional)"/>
-              <Button className={"newChannelButton"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
-            </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={350}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              > Globals &nbsp;&nbsp;
-              <input mask={maskedInputDurations} className={"sqdiv" + ctx.state.globalOnSqClass}
-                key={'globalsq'}
-                onKeyUp = {ctx.handleGlobalsq.bind(ctx)}
-                onChange={ctx.handleGlobalsqDuration.bind(ctx)}
-                value = {globalsq}
-                placeholder="Global Sequencer "/>
-              <MaskedInput mask={maskedInputPatterns} className={"newChannelInput" + ctx.state.globalOnClickClass}
-                key={'globalchannel'}
-                onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)}
-                onChange={ctx.handleGlobalChannels.bind(ctx)}
-                value = {globalChannels}
-                placeholder="Channels "/>
-              <input className={"defaultArea" + ctx.state.globalOnClickClass} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
-              <input className={"defaultArea" + ctx.state.globalOnClickClass} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
-              {_.map(storedGlobals, (c, i) => {
-                 return <Button id={i} pressed = {pressed[i]} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
-               })}
-               <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec</Button>
-            </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={'flex'}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Console</p>
-              <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
-              <textarea className={"defaultPatternArea" + ctx.state.SCOnClickClass} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
-            </div>
-          </Layout>
-        </Layout>
-      </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth={400}>
-        <div className="Patterns" >
-          <div className="PatternsColumn" >
-            <Patterns active={activeMatrix}/>
-          </div>
+      </div>
+      <div key={'matrix'} data-grid={_.omitBy(_.find(layouts, ['i', 'matrix']), _.isString)} >
+        <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "matrix")}>X</span>
         </div>
-        </Layout>
-      </Layout>
-    </div>
+        {ctx.renderPlayer()}
+      </div>
+      <div key={'patterns'} data-grid={_.omitBy(_.find(layouts, ['i', 'patterns']), _.isString)}>
+        <div className={"PanelHeader"}> ■ Patterns in <span class="italic">{'"'+activeMatrix+'"'}</span>
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "patterns")}>X</span>
+        </div>
+        <div className={"AllPatterns"} >
+          <Patterns active={activeMatrix}/>
+        </div>
+      </div>
+      <div key={'pattern_history'} data-grid={_.omitBy(_.find(layouts, ['i', 'pattern_history']), _.isString)}>
+        <div className={"PanelHeader"}> ■ Pattern History
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "pattern_history")}>X</span>
+        </div>
+        <div>
+         {_.map(storedPatterns, (c, i) => {
+            return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[i]} options={historyOptions}/>
+          })}
+        </div>
+      </div>
+      <div key={'channel_add'} data-grid={_.omitBy(_.find(layouts, ['i', 'channel_add']), _.isString)}>
+        <div className={"PanelHeader"}> ■ Add Channel
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
+        </div>
+        <div>
+          <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="Name "/>
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="Step "/>
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="Transition (optional)"/>
+          <Button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
+        </div>
+      </div>
+      <div key={'globals'} data-grid={_.omitBy(_.find(layouts, ['i', 'globals']), _.isString)}>
+        <div className={"PanelHeader"}> ■ Global Parameters
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "globals")}>X</span>
+        </div>
+        <div>
+          <input mask={maskedInputDurations}
+            className={"Input" + ctx.state.globalOnSqClass + " draggableCancel"}
+            key={'globalsq'}
+            onKeyUp = {ctx.handleGlobalsq.bind(ctx)}
+            onChange={ctx.handleGlobalsqDuration.bind(ctx)}
+            value = {globalsq}
+            placeholder="Global Sequencer "/>
+          <MaskedInput mask={maskedInputPatterns}
+          className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"}
+            key={'globalchannel'}
+            onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)}
+            onChange={ctx.handleGlobalChannels.bind(ctx)}
+            value = {globalChannels}
+            placeholder="Channels "/>
+          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
+          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
+          {_.map(storedGlobals, (c, i) => {
+             return <Button className={"Button draggableCancel"} id={i} pressed={pressed[i]} onClick={ctx.clicked.bind(ctx)} theme={themeButton}>{i}</Button>
+           })}
+           <Button className={"Button draggableCancel"} theme={themeButton} onClick={ctx.record.bind(ctx)}>Rec</Button>
+        </div>
+      </div>
+      <div key={'console'} data-grid={_.omitBy(_.find(layouts, ['i', 'console']), _.isString)}>
+        <div className={"PanelHeader"}> ■ Console
+          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "console")}>X</span>
+        </div>
+        <div>
+          <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
+          <textarea className={"ConsoleTextBox" + ctx.state.SCOnClickClass + " draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+        </div>
+      </div>
+    </ResponsiveReactGridLayout>
+  </div>
   </div>
   }
 }
+
 export default connect(state => state)(Home);

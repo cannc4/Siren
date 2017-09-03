@@ -1,0 +1,222 @@
+.Home {
+  background: rgba(27, 27, 27, 1);
+  overflow: auto;
+}
+
+/*Log-in Button Animation*/
+@keyframes flusa {
+  from {background-color: rgba(255,255,102,0.2);}
+  to {background-color: rgba(0,0,0, 0);}
+}
+.Executed {
+  animation-name: flusa;
+  animation-duration: 1s;
+}
+
+/*Panel Headers*/
+.PanelHeader {
+  background: rgba(200,200,200, 0.25);
+  padding: 3px 5px 3px 5px;
+  border-style: double;
+  border-width: 1px;
+  border-color: rgba(180,180,180, 1);
+}
+/*Panel Close Button */
+.PanelClose {
+  float: right;
+  cursor: pointer;
+}
+
+
+
+
+/*------------INPUTS AND BUTTONS------------*/
+.Input {
+  font-size: 12px;
+  border: 1px solid rgba(125,125,125, 0.8);
+  cursor: text;
+  width: 100%;
+}
+.Button {
+  font-size: 12px;
+  border: 1px solid rgba(125,125,125, 0.8);
+  cursor: pointer;
+}
+
+
+
+
+/*------------CODEMIRROR------------*/
+.CodeMirror {
+  background-color: rgba(255,255,255, 0.05) !important;
+}
+/*height*/
+div.cm-s-_style.CodeMirror {
+  height: 100px;
+}
+
+
+
+
+/*------------SCENES PANEL------------*/
+/*All Scene Items together*/
+.AllScenes {
+  overflow-y: auto;
+  margin: 10px 0px 0px 0px;
+}
+/*Scene Items on Scene Panel*/
+.SceneItem {
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  width: 98%; /*But whyy*/
+  background: none;
+}
+/*Active Scene Items on Scene Panel*/
+.SceneItem-active {
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  width: 98%; /*But whyy*/
+  background: rgba(255,255,102,0.25);
+}
+
+
+
+/*------------PATTERNS PANEL------------*/
+/*All patterns*/
+.AllPatterns {
+  /*      top | right | bottom | left */
+  margin: 0px;
+}
+/*Individual Pattern*/
+.PatternItem {
+  width: 100%;
+}
+/*CodeMirror window of each pattern*/
+.PatternItemCodeMirror {
+  resize:both;
+  overflow-y: auto;
+  min-height: 80px;
+  border: 1px rgba(125,100,100, 0.8);
+}
+
+
+
+
+/*------------CONSOLE PANEL------------*/
+/*Tidal and SC Console textboxes*/
+.ConsoleTextBox {
+
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  font-size: 14px;
+  width: 100%;
+  height: 40%;
+}
+
+
+
+
+/*------------PATTERN HISTORY PANEL------------*/
+/*Pattern History Fields (???)*/
+.defaultPatternHistoryArea {
+  display: flex;
+  font-size: 12px;
+  flex-direction: column;
+  align-self: flex-end;
+  margin: 5px;
+  width: 95%;
+  height: 15%;
+}
+
+
+
+
+/*------------MATRIX PANEL------------*/
+/*All Channels Together*/
+.AllChannels {
+  display: flex;
+  flex-grow: 2;
+  flex-direction: row;
+  overflow-y: auto;
+  margin: 10px;
+}
+
+/*Individual Channels*/
+.ChannelItem {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  line-height: 20px;
+  min-height: 35px;
+  padding: 0;
+}
+/* Matrix header styling*/
+.ChannelItemHeader {
+  display: inline-flex;
+  background: rgba(200,200,200,0.1);
+  line-height: 2px;
+  border-width: 1px double rgba(180,180,180, 1);
+}
+.Visual {
+  background: rgba(144, 48, 90,0.5);
+}
+.Audio {
+  background: rgba(170, 162, 57,0.5);
+}
+.MIDI {
+  background: rgba(255, 175, 63, 0.5)
+}
+
+/*Individual Grid Cells*/
+.GridItem {
+  display: flex;
+  flex-grow: 1;
+  width: 95%;
+  margin-left: 2.5%;
+  line-height: 24px;
+  font-size: 1vw;
+  text-align: center;
+  vertical-align: center;
+  overflow-y: auto;
+  border: 1px solid rgba(125,125,125, 0.15);
+  background: rgba(0,0,0,0.3);
+  opacity: 0.6;
+}
+
+/*Active Individual Grid Cells*/
+.GridItem-active {
+  background-color: rgba(255, 255, 255, 0.1);
+
+  border: 1px solid rgba(125,125,125, 0.65);
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  font-size: 1vw;
+  line-height: 24px;
+  vertical-align: center;
+  text-align: center;
+}
+
+/*Individual Transition Cells*/
+.GridItem-transition {
+  width: 95%;
+  margin-left: 2.5%;
+  height: 5%;
+  font-size: 1vw;
+  text-align: center;
+  vertical-align: center;
+  overflow-y: auto;
+  border: 1px solid rgba(125,125,125, 0.4);
+  background: rgba(0, 0, 0, 0.8);
+  opacity: 0.6;
+}
+
+/* Table column sizing
+================================== */
+.Channel--2cols > .playbox  { width: 50%; }
+.Channel--3cols > .playbox  { width: 33.33%; }
+.Channel--4cols > .playbox  { width: 25%; }
+.Channel--5cols > .playbox  { width: 20%; }
+.Channel--6cols > .playbox  { width: 16.6%; }
+.Channel--7cols > .playbox  { width: 14.27%; }
+.Channel--8cols > .playbox  { width: 12.5%; }
+.Channel--13cols > .playbox  { width: 7.5%; }
+.Channel--16cols > .playbox  { width: 6.25%; }
+.Channel--17cols > .playbox  { width: 5.88%; }
