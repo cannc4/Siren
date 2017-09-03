@@ -5,12 +5,12 @@ import './Menu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
-import {sendScPattern, sendSCMatrix, sendPatterns,
+import {sendScPattern, sendSCMatrix,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel, deleteChannel} from '../actions'
+      createChannel, deleteChannel,createCell,bootCells} from '../actions'
 
 
 import {Layout, LayoutSplitter} from 'react-flex-layout';
@@ -236,7 +236,8 @@ addChannel() {
           var obj = fbcreatechannelinscene('Matrices', nc, d.key);
           nc['key'] = obj
           store.dispatch(createChannel(nc));
-
+          const newCell = {cstep: c_step, cid: _index };
+          store.dispatch(createCell(newCell));
           ctx.setState({ activeMatrix: d.matName, matName: d.matName });
         }
 
@@ -268,7 +269,7 @@ handleChannelTransition = event => {
   ctx.setState({c_transition: event.target.value});
 }
 
-renderPlayer() {
+renderChannel(item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
 
@@ -280,8 +281,19 @@ renderPlayer() {
       scene_key = scenes[j].key
     }
   }
-  return (<Channels active = {activeMatrix}
-                    scene_key = {scene_key}/>)
+
+  return <Channels active = {activeMatrix}
+            scene_key = {scene_key}
+            item = {item}/>
+}
+
+renderPlayer() {
+  const ctx = this;
+  var items = ctx.props.channel;
+
+  return (<div className="ChannelHolder">
+          {_.map(items, ctx.renderChannel.bind(ctx))}
+          </div>)
 }
 
 changeName({target: { value }}) {
@@ -294,7 +306,7 @@ addItem() {
   var patterns = [],
       globals = [],
       channels = []
-
+console.log("here");
   const checkSceneName = function(newName, items) {
     if (newName.length < 1) {
       return false;
@@ -368,6 +380,13 @@ renderScene(item, dbKey, i) {
 
     store.dispatch(globalStore(sglobals,[]));
     store.dispatch(globalUpdate('', '', ''));
+    _.forEach(item.channels, function(ch, i){
+      const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
+      console.log(ch.cid);
+      store.dispatch(bootCells(c_cell));
+    });
+    
+  
   }
 
   const handleDelete = ({ target: { value }}) => {
