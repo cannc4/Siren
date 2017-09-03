@@ -12,7 +12,6 @@ var themeButton = {
   style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
   disabledStyle: { background: 'gray'},
   overStyle: { background: 'rgba(2,4,2,0.15)' },
-  activeStyle: { background: 'rgba(44,44,44,0.15)' },
   pressedStyle: {background: 'rgba(200,200,200,0.75)'},
   overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
 }
@@ -197,13 +196,13 @@ class Channels extends Component {
     }
 
     const step = parseInt(item.step);
-  
+
     return item && (
       <div key={(item['cid']).toString()} className={"ChannelItem"}>
         <div className = {"ChannelItemHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S</Button>
+          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel}>S</Button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
         <input className = {"GridItem-transition draggableCancel"}

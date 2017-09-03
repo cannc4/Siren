@@ -12,7 +12,7 @@ import {sendScPattern, sendSCMatrix, sendPatterns,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel, deleteChannel} from '../actions'
+      createChannel, deleteChannel, updateLayout} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -34,13 +34,14 @@ var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
+var keymaster = require('keymaster');
+
 var Button = require('react-button')
 var MaskedInput = require('react-maskedinput')
 var themeButton = {
     style : {borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(125,125,125, 0.8)'},
     disabledStyle: { background: 'gray'},
     overStyle: { background: 'rgba(255,255,102,0.15)' },
-    activeStyle: { background: 'rgba(255,255,102,0.15)' },
     pressedStyle: {background: 'rgba(255,255,102,0.75)'},
     overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
 }
@@ -95,6 +96,14 @@ class Home extends Component {
       c_transition: '',
       csize: 1
     }
+
+    store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                                 {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                                 {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                                 {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                                 {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
+                                 {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
+                                 {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
   }
 
 //Clock for Haskell
@@ -107,8 +116,16 @@ componentDidMount(props,state){
   socket.on("dc", data => {
     store.dispatch(stopClick());
   })
+
+  keymaster('shift+r', ctx.resetLayout.bind(ctx));
+  keymaster('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
 }
 
+componentWillUnmount(props, state) {
+  const ctx = this;
+  keymaster.unbind('shift+r', ctx.resetLayout.bind(ctx));
+  keymaster.unbind('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
+}
 
 componentWillReceiveProps(nextProps) {
   const ctx = this;
@@ -121,8 +138,6 @@ componentWillReceiveProps(nextProps) {
     var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
     Firebase.database().ref("/matrices").child(obj.key).remove();
   }
-
-
 }
 
 componentDidUpdate(prevProps, prevState) {
@@ -169,7 +184,6 @@ handleConsoleSubmit = event => {
   const {tidalServerLink, tidalOnClickClass} = ctx.state;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
   const channels = ctx.props.channel;
-  console.log(channels);
   if(event.keyCode === 13 && event.ctrlKey && body){
     ctx.setState({tidalOnClickClass: ' Executed'});
     setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
@@ -779,8 +793,49 @@ tidalcps (value) {
 }
 
 onRemoveItem(key){
-  console.log(key + ' removed.');
+  console.log(key + ' removing.');
+  console.log(this.props.layout.windows);
+  console.log(_.reject(this.props.layout.windows, {i: key}));
+  store.dispatch(updateLayout(_.reject(this.props.layout.windows, {i: key})));
+
+  console.log(this.props.layout.windows);
+  console.log(_.reject(this.props.layout.windows, {i: key}));
 }
+onLayoutChange(layout, layouts) {
+  // SAVE DB
+  console.log('onLayoutChange');
+  console.log(layout, layouts);
+  var temp_layouts = []
+  _.forEach(layout, function(l) {
+    temp_layouts = _.concat(temp_layouts, _.omitBy(l, _.isUndefined));
+  })
+  console.log(temp_layouts);
+
+  store.dispatch(updateLayout(temp_layouts));
+}
+
+makeMatrixFullscreen() {
+  console.log("FULLSCREEN LAYOUT");
+  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 20, w: 3, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'matrix', x: 0, y: 0, w: 24, h: 20, minW: 5, moved: false, static: false},
+                               {i: 'patterns', x: 16, y: 20, w: 8, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'pattern_history', x: 23, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                               {i: 'channel_add', x: 3, y: 36, w: 3, h: 4, minW: 2, moved: false, static: false},
+                               {i: 'globals', x: 6, y: 36, w: 5, h: 4, minW: 4, moved: false, static: false},
+                               {i: 'console', x: 11, y: 36, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+}
+
+resetLayout() {
+  console.log("RESET LAYOUT");
+  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                               {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                               {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
+                               {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
+                               {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+}
+
 
 render() {
   const ctx=this;
@@ -814,17 +869,23 @@ render() {
       margin = 7,
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
 
+  const layouts = ctx.props.layout.windows;
+  console.log( "only is number" , _.omitBy(_.find(layouts, ['i', 'matrix']), _.isString));
+  console.log(layouts);
+  console.log(_.find(layouts, ['i', 'scenes']));
   return <div>
   <div className={"Home cont"}>
     <ResponsiveReactGridLayout
         className={"layout"}
+        layouts={ctx.props.layout.windows}
         breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480}}
         cols={{lg: 24, md: 20, sm: 12, xs: 8}}
         draggableCancel={'.draggableCancel'}
         margin={[margin, margin]}
         rowHeight={row_height}
+        onLayoutChange={ctx.onLayoutChange.bind(ctx)}
       >
-      <div key={"scenes"} data-grid={{x: 0, y: 0, w: 3, h: vertical_n, minW: 3}}>
+      <div key={"scenes"} data-grid={_.omitBy(_.find(layouts, ['i', 'scenes']), _.isString)}>
         <div className={"PanelHeader"}> ■ All Scenes
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
         </div>
@@ -843,13 +904,13 @@ render() {
           </div>
         </div>
       </div>
-      <div key={'matrix'} data-grid={{x: 3, y: 0, w: 13, h: 13, minW: 5}} >
+      <div key={'matrix'} data-grid={_.omitBy(_.find(layouts, ['i', 'matrix']), _.isString)} >
         <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "matrix")}>X</span>
         </div>
         {ctx.renderPlayer()}
       </div>
-      <div key={'patterns'} data-grid={{x: 16, y: 0, w: 8, h: vertical_n, minW: 3}}>
+      <div key={'patterns'} data-grid={_.omitBy(_.find(layouts, ['i', 'patterns']), _.isString)}>
         <div className={"PanelHeader"}> ■ Patterns in <span class="italic">{'"'+activeMatrix+'"'}</span>
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "patterns")}>X</span>
         </div>
@@ -857,7 +918,7 @@ render() {
           <Patterns active={activeMatrix}/>
         </div>
       </div>
-      <div key={'pattern_history'} data-grid={{x: 3, y: 14, w: 13, h: 3, minW: 3}}>
+      <div key={'pattern_history'} data-grid={_.omitBy(_.find(layouts, ['i', 'pattern_history']), _.isString)}>
         <div className={"PanelHeader"}> ■ Pattern History
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "pattern_history")}>X</span>
         </div>
@@ -867,7 +928,7 @@ render() {
           })}
         </div>
       </div>
-      <div key={'channel_add'} data-grid={{x: 3, y: 16, w: 3, h: 4, minW: 2}}>
+      <div key={'channel_add'} data-grid={_.omitBy(_.find(layouts, ['i', 'channel_add']), _.isString)}>
         <div className={"PanelHeader"}> ■ Add Channel
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
         </div>
@@ -879,7 +940,7 @@ render() {
           <Button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
         </div>
       </div>
-      <div key={'globals'} data-grid={{x: 6, y: 16, w: 5, h: 4, minW: 4}}>
+      <div key={'globals'} data-grid={_.omitBy(_.find(layouts, ['i', 'globals']), _.isString)}>
         <div className={"PanelHeader"}> ■ Global Parameters
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "globals")}>X</span>
         </div>
@@ -906,7 +967,7 @@ render() {
            <Button className={"Button draggableCancel"} theme={themeButton} onClick={ctx.record.bind(ctx)}>Rec</Button>
         </div>
       </div>
-      <div key={'console'} data-grid={{x: 11, y: 16, w: 5, h: 4, minW: 2}}>
+      <div key={'console'} data-grid={_.omitBy(_.find(layouts, ['i', 'console']), _.isString)}>
         <div className={"PanelHeader"}> ■ Console
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "console")}>X</span>
         </div>
