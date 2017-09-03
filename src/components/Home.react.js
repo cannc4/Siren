@@ -7,12 +7,12 @@ import './style/Menu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
-import {sendScPattern, sendSCMatrix, sendPatterns,
+import {sendScPattern, sendSCMatrix,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene,
-      createChannel, deleteChannel, updateLayout} from '../actions'
+      createChannel, deleteChannel, createCell, bootCells, updateLayout} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -256,7 +256,8 @@ addChannel() {
           var obj = fbcreatechannelinscene('Matrices', nc, d.key);
           nc['key'] = obj
           store.dispatch(createChannel(nc));
-
+          const newCell = {cstep: c_step, cid: _index };
+          store.dispatch(createCell(newCell));
           ctx.setState({ activeMatrix: d.matName, matName: d.matName });
         }
 
@@ -325,7 +326,7 @@ addItem() {
   var patterns = [],
       globals = [],
       channels = []
-
+console.log("here");
   const checkSceneName = function(newName, items) {
     if (newName.length < 1) {
       return false;
@@ -399,6 +400,13 @@ renderScene(item, dbKey, i) {
 
     store.dispatch(globalStore(sglobals,[]));
     store.dispatch(globalUpdate('', '', ''));
+    _.forEach(item.channels, function(ch, i){
+      const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
+      console.log(ch.cid);
+      store.dispatch(bootCells(c_cell));
+    });
+    
+  
   }
 
   const handleDelete = ({ target: { value }}) => {

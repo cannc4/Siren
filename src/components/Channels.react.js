@@ -1,12 +1,12 @@
-
+import { SelectableGroup, createSelectable } from 'react-selectable';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
 import _ from 'lodash';
-
+import Cell from './Cell.react'
+const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-        sendPatterns} from '../actions';
-
+        sendPatterns,selectCell} from '../actions';
 var Button = require('react-button')
 var themeButton = {
   style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
@@ -30,8 +30,13 @@ class Channels extends Component {
       transition: '',
       solo:'',
       soloPressed:[],
-      soloActive:false
+      selectedCells: [],
+      soloActive:false,
+			tolerance: 20,
+			selectOnMouseMove: false
     }
+    //this.handleSelection = this.handleSelection.bind(this);
+	
   }
 
   componentDidMount(){
@@ -42,8 +47,17 @@ class Channels extends Component {
       pr[i]=false;
     }
     ctx.setState({soloPressed: pr });
+    //document.addEventListener('click', this.clearItems);
   }
 
+	// clearItems (e) {
+	// 	if(!isNodeInRoot(e.target, this.refs.selectable)) {
+	// 		this.setState({
+	// 			selectedItems: []
+	// 		});
+	// 	}
+	// }
+  
   sendPatterns(){
     const ctx = this;
     const globalparams = ctx.props.globalparams;
@@ -114,12 +128,30 @@ class Channels extends Component {
     ctx.sendPatterns();
   }
 
+  handleSelection (selectedKeys) {
+    const ctx = this;
+    //const {selectedCells} = ctx.state;
+    var b = [];
+    console.log(selectedKeys);
+    store.dispatch(selectCell(selectedKeys));
+  }
   // Cell draw
+  // renderStep(item, _, i) {
+  //   const ctx = this;
+  //   const { click, active } = ctx.props;
+  //   const step = parseInt(item.step);
+  //   const currentStep = Math.floor( click.current % step);
+  //   return <Cell item = {item} index={i} c_cid = {item.cid} currentStep = {currentStep} s_key = { ctx.props.scene_key}/>
+  // }
+
   renderStep(item, _, i) {
     const ctx = this;
     const { click, active } = ctx.props;
     const step = parseInt(item.step);
     const currentStep = Math.floor( click.current % step);
+
+    
+    /////////////////////////////
 
     const setText=({ target: { value }}) => {
       item.vals[i] = value;
@@ -134,6 +166,15 @@ class Channels extends Component {
                       value={item.vals[i]}
                       onChange={setText}/>
           </div>
+    //////////////////////////////////////
+    
+    return(
+          <SelectableComponent item = {item} index={i} c_cid = {item.cid} 
+          currentStep = {currentStep} s_key = { ctx.props.scene_key} >
+          </SelectableComponent>
+    )
+    
+    //////////////////////////////////////
   }
 
   // Render whole matrix
@@ -204,7 +245,13 @@ class Channels extends Component {
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
           <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel}>S</Button>
         </div>
+        <SelectableGroup onSelection={ctx.handleSelection.bind(ctx)}
+          tolerance={this.state.tolerance}
+					selectOnMouseMove={this.state.selectOnMouseMove}
+          preventDefault = {false}
+          selectableKey={(item.cid +'_').toString()}>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
+        </SelectableGroup>
         <input className = {"GridItem-transition draggableCancel"}
           placeholder={" - "}  value = {item.transition}
           onChange = {updateTransition}/>

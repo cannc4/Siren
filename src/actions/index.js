@@ -583,7 +583,30 @@ export const updateMatrix = (item) => {
 		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
 	};
 }
-
+export const selectCell = (selectedcell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'SELECT_CELL', payload: selectedcell });
+    };
+}
+export const updateCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'REFINE_CELL', payload: cell });
+    };
+}
+export const bootCells = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'BOOT_CELL', payload: cell });
+    };
+}
+export const createCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'CREATE_CELL', payload: cell });
+    };
+}
 export const sendScPattern = (server, expression) => {
 	return dispatch => {
 		if (!expression) return;

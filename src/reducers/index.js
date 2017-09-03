@@ -6,6 +6,7 @@ import tidal from './tidal';
 import click from './click';
 import channel from './channel';
 import layout from './layout';
+import cell from './cell';
 import menu from './menu';
 import globalparams from './global';
 import usererror from './usererror';
@@ -38,6 +39,7 @@ const rootReducer = combineReducers({
   layout,
   menu,
   globalparams,
+  cell,
   ...keys
 });
 
