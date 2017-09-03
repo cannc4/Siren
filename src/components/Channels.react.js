@@ -127,11 +127,11 @@ class Channels extends Component {
       const nc = { vals: item.vals, key: item.key };
       fbupdatechannelinscene('Matrices', nc, ctx.props.scene_key);
     }
-    var className = 'playbox';
+    var className = 'GridItem';
     if (currentStep === i)
       className += '-active';
     return <div key={(item['key']+'_'+i).toString()}>
-            <textarea className={className} type="text"
+            <textarea className={className + " draggableCancel"} type="text"
                       value={item.vals[i]}
                       onChange={setText}/>
           </div>
@@ -197,17 +197,16 @@ class Channels extends Component {
     }
 
     const step = parseInt(item.step);
-    const playerClass = "Channel"
-
+  
     return item && (
-      <div key={(item['cid']).toString()} className={playerClass}>
-        <div className = {"channelHeader " + item.type }>
+      <div key={(item['cid']).toString()} className={"ChannelItem"}>
+        <div className = {"ChannelItemHeader " + item.type }>
           <button onClick={deleteChannel}>&nbsp;{'X'}</button>
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
           <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel} activeStyle={{position:'relative', top: 2}}>S</Button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <input className = "transition"
+        <input className = {"GridItem-transition draggableCancel"}
           placeholder={" - "}  value = {item.transition}
           onChange = {updateTransition}/>
       </div>

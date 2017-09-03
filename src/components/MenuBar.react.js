@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import store from '../store';
-import './MenuBar.css'
+import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick,resetClick, initTidalConsole} from '../actions'
 

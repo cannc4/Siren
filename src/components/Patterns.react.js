@@ -122,20 +122,20 @@ class Patterns extends Component {
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <li key={item.key} className="easter" >
-        <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-          <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
-            <div key={name} style={{ display: 'flex', flexDirection: 'column', flex: 3}}>
-              <input type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-              <input type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+      <div key={item.key} className="PatternItem draggableCancel" >
+        <div key={name} >
+          <div key={name} >
+            <div key={name} >
+              <input className={'Input draggableCancel'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
+              <input className={'Input draggableCancel'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-              <button onClick={handleDelete}>{'Delete'} </button>
+            <div>
+              <button className={'Button'} onClick={handleDelete}>{'Delete'} </button>
             </div>
           </div>
-          <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+          <CodeMirror className={'PatternItemCodeMirror'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
         </div>
-      </li>
+      </div>
     )
   }
 
@@ -161,18 +161,14 @@ class Patterns extends Component {
     const changeName = ctx.changeName.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
 
-    const viewPortWidth = '100%'
-
     return (
       <div>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
-          <input className={'newPatternInput'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
-          <button className={'newPatternButton'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
+        <div>
+          <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
+          <button className={'Button'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
-        <div style={{ width: viewPortWidth }}>
-          <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-            {renderItems(items)}
-          </ul>
+        <div>
+          {renderItems(items)}
         </div>
       </div>
     );
