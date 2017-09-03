@@ -326,7 +326,6 @@ addItem() {
   var patterns = [],
       globals = [],
       channels = []
-console.log("here");
   const checkSceneName = function(newName, items) {
     if (newName.length < 1) {
       return false;
@@ -396,17 +395,15 @@ renderScene(item, dbKey, i) {
       globalTransformations: '', globalCommands:'', globalChannels: '',
       pressed:gpressed, sceneIndex:item.key});
 
+    console.log("Item", item);
     ctx.updateMatrix(item);
 
     store.dispatch(globalStore(sglobals,[]));
     store.dispatch(globalUpdate('', '', ''));
     _.forEach(item.channels, function(ch, i){
       const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
-      console.log(ch.cid);
       store.dispatch(bootCells(c_cell));
     });
-    
-  
   }
 
   const handleDelete = ({ target: { value }}) => {
@@ -665,14 +662,8 @@ updateGlobalSq(){
   if(Object.values(storedGlobals).length >= helperindex)
     ctx.setState({global_helperindex:0});
 
-
-    console.log(Object.values(storedGlobals).length);
-    console.log(global_helperindex);
-
   if(sqActive_UI === true){
-    console.log('here');
     if(sqActive === false){
-
       ctx.setState({helperindex:0});
       var compileDuration = gbdur[helperindex] * 1000;
       var selGlobalPair = global_helperindex ;
@@ -733,9 +724,6 @@ sequenceGlobals = (selected_global_index) => {
 
 
     var pattern = patname + tr + patternbody +cm;
-
-    console.log(pattern);
-
     ctx.consoleSubmit(tidalServerLink, pattern);
     ctx.setState({globalCommands: cm,
                   globalTransformations: tr,
@@ -753,7 +741,6 @@ updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
   const { globalChannels} = ctx.state;
   var tempAr = [] ;
   var gbchan = globalChannels.split(" ");
-  console.log("CHANNELS" + gbchan[1]);
 
   if (gbchan === undefined ||gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='0' ){
     for (var i = 0; i < storedPatterns.length; i++) {
@@ -802,22 +789,15 @@ tidalcps (value) {
 
 onRemoveItem(key){
   console.log(key + ' removing.');
-  console.log(this.props.layout.windows);
-  console.log(_.reject(this.props.layout.windows, {i: key}));
   store.dispatch(updateLayout(_.reject(this.props.layout.windows, {i: key})));
-
-  console.log(this.props.layout.windows);
-  console.log(_.reject(this.props.layout.windows, {i: key}));
 }
 onLayoutChange(layout, layouts) {
   // SAVE DB
   console.log('onLayoutChange');
-  console.log(layout, layouts);
   var temp_layouts = []
   _.forEach(layout, function(l) {
     temp_layouts = _.concat(temp_layouts, _.omitBy(l, _.isUndefined));
   })
-  console.log(temp_layouts);
 
   store.dispatch(updateLayout(temp_layouts));
 }
@@ -878,9 +858,7 @@ render() {
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
 
   const layouts = ctx.props.layout.windows;
-  console.log( "only is number" , _.omitBy(_.find(layouts, ['i', 'matrix']), _.isString));
-  console.log(layouts);
-  console.log(_.find(layouts, ['i', 'scenes']));
+  console.log("Homereact-render -- matrix layout" , _.omitBy(_.find(layouts, ['i', 'matrix']), _.isString));
   return <div>
   <div className={"Home cont"}>
     <ResponsiveReactGridLayout

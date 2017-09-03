@@ -38,14 +38,14 @@ export default (state = INITIAL_STATE, action) => {
                 z.vals[action.payload.cid][i] = '';
             }
         }
-    console.log("REFINE" + z.vals);
-    return {...z};
+        console.log("REFINE" + z.vals);
+      return {...z};
     case 'SELECT_'+modelName:
-    const e = state;
-    var b = e.selectedCells
-    e.selectedCells = _.concat(b,action.payload.selectedCells )
-    console.log(e.selectedCells)
-    return {...e};
+      const e = state;
+      var b = e.selectedCells
+      e.selectedCells = _.concat(b,action.payload.selectedCells )
+      console.log(e.selectedCells)
+      return {...e};
     default:
         return state;
   }
