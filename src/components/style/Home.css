@@ -27,14 +27,16 @@
   cursor: pointer;
 }
 
+
+
+
 /*------------INPUTS AND BUTTONS------------*/
-/*New Pattern/Scene Input*/
 .Input {
   font-size: 12px;
   border: 1px solid rgba(125,125,125, 0.8);
   cursor: text;
+  width: 100%;
 }
-/*New Pattern Add Button*/
 .Button {
   font-size: 12px;
   border: 1px solid rgba(125,125,125, 0.8);
@@ -59,18 +61,21 @@ div.cm-s-_style.CodeMirror {
 /*------------SCENES PANEL------------*/
 /*All Scene Items together*/
 .AllScenes {
-  display: flex;
   overflow-y: auto;
-  padding-bottom: 5px;
+  margin: 10px 0px 0px 0px;
 }
 /*Scene Items on Scene Panel*/
 .SceneItem {
-  display: flex;
-  flex-grow: 2;
-  flex-direction: row;
-  padding-bottom: 5px;
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  width: 98%; /*But whyy*/
+  background: none;
 }
-
+/*Active Scene Items on Scene Panel*/
+.SceneItem-active {
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  width: 98%; /*But whyy*/
+  background: rgba(255,255,102,0.25);
+}
 
 
 
@@ -97,14 +102,10 @@ div.cm-s-_style.CodeMirror {
 
 /*------------CONSOLE PANEL------------*/
 /*Tidal and SC Console textboxes*/
-.ConsoleTextBox{
-  display: flex;
+.ConsoleTextBox {
   font-size: 14px;
-  flex-direction: column;
-  align-self: flex-end;
-  margin: 5px;
-  width: 95%;
-  height: 30%;
+  width: 100%;
+  height: 40%;
 }
 
 
@@ -149,9 +150,7 @@ div.cm-s-_style.CodeMirror {
   display: inline-flex;
   background: rgba(200,200,200,0.1);
   line-height: 2px;
-  border-style: double;
-  border-width: 1px;
-  border-color: rgba(180,180,180, 1);
+  border-width: 1px double rgba(180,180,180, 1);
 }
 .Visual {
   background: rgba(144, 48, 90,0.5);

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './style/Layout.css';
+import './style/Dropdown.css';
 import './style/Home.css';
 import './style/Menu.css';
 import io from 'socket.io-client'
@@ -36,7 +37,7 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 var Button = require('react-button')
 var MaskedInput = require('react-maskedinput')
 var themeButton = {
-    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
+    style : {borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(125,125,125, 0.8)'},
     disabledStyle: { background: 'gray'},
     overStyle: { background: 'rgba(255,255,102,0.15)' },
     activeStyle: { background: 'rgba(255,255,102,0.15)' },
@@ -410,12 +411,12 @@ renderScene(item, dbKey, i) {
   }
 
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  const className = activeMatrix === item.matName ? "SceneItem-active" : "SceneItem";
   return item.key && (
-    <div key={item.key} className={"SceneItem"}>
-      <div >
-        <button onClick={handleDelete}>{'x'}</button>
-        {activeMatrix === item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</Button>}
-        {activeMatrix !== item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton}  style={{ color: '#ddd'}}>{item.matName}</Button>}
+    <div key={item.key} className={className+ " draggableCancel"}>
+      <div>
+        <button onClick={handleDelete}>{'X'}</button>
+        <button onClick={updateMatrix}>{item.matName}</button>
       </div>
     </div>
   )
@@ -830,14 +831,14 @@ render() {
         <div>
           <div>
             <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button className={'Button'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-            {!this.state.sceneSentinel && <button className={'Button'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
-            <button className={'Button'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+            {this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+            {!this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
+            <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
           </div>
           <div className={'AllScenes'}>
             <div>
               {this.props.user.user.name && ctx.renderScenes(items)}
-              {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+              {!this.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
             </div>
           </div>
         </div>
@@ -871,11 +872,11 @@ render() {
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
         </div>
         <div>
-          <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value = {c_type} placeholder="Type" />
+          <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
           <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} value = {c_name} placeholder="Name "/>
           <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} value = {c_step} placeholder="Step "/>
           <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} value = {c_transition} placeholder="Transition (optional)"/>
-          <Button className={"Button"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
+          <Button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
         </div>
       </div>
       <div key={'globals'} data-grid={{x: 6, y: 16, w: 5, h: 4, minW: 4}}>
@@ -900,9 +901,9 @@ render() {
           <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
           <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
           {_.map(storedGlobals, (c, i) => {
-             return <Button id={i} pressed = {pressed[i]} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
+             return <Button className={"Button draggableCancel"} id={i} pressed={pressed[i]} onClick={ctx.clicked.bind(ctx)} theme={themeButton}>{i}</Button>
            })}
-           <Button theme={themeButton} onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec</Button>
+           <Button className={"Button draggableCancel"} theme={themeButton} onClick={ctx.record.bind(ctx)}>Rec</Button>
         </div>
       </div>
       <div key={'console'} data-grid={{x: 11, y: 16, w: 5, h: 4, minW: 2}}>
