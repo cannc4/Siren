@@ -727,8 +727,10 @@ export const deleteChannel = (key) => {
 	return  { type: 'DELETE_CHANNEL', payload: key }
 }
 
-export const updateLayout = (windows) => {
-	return  { type: 'UPDATE_LAYOUT', payload: windows }
+export function updateLayout(windows) {
+	return dispatch => {
+		dispatch({ type: 'UPDATE_LAYOUT', payload: windows });
+	}
 }
 
 export function chokeClick() {

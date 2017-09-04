@@ -835,7 +835,7 @@ resetLayout() {
                      {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
                      {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
                      {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false},
-                     {i: 'dummy', x: 11, y: 56, w: 5, h: 4, minW: 2, moved: false, static: false},];
+                     {i: 'dummy', x: 11, y: 56, w: 5, h: 4, minW: 2, moved: false, static: false}];
   store.dispatch(updateLayout(localstore));
 }
 
@@ -888,7 +888,6 @@ render() {
     newGridParameters.w = itemToCopy.w;
     newGridParameters.h = itemToCopy.h;
     newGridParameters.minW = itemToCopy.minW;
-    console.log(newGridParameters);
     return newGridParameters;
   }
 
@@ -897,7 +896,7 @@ render() {
     <ResponsiveReactGridLayout
         className={"layout"}
         layouts={layouts}
-        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480}}
+        breakpoints={{lg: 1200, md: 996, sm: 768, xs: getGridParameters('matrix').w}}
         cols={{lg: 24, md: 20, sm: 12, xs: getGridParameters('scenes').y}}
         draggableCancel={'.draggableCancel'}
         margin={[margin, margin]}
