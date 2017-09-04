@@ -42,9 +42,7 @@ export default (state = INITIAL_STATE, action) => {
       return {...z};
     case 'SELECT_'+modelName:
       const e = state;
-      var b = e.selectedCells
-      e.selectedCells = _.concat(b,action.payload.selectedCells )
-      console.log(e.selectedCells)
+      e.selectedCells = action.payload;
       return {...e};
     default:
         return state;

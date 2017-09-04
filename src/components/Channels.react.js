@@ -128,13 +128,7 @@ class Channels extends Component {
     ctx.sendPatterns();
   }
 
-  handleSelection (selectedKeys) {
-    const ctx = this;
-    //const {selectedCells} = ctx.state;
-    var b = [];
-    console.log("selectedKeys ", selectedKeys);
-    store.dispatch(selectCell(selectedKeys));
-  }
+
   // Cell draw
   // renderStep(item, _, i) {
   //   const ctx = this;
@@ -231,15 +225,7 @@ class Channels extends Component {
           <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
           <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel}>S</Button>
         </div>
-        <SelectableGroup onSelection={ctx.handleSelection.bind(ctx)}
-          ref="selectable"
-          tolerance={this.state.tolerance}
-					selectOnMouseMove={this.state.selectOnMouseMove}
-          preventDefault = {false}
-          selected={selected}
-          fixedPosition={true}>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        </SelectableGroup>
         <input className = {"GridItem-transition draggableCancel"}
           placeholder={" - "}  value = {item.transition}
           onChange = {updateTransition}/>

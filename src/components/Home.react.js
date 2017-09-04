@@ -4,6 +4,7 @@ import './style/Layout.css';
 import './style/Dropdown.css';
 import './style/Home.css';
 import './style/Menu.css';
+import './style/ContextMenu.css';
 import io from 'socket.io-client'
 // const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
 
@@ -11,7 +12,7 @@ import {sendScPattern, sendSCMatrix,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
-      fbcreatechannelinscene, fbupdatechannelinscene,
+      fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells, updateLayout} from '../actions'
 
 import Patterns from './Patterns.react';
@@ -19,9 +20,11 @@ import Channels from './Channels.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
+import { SelectableGroup, createSelectable } from 'react-selectable';
+
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
 import Dropdown from 'react-dropdown'
-
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.js';
@@ -289,6 +292,16 @@ handleChannelTransition = event => {
   ctx.setState({c_transition: event.target.value});
 }
 
+handleSelection (selectedKeys) {
+  const ctx = this;
+  store.dispatch(selectCell(selectedKeys));
+  // console.log("selectedKeys2 ", ctx.props.cell.selectedCells);
+}
+
+handleUnselection() {
+  store.dispatch(selectCell([]))
+}
+
 renderChannel(item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
@@ -311,7 +324,7 @@ renderPlayer() {
   const ctx = this;
   var items = ctx.props.channel;
 
-  return (<div className={"AllChannels"}>
+  return (<div className={"AllChannels draggableCancel"}>
           {_.map(items, ctx.renderChannel.bind(ctx))}
           </div>)
 }
@@ -815,14 +828,22 @@ makeMatrixFullscreen() {
 
 resetLayout() {
   console.log("RESET LAYOUT");
-  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
-                               {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
-                               {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
-                               {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
-                               {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
-                               {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
-                               {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+  const localstore = [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                     {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                     {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                     {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
+                     {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
+                     {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
+                     {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false},
+                     {i: 'dummy', x: 11, y: 56, w: 5, h: 4, minW: 2, moved: false, static: false},];
+  store.dispatch(updateLayout(localstore));
 }
+
+
+handleClick = (e, data) => {
+  console.log(e, data);
+}
+
 
 
 render() {
@@ -857,46 +878,77 @@ render() {
       margin = 7,
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
 
-  const layouts = ctx.props.layout.windows;
-  console.log("Homereact-render -- matrix layout" , _.omitBy(_.find(layouts, ['i', 'matrix']), _.isString));
+  let layouts = JSON.parse(JSON.stringify(ctx.props.layout.windows));
+
+  const getGridParameters = (specifier) => {
+    const itemToCopy = _.find(layouts, ['i', specifier]);
+    var newGridParameters = {x: 0, y:0, h:0, w:0, minW:0};
+    newGridParameters.x = itemToCopy.x;
+    newGridParameters.y = itemToCopy.y;
+    newGridParameters.w = itemToCopy.w;
+    newGridParameters.h = itemToCopy.h;
+    newGridParameters.minW = itemToCopy.minW;
+    console.log(newGridParameters);
+    return newGridParameters;
+  }
+
   return <div>
   <div className={"Home cont"}>
     <ResponsiveReactGridLayout
         className={"layout"}
-        layouts={ctx.props.layout.windows}
+        layouts={layouts}
         breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480}}
-        cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+        cols={{lg: 24, md: 20, sm: 12, xs: getGridParameters('scenes').y}}
         draggableCancel={'.draggableCancel'}
         margin={[margin, margin]}
         rowHeight={row_height}
         onLayoutChange={ctx.onLayoutChange.bind(ctx)}
       >
-      <div key={"scenes"} data-grid={_.omitBy(_.find(layouts, ['i', 'scenes']), _.isString)}>
-        <div className={"PanelHeader"}> ■ All Scenes
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
-        </div>
-        <div>
+      <div key={"scenes"} data-grid={getGridParameters('scenes')}>
+        <ContextMenuTrigger id="scenes_context">
           <div>
-            <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-            {!this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
-            <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
-          </div>
-          <div className={'AllScenes'}>
+            <div className={"PanelHeader"}> ■ All Scenes
+              <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
+            </div>
             <div>
-              {this.props.user.user.name && ctx.renderScenes(items)}
-              {!this.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+              <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+              {this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+              {!this.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
+              <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+            </div>
+            <div className={'AllScenes'}>
+              <div>
+                {this.props.user.user.name && ctx.renderScenes(items)}
+                {!this.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+              </div>
             </div>
           </div>
-        </div>
+          <ContextMenu id="scenes_context" className={"draggableCancel"}>
+            <MenuItem data={"some_data"} onClick={this.handleClick.bind(ctx)}>
+              Item 1
+            </MenuItem>
+            <MenuItem data={"some_data"} onClick={this.handleClick.bind(ctx)}>
+              Item 2
+            </MenuItem>
+            <MenuItem divider />
+            <MenuItem data={"some_data"} onClick={this.handleClick.bind(ctx)}>
+       	      Item 3
+            </MenuItem>
+          </ContextMenu>
+        </ContextMenuTrigger>
       </div>
-      <div key={'matrix'} data-grid={_.omitBy(_.find(layouts, ['i', 'matrix']), _.isString)} >
+      <div key={'matrix'} data-grid={getGridParameters('matrix')} >
         <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "matrix")}>X</span>
         </div>
-        {ctx.renderPlayer()}
+        <SelectableGroup
+            onSelection={ctx.handleSelection.bind(ctx)}
+            onNonItemClick={ctx.handleUnselection.bind(ctx)}
+            tolerance={0}>
+            {ctx.renderPlayer()}
+        </SelectableGroup>
       </div>
-      <div key={'patterns'} data-grid={_.omitBy(_.find(layouts, ['i', 'patterns']), _.isString)}>
+      <div key={'patterns'} data-grid={getGridParameters('patterns')}>
         <div className={"PanelHeader"}> ■ Patterns in <span class="italic">{'"'+activeMatrix+'"'}</span>
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "patterns")}>X</span>
         </div>
@@ -904,7 +956,7 @@ render() {
           <Patterns active={activeMatrix}/>
         </div>
       </div>
-      <div key={'pattern_history'} data-grid={_.omitBy(_.find(layouts, ['i', 'pattern_history']), _.isString)}>
+      <div key={'pattern_history'} data-grid={getGridParameters('pattern_history')}>
         <div className={"PanelHeader"}> ■ Pattern History
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "pattern_history")}>X</span>
         </div>
@@ -914,7 +966,7 @@ render() {
           })}
         </div>
       </div>
-      <div key={'channel_add'} data-grid={_.omitBy(_.find(layouts, ['i', 'channel_add']), _.isString)}>
+      <div key={'channel_add'} data-grid={getGridParameters('channel_add')}>
         <div className={"PanelHeader"}> ■ Add Channel
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
         </div>
@@ -926,7 +978,7 @@ render() {
           <Button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)} theme = {themeButton}>Add</Button>
         </div>
       </div>
-      <div key={'globals'} data-grid={_.omitBy(_.find(layouts, ['i', 'globals']), _.isString)}>
+      <div key={'globals'} data-grid={getGridParameters('globals')}>
         <div className={"PanelHeader"}> ■ Global Parameters
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "globals")}>X</span>
         </div>
@@ -953,7 +1005,7 @@ render() {
            <Button className={"Button draggableCancel"} theme={themeButton} onClick={ctx.record.bind(ctx)}>Rec</Button>
         </div>
       </div>
-      <div key={'console'} data-grid={_.omitBy(_.find(layouts, ['i', 'console']), _.isString)}>
+      <div key={'console'} data-grid={getGridParameters('console')}>
         <div className={"PanelHeader"}> ■ Console
           <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "console")}>X</span>
         </div>

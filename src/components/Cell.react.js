@@ -22,7 +22,6 @@ class Cell extends Component {
 
   componentWillMount = () => {
     const ctx = this;
-    console.log(this.props.item.cid);
     this.setState({value: this.props.item.vals[this.props.index],
                    cid: this.props.item.cid,
                    c_key:this.props.item.key,
@@ -30,12 +29,19 @@ class Cell extends Component {
                    s_key: this.props.s_key});
   }
 
-  shouldComponentUpdate(nextProps, nextState){
-    if  ( nextState.value !== this.state.value  ) {
-        return true;
-    }
-    return false;
-  }
+  // shouldComponentUpdate = (nextProps, nextState) => {
+  //   if(nextState.value !== this.state.value) {
+  //     return true;
+  //   }
+  //   else if(nextProps.currentStep === nextState.index ||
+  //           nextProps.currentStep === this.state.index+1 ||
+  //           nextProps.currentStep === 0) {
+  //     return true;
+  //   }
+  //   else {
+  //     return false;
+  //   }
+  // }
 
 //   componentWillUpdate(nextProps, nextState){
 //     if(nextProps.currentStep === nextState.state.index){
@@ -80,17 +86,19 @@ class Cell extends Component {
       fbupdatechannelinscene('Matrices', nc, ctx.state.s_key);
     }
     const tests = ({ target: { value }}) => {
-      console.log("tests on render cell?")
+      this.nameInput.focus();
     }
-
-
 
     var className = ctx.state.className;
     if(ctx.props.currentStep === ctx.state.index){
       className += '-active'
     }
+    if(_.indexOf(ctx.props.cell.selectedCells, ctx.state.cid+"_"+ctx.state.index) >= 0) {
+      className += ' selected';
+    }
     return <div key={(ctx.state.c_key +'_'+ctx.state.index).toString()}>
-      <textarea className={className + " draggableCancel"} type="text"
+      <textarea ref={(input) => { this.nameInput = input; }}
+                className={className + " draggableCancel"} type="text"
                 value={ctx.state.value}
                 onChange={setText}
                 onClick={tests}/>

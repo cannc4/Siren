@@ -360,8 +360,6 @@ var patListBack = [];
 var clickPrev;
 export const sendPatterns = (server, channel_namestepvalue ,
 	 channels, scenePatterns, click, globalparams) => {
-console.log('here');
-	// if(clickPrev !== undefined && click.current !== clickPrev){
 
 	return dispatch => {
 		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){

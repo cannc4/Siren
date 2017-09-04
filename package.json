@@ -55,6 +55,8 @@
     "react": "^15.4.2",
     "react-button": "^1.2.1",
     "react-codemirror": "^0.3.0",
+    "react-context-menu": "^1.1.0",
+    "react-contextmenu": "^2.6.5",
     "react-dom": "^15.4.2",
     "react-dropdown": "^1.2.5",
     "react-flex-layout": "^0.9.6",
