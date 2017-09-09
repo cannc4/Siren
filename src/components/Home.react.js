@@ -5,15 +5,15 @@ import './style/Dropdown.css';
 import './style/Home.css';
 import './style/Menu.css';
 import './style/ContextMenu.css';
-import io from 'socket.io-client'
-// const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
+import io from 'socket.io-client';
 
 import {sendScPattern, sendSCMatrix,
       sendGlobals,consoleSubmitHistory, consoleSubmit, fbcreateMatrix,
       fbdelete, fborder, updateMatrix,globalUpdate,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
-      createChannel, deleteChannel, createCell, bootCells, updateLayout} from '../actions'
+      createChannel, deleteChannel, createCell, bootCells,
+      updateLayout, forceUpdateLayout} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -93,10 +93,10 @@ class Home extends Component {
     store.dispatch(updateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
                                  {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
                                  {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
-                                 {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
-                                 {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
-                                 {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
-                                 {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+                                 {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, moved: false, static: false},
+                                 {i: 'channel_add', x: 3, y: 15, w: 3, h: 4, minW: 2, moved: false, static: false},
+                                 {i: 'globals', x: 6, y: 15, w: 5, h: 4, minW: 4, moved: false, static: false},
+                                 {i: 'console', x: 11, y: 15, w: 5, h: 4, minW: 2, moved: false, static: false}]))
   }
 
 //Clock for Haskell
@@ -781,9 +781,20 @@ tidalcps (value) {
   ctx.setState({click:temp});
 }
 
-onRemoveItem(key){
-  console.log(key + ' removing.');
-  store.dispatch(updateLayout(_.reject(this.props.layout.windows, {i: key})));
+onRemoveItem(specifier){
+  // assign a Y component greater than 100 to remove
+  var layouts = this.props.layout.windows;
+  if(layouts !== undefined) {
+    _.forEach(layouts, function(item, i) {
+      if (item.i === specifier) {
+        layouts[i].y = 150;
+        layouts[i].x = 0;
+        layouts[i].w = 3;
+        layouts[i].h = 1;
+      }
+    });
+    store.dispatch(forceUpdateLayout(layouts, layouts.length));
+  }
 }
 onLayoutChange(layout, layouts) {
   // SAVE DB
@@ -798,26 +809,29 @@ onLayoutChange(layout, layouts) {
 
 makeMatrixFullscreen() {
   console.log("FULLSCREEN LAYOUT");
-  store.dispatch(updateLayout([{i: "scenes", x: 0, y: 20, w: 3, h: 20, minW: 3, moved: false, static: false},
-                               {i: 'matrix', x: 0, y: 0, w: 24, h: 20, minW: 5, moved: false, static: false},
-                               {i: 'patterns', x: 16, y: 20, w: 8, h: 20, minW: 3, moved: false, static: false},
-                               {i: 'pattern_history', x: 23, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
-                               {i: 'channel_add', x: 3, y: 36, w: 3, h: 4, minW: 2, moved: false, static: false},
-                               {i: 'globals', x: 6, y: 36, w: 5, h: 4, minW: 4, moved: false, static: false},
-                               {i: 'console', x: 11, y: 36, w: 5, h: 4, minW: 2, moved: false, static: false}]))
+  var layouts = this.props.layout.windows;
+  if(layouts !== undefined) {
+    _.forEach(layouts, function(item, i) {
+      if (item.i === 'matrix') {
+        layouts[i].y = 0;
+        layouts[i].x = 0;
+        layouts[i].w = 24;
+        layouts[i].h = 20;
+      }
+    });
+    store.dispatch(forceUpdateLayout(layouts, layouts.length));
+  }
 }
 
 resetLayout() {
   console.log("RESET LAYOUT");
-  const localstore = [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
-                     {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
-                     {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
-                     {i: 'pattern_history', x: 3, y: 14, w: 13, h: 3, minW: 3, moved: false, static: false},
-                     {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, moved: false, static: false},
-                     {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, moved: false, static: false},
-                     {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, moved: false, static: false},
-                     {i: 'dummy', x: 11, y: 56, w: 5, h: 4, minW: 2, moved: false, static: false}];
-  store.dispatch(updateLayout(localstore));
+  store.dispatch(forceUpdateLayout([{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, moved: false, static: false},
+                               {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, moved: false, static: false},
+                               {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, moved: false, static: false},
+                               {i: 'channel_add', x: 3, y: 15, w: 3, h: 4, minW: 2, moved: false, static: false},
+                               {i: 'globals', x: 6, y: 15, w: 5, h: 4, minW: 4, moved: false, static: false},
+                               {i: 'console', x: 11, y: 15, w: 5, h: 4, minW: 2, moved: false, static: false}], this.props.layout.windows.length));
 }
 
 
@@ -859,18 +873,21 @@ render() {
       margin = 7,
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
 
-  let layouts = JSON.parse(JSON.stringify(ctx.props.layout.windows));
-
+  let layouts = ctx.props.layout.windows;
   const getGridParameters = (specifier) => {
     const itemToCopy = _.find(layouts, ['i', specifier]);
-    var newGridParameters = {x: 0, y:0, h:0, w:0, minW:0};
-    newGridParameters.x = itemToCopy.x;
-    newGridParameters.y = itemToCopy.y;
-    newGridParameters.w = itemToCopy.w;
-    newGridParameters.h = itemToCopy.h;
-    newGridParameters.minW = itemToCopy.minW;
+    var newGridParameters = {x: 0, y:100, h:1, w:1, minW:0};
+    if(itemToCopy){
+      newGridParameters.x = itemToCopy.x;
+      newGridParameters.y = itemToCopy.y;
+      newGridParameters.w = itemToCopy.w;
+      newGridParameters.h = itemToCopy.h;
+      newGridParameters.minW = itemToCopy.minW;
+    }
     return newGridParameters;
   }
+
+  console.log(layouts);
 
   return <div>
   <div className={"Home cont"}>
@@ -883,12 +900,24 @@ render() {
         margin={[margin, margin]}
         rowHeight={row_height}
         onLayoutChange={ctx.onLayoutChange.bind(ctx)}
+        verticalCompact={true}
       >
+      <div key={'matrix'} data-grid={getGridParameters('matrix')} >
+      <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
+      <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "matrix")}>X</span>
+      </div>
+      <SelectableGroup
+      onSelection={ctx.handleSelection.bind(ctx)}
+      onNonItemClick={ctx.handleUnselection.bind(ctx)}
+      tolerance={0}>
+      {ctx.renderPlayer()}
+      </SelectableGroup>
+      </div>
       <div key={"scenes"} data-grid={getGridParameters('scenes')}>
         <ContextMenuTrigger id="scenes_context">
           <div>
             <div className={"PanelHeader"}> ■ All Scenes
-              <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
+              <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "scenes")}>X</span>
             </div>
             <div>
               <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
@@ -917,20 +946,9 @@ render() {
           </ContextMenu>
         </ContextMenuTrigger>
       </div>
-      <div key={'matrix'} data-grid={getGridParameters('matrix')} >
-        <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "matrix")}>X</span>
-        </div>
-        <SelectableGroup
-            onSelection={ctx.handleSelection.bind(ctx)}
-            onNonItemClick={ctx.handleUnselection.bind(ctx)}
-            tolerance={0}>
-            {ctx.renderPlayer()}
-        </SelectableGroup>
-      </div>
       <div key={'patterns'} data-grid={getGridParameters('patterns')}>
         <div className={"PanelHeader"}> ■ Patterns in <span class="italic">{'"'+activeMatrix+'"'}</span>
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "patterns")}>X</span>
+          <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "patterns")}>X</span>
         </div>
         <div className={"AllPatterns"} >
           <Patterns active={activeMatrix}/>
@@ -938,7 +956,7 @@ render() {
       </div>
       <div key={'pattern_history'} data-grid={getGridParameters('pattern_history')}>
         <div className={"PanelHeader"}> ■ Pattern History
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "pattern_history")}>X</span>
+          <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "pattern_history")}>X</span>
         </div>
         <div>
          {_.map(storedPatterns, (c, i) => {
@@ -948,7 +966,7 @@ render() {
       </div>
       <div key={'channel_add'} data-grid={getGridParameters('channel_add')}>
         <div className={"PanelHeader"}> ■ Add Channel
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
+          <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "channel_add")}>X</span>
         </div>
         <div>
           <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
@@ -960,7 +978,7 @@ render() {
       </div>
       <div key={'globals'} data-grid={getGridParameters('globals')}>
         <div className={"PanelHeader"}> ■ Global Parameters
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "globals")}>X</span>
+          <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "globals")}>X</span>
         </div>
         <div>
           <input mask={maskedInputDurations}
@@ -987,7 +1005,7 @@ render() {
       </div>
       <div key={'console'} data-grid={getGridParameters('console')}>
         <div className={"PanelHeader"}> ■ Console
-          <span className={"PanelClose"} onClick={this.onRemoveItem.bind(this, "console")}>X</span>
+          <span className={"PanelClose draggableCancel"} onClick={this.onRemoveItem.bind(this, "console")}>X</span>
         </div>
         <div>
           <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>

@@ -147,6 +147,7 @@ div.cm-s-_style.CodeMirror {
   height: 92.5%;
   overflow-y: auto;
   margin: 10px;
+  cursor: crosshair;
 }
 
 /*Individual Channels*/
