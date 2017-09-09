@@ -5,7 +5,7 @@ import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene 
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-var CodeMirrorStyle = require('../assets/_style.css');
+import '../assets/_style.css'
 import '../assets/_rule.js';
 
 class Patterns extends Component {
@@ -61,10 +61,11 @@ class Patterns extends Component {
       } else {
         value = obj;
       }
-      var re = /`(\w+)`/g, match, matches = [];
-      while (match = re.exec(value)) {
+      var re = /`(\w+)`/g, match = re.exec(value), matches = [];
+      while (match) {
         if(_.indexOf(matches, match[1]) === -1)
           matches.push(match[1]);
+        match = re.exec(value);
       }
       _.remove(matches, function(n) {
         return n === 't';
@@ -106,14 +107,14 @@ class Patterns extends Component {
         showCursorWhenSelecting: true
     };
 
-    function getStyleSheet(unique_title) {
-      for(var i=0; i<document.styleSheets.length; i++) {
-        var sheet = document.styleSheets[i];
-        if(sheet.title == unique_title) {
-          return sheet;
-        }
-      }
-    }
+    // function getStyleSheet(unique_title) {
+    //   for(var i=0; i<document.styleSheets.length; i++) {
+    //     var sheet = document.styleSheets[i];
+    //     if(sheet.title == unique_title) {
+    //       return sheet;
+    //     }
+    //   }
+    // }
     //
     // var sheet = getStyleSheet('_style');
     // console.log(sheet);

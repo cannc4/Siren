@@ -1,4 +1,4 @@
-import { SelectableGroup, createSelectable } from 'react-selectable';
+import { createSelectable } from 'react-selectable';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
@@ -6,7 +6,7 @@ import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-        sendPatterns,selectCell} from '../actions';
+        sendPatterns } from '../actions';
 var Button = require('react-button')
 var themeButton = {
   style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
@@ -41,7 +41,7 @@ class Channels extends Component {
 
   componentDidMount(){
     const ctx = this;
-    const soloPressed = ctx.state;
+
     var pr = [];
     for (var i =0 ;i <40; i++){
       pr[i]=false;
@@ -60,20 +60,20 @@ class Channels extends Component {
 
   sendPatterns(){
     const ctx = this;
-    const globalparams = ctx.props.globalparams;
+
     const tidalServerLink = 'localhost:3001';
-    const { patterns, click } = ctx.props;
-    const { solo,soloActive } = ctx.state;
+    const { click } = ctx.props;
+    const { solo, soloActive } = ctx.state;
     const items = ctx.props.matrices;
 
     if (click.isActive && click.flag % click.times === 0) {
       var scenePatterns,
         channels,
-        channel_type,
+        // channel_type,
         channel_values,
-        channel_name,
-        channel_id,
-        channel_transition,
+        // channel_name,
+        // channel_id,
+        // channel_transition,
         mat_name;
 
       _.each(items, function(d){
@@ -86,10 +86,11 @@ class Channels extends Component {
 
       var channel_namestepvalues = [];
       _.each(channels, function(chan, i) {
+        var runNo, stepvalue;
         if( soloActive=== true ){
           if (chan.name === solo){
-            var runNo = Math.floor( click.current % chan.step) ;
-            var stepvalue = '';
+            runNo = Math.floor( click.current % chan.step) ;
+            stepvalue = '';
             channel_values = chan.vals;
             if (runNo !== undefined && (mat_name === chan.scene)) {
               _.each(channel_values, function(sv, j){
@@ -103,8 +104,8 @@ class Channels extends Component {
           }
         }
         else {
-          var runNo = Math.floor( click.current % chan.step) ;
-          var stepvalue = '';
+          runNo = Math.floor( click.current % chan.step) ;
+          stepvalue = '';
           channel_values = chan.vals;
             if (runNo !== undefined && (mat_name === chan.scene)) {
             _.each(channel_values, function(sv, j){
@@ -140,19 +141,19 @@ class Channels extends Component {
 
   renderStep(item, _, i) {
     const ctx = this;
-    const { click, active } = ctx.props;
-    const step = parseInt(item.step);
+    const { click } = ctx.props;
+    const step = parseInt(item.step, 10);
     const currentStep = Math.floor( click.current % step);
 
     return(
       <SelectableComponent
         selectableKey={item.cid+'_'+i}
         key={item.key+i}
-        item = {item}
+        item={item}
         index={i}
-        c_cid = {item.cid}
-        currentStep = {currentStep}
-        s_key = {ctx.props.scene_key} >
+        c_cid={item.cid}
+        currentStep={currentStep}
+        s_key={ctx.props.scene_key} >
       </SelectableComponent>
     )
   }
@@ -185,7 +186,7 @@ class Channels extends Component {
     }
     const soloChannel = event => {
       const ctx = this;
-      const {solo, soloPressed, soloActive} = ctx.state;
+      const { soloPressed, soloActive} = ctx.state;
       var pr = soloPressed;
 
       if(soloActive === false){
@@ -195,8 +196,8 @@ class Channels extends Component {
         pr[item.cid] = !pr[item.cid];
       }
       else{
-        for (var i = 0; i < pr.length; i++){
-          pr[i] = false;
+        for (var j = 0; j < pr.length; j++){
+          pr[j] = false;
         }
       }
       var sel_solo;
@@ -210,25 +211,24 @@ class Channels extends Component {
     }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
-      item.transition = value
+      item.transition = value;
       fbupdatechannelinscene('Matrices',
                 { transition: value, key: item.key },
                 ctx.props.scene_key)
     }
 
-    const step = parseInt(item.step);
-    const selected = this.state.selectedCells.indexOf(9) > -1;
+    const step = parseInt(item.step, 10);
     return item && (
       <div key={(item['cid']).toString()} className={"ChannelItem"}>
-        <div className = {"ChannelItemHeader " + item.type }>
-          <button onClick={deleteChannel}>&nbsp;{'X'}</button>
-          <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-          <Button theme = {themeButton} pressed = {soloPressed[item.cid]} onClick={soloChannel}>S</Button>
+        <div className={"ChannelItemHeader " + item.type }>
+          <Button theme={themeButton} pressed={soloPressed[item.cid]} onClick={soloChannel}>S</Button>
+          <p>{item.name}</p>
+          <button onClick={deleteChannel}>{'X'}</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <input className = {"GridItem-transition draggableCancel"}
-          placeholder={" - "}  value = {item.transition}
-          onChange = {updateTransition}/>
+        <input className={"GridItem-transition draggableCancel"}
+          placeholder={" - "}  value={item.transition}
+          onChange={updateTransition}/>
       </div>
     )
   }

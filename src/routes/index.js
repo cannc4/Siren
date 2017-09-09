@@ -6,8 +6,7 @@ import App from '../components/App';
 import Patterns from '../components/Patterns.react';
 import Home from '../components/Home.react';
 import {
-  handleEnterHome,
-  handleEnterLive
+  handleEnterHome
 } from './callbacks';
 
 export default (

@@ -5,7 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-import { handleEnterHome } from '../routes'
+
 Firebase.initializeApp({
 
 		 apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -51,11 +51,15 @@ const models = {
     }
   }
 }
-
+// eslint-disable-next-line
 String.prototype.replaceAt = function(index, character) {
 	return this.substr(0, index) + character + this.substr(index+character.length);
 }
-
+// eslint-disable-next-line
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
 
 export function fetchModels() {
 	return _.map(models, (e, key) => { return key.toLowerCase() })
@@ -165,22 +169,11 @@ export function fbcreatechannelinscene(model, data, s_key){
 	}
 }
 
-export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
-}
-
-
-export function fbdeletechannelinscene(model, s_key, c_key) {
-	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-	store.dispatch(deleteChannel(c_key));
-}
-
-
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
 	{
-		var datakey, sceneIndex, values, patterns, uid, channels, storedGlobals;
+		var datakey, sceneIndex, patterns, channels, storedGlobals;
 		models[model].dataSource.ref.once('value', dat => {
 			var u_id = Firebase.auth().currentUser.uid;
 			if ( u_id !== null)
@@ -192,7 +185,7 @@ export function fbcreateMatrix(model, data) {
 					if (obj.channels !== undefined) channels = obj.channels;
 					if (obj.globals !== undefined) storedGlobals = obj.globals;
 					if (obj.patterns !== undefined) patterns = obj.patterns;
-					uid = obj.uid;
+					u_id = obj.uid;
 				}
 			}
 		});
@@ -276,15 +269,15 @@ export function GitHubLogin() {
 		Firebase.auth().getRedirectResult().then(result => {
 			if (result.credential) {
 				// This gives you a GitHub Access Token. You can use it to access the GitHub API.
-				var token = result.credential.accessToken;
+				// var token = result.credential.accessToken;
 			}
 			// The signed-in user info
-			var user = result.user;
+			// var user = result.user;
 		}).catch(function(error) {
-			var errorCode = error.code;
-			var errorMessage = error.message;
-			var email = error.email;
-			var credential = error.credential;
+			// var errorCode = error.code;
+			// var errorMessage = error.message;
+			// var email = error.email;
+			// var credential = error.credential;
 			dispatch({
 				type: FETCH_ACCOUNTS_ERROR,
 				payload: error
@@ -347,17 +340,10 @@ export const TidalTick = (server) => {
   }
 }
 
-
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.replace(new RegExp(search, 'g'), replacement);
-};
-
-
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
-var patListBack = [];
-var clickPrev;
+// var patListBack = [];
+// var clickPrev;
 export const sendPatterns = (server, channel_namestepvalue ,
 	 channels, scenePatterns, click, globalparams) => {
 
@@ -380,32 +366,32 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			return param;
 		}
 		//gets mathematical expression
-		const getMathExpr = (v) => {
-			var maths = [];
-			_.map(_.split(v, /[&]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
-
-				if(p1 !== "") maths.push(p1);
-			});
-			return maths;
-		}
+		// const getMathExpr = (v) => {
+		// 	var maths = [];
+		// 	_.map(_.split(v, /[&]+/g), (p1, p2) => {
+		// 		p1 = _.trim(p1);
+		//
+		// 		if(p1 !== "") maths.push(p1);
+		// 	});
+		// 	return maths;
+		// }
 
 		// pattern name
 		const cellName = getParameters(v)[0];
 
 		// command of the pattern
 		const cmd = _.find(scenePatterns, c => c.name === cellName);
+		var newCommand;
 
 		// CPS channel handling
 		if( k === 'cps'){
-			var newCommand = cellName;
-			return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+			newCommand = cellName;
+			return [k + " " + newCommand, "sendOSC d_OSC $ "] ;
 		}
 		// other channels
 		else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
 			var cellItem = _.slice(getParameters(v), 1);
-			var newCommand = cmd.pattern;
-
+			newCommand= cmd.pattern;
 			// Construct the parameter list from command
 			var parameters = _.concat( _.split(cmd.params, ','),'t');
 
@@ -416,7 +402,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
 				}
 				// Random parameter
-				else if(_.indexOf(cellItem[i], '|') != -1 )
+				else if(_.indexOf(cellItem[i], '|') !== -1 )
 				{
 					cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
 					var bounds = _.split(cellItem[i], ',');
@@ -434,25 +420,26 @@ export const sendPatterns = (server, channel_namestepvalue ,
 				}
 			});
 
+
 			// Math Parser
-			var re = /\&(.*?)\&/g;
-			_.forEach(_.words(newCommand, re), function(val, i){
+			// eslint-disable-next-line
+			_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
 				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 			})
 			// solo or not (obsolete)
 			var channel_id,
-					channel_type,
+					// channel_type,
 					channel_transition,
-		 			channel_name,
+					// 	channel_name,
 					transitionHolder,
 					soloHolder,
 					_k;
 
 			_.each(channels, function(chantwo,i){
 				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
-					channel_type = chantwo.type;
+					// channel_type = chantwo.type;
 					channel_transition = chantwo.transition;
-					channel_name = chantwo.name;
+					// channel_name = chantwo.name;
 					channel_id = chantwo.cid;
 					soloHolder = k[0];
 				 	transitionHolder = "" ;
@@ -475,10 +462,10 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			// 		transitionHolder = " $ ";
 			// }
 
+			var pattern;
 			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
-
 				var storechan = _k + " $ ";
-				var pattern = storechan + newCommand;
+				pattern = storechan + newCommand;
 				globalparams.storedPatterns[channel_id] = '';
 				globalparams.storedPatterns[channel_id] = pattern;
 				channel_id++;
@@ -497,9 +484,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 
 			}
 			else {
-
-
-				var pattern = soloHolder  + transitionHolder + newCommand;
+				pattern = soloHolder  + transitionHolder + newCommand;
 				globalparams.storedPatterns[channel_id] = '';
 				globalparams.storedPatterns[channel_id] = pattern;
 				channel_id++;
@@ -557,7 +542,7 @@ export const sendPatterns = (server, channel_namestepvalue ,
 			console.error(error);
 		});
 	//}
-	clickPrev = click.current;
+	// clickPrev = click.current;
 }
 // else {
 // 	return [];
@@ -652,10 +637,9 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 				var stp=storedPatterns[chan-1];
 				if(stp !== undefined){
 					ch = stp.match(b)[0];
-					ch = ch + ' $ ';
+					ch += ' $ ';
 					stp = stp.substring(stp.indexOf('$')+1);
-					var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
-					pat.push(pp);
+					pat.push(ch  + currentglobal[1]  + stp + currentglobal[0]);
 				}
 			});
 			}
@@ -748,4 +732,14 @@ export function resetClick() {
 	return dispatch => {
 		dispatch({ type: 'RESET_CLICK'});
 	}
+}
+
+export function fbupdatechannelinscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+}
+
+
+export function fbdeletechannelinscene(model, s_key, c_key) {
+	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+	store.dispatch(deleteChannel(c_key));
 }

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import store from '../store';
 import './style/MenuBar.css'
 
@@ -32,7 +31,6 @@ class MenuBar extends Component {
 
   ////////////////////////////// TIMER STARTS ////////////////////////////
   startTimer = event => {
-    const ctx = this;
     if(event.shiftKey)
       store.dispatch(resetClick());
     else
@@ -40,7 +38,6 @@ class MenuBar extends Component {
   }
 
   stopTimer = event => {
-    const ctx = this;
     if(event.shiftKey)
       store.dispatch(resetClick());
     else
@@ -58,14 +55,14 @@ class MenuBar extends Component {
     const ctx = this;
 
     const { times } = ctx.state;
-    const { tidal, click, patterns } = ctx.props;
+    const { tidal, click } = ctx.props;
     const { version } = ctx.props.menu;
 
 
     const changeTimes = ({target: {value}}) => {
-      if (!isNaN(parseInt(value))){
-        ctx.setState({times : parseInt(value)});
-        ctx.props.click.times = parseInt(value);
+      if (!isNaN(parseInt(value, 10))){
+        ctx.setState({times : parseInt(value, 10)});
+        ctx.props.click.times = parseInt(value, 10);
       }
     }
 

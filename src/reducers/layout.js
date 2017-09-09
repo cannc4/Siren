@@ -1,3 +1,4 @@
+import _ from 'lodash';
 const modelName = 'LAYOUT';
 const INITIAL_STATE = {windows: {}};
 export default (state = INITIAL_STATE, action) => {

@@ -143,7 +143,6 @@ div.cm-s-_style.CodeMirror {
 /*All Channels Together*/
 .AllChannels {
   display: flex;
-  flex-grow: 2;
   flex-direction: row;
   height: 92.5%;
   overflow-y: auto;
@@ -162,6 +161,7 @@ div.cm-s-_style.CodeMirror {
 /* Matrix header styling*/
 .ChannelItemHeader {
   display: inline-flex;
+  justify-content: space-between;
   background: rgba(200,200,200,0.1);
   line-height: 2px;
   border-width: 1px double rgba(180,180,180, 1);
@@ -169,8 +169,8 @@ div.cm-s-_style.CodeMirror {
 .Visual {
   background: rgba(144, 48, 90,0.5);
 }
-.Audio {
-  background: rgba(170, 162, 57,0.5);
+.SCSynth {
+  background: rgba(70, 82, 157,0.5);
 }
 .MIDI {
   background: rgba(255, 175, 63, 0.5)

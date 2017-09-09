@@ -1,10 +1,10 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
-
+/* eslint-disable */
 (function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
+  if (typeof exports === "object" && typeof module === "object") // CommonJS
     mod(require("../../node_modules/codemirror/lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
+  else if (typeof define === "function" && define.amd) // AMD
     define(["../../node_modules/codemirror/lib/codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
@@ -39,7 +39,7 @@
 
         var ch = source.next();
         if (specialRE.test(ch)) {
-          if (ch == '{' && source.eat('-')) {
+          if (ch === '{' && source.eat('-')) {
             var t = "comment";
             if (source.eat('#')) t = "meta";
             return switchState(source, setState, ncomment(t, 1));
@@ -47,7 +47,7 @@
           return null;
         }
 
-        if (ch == '\'') {
+        if (ch === '\'') {
           if (source.eat('\\'))
             source.next();  // should handle other escapes here
           else
@@ -59,18 +59,18 @@
         }
 
         // console.log(ch);
-        if (ch == '&') {
+        if (ch === '&') {
           // console.log("mathState");
           return switchState(source, setState, mathExpression);
         }
 
-        if (ch == '`') {
+        if (ch === '`') {
 
             // console.log("varState");
           return switchState(source, setState, variableExpression);
         }
 
-        if (ch == '"') {
+        if (ch === '"') {
 
             // console.log("stringState");
           return switchState(source, setState, stringLiteral);
@@ -90,7 +90,7 @@
         }
 
         if (digitRE.test(ch)) {
-          if (ch == '0') {
+          if (ch === '0') {
             if (source.eat(/[xX]/)) {
               source.eatWhile(hexitRE); // should require at least 1
               return "integer";
@@ -115,7 +115,7 @@
         }
 
         if (symbolRE.test(ch)) {
-          if (ch == '-' && source.eat(/-/)) {
+          if (ch === '-' && source.eat(/-/)) {
             source.eatWhile(/-/);
             if (!source.eat(symbolRE)) {
               source.skipToEnd();
@@ -131,18 +131,18 @@
     }
 
     function ncomment(type, nest) {
-      if (nest == 0) {
+      if (nest === 0) {
         return normal();
       }
       return function(source, setState) {
         var currNest = nest;
         while (!source.eol()) {
           var ch = source.next();
-          if (ch == '{' && source.eat('-')) {
+          if (ch === '{' && source.eat('-')) {
             ++currNest;
-          } else if (ch == '-' && source.eat('}')) {
+          } else if (ch === '-' && source.eat('}')) {
             --currNest;
-            if (currNest == 0) {
+            if (currNest === 0) {
               setState(normal());
               return type;
             }
@@ -156,11 +156,11 @@
     function stringLiteral(source, setState) {
       while (!source.eol()) {
         var ch = source.next();
-        if (ch == '"') {
+        if (ch === '"') {
           setState(normal());
           return "string";
         }
-        if (ch == '\\') {
+        if (ch === '\\') {
           if (source.eol() || source.eat(whiteCharRE)) {
             setState(stringGap);
             return "string";
@@ -184,7 +184,7 @@
     function mathExpression(source, setState) {
       while (!source.eol()) {
         var ch = source.next();
-        if (ch == '&') {
+        if (ch === '&') {
           setState(normal());
           return "mathexpression";
         }
@@ -196,7 +196,7 @@
     function variableExpression(source, setState) {
       while (!source.eol()) {
         var ch = source.next();
-        if (ch == '`') {
+        if (ch === '`') {
           setState(normal());
           return "variableexpression";
         }

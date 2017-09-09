@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import store from '../store';
 import _ from 'lodash';
 
-import { fbdeletechannelinscene, fbupdatechannelinscene, updateCell, createCell} from '../actions';
+import { fbupdatechannelinscene, updateCell} from '../actions';
 
 class Cell extends Component {
   constructor(props) {
@@ -21,7 +21,6 @@ class Cell extends Component {
   }
 
   componentWillMount = () => {
-    const ctx = this;
     this.setState({value: this.props.item.vals[this.props.index],
                    cid: this.props.item.cid,
                    c_key:this.props.item.key,

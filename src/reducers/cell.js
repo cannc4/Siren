@@ -1,4 +1,4 @@
-import _ from 'lodash';
+// import _ from 'lodash';
 const modelName = 'CELL';
 const INITIAL_STATE = {vals: [[]], selectedCells:[]};
 export default (state = INITIAL_STATE, action) => {
@@ -32,10 +32,10 @@ export default (state = INITIAL_STATE, action) => {
         const z = state;
         var b = new Array(action.payload.cstep);
         z.vals.push(b);
-        for (var i = 0; i < action.payload.cstep; i++){
-            z.vals[action.payload.cid][i]= "";
-            if( z.vals[action.payload.cid][i] === undefined){
-                z.vals[action.payload.cid][i] = '';
+        for (var j = 0; j < action.payload.cstep; j++){
+            z.vals[action.payload.cid][j]= "";
+            if( z.vals[action.payload.cid][j] === undefined){
+                z.vals[action.payload.cid][j] = '';
             }
         }
         console.log("REFINE" + z.vals);
