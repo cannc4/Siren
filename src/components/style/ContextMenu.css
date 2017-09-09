@@ -1,10 +1,10 @@
 .react-contextmenu {
   font-family: 'Inconsolata';
   font-weight: 40;
-    min-width: 120px;
+    min-width: 140px;
     padding: 5px 0;
     margin: 2px 0 0;
-    font-size: 14px;
+    font-size: 12px;
     text-align: left;
     background-color: rgba(125,125,125, 0.85);
     background-clip: padding-box;

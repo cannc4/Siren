@@ -7,6 +7,7 @@ export default (state = INITIAL_STATE, action) => {
     case 'UPDATE_'+modelName:
       const l = state;
       l.windows = JSON.parse(JSON.stringify(action.payload));
+      console.log('reducer: ', action.payload);
       _.forEach(action.payload, function(panel, j)
       {
         l.windows[j].x = action.payload[j].x;
@@ -14,6 +15,7 @@ export default (state = INITIAL_STATE, action) => {
         l.windows[j].w = action.payload[j].w;
         l.windows[j].h = action.payload[j].h;
         l.windows[j].minW = action.payload[j].minW;
+        l.windows[j].isVisible = action.payload[j].isVisible;
       })
       return {...l};
     default:

@@ -715,16 +715,13 @@ export function forceUpdateLayout(windows, current_layout_length) {
 	// react-grid-layout only rerenders when number of layouts have changed.
 	// Add or remove a dummy layout to change the number of layouts, and force
 	// it to rerender itself
-	console.log('1) ', windows.length, current_layout_length);
 	if(windows.length === current_layout_length){
 		if(_.find(windows, function(o) { return o.i === 'dummy'; })){
 			windows = _.reject(windows, ['i', 'dummy']);
 		}
 		else {
-			windows = _.concat(windows, {i: 'dummy', x: 11, y: 100, w: 5, h: 4, minW: 2, moved: false, static: false});
+			windows = _.concat(windows, {i: 'dummy', x: 11, y: 100, w: 5, h: 4, minW: 2, isVisible: false});
 		}
-
-		console.log('2) ', windows.length, current_layout_length);
 	}
 	return dispatch => {
 		dispatch({ type: 'UPDATE_LAYOUT', payload: windows });
