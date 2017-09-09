@@ -88,13 +88,14 @@ class Home extends Component {
       c_id: 0,
       c_transition: '',
       csize: 1,
+      manual_layout_trig: false,
       default_layout: [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, isVisible: true},
                        {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, isVisible: true},
                        {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
                        {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
-                       {i: 'channel_add', x: 3, y: 15, w: 3, h: 4, minW: 2, isVisible: true},
-                       {i: 'globals', x: 6, y: 15, w: 5, h: 4, minW: 4, isVisible: true},
-                       {i: 'console', x: 11, y: 15, w: 5, h: 4, minW: 2, isVisible: true}]
+                       {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
+                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
+                       {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true}]
     }
 
     store.dispatch(updateLayout(this.state.default_layout))
@@ -779,6 +780,10 @@ tidalcps (value) {
   ctx.setState({click:temp});
 }
 
+handleClick = (e, data) => {
+  console.log(e, data);
+}
+
 onAddlayoutItem(specifier){
   var layouts = this.props.layout.windows;
   store.dispatch(forceUpdateLayout(_.concat(layouts, _.find(this.state.default_layout, ['i', specifier])), layouts.length));
@@ -799,11 +804,22 @@ onLayoutChange(layout, layouts) {
   const ctx = this;
   var temp_layouts = []
   _.forEach(layout, function(l) {
-    l.isVisible = _.find(ctx.props.layout.windows, ['i', l.i]).isVisible;
+    const propItem = _.find(ctx.props.layout.windows, ['i', l.i]);
+    l.isVisible = propItem.isVisible;
     if(l.isVisible === undefined)
       l.isVisible = true;
+
+    if (ctx.state.manual_layout_trig){
+      l.x = propItem.x;
+      l.y = propItem.y;
+      l.w = propItem.w;
+      l.h = propItem.h;
+      l.minW = propItem.minW;
+    }
     temp_layouts = _.concat(temp_layouts, _.omitBy(l, _.isUndefined));
   })
+
+  ctx.setState({manual_layout_trig: false});
 
   console.log('onLayoutChange: ', temp_layouts);
   store.dispatch(updateLayout(temp_layouts));
@@ -811,8 +827,10 @@ onLayoutChange(layout, layouts) {
 
 makeMatrixFullscreen() {
   console.log("FULLSCREEN LAYOUT");
+  this.setState({manual_layout_trig: true});
   var layouts = this.props.layout.windows
   if(layouts !== undefined) {
+    var found = false;
     _.forEach(layouts, function(item, i) {
       if (item.i === 'matrix') {
         layouts[i].y = 0;
@@ -820,23 +838,25 @@ makeMatrixFullscreen() {
         layouts[i].w = 24;
         layouts[i].h = 20;
         layouts[i].isVisible = true;
+        found = true;
       }
       else {
         layouts[i].isVisible = false;
       }
     });
+
+    if (!found) {
+      layouts = _.concat(layouts, {i: 'matrix', x: 0, y: 0, w: 24, h: 20, minW: 5, isVisible: true});
+    }
+
     store.dispatch(forceUpdateLayout(layouts, layouts.length));
   }
 }
 
 resetLayout() {
   console.log("RESET LAYOUT");
+  this.setState({manual_layout_trig: true});
   store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
-}
-
-
-handleClick = (e, data) => {
-  console.log(e, data);
 }
 
 renderLayouts(layoutItem, k) {
@@ -1024,7 +1044,7 @@ render() {
     <div className={"Home cont"}>
       <ResponsiveReactGridLayout
           className={"layout"}
-          layout={ctx.props.layout.windows}
+          layout={layouts}
           breakpoints={{lg: 1200, md: 996, sm: 768, xs: 360}}
           cols={{lg: 24, md: 20, sm: 12, xs: 8}}
           draggableCancel={'.draggableCancel'}
@@ -1040,7 +1060,7 @@ render() {
 
   <ContextMenu id="global_context" className={"draggableCancel"}>
     <MenuItem data={{value: 1}} onClick={ctx.handleClick.bind(ctx)}>
-      Global Item 1
+      Does nothing
     </MenuItem>
     <MenuItem divider />
     <SubMenu title={'Windows'}>
