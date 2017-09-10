@@ -312,16 +312,19 @@ export function logout() {
 	}
 }
 
-
 export const initTidalConsole = (server) => {
 	return dispatch => {
 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
 		.then((response) => {
+
 			dispatch({type: 'FETCH_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});
 	}
+}
+export const killTidalConsole = (server) => {
+	console.log("Implement stopping the server");
 }
 export const exitSC = (server) => {
 	return dispatch => {

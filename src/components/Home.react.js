@@ -844,8 +844,9 @@ onLoadCustomLayout(layout_id) {
   console.log("custom LAYOUT "+layout_id);
   const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
   this.setState({manual_layout_trig: true});
-  if (layout !== undefined)
+  if (layout !== undefined) {
     store.dispatch(forceUpdateLayout(layout, this.props.layout.windows.length));
+  }
 }
 
 makeMatrixFullscreen() {

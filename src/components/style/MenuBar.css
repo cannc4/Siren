@@ -2,32 +2,28 @@
   background: rgba(27, 27, 27, 1);
   position: fixed;
   display: inline-flex;
+  justify-content: space-between;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1;
   border-bottom: 1px solid #333;
-  padding: 0 30px;
+  padding: 6px 30px;
 }
 
-.MenuBar > a {
-  padding: 5px;
-  height: 50px;
-  line-height: 50px;
-  vertical-align: middle;
-  color: #ddd;
-  font-weight: 400;
-  font-size: 18px;
+.Logo {
+  margin-bottom: 0px !important;
+  font-family: 'Inconsolata';
+  font-weight: 40;
+  background: rgba(200,200,200, 0.15);
+  color: #bbb;
 }
-
-.MenuBar > a:hover {
-  color: #ddd;
-  text-decoration: underline;
-}
-
-.MenuBar > a.active {
-  color: rgba(27, 27, 27, 1);
-  text-decoration: none;
+.Version {
+  margin-top: 30px;
+  background: rgba(200,200,90, 0.75);
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .User{
@@ -35,7 +31,7 @@
   padding: 5px;
 
   justify-content: center;
-  align-items: center;
+  align-items:center;
   color: #ddd;
 }
 

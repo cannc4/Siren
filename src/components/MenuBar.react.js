@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import store from '../store';
 import './style/MenuBar.css'
 
-import { GitHubLogin, logout, chokeClick,resetClick, initTidalConsole} from '../actions'
+import { GitHubLogin, logout, chokeClick, resetClick,
+         initTidalConsole, killTidalConsole} from '../actions'
 
 class MenuBar extends Component {
   constructor(props) {
@@ -51,6 +52,12 @@ class MenuBar extends Component {
     store.dispatch(initTidalConsole(tidalServerLink));
   }
 
+  stopTidal() {
+    const ctx=this;
+    const { tidalServerLink } = ctx.state;
+    store.dispatch(killTidalConsole(tidalServerLink));
+  }
+
   render() {
     const ctx = this;
 
@@ -75,16 +82,16 @@ class MenuBar extends Component {
     }
 
     return (<div className='MenuBar boxshadow'>
-      <a href={"https://github.com/cannc4/Siren"}>
-      σειρήνα
-      </a>
-      <a style={{fontSize: '10px'}} href={"https://github.com/cannc4/Siren"}>{version}</a>
+      <div>
+        <h1 className={"Logo"}>Siren<span className={'Version'}>{'('+version+')'}</span></h1>
+      </div>
       <div className={"TimerControls"}>
-        {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
+        {!tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
+        {tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
         {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
         {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        <p>  Rate &nbsp;&nbsp;  </p>
+
+        <p style={{paddingLeft: 15, paddingReft: 5}}>{'Rate: '}</p>
         <input className={'TimesInput'} value={times} onChange={changeTimes}/>
       </div>
       <div className={"User"}>
@@ -92,8 +99,8 @@ class MenuBar extends Component {
           {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
         </div>
         <div>
-          {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>Logout</button>}
-          {!ctx.props.user.user.email && <button id={'login'} onClick={loginGG}>Login</button>}
+          {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}
+          {!ctx.props.user.user.email && <button className={"Button"} id={'login'} onClick={loginGG}>Login</button>}
         </div>
       </div>
     </div>)
