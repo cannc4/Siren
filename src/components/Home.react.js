@@ -13,7 +13,7 @@ import {sendScPattern, sendSCMatrix,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells,
-      updateLayout, forceUpdateLayout} from '../actions'
+      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -88,7 +88,7 @@ class Home extends Component {
       c_id: 0,
       c_transition: '',
       csize: 1,
-      manual_layout_trig: false,
+      manual_layout_trig: true,
       default_layout: [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, isVisible: true},
                        {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, isVisible: true},
                        {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
@@ -98,7 +98,7 @@ class Home extends Component {
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true}]
     }
 
-    store.dispatch(updateLayout(this.state.default_layout))
+    // store.dispatch(updateLayout(this.state.default_layout))
   }
 
 //Clock for Haskell
@@ -114,12 +114,22 @@ componentDidMount(props,state){
 
   keymaster('shift+r', ctx.resetLayout.bind(ctx));
   keymaster('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
+
+  keymaster('shift+1', ctx.onLoadCustomLayout.bind(ctx, 'c_1'));
+  keymaster('shift+2', ctx.onLoadCustomLayout.bind(ctx, 'c_2'));
+  keymaster('shift+3', ctx.onLoadCustomLayout.bind(ctx, 'c_3'));
+  keymaster('shift+4', ctx.onLoadCustomLayout.bind(ctx, 'c_4'));
 }
 
 componentWillUnmount(props, state) {
   const ctx = this;
   keymaster.unbind('shift+r', ctx.resetLayout.bind(ctx));
   keymaster.unbind('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
+
+  keymaster.unbind('shift+1', ctx.onLoadCustomLayout.bind(ctx, 'c_1'));
+  keymaster.unbind('shift+2', ctx.onLoadCustomLayout.bind(ctx, 'c_2'));
+  keymaster.unbind('shift+3', ctx.onLoadCustomLayout.bind(ctx, 'c_3'));
+  keymaster.unbind('shift+4', ctx.onLoadCustomLayout.bind(ctx, 'c_4'));
 }
 
 componentWillReceiveProps(nextProps) {
@@ -784,6 +794,11 @@ handleClick = (e, data) => {
   console.log(e, data);
 }
 
+saveLayouttoCustom = (id, e, data) => {
+  console.log("save db: ", id, e, data);
+  fbsavelayout("Accounts", this.props.layout.windows, this.props.user.user.uid, data.item);
+}
+
 onAddlayoutItem(specifier){
   var layouts = this.props.layout.windows;
   store.dispatch(forceUpdateLayout(_.concat(layouts, _.find(this.state.default_layout, ['i', specifier])), layouts.length));
@@ -796,13 +811,14 @@ onRemovelayoutItem(specifier){
         layouts[i].isVisible = false;
       }
     });
+    fbupdatelayout("Accounts", layouts, this.props.user.user.uid);
     store.dispatch(forceUpdateLayout(layouts, layouts.length));
   }
 }
-onLayoutChange(layout, layouts) {
-  // SAVE DB
+onLayoutChange(layout) {
   const ctx = this;
   var temp_layouts = []
+  console.log('onLayoutChange: ', layout);
   _.forEach(layout, function(l) {
     const propItem = _.find(ctx.props.layout.windows, ['i', l.i]);
     l.isVisible = propItem.isVisible;
@@ -820,9 +836,16 @@ onLayoutChange(layout, layouts) {
   })
 
   ctx.setState({manual_layout_trig: false});
-
-  console.log('onLayoutChange: ', temp_layouts);
+  fbupdatelayout("Accounts", temp_layouts, ctx.props.user.user.uid);
   store.dispatch(updateLayout(temp_layouts));
+}
+
+onLoadCustomLayout(layout_id) {
+  console.log("custom LAYOUT "+layout_id);
+  const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
+  this.setState({manual_layout_trig: true});
+  if (layout !== undefined)
+    store.dispatch(forceUpdateLayout(layout, this.props.layout.windows.length));
 }
 
 makeMatrixFullscreen() {
@@ -913,37 +936,23 @@ renderLayouts(layoutItem, k) {
   }
   else if (layoutItem.i === 'scenes') {
     return layoutItem.isVisible && (<div key={"scenes"} data-grid={getGridParameters('scenes')}>
-      <ContextMenuTrigger id="scenes_context">
+      <div>
+        <div className={"PanelHeader"}> ■ All Scenes
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
+        </div>
         <div>
-          <div className={"PanelHeader"}> ■ All Scenes
-            <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
-          </div>
+          <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
+          {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+          {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
+          <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+        </div>
+        <div className={'AllScenes'}>
           <div>
-            <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-            {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
-            <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
-          </div>
-          <div className={'AllScenes'}>
-            <div>
-              {ctx.props.user.user.name && ctx.renderScenes(items)}
-              {!ctx.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
-            </div>
+            {ctx.props.user.user.name && ctx.renderScenes(items)}
+            {!ctx.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
           </div>
         </div>
-        <ContextMenu id="scenes_context" className={"draggableCancel"}>
-          <MenuItem data={{value: 1}} onClick={ctx.handleClick.bind(ctx)}>
-            Item 1
-          </MenuItem>
-          <MenuItem data={{value: 2}} onClick={ctx.handleClick.bind(ctx)}>
-            Item 2
-          </MenuItem>
-          <MenuItem divider />
-          <MenuItem data={{value: 3}} onClick={ctx.handleClick.bind(ctx)}>
-            Item 3
-          </MenuItem>
-        </ContextMenu>
-      </ContextMenuTrigger>
+      </div>
     </div>);
   }
   else if (layoutItem.i === 'patterns') {
@@ -1038,9 +1047,8 @@ render() {
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
 
   let layouts = _.filter(ctx.props.layout.windows, ['isVisible', true, 'i', 'dummy']);
-  console.log('layouts: ', layouts);
   return <div>
-  <ContextMenuTrigger id="global_context">
+  <ContextMenuTrigger id="global_context" holdToDisplay={-1}>
     <div className={"Home cont"}>
       <ResponsiveReactGridLayout
           className={"layout"}
@@ -1072,8 +1080,22 @@ render() {
       })}
     </SubMenu>
     <SubMenu title={'Layouts'}>
-      <MenuItem onClick={ctx.resetLayout.bind(ctx)} data={{ item: 'reset' }}>Reset</MenuItem>
-      <MenuItem onClick={ctx.makeMatrixFullscreen.bind(ctx)} data={{ item: 'reset' }}>Expand Grid</MenuItem>
+      <MenuItem onClick={ctx.resetLayout.bind(ctx)} data={{ item: 'reset' }}>Reset<span style={{float: 'right'}}>⇧ + R</span></MenuItem>
+      <MenuItem onClick={ctx.makeMatrixFullscreen.bind(ctx)} data={{ item: 'reset' }}>Max. Grid<span style={{float: 'right'}}>⇧ + F</span></MenuItem>
+      <MenuItem divider />
+      {_.map({a:1, b:2, c:3, d:4}, function(i, key) {
+        if(ctx.props.user.user.layouts !== undefined && ctx.props.user.user.layouts.customs !== undefined) {
+          if(ctx.props.user.user.layouts.customs[["c_"+i]] !== undefined){
+            return <MenuItem onClick={ctx.onLoadCustomLayout.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>Cust. {i}<span style={{float: 'right'}}>⇧ + {i}</span></MenuItem>
+          }
+          else {
+            return <MenuItem onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
+          }
+        }
+        else {
+          return <MenuItem onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
+        }
+      })}
     </SubMenu>
   </ContextMenu>
 

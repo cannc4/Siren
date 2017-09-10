@@ -20,23 +20,7 @@ const models = {
       email: 'String',
       name: 'String',
       uid: 'String',
-    }
-  },
-  Patterns: {
-    dataSource: Firebase.database().ref("/patterns"),
-    model: {
-      name: 'String',
-      params: 'String',
-      pattern: 'String',
-      skey: 'String',
-      uid: 'String'
-    }
-  },
-  Live: {
-    dataSource: Firebase.database().ref("/live"),
-    model: {
-      timer: 'Object',
-      values: 'Object'
+			layouts: 'Object'
     }
   },
   Matrices: {
@@ -95,7 +79,8 @@ export function fbauth() {
 						uid: user.uid,
 						name: user.displayName,
 						email: user.email,
-						key: user.uid
+						key: user.uid,
+						layouts: user.layouts
 					}))
 				})
 			}
@@ -122,6 +107,25 @@ export function fbfetch(model) {
 		})
 	}
 }
+export function fbfetchlayout(model) {
+	return dispatch => {
+		models[model].dataSource.ref.on('value', data => {
+			if (Firebase.auth().currentUser !== null)
+			{
+				const { uid } = Firebase.auth().currentUser;
+				const u = _.find(data.val(), (d) => d.uid === uid);
+
+				if (u !== null && u !== undefined) {
+					// console.log('fbfetchlayout: ', Object.values(u.layouts.default_layout));
+					dispatch({
+						type: 'UPDATE_LAYOUT',
+						payload: _.filter(Object.values(u.layouts.default_layout), ['isVisible', true])
+					})
+				}
+			}
+		})
+	}
+}
 export function fbfetchscenes(model) {
 	return dispatch => {
 		models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
@@ -141,6 +145,7 @@ export function fbfetchscenes(model) {
 		})
 	}
 }
+
 export function fbcreate(model, data) {
 	if (data['key']) {
 		return models[model].dataSource.child(data['key']).update({...data})
@@ -754,8 +759,28 @@ export function fbupdatechannelinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
 }
 
-
 export function fbdeletechannelinscene(model, s_key, c_key) {
 	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
 	store.dispatch(deleteChannel(c_key));
+}
+
+export function fbsavelayout(model, layout, uid, c_id) {
+	if ( uid !== undefined ) {
+		var temp_layouts = {};
+		_.forEach(layout, function(o) {
+			temp_layouts[o.i] = o;
+		})
+		models[model].dataSource.child(uid).child("layouts").child("customs").child(c_id).set(temp_layouts)
+	}
+}
+
+export function fbupdatelayout(model, layout, uid) {
+	console.log(layout, uid);
+	if ( uid !== undefined ) {
+		var temp_layouts = {};
+		_.forEach(layout, function(o) {
+			temp_layouts[o.i] = o;
+		})
+		models[model].dataSource.child(uid).child("layouts").child("default_layout").set(temp_layouts)
+	}
 }

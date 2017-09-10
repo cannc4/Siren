@@ -6,7 +6,7 @@ export default (state = INITIAL_STATE, action) => {
     // action.payload is the whole layout
     case 'UPDATE_'+modelName:
       const l = state;
-      l.windows = JSON.parse(JSON.stringify(action.payload));
+      l.windows = action.payload;
       console.log('reducer: ', action.payload);
       _.forEach(action.payload, function(panel, j)
       {
