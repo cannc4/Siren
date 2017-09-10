@@ -17,6 +17,7 @@ import {sendScPattern, sendSCMatrix,
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
+import Settings from './Settings.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
@@ -95,7 +96,8 @@ class Home extends Component {
                        {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
                        {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
-                       {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true}]
+                       {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
+                       {i: 'setting', x: 11, y: 20, w: 6, h: 13, minW: 7, isVisible: true}]
     }
 
     // store.dispatch(updateLayout(this.state.default_layout))
@@ -795,7 +797,6 @@ handleClick = (e, data) => {
 }
 
 saveLayouttoCustom = (id, e, data) => {
-  console.log("save db: ", id, e, data);
   fbsavelayout("Accounts", this.props.layout.windows, this.props.user.user.uid, data.item);
 }
 
@@ -818,7 +819,6 @@ onRemovelayoutItem(specifier){
 onLayoutChange(layout) {
   const ctx = this;
   var temp_layouts = []
-  console.log('onLayoutChange: ', layout);
   _.forEach(layout, function(l) {
     const propItem = _.find(ctx.props.layout.windows, ['i', l.i]);
     l.isVisible = propItem.isVisible;
@@ -841,7 +841,6 @@ onLayoutChange(layout) {
 }
 
 onLoadCustomLayout(layout_id) {
-  console.log("custom LAYOUT "+layout_id);
   const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
   this.setState({manual_layout_trig: true});
   if (layout !== undefined) {
@@ -850,7 +849,6 @@ onLoadCustomLayout(layout_id) {
 }
 
 makeMatrixFullscreen() {
-  console.log("FULLSCREEN LAYOUT");
   this.setState({manual_layout_trig: true});
   var layouts = this.props.layout.windows
   if(layouts !== undefined) {
@@ -878,7 +876,6 @@ makeMatrixFullscreen() {
 }
 
 resetLayout() {
-  console.log("RESET LAYOUT");
   this.setState({manual_layout_trig: true});
   store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
 }
@@ -1030,6 +1027,14 @@ renderLayouts(layoutItem, k) {
         <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
         <textarea className={"ConsoleTextBox" + ctx.state.SCOnClickClass + " draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
       </div>
+    </div>);
+  }
+  else if (layoutItem.i === 'setting') {
+    return layoutItem.isVisible && (<div key={'setting'} data-grid={getGridParameters('setting')}>
+      <div className={"PanelHeader"}> ■ Settings
+        <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "setting")}>X</span>
+      </div>
+      <Settings uid={ctx.props.user.user.uid}/>
     </div>);
   }
   else {

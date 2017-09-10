@@ -787,3 +787,9 @@ export function fbupdatelayout(model, layout, uid) {
 		models[model].dataSource.child(uid).child("layouts").child("default_layout").set(temp_layouts)
 	}
 }
+
+export function fbsaveconfig(model, uid, config) {
+	if ( uid !== undefined ) {
+		models[model].dataSource.child(uid).child("config").update({...config});
+	}
+}

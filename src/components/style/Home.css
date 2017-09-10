@@ -41,20 +41,38 @@
   font-size: 12px;
   border: 1px solid rgba(125,125,125, 0.8);
   cursor: pointer;
+  padding: 5px 5px 12px 5px;
 }
 
 
-/*ContextMenu*/
-/*nav {
-  margin: 10px;
-  padding: 8px;
-  background: rgba(125,125,125, 0.85);
-  border-radius: 2px;
-  border: 1px solid rgba(200,200,200, 0.85);
-  box-shadow: 0px 0px 10px #222;
-  width: 100px;
-  z-index: 100000;
-}*/
+
+
+/*------------SETTINGS------------*/
+.Settings {
+  display: flex;
+  flex-direction: column;
+  width: 370px;
+  height: 90%;
+  overflow-y: scroll;
+}
+.SettingsItem {
+  margin: 7px;
+  display: inline-flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+.SettingsLabel {
+  margin-top: 15px;
+  padding-right: 5px;
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 150px;
+}
+
+
+
 
 /*------------CODEMIRROR------------*/
 .CodeMirror {
@@ -90,6 +108,7 @@ div.cm-s-_style.CodeMirror {
 
 
 
+
 /*------------PATTERNS PANEL------------*/
 /*All patterns*/
 .AllPatterns {
@@ -114,7 +133,6 @@ div.cm-s-_style.CodeMirror {
 /*------------CONSOLE PANEL------------*/
 /*Tidal and SC Console textboxes*/
 .ConsoleTextBox {
-
   border: 1px solid rgba(120, 120, 120, 0.75);
   font-size: 14px;
   width: 100%;
