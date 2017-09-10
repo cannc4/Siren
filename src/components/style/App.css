@@ -12,16 +12,8 @@ body, .fill, .cont {
   font-family: 'Inconsolata';
   font-weight: 40;
 }
-body {
-  /*background: url('http://sut.la/tcab/*.css.png');*/
-  /*background-position: bottom;;
-  background-repeat: no-repeat;
-  background-size: cover;
-  max-height: 100%;*/
-}
 
 .logo {
-
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;

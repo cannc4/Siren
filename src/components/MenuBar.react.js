@@ -83,7 +83,7 @@ class MenuBar extends Component {
 
     return (<div className='MenuBar boxshadow'>
       <div>
-        <h1 className={"Logo"}>Siren<span className={'Version'}>{'('+version+')'}</span></h1>
+        <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
       </div>
       <div className={"TimerControls"}>
         {!tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
@@ -96,7 +96,7 @@ class MenuBar extends Component {
       </div>
       <div className={"User"}>
         <div>
-          {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
+          {ctx.props.user.user.email && <button style={{fontWeight: "bold"}} id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
         </div>
         <div>
           {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}

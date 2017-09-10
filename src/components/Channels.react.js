@@ -7,14 +7,6 @@ import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
         sendPatterns } from '../actions';
-var Button = require('react-button')
-var themeButton = {
-  style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
-  disabledStyle: { background: 'gray'},
-  overStyle: { background: 'rgba(2,4,2,0.15)' },
-  pressedStyle: {background: 'rgba(200,200,200,0.75)'},
-  overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
-}
 
 class Channels extends Component {
   constructor(props) {
@@ -148,7 +140,7 @@ class Channels extends Component {
     return(
       <SelectableComponent
         selectableKey={item.cid+'_'+i}
-        key={item.key+i}
+        key={item.key+'_'+i}
         item={item}
         index={i}
         c_cid={item.cid}
@@ -165,8 +157,8 @@ class Channels extends Component {
     const item = ctx.props.item;
 
     if (item.scene !== ctx.props.active)
-      return item && (
-        <div key={(item['cid']).toString()} className={"Channel"}></div>
+      return item.key && (
+        <div key={item.key} className={"ChannelItem"}></div>
       );
 
     const deleteChannel = event => {
@@ -218,15 +210,15 @@ class Channels extends Component {
     }
 
     const step = parseInt(item.step, 10);
-    return item && (
-      <div key={(item['cid']).toString()} className={"ChannelItem"}>
-        <div className={"ChannelItemHeader " + item.type }>
-          <Button theme={themeButton} pressed={soloPressed[item.cid]} onClick={soloChannel}>S</Button>
+    return item.key && (
+      <div key={item.key} className={"ChannelItem"}>
+        <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
+          <button className={"Button "+ soloPressed[item.cid]} onClick={soloChannel}>S</button>
           <p>{item.name}</p>
-          <button onClick={deleteChannel}>{'X'}</button>
+          <button className={"Button"} onClick={deleteChannel}>X</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <input className={"GridItem-transition draggableCancel"}
+        <input key={item.key+'_t'}className={"GridItem-transition draggableCancel"}
           placeholder={" - "}  value={item.transition}
           onChange={updateTransition}/>
       </div>

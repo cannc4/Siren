@@ -87,7 +87,7 @@ class Patterns extends Component {
     const handleDelete = () => {
       const payload = { key: item.key };
 
-      if(confirm("This pattern will be deleted from " + ctx.props.active + "scene "))
+      if(confirm("This pattern will be deleted from the scene '" + ctx.props.active + "'"))
         _.each(Object.values(ctx.props["matrices"]), function(d){
           if(d.matName === ctx.props.active){
             ctx.setState({sceneKey: d.key});
@@ -131,7 +131,7 @@ class Patterns extends Component {
               <input className={'Input draggableCancel'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             </div>
             <div>
-              <button className={'Button'} onClick={handleDelete}>{'Delete'} </button>
+              <button className={'Button draggableCancel'} onClick={handleDelete}>{'Delete'} </button>
             </div>
           </div>
           <CodeMirror className={'PatternItemCodeMirror'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
@@ -166,7 +166,7 @@ class Patterns extends Component {
       <div>
         <div>
           <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
-          <button className={'Button'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
+          <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
         <div>
           {renderItems(items)}

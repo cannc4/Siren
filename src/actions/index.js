@@ -778,7 +778,7 @@ export function fbsavelayout(model, layout, uid, c_id) {
 }
 
 export function fbupdatelayout(model, layout, uid) {
-	console.log(layout, uid);
+	// console.log(layout, uid);
 	if ( uid !== undefined ) {
 		var temp_layouts = {};
 		_.forEach(layout, function(o) {

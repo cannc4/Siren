@@ -21,11 +21,11 @@ import Settings from './Settings.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
-import { SelectableGroup } from 'react-selectable';
 
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-
+import { SelectableGroup } from 'react-selectable';
 import Dropdown from 'react-dropdown'
+
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.js';
@@ -39,16 +39,7 @@ var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 var keymaster = require('keymaster');
-
-var Button = require('react-button')
 var MaskedInput = require('react-maskedinput')
-var themeButton = {
-    style : {borderWidth: 1, borderStyle: 'solid', borderColor: 'rgba(125,125,125, 0.8)'},
-    disabledStyle: { background: 'gray'},
-    overStyle: { background: 'rgba(255,255,102,0.15)' },
-    pressedStyle: {background: 'rgba(255,255,102,0.75)'},
-    overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
-}
 
 const channelOptions = ['SCSynth', 'Visual', 'MIDI']
 
@@ -97,7 +88,7 @@ class Home extends Component {
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
                        {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
-                       {i: 'setting', x: 11, y: 20, w: 6, h: 13, minW: 7, isVisible: true}]
+                       {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
     }
 
     // store.dispatch(updateLayout(this.state.default_layout))
@@ -400,8 +391,6 @@ renderScene(item, dbKey, i) {
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
       globalTransformations: '', globalCommands:'', globalChannels: '',
       pressed:gpressed, sceneIndex:item.key});
-
-    console.log("Item", item);
     ctx.updateMatrix(item);
 
     store.dispatch(globalStore(sglobals,[]));
@@ -479,7 +468,6 @@ clicked = event => {
         globalCommands,globalTransformations,sceneIndex} =ctx.state;
   const globalparams = ctx.props.globalparams;
   const scenes = ctx.props.matrices;
-  var matkey;
 
   var pr = pressed;
   for(var sp = 0; sp < pr.length; sp++){
@@ -490,39 +478,35 @@ clicked = event => {
       pr[sp] = false;
     }
   }
-  ctx.setState({pressed:pr});
+  ctx.setState({ pressed: pr });
 
+  var matkey;
   _.each(scenes , function (sc, i) {
     if(sc.key === sceneIndex){
-      ctx.setState({storedGlobals:sc.storedGlobals})
+      ctx.setState({storedGlobals: sc.storedGlobals})
       matkey = sc.key;
     }
   })
 
   var ttm;
-  if (event.shiftKey){
+  if (event.shiftKey) {
     ttm = storedGlobals;
-    ttm[event.target.id] = {transform:'',
-              command:'',
-              selectedChannels:''};
+    ttm[event.target.id] = {transform:'', command:'', selectedChannels:''};
 
-    fbupdateglobalsinscene('Matrices',ttm,matkey);
+    fbupdateglobalsinscene('Matrices', ttm, matkey);
     store.dispatch(globalUpdate('', '', ''));
-    ctx.setState({globalTransformations:'', globalCommands:'',
-                  globalChannels: ''})
+    ctx.setState({globalTransformations: '', globalCommands: '', globalChannels: ''})
   }
-  else if (event.altKey){
-
+  else if (event.altKey) {
     ttm = storedGlobals;
     ttm[event.target.id] = {transform:globalTransformations,
               command:globalCommands,
               selectedChannels:globalChannels};
-    fbupdateglobalsinscene('Matrices',ttm,matkey);
-    store.dispatch(globalStore(ttm,globalparams.storedPatterns));
+    fbupdateglobalsinscene('Matrices', ttm, matkey);
+    store.dispatch(globalStore(ttm, globalparams.storedPatterns));
     store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
-    ctx.setState({storedGlobals:ttm});
+    ctx.setState({storedGlobals: ttm});
   }
-
   else {
     ttm = storedGlobals[event.target.id];
     store.dispatch(globalStore(globalparams.storedGlobals,globalparams.storedPatterns));
@@ -694,12 +678,12 @@ updateGlobalSq(){
 
 sequenceGlobals = (selected_global_index) => {
   const ctx = this;
-  const {tidalServerLink, storedGlobals,pressed} = ctx.state;
+  const {tidalServerLink, storedGlobals, pressed} = ctx.state;
   const storedPatterns = ctx.props.globalparams.storedPatterns;
 
   for (var i = 0; i < storedPatterns.length; i++) {
   if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-    var pr =pressed;
+    var pr = pressed;
     for(var sp = 0; sp < pr.length; sp++){
       if(selected_global_index === sp){
         pr[sp] = true;
@@ -927,7 +911,7 @@ renderLayouts(layoutItem, k) {
       <SelectableGroup
         onSelection={ctx.handleSelection.bind(ctx)}
         onNonItemClick={ctx.handleUnselection.bind(ctx)}
-        tolerance={0}>
+        tolerance={5}>
         {ctx.renderPlayer()}
       </SelectableGroup>
     </div>);
@@ -940,9 +924,11 @@ renderLayouts(layoutItem, k) {
         </div>
         <div>
           <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-          {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-          {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add Scene</button>}
-          <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+          <div style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+            {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
+            {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add New Scene</button>}
+            <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
+          </div>
         </div>
         <div className={'AllScenes'}>
           <div>
@@ -955,7 +941,7 @@ renderLayouts(layoutItem, k) {
   }
   else if (layoutItem.i === 'patterns') {
     return layoutItem.isVisible && (<div key={'patterns'} data-grid={getGridParameters('patterns')}>
-      <div className={"PanelHeader"}> ■ Patterns in <span class="italic">{'"'+activeMatrix+'"'}</span>
+      <div className={"PanelHeader"}> ■ Patterns in <span style={{fontWeight: 'bold'}}>{'"'+activeMatrix+'"'}</span>
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "patterns")}>X</span>
       </div>
       <div className={"AllPatterns"} >
@@ -985,7 +971,7 @@ renderLayouts(layoutItem, k) {
         <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} value={c_name} placeholder="Name "/>
         <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} value={c_step} placeholder="Step "/>
         <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} value={c_transition} placeholder="Transition (optional)"/>
-        <Button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)} theme={themeButton}>Add</Button>
+        <button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)}>Add</button>
       </div>
     </div>);
   }
@@ -1012,9 +998,9 @@ renderLayouts(layoutItem, k) {
         <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder="Global Transformation "/>
         <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder="Global Command " />
         {_.map(storedGlobals, (c, i) => {
-           return <Button className={"Button draggableCancel"} id={i} pressed={pressed[i]} onClick={ctx.clicked.bind(ctx)} theme={themeButton}>{i}</Button>
+           return <button className={"Button " + pressed[i] + " draggableCancel"} key={i} onClick={ctx.clicked.bind(ctx)}>{i}</button>
          })}
-         <Button className={"Button draggableCancel"} theme={themeButton} onClick={ctx.record.bind(ctx)}>Rec</Button>
+         <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
       </div>
     </div>);
   }
@@ -1031,7 +1017,7 @@ renderLayouts(layoutItem, k) {
   }
   else if (layoutItem.i === 'setting') {
     return layoutItem.isVisible && (<div key={'setting'} data-grid={getGridParameters('setting')}>
-      <div className={"PanelHeader"}> ■ Settings
+      <div className={"PanelHeader"}> ■ Config Settings
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "setting")}>X</span>
       </div>
       <Settings uid={ctx.props.user.user.uid}/>
@@ -1078,11 +1064,11 @@ render() {
     </MenuItem>
     <MenuItem divider />
     <SubMenu title={'Windows'}>
-      {_.map(ctx.state.default_layout, function(layoutItem) {
+      {_.map(ctx.state.default_layout, function(layoutItem, key) {
         if(_.find(layouts, { 'i': layoutItem.i, 'isVisible': true }) )
-          return <MenuItem onClick={ctx.onRemovelayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}<span style={{float: 'right'}}>√</span></MenuItem>;
+          return <MenuItem key={key} onClick={ctx.onRemovelayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}<span style={{float: 'right'}}>√</span></MenuItem>;
         else
-          return <MenuItem onClick={ctx.onAddlayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}</MenuItem>;
+          return <MenuItem key={key} onClick={ctx.onAddlayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}</MenuItem>;
       })}
     </SubMenu>
     <SubMenu title={'Layouts'}>
@@ -1091,16 +1077,13 @@ render() {
       <MenuItem divider />
       {_.map({a:1, b:2, c:3, d:4}, function(i, key) {
         if(ctx.props.user.user.layouts !== undefined && ctx.props.user.user.layouts.customs !== undefined) {
-          if(ctx.props.user.user.layouts.customs[["c_"+i]] !== undefined){
-            return <MenuItem onClick={ctx.onLoadCustomLayout.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>Cust. {i}<span style={{float: 'right'}}>⇧ + {i}</span></MenuItem>
-          }
-          else {
-            return <MenuItem onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
-          }
+          if(ctx.props.user.user.layouts.customs[["c_"+i]] !== undefined)
+            return <MenuItem key={key} onClick={ctx.onLoadCustomLayout.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>Cust. {i}<span style={{float: 'right'}}>⇧ + {i}</span></MenuItem>
+          else
+            return <MenuItem key={key} onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
         }
-        else {
-          return <MenuItem onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
-        }
+        else
+          return <MenuItem key={key} onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
       })}
     </SubMenu>
   </ContextMenu>

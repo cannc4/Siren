@@ -7,7 +7,6 @@ export default (state = INITIAL_STATE, action) => {
     case 'UPDATE_'+modelName:
       const l = state;
       l.windows = action.payload;
-      console.log('reducer: ', action.payload);
       _.forEach(action.payload, function(panel, j)
       {
         l.windows[j].x = action.payload[j].x;

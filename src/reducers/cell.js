@@ -5,8 +5,8 @@ export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'REFINE_'+modelName:
         const p = state;
-        console.log(action.payload);
-        console.log(p.vals);
+        // console.log(action.payload);
+        // console.log(p.vals);
         if (action.payload.cid !== undefined){
             if(p.vals[action.payload.cid][action.payload.cell_index]=== undefined){
                 p.vals[action.payload.cid][action.payload.cell_index].push(action.payload.cell_value);
@@ -15,7 +15,7 @@ export default (state = INITIAL_STATE, action) => {
             p.vals[action.payload.cid][action.payload.cell_index] = action.payload.cell_value;
             }
         }
-        console.log("REFINE" + p.vals);
+        // console.log("REFINE" + p.vals);
         return {...p};
     case 'BOOT_'+modelName:
         const d = state;
@@ -26,7 +26,7 @@ export default (state = INITIAL_STATE, action) => {
         for (var i = 0; i < action.payload.cstep; i++){
             d.vals[action.payload.cid][i] =  action.payload.propedcell[i];
         }
-        console.log("BOOT" + d.vals);
+        // console.log("BOOT" + d.vals);
         return {...d};
     case 'CREATE_'+modelName:
         const z = state;
@@ -38,7 +38,7 @@ export default (state = INITIAL_STATE, action) => {
                 z.vals[action.payload.cid][j] = '';
             }
         }
-        console.log("REFINE" + z.vals);
+        // console.log("REFINE" + z.vals);
       return {...z};
     case 'SELECT_'+modelName:
       const e = state;

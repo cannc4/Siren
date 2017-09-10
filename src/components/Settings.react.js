@@ -82,7 +82,7 @@ class Settings extends Component {
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>scd Start:</p>  <input className={'Input'} value={this.state.scd_start} onChange={ctx.updateValue.bind(ctx, 'scd_start')}/>
       </div>
-      <button className={'Button'} onClick={ctx.writeConfigDB.bind(ctx)}>SAVE ONLINE AND LOCAL</button>
+      <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigDB.bind(ctx)}>SAVE ONLINE AND LOCAL</button>
     </div>)
   }
 }
