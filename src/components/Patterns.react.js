@@ -125,14 +125,10 @@ class Patterns extends Component {
     return item.key && (
       <div key={item.key} className="PatternItem draggableCancel" >
         <div key={name} >
-          <div key={name} >
-            <div key={name} >
-              <input className={'Input draggableCancel'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-              <input className={'Input draggableCancel'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
-            </div>
-            <div>
-              <button className={'Button draggableCancel'} onClick={handleDelete}>{'Delete'} </button>
-            </div>
+          <div key={name} className={'PatternItemInputs'}>
+            <input className={'Input draggableCancel'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
+            <input className={'Input draggableCancel'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+            <button className={'Button draggableCancel'} onClick={handleDelete}>{'Delete'} </button>
           </div>
           <CodeMirror className={'PatternItemCodeMirror'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
         </div>
@@ -164,7 +160,7 @@ class Patterns extends Component {
 
     return (
       <div>
-        <div>
+        <div className={'PatternItem PatternItemInputs'}>
           <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
           <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>

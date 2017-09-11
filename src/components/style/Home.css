@@ -13,10 +13,18 @@
   animation-duration: 1s;
 }
 
+.PanelAdjuster {
+  margin: 5px;
+  max-height: calc(100% - 34px);
+  max-width: calc(100% - 10px);
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
 /*Panel Headers*/
 .PanelHeader {
   background: rgba(200,200,200, 0.25);
   padding: 3px 5px 3px 5px;
+  height: 20px;
   border-style: double;
   border-width: 1px;
   border-color: rgba(180,180,180, 1);
@@ -58,7 +66,7 @@
   border: 1px dashed rgba(200,200,200, 0.9);
 }
 .Button.true {
-  background: rgba(255,255,102,0.75);
+  background: rgba(255,255,102,0.45);
   color: #111;
   font-weight: bold;
 }
@@ -75,15 +83,14 @@
 .Settings {
   display: flex;
   flex-direction: column;
-  width: 370px;
-  height: 90%;
+  width: calc(100% - 5px);
   align-items: center;
-  overflow-y: scroll;
 }
 .SettingsItem {
   display: inline-flex;
   justify-content: space-around;
   align-items: center;
+  height: 50px;
   width: 100%;
 }
 .SettingsLabel {
@@ -93,6 +100,49 @@
   justify-content: flex-end;
   align-items: center;
   width: 150px;
+}
+
+
+
+
+/*------------GLOBAL PARAMETERS------------*/
+.GlobalParams {
+  align-items: center;
+}
+.GlobalParams p {
+  font-size: 11px;
+  color: #888;
+  line-height: 12px;
+  padding: 0 0 0 2px;
+  margin: 0px;
+  font-weight: bold;
+}
+.GlobalSequencer {
+  width: 100%;
+}
+.GlobalParamsInputs {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - 5px);
+  padding: 1px;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+.GlobalParamsInputsII {
+  width: calc(100% - 5px);
+  padding: 1px;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+.StoredGlobalParams {
+  background: rgba(200, 200, 200, 0.05);
+  border: 1px solid #000;
+  height: auto;
+}
+.StoredGlobalParams button {
+  margin: 5px;
+  padding: 4px 7px 4px 7px;
+  min-width: 30px;
 }
 
 
@@ -111,21 +161,25 @@ div.cm-s-_style.CodeMirror {
 
 
 /*------------SCENES PANEL------------*/
+.Scenes {
+}
 /*All Scene Items together*/
 .AllScenes {
-  overflow-y: auto;
-  height: 100%;
-  margin: 10px 0px 0px 0px;
+  margin-top: 10px;
+  padding: 1px;
+  border: 1px solid #000;
+
 }
 /*Scene Items on Scene Panel*/
 .SceneItem {
   border: 1px solid rgba(120, 120, 120, 0.75);
-  width: 98%; /*But whyy*/
+  width: 98%;
   background: none;
+  margin-top: 3px;
 }
 /*Active Scene Items on Scene Panel*/
 .SceneItem-active {
-  border: 1px solid rgba(120, 120, 120, 0.75);
+  border: 1px solid rgba(200, 200, 200, 0.75);
   width: 98%; /*But whyy*/
   background: rgba(255,255,102,0.25);
 }
@@ -137,11 +191,21 @@ div.cm-s-_style.CodeMirror {
 /*All patterns*/
 .AllPatterns {
   /*      top | right | bottom | left */
-  margin: 0px;
 }
 /*Individual Pattern*/
 .PatternItem {
-  width: 100%;
+  width: calc(100% - 5px);
+  margin-top: 8px;
+  padding: 1px;
+  border: 1px solid #000;
+}
+.PatternItemInputs {
+  display: flex;
+  flex-direction: row;
+  width: calc(100%);
+}
+.PatternItemInputs button{
+  padding: 0 10px 0 10px;
 }
 /*CodeMirror window of each pattern*/
 .PatternItemCodeMirror {
@@ -156,11 +220,14 @@ div.cm-s-_style.CodeMirror {
 
 /*------------CONSOLE PANEL------------*/
 /*Tidal and SC Console textboxes*/
+.Console {
+}
 .ConsoleTextBox {
   border: 1px solid rgba(120, 120, 120, 0.75);
   font-size: 14px;
-  width: 100%;
-  height: 40%;
+  margin: 0 2.5px 0 2.5px;
+  height: calc(100% - 35px);
+  width: calc(50% - 5px);
 }
 
 
@@ -181,30 +248,37 @@ div.cm-s-_style.CodeMirror {
 
 
 
+/*------------ADD CHANNEL PANEL------------*/
+.AddChannel {
+}
+
+
+
+
 /*------------MATRIX PANEL------------*/
 /*All Channels Together*/
 .AllChannels {
   display: flex;
   flex-direction: row;
-  /*height: 92.5%;*/
-  overflow-y:hidden;
-  margin: 10px;
   cursor: crosshair;
-  text-transform: none;
+  overflow-x: auto;
 }
 
 /*Individual Channels*/
 .ChannelItem {
+  padding-left: 2px;
   display: flex;
   flex-direction: column;
   margin: 0;
   line-height: 20px;
   min-height: 35px;
+  min-width: 100px;
   padding: 0;
 }
 /* Matrix header styling*/
 .ChannelItemHeader {
   display: inline-flex;
+  min-height: 30px;
   justify-content: space-between;
   background: rgba(200,200,200,0.1);
   border: 0.5px solid rgba(200, 200, 200, 0.75);
@@ -271,25 +345,26 @@ div.cm-s-_style.CodeMirror {
 .GridItem-transition {
   width: 95%;
   margin-left: 2.5%;
-  height: 5%;
+  margin-bottom: 100px;
+  height: 30px;
+  min-height: 30px;
   font-size: 1vw;
   text-align: center;
   vertical-align: center;
   overflow-y: auto;
   border: 1px solid rgba(125,125,125, 0.4);
   background: rgba(0, 0, 0, 0.8);
-  opacity: 0.6;
 }
 
 /* Table column sizing
 ================================== */
-.Channel--2cols > .playbox  { width: 50%; }
-.Channel--3cols > .playbox  { width: 33.33%; }
-.Channel--4cols > .playbox  { width: 25%; }
-.Channel--5cols > .playbox  { width: 20%; }
-.Channel--6cols > .playbox  { width: 16.6%; }
-.Channel--7cols > .playbox  { width: 14.27%; }
-.Channel--8cols > .playbox  { width: 12.5%; }
-.Channel--13cols > .playbox  { width: 7.5%; }
-.Channel--16cols > .playbox  { width: 6.25%; }
-.Channel--17cols > .playbox  { width: 5.88%; }
+.Channel--2cols > .GridItem  { width: 50%; }
+.Channel--3cols > .GridItem  { width: 33.33%; }
+.Channel--4cols > .GridItem  { width: 25%; }
+.Channel--5cols > .GridItem  { width: 20%; }
+.Channel--6cols > .GridItem  { width: 16.6%; }
+.Channel--7cols > .GridItem  { width: 14.27%; }
+.Channel--8cols > .GridItem  { width: 12.5%; }
+.Channel--13cols > .GridItem  { width: 7.5%; }
+.Channel--16cols > .GridItem  { width: 6.25%; }
+.Channel--17cols > .GridItem  { width: 5.88%; }

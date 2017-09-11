@@ -158,7 +158,7 @@ class Channels extends Component {
 
     if (item.scene !== ctx.props.active)
       return item.key && (
-        <div key={item.key} className={"ChannelItem"}></div>
+        <div key={item.key}></div>
       );
 
     const deleteChannel = event => {

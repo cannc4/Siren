@@ -48,7 +48,7 @@ class Settings extends Component {
 
   render() {
     const ctx = this;
-    return (<div className={'Settings draggableCancel'}>
+    return (<div className={'Settings PanelAdjuster draggableCancel'}>
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>User Path:</p>  <input className={'Input'} value={this.state.userpath} onChange={ctx.updateValue.bind(ctx, 'userpath')}/>
       </div>

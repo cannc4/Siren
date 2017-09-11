@@ -489,19 +489,21 @@ clicked = event => {
   })
 
   var ttm;
-  if (event.shiftKey) {
+  if (event.altKey) {
+    // Delete content of the item
     ttm = storedGlobals;
     ttm[event.target.id] = {transform:'', command:'', selectedChannels:''};
 
     fbupdateglobalsinscene('Matrices', ttm, matkey);
     store.dispatch(globalUpdate('', '', ''));
     ctx.setState({globalTransformations: '', globalCommands: '', globalChannels: ''})
+    ctx.setState({storedGlobals: ttm});
   }
-  else if (event.altKey) {
+  else if (event.shiftKey) {
     ttm = storedGlobals;
-    ttm[event.target.id] = {transform:globalTransformations,
-              command:globalCommands,
-              selectedChannels:globalChannels};
+    ttm[event.target.id] = {transform: globalTransformations,
+                            command: globalCommands,
+                            selectedChannels: globalChannels};
     fbupdateglobalsinscene('Matrices', ttm, matkey);
     store.dispatch(globalStore(ttm, globalparams.storedPatterns));
     store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
@@ -908,7 +910,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "matrix")}>X</span>
       </div>
-      <SelectableGroup
+      <SelectableGroup className={'PanelAdjuster'}
         onSelection={ctx.handleSelection.bind(ctx)}
         onNonItemClick={ctx.handleUnselection.bind(ctx)}
         tolerance={5}>
@@ -922,18 +924,18 @@ renderLayouts(layoutItem, k) {
         <div className={"PanelHeader"}> ■ All Scenes
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
         </div>
-        <div>
+        <div className={'Scenes PanelAdjuster'}>
           <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
           <div style={{display: 'inline-flex', justifyContent: 'space-between'}}>
             {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
             {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add New Scene</button>}
             <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
           </div>
-        </div>
-        <div className={'AllScenes'}>
-          <div>
-            {ctx.props.user.user.name && ctx.renderScenes(items)}
-            {!ctx.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+          <div className={'AllScenes'}>
+            <div>
+              {ctx.props.user.user.name && ctx.renderScenes(items)}
+              {!ctx.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+            </div>
           </div>
         </div>
       </div>
@@ -944,7 +946,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Patterns in <span style={{fontWeight: 'bold'}}>{'"'+activeMatrix+'"'}</span>
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "patterns")}>X</span>
       </div>
-      <div className={"AllPatterns"} >
+      <div className={"AllPatterns PanelAdjuster"} >
         <Patterns active={activeMatrix}/>
       </div>
     </div>);
@@ -954,7 +956,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Pattern History
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "pattern_history")}>X</span>
       </div>
-      <div>
+      <div className={"PanelAdjuster"}>
        {_.map(storedPatterns, (c, i) => {
           return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[i]} options={historyOptions}/>
         })}
@@ -966,7 +968,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Add Channel
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "channel_add")}>X</span>
       </div>
-      <div>
+      <div className={'AddChannel PanelAdjuster'}>
         <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
         <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} value={c_name} placeholder="Name "/>
         <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} value={c_step} placeholder="Step "/>
@@ -980,27 +982,39 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Global Parameters
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "globals")}>X</span>
       </div>
-      <div>
-        <input mask={maskedInputDurations}
-          className={"Input" + ctx.state.globalOnSqClass + " draggableCancel"}
-          key={'globalsq'}
-          onKeyUp={ctx.handleGlobalsq.bind(ctx)}
-          onChange={ctx.handleGlobalsqDuration.bind(ctx)}
-          value={globalsq}
-          placeholder="Global Sequencer "/>
-        <MaskedInput mask={maskedInputPatterns}
-        className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"}
-          key={'globalchannel'}
-          onKeyUp={ctx.handleUpdatePatterns.bind(ctx)}
-          onChange={ctx.handleGlobalChannels.bind(ctx)}
-          value={globalChannels}
-          placeholder="Channels "/>
-        <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder="Global Transformation "/>
-        <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder="Global Command " />
-        {_.map(storedGlobals, (c, i) => {
-           return <button className={"Button " + pressed[i] + " draggableCancel"} key={i} onClick={ctx.clicked.bind(ctx)}>{i}</button>
-         })}
-         <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
+      <div className={"GlobalParams PanelAdjuster"}>
+        <p>Sequencer: ⌥ + Enter, ⇧ + Enter</p>
+        <p>Channels : ⌃ + Enter</p>
+        <div className={'GlobalParamsInputs'}>
+          <div className={'GlobalSequencer'}>
+            <input mask={maskedInputDurations}
+              className={"Input" + ctx.state.globalOnSqClass + " draggableCancel"}
+              key={'globalsq'}
+              onKeyUp={ctx.handleGlobalsq.bind(ctx)}
+              onChange={ctx.handleGlobalsqDuration.bind(ctx)}
+              value={globalsq}
+              placeholder={"Sequencer ( "+maskedInputDurations+")"}/>
+            <MaskedInput mask={maskedInputPatterns}
+              className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"}
+              key={'globalchannel'}
+              onKeyUp={ctx.handleUpdatePatterns.bind(ctx)}
+              onChange={ctx.handleGlobalChannels.bind(ctx)}
+              value={globalChannels}
+              placeholder={"Channels ( "+maskedInputPatterns+")"}/>
+          </div>
+          <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
+        </div>
+        <p>Execute: ⌃ + Enter</p>
+        <div className={"GlobalParamsInputsII"}>
+          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder={"Transformation"}/>
+          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder={"Commands"} />
+        </div>
+        <p>{"(Select) click,  (save) ⇧ + click, (delete) ⌥ + click"}</p>
+        <div className={'StoredGlobalParams'}>
+          {_.map(storedGlobals, (c, i) => {
+            return <button key={i} id={i} className={"Button " + pressed[i] + " draggableCancel"} onClick={ctx.clicked.bind(ctx)}>{i}</button>
+          })}
+        </div>
       </div>
     </div>);
   }
@@ -1009,7 +1023,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Console
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "console")}>X</span>
       </div>
-      <div>
+      <div className={'Console PanelAdjuster'}>
         <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
         <textarea className={"ConsoleTextBox" + ctx.state.SCOnClickClass + " draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
       </div>
@@ -1020,7 +1034,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Config Settings
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "setting")}>X</span>
       </div>
-      <Settings uid={ctx.props.user.user.uid}/>
+      <Settings className={'PanelAdjuster'} uid={ctx.props.user.user.uid}/>
     </div>);
   }
   else {
