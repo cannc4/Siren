@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-// import store from '../store';
+// import _ from 'lodash';
 
 import { fbsaveconfig } from '../actions'
 
@@ -8,22 +8,21 @@ class Settings extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      userpath: "C:\\Users\\Mert",
-      debug: true,
-      ghcipath: "C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe",
-      sclang: "C:\\Program Files\\SuperCollider-3.8.0\\sclang.exe",
-      scsynth: "C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe",
-      sclang_conf: "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
-      port: 3001,
-      samples_path: "C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*",
-      path: "C:\\GitHub\\Siren\\config\\config.json",
-      tidal_boot: "C:\\GitHub\\Siren\\config\\tidal-boot-default.hs",
-      tidal_sync: "C:\\GitHub\\Siren\\sync\\sync.hs",
-      scd_start: "C:\\GitHub\\Siren\\config\\scd-start-default.scd"
+      userpath: props.user.user.config.userpath,
+      ghcipath: props.user.user.config.ghcipath,
+      sclang: props.user.user.config.sclang,
+      scsynth: props.user.user.config.scsynth,
+      sclang_conf: props.user.user.config.sclang_conf,
+      port: props.user.user.config.port,
+      samples_path: props.user.user.config.samples_path,
+      path: props.user.user.config.path,
+      tidal_boot: props.user.user.config.tidal_boot,
+      tidal_sync: props.user.user.config.tidal_sync,
+      scd_start: props.user.user.config.scd_start
     }
   }
 
-  writeConfigDB() {
+  writeConfigLocal() {
     const ctx = this;
 
     // local save
@@ -35,6 +34,10 @@ class Settings extends Component {
       a.click();
     }
     download(JSON.stringify(ctx.state), 'config.json', 'text/plain');
+  }
+
+  writeConfigDB() {
+    const ctx = this;
 
     // online database save
     if(ctx.props.uid !== undefined)
@@ -82,7 +85,10 @@ class Settings extends Component {
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>scd Start:</p>  <input className={'Input'} value={this.state.scd_start} onChange={ctx.updateValue.bind(ctx, 'scd_start')}/>
       </div>
-      <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigDB.bind(ctx)}>SAVE ONLINE AND LOCAL</button>
+      <div style={{display: 'inline-flex', justifyContent: 'space-around'}}>
+        <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigLocal.bind(ctx)}>Save Locally</button>
+        <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigDB.bind(ctx)}>Save Database</button>
+      </div>
     </div>)
   }
 }

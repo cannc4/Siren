@@ -288,30 +288,24 @@ handleUnselection() {
   store.dispatch(selectCell([]))
 }
 
-renderChannel(item){
+renderChannel(scene_key, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
 
-  // Find active scene's key
-  var scene_key;
-  const scenes = Object.values(ctx.props['matrices']);
-  for(var j = 0; j < scenes.length; j++){
-    if (scenes[j].matName === activeMatrix) {
-      scene_key = scenes[j].key
-    }
-  }
-
-  return <Channels active={activeMatrix}
+  return <Channels key={item.key}
+            active={activeMatrix}
             scene_key={scene_key}
             item={item}/>
 }
 
 renderPlayer() {
   const ctx = this;
-  var items = ctx.props.channel;
+  const { activeMatrix } = ctx.state;
+  const items = ctx.props.channel;
+  const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
 
   return (<div className={"AllChannels draggableCancel"}>
-          {_.map(items, ctx.renderChannel.bind(ctx))}
+          {_.map(items, ctx.renderChannel.bind(ctx, sceneKey))}
           </div>)
 }
 
