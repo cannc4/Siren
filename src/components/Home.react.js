@@ -250,7 +250,7 @@ addChannel() {
         if (c_name === undefined || c_name === '') {
           alert('Invalid name for channel');
         }
-        else if (c_step === undefined || c_step === '') {
+        else if (c_step === undefined || c_step === '' || _.toInteger(c_step) <= 0) {
           alert('Invalid step, use numbers only');
         }
         else if (c_type === '' || c_type === undefined ) {
