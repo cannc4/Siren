@@ -1096,6 +1096,7 @@ render() {
       <MenuItem onClick={ctx.resetLayout.bind(ctx)} data={{ item: 'reset' }}>Reset<span style={{float: 'right'}}>⇧ + R</span></MenuItem>
       <MenuItem onClick={ctx.makeMatrixFullscreen.bind(ctx)} data={{ item: 'reset' }}>Max. Grid<span style={{float: 'right'}}>⇧ + F</span></MenuItem>
       <MenuItem divider />
+      <MenuItem disabled> alt-click to remove </MenuItem>
       {_.map({a:1, b:2, c:3, d:4}, function(i, key) {
         if(ctx.props.user.user.layouts !== undefined && ctx.props.user.user.layouts.customs !== undefined) {
           if(ctx.props.user.user.layouts.customs[["c_"+i]] !== undefined)
