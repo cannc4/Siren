@@ -13,7 +13,7 @@ import {sendScPattern, sendSCMatrix,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells,
-      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout} from '../actions'
+      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -827,11 +827,17 @@ onLayoutChange(layout) {
   store.dispatch(updateLayout(temp_layouts));
 }
 
-onLoadCustomLayout(layout_id) {
+onLoadCustomLayout = (layout_id, event) => {
+  console.log(event, layout_id);
   const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
-  this.setState({manual_layout_trig: true});
-  if (layout !== undefined) {
-    store.dispatch(forceUpdateLayout(layout, this.props.layout.windows.length));
+  if (event.altKey) {
+    fbdeletecustomlayout("Accounts", this.props.user.user.uid, layout_id);
+  }
+  else {
+    this.setState({manual_layout_trig: true});
+    if (layout !== undefined) {
+      store.dispatch(forceUpdateLayout(layout, this.props.layout.windows.length));
+    }
   }
 }
 

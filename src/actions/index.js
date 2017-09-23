@@ -776,6 +776,13 @@ export function fbsavelayout(model, layout, uid, c_id) {
 	}
 }
 
+export function fbdeletecustomlayout(model, uid, c_id) {
+	if ( uid !== undefined ) {
+		models[model].dataSource.child(uid).child("layouts").child("customs").child(c_id).remove();
+	}
+}
+
+
 export function fbupdatelayout(model, layout, uid) {
 	// console.log(layout, uid);
 	if ( uid !== undefined ) {
