@@ -219,6 +219,7 @@ addChannel() {
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix) {
       _.each(d.channels, function(c) {
+        console.log(c);
         if(c.name === c_name) {
           alert('"' + c_name + '" already exists in "' + d.matName + '"');
           flag = true;
@@ -245,9 +246,15 @@ addChannel() {
           step: c_step,
           vals: values
         };
-        //do a proper check here
-        if (c_name === undefined || c_step === undefined ){
-          alert('Invalid step or name');
+
+        if (c_name === undefined || c_name === '') {
+          alert('Invalid name for channel');
+        }
+        else if (c_step === undefined || c_step === '') {
+          alert('Invalid step, use numbers only');
+        }
+        else if (c_type === '' || c_type === undefined ) {
+          alert('Invalid type');
         }
         else{
           var obj = fbcreatechannelinscene('Matrices', nc, d.key);
@@ -881,7 +888,7 @@ renderLayouts(layoutItem, k) {
         readOnly: true
   };
   const maskedInputDurations=  _.repeat("1.1  ", 4);
-  const maskedInputPatterns = "1 " + _.repeat("1  ", storedPatterns.length-1);
+  const maskedInputPatterns = "1 | " + _.repeat("1  ", storedPatterns.length-1);
   const updateScPattern = event  => {
     ctx.setState({scPattern: event.target.value})
   }
@@ -981,7 +988,7 @@ renderLayouts(layoutItem, k) {
         <p>Channels : ⌃ + Enter</p>
         <div className={'GlobalParamsInputs'}>
           <div className={'GlobalSequencer'}>
-            <input mask={maskedInputDurations}
+            <MaskedInput mask={maskedInputDurations}
               className={"Input" + ctx.state.globalOnSqClass + " draggableCancel"}
               key={'globalsq'}
               onKeyUp={ctx.handleGlobalsq.bind(ctx)}

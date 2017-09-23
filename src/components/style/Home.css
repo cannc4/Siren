@@ -182,6 +182,7 @@ div.cm-s-_style.CodeMirror {
   border: 1px solid rgba(200, 200, 200, 0.75);
   width: 98%; /*But whyy*/
   background: rgba(255,255,102,0.25);
+  margin-top: 3px;
 }
 
 

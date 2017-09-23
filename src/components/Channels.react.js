@@ -79,35 +79,21 @@ class Channels extends Component {
       var channel_namestepvalues = [];
       _.each(channels, function(chan, i) {
         var runNo, stepvalue;
-        if( soloActive=== true ){
-          if (chan.name === solo){
-            runNo = Math.floor( click.current % chan.step) ;
-            stepvalue = '';
-            channel_values = chan.vals;
-            if (runNo !== undefined && (mat_name === chan.scene)) {
-              _.each(channel_values, function(sv, j){
-                if (j === runNo){
-                  stepvalue =  sv;
-                }
-              })
-              if (stepvalue !== '')
-                channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
-             }
-          }
-        }
-        else {
+        if ( !(soloActive === true && chan.name !== solo) )
+        {
           runNo = Math.floor( click.current % chan.step) ;
           stepvalue = '';
           channel_values = chan.vals;
-            if (runNo !== undefined && (mat_name === chan.scene)) {
+          if (runNo !== undefined && (mat_name === chan.scene) && chan.name === ctx.props.item.name) {
             _.each(channel_values, function(sv, j){
               if (j === runNo){
                 stepvalue =  sv;
               }
             })
-          if (stepvalue !== '')
-            channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
-        }}
+            if (stepvalue !== '')
+              channel_namestepvalues = _.concat(channel_namestepvalues, {[chan.name]: stepvalue});
+          }
+        }
       })
       if(channel_namestepvalues.length > 0){
         store.dispatch(sendPatterns(tidalServerLink, channel_namestepvalues,
@@ -208,7 +194,9 @@ class Channels extends Component {
                 { transition: value, key: item.key },
                 ctx.props.scene_key)
     }
-
+    const tests = ({ target: { value }}) => {
+      this.nameInput.focus();
+    }
     const step = parseInt(item.step, 10);
     return item.key && (
       <div key={item.key} className={"ChannelItem"}>
@@ -218,9 +206,11 @@ class Channels extends Component {
           <button className={"Button"} onClick={deleteChannel}>X</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <input key={item.key+'_t'}className={"GridItem-transition draggableCancel"}
+        <input ref={(input) => { this.nameInput = input; }}
+          key={item.key+'_t'}className={"GridItem-transition draggableCancel"}
           placeholder={" - "}  value={item.transition}
-          onChange={updateTransition}/>
+          onChange={updateTransition}
+          onClick={tests}/>
       </div>
     )
   }

@@ -504,9 +504,9 @@ export const sendPatterns = (server, channel_namestepvalue ,
 						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
 					}
 				}
-					else {
-						pattern = soloHolder + transitionHolder + newCommand ;
-					}
+				else {
+					pattern = soloHolder + transitionHolder + newCommand ;
+				}
 
 				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
 				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
@@ -538,9 +538,8 @@ export const sendPatterns = (server, channel_namestepvalue ,
 
 				console.log(pattern);
 				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-				}
 			}
-
+		}
 		else
 			return false;
 		}))

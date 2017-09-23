@@ -49,6 +49,7 @@ class MenuBar extends Component {
   runTidal() {
     const ctx=this;
     const { tidalServerLink } = ctx.state;
+
     store.dispatch(initTidalConsole(tidalServerLink));
   }
 
