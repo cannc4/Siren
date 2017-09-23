@@ -301,8 +301,8 @@ div.cm-s-_style.CodeMirror {
 .GridItem {
   display: flex;
   flex-grow: 1;
-  width: 95%;
-  margin-left: 2.5%;
+  resize: none;
+  width: 100%;
   line-height: 20px;
   font-size: 1vw;
   text-align: center;
@@ -319,11 +319,12 @@ div.cm-s-_style.CodeMirror {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(125,125,125, 0.65);
   display: flex;
+  resize: none;
   flex-grow: 1;
   width: 100%;
   font-size: 1vw;
   font-weight: bold;
-  line-height: 24px;
+  line-height: 20px;
   vertical-align: center;
   text-align: center;
 }
@@ -344,8 +345,7 @@ div.cm-s-_style.CodeMirror {
 
 /*Individual Transition Cells*/
 .GridItem-transition {
-  width: 95%;
-  margin-left: 2.5%;
+  width: 100%;
   margin-bottom: 100px;
   height: 30px;
   min-height: 30px;

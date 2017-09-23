@@ -35,7 +35,8 @@ import '../assets/_rule.js';
 
 // Grid Layout
 var WidthProvider = require('react-grid-layout').WidthProvider;
-var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
+var ReactGridLayout = require('react-grid-layout');
+var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 var keymaster = require('keymaster');
@@ -298,21 +299,32 @@ handleUnselection() {
 renderChannel(scene_key, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
-
-  return <Channels key={item.key}
+console.log(item);
+  return <div key={item.key} data-grid={{x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
+          <Channels key={item.key}
             active={activeMatrix}
             scene_key={scene_key}
             item={item}/>
+         </div>
 }
 
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
-  const items = ctx.props.channel;
+  const items = _.reject(ctx.props.channel, function(o) {
+    return o.scene !== activeMatrix;
+  });
   const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
-
   return (<div className={"AllChannels draggableCancel"}>
-          {_.map(items, ctx.renderChannel.bind(ctx, sceneKey))}
+          <ReactGridLayout
+              className={"layout_matrix"}
+              cols={36}
+              width={2000}
+              rowHeight={40}
+              draggableCancel={'.draggableCancel'}
+            >
+            {_.map(items, ctx.renderChannel.bind(ctx, sceneKey))}
+          </ReactGridLayout>
           </div>)
 }
 
@@ -920,7 +932,8 @@ renderLayouts(layoutItem, k) {
       <SelectableGroup className={'PanelAdjuster'}
         onSelection={ctx.handleSelection.bind(ctx)}
         onNonItemClick={ctx.handleUnselection.bind(ctx)}
-        tolerance={5}>
+        tolerance={5}
+        enabled={false}>
         {ctx.renderPlayer()}
       </SelectableGroup>
     </div>);
