@@ -25,7 +25,9 @@ class Channels extends Component {
       selectedCells: [],
       soloActive:false,
 			tolerance: 0,
-			selectOnMouseMove: false
+			selectOnMouseMove: false,
+      isLoop: true,
+      loopNumber: 0
     }
     //this.handleSelection = this.handleSelection.bind(this);
 
@@ -81,7 +83,10 @@ class Channels extends Component {
         var runNo, stepvalue;
         if ( !(soloActive === true && chan.name !== solo) )
         {
-          runNo = Math.floor( click.current % chan.step) ;
+          runNo = Math.floor( click.current % chan.step);
+          if (!ctx.state.isLoop && (parseInt(click.current / chan.step) > ctx.state.loopNumber))
+            runNo = chan.step-1;
+
           stepvalue = '';
           channel_values = chan.vals;
           if (runNo !== undefined && (mat_name === chan.scene) && chan.name === ctx.props.item.name) {
@@ -120,8 +125,12 @@ class Channels extends Component {
   renderStep(item, _, i) {
     const ctx = this;
     const { click } = ctx.props;
-    const step = parseInt(item.step, 10);
-    const currentStep = Math.floor( click.current % step);
+    const step = parseInt(item.step);
+    const current = parseInt(click.current);
+    var   currentStep = Math.floor( current % step);
+
+    if (!ctx.state.isLoop && (parseInt(current / step) > ctx.state.loopNumber))
+      currentStep = step-1;
 
     return(
       <SelectableComponent
@@ -197,11 +206,15 @@ class Channels extends Component {
     const tests = ({ target: { value }}) => {
       this.nameInput.focus();
     }
+    const loopChannel = event => {
+      this.setState({isLoop: !this.state.isLoop, loopNumber: this.props.click.current / item.step});
+    }
     const step = parseInt(item.step, 10);
     return item.key && (
       <div key={item.key} className={"ChannelItem"}>
         <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
           <button className={"Button "+ soloPressed[item.cid]} onClick={soloChannel}>S</button>
+          <button className={"Button "+ this.state.isLoop} onClick={loopChannel}>⭯</button>
           <p>{item.name}</p>
           <button className={"Button"} onClick={deleteChannel}>X</button>
         </div>

@@ -67,7 +67,7 @@
 }
 .Button.true {
   background: rgba(255,255,102,0.45);
-  color: #111;
+  color: #fff;
   font-weight: bold;
 }
 .ChannelItemHeader button {

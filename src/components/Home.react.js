@@ -220,7 +220,6 @@ addChannel() {
   _.each(Object.values(ctx.props["matrices"]), function(d){
     if(d.matName === activeMatrix) {
       _.each(d.channels, function(c) {
-        console.log(c);
         if(c.name === c_name) {
           alert('"' + c_name + '" already exists in "' + d.matName + '"');
           flag = true;
@@ -299,7 +298,6 @@ handleUnselection() {
 renderChannel(scene_key, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
-console.log(item);
   return <div key={item.key} data-grid={{x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
           <Channels key={item.key}
             active={activeMatrix}
