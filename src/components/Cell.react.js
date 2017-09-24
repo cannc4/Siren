@@ -71,9 +71,13 @@ class Cell extends Component {
   render() {
     const ctx = this;
     const setText = ({ target: { value }}) => {
-      const c_cell = { cell_value: value, cid: ctx.state.cid, c_key: ctx.state.c_key, cell_index: ctx.state.index, channels: ctx.props.channel };
+      const c_cell = { cell_value: value, cid: ctx.state.cid, c_key: ctx.state.c_key, cell_index: ctx.state.index};
       store.dispatch(updateCell(c_cell));
       const val = ctx.props.cell.vals;
+
+      console.log(val);
+      console.log(val[ctx.state.cid]);
+      console.log(ctx.state.c_key);
 
       const nc = { vals: val[ctx.state.cid], key: ctx.state.c_key };
       ctx.setState({value: value});
@@ -85,7 +89,10 @@ class Cell extends Component {
 
     var className = ctx.state.className;
     if(ctx.props.currentStep === ctx.state.index){
-      className += '-active'
+      className += ' active'
+    }
+    if(ctx.props.index % 2 === 0) {
+      className += ' even'
     }
     if(_.indexOf(ctx.props.cell.selectedCells, ctx.state.cid+"_"+ctx.state.index) >= 0) {
       className += ' selected';

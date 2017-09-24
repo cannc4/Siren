@@ -92,8 +92,6 @@ class Home extends Component {
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
                        {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
     }
-
-    // store.dispatch(updateLayout(this.state.default_layout))
   }
 
 //Clock for Haskell
@@ -228,26 +226,6 @@ addChannel() {
       })
 
       if (flag === false){
-        var _index=0;
-        _.each(d.channels, function(chan,i){
-          _index++;
-        })
-        ctx.setState({ c_id : _index });
-
-        var values = {}
-        for(var i = 0; i < c_step; i++){
-          values[i] = '';
-        }
-
-        var nc = { scene: activeMatrix,
-          cid: _index,
-          type: c_type,
-          name: c_name,
-          transition: c_transition,
-          step: c_step,
-          vals: values
-        };
-
         if (c_name === undefined || c_name === '') {
           alert('Invalid name for channel');
         }
@@ -258,15 +236,35 @@ addChannel() {
           alert('Invalid type');
         }
         else{
+          var _index=0;
+          _.each(d.channels, function(chan,i){
+            _index++;
+          })
+          ctx.setState({ c_id : _index });
+
+          var values = {}
+          for(var i = 0; i < c_step; i++){
+            values[i] = '';
+          }
+
+          var nc = { scene: activeMatrix,
+            cid: _index,
+            type: c_type,
+            name: c_name,
+            transition: c_transition,
+            step: c_step,
+            vals: values
+          };
+
           var obj = fbcreatechannelinscene('Matrices', nc, d.key);
-          nc['key'] = obj
+          nc['key'] = obj;
           store.dispatch(createChannel(nc));
           const newCell = {cstep: c_step, cid: _index };
           store.dispatch(createCell(newCell));
           ctx.setState({ activeMatrix: d.matName, matName: d.matName });
         }
-
-      } else {
+      }
+      else {
         console.log('"' + c_name + '" already exists in "' + d.matName + '"');
       }
     }
@@ -317,10 +315,17 @@ renderChannel(scene_key, channelLen, item){
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
-  const items = _.reject(ctx.props.channel, function(o) {
-    return o.scene !== activeMatrix;
-  });
+
+  // _.reject(ctx.props.channel, function(o) {
+  //   return o.scene !== activeMatrix;
+  // });
   const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
+  const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
+  var items;
+  if (!_.isUndefined(scene)) {
+    items = scene.channels;
+  }
+  const items_length = _.isUndefined(items) ? 0 : items.length;
   return (<div className={"AllChannels draggableCancel"}>
           <ReactGridLayout
               className={"layout_matrix"}
@@ -330,7 +335,7 @@ renderPlayer() {
               margin={[2,10]}
               draggableCancel={'.draggableCancel'}
             >
-            {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items.length))}
+            {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items_length))}
           </ReactGridLayout>
           </div>)
 }
@@ -1014,7 +1019,6 @@ renderLayouts(layoutItem, k) {
       </div>
       <div className={"GlobalParams PanelAdjuster"}>
         <p>Sequencer: ⌥ + Enter, ⇧ + Enter</p>
-        <p>Channels : ⌃ + Enter</p>
         <div className={'GlobalParamsInputs'}>
           <div className={'GlobalSequencer'}>
             <MaskedInput mask={maskedInputDurations}
@@ -1024,20 +1028,25 @@ renderLayouts(layoutItem, k) {
               onChange={ctx.handleGlobalsqDuration.bind(ctx)}
               value={globalsq}
               placeholder={"Sequencer ( "+maskedInputDurations+")"}/>
-            <MaskedInput mask={maskedInputPatterns}
-              className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"}
-              key={'globalchannel'}
-              onKeyUp={ctx.handleUpdatePatterns.bind(ctx)}
-              onChange={ctx.handleGlobalChannels.bind(ctx)}
-              value={globalChannels}
-              placeholder={"Channels ( "+maskedInputPatterns+")"}/>
           </div>
-          <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
         </div>
+
         <p>Execute: ⌃ + Enter</p>
         <div className={"GlobalParamsInputsII"}>
-          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder={"Transformation"}/>
-          <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder={"Commands"} />
+          <div className={"GlobalParamsInputs"}>
+            <div>
+              <MaskedInput mask={maskedInputPatterns}
+                className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"}
+                key={'globalchannel'}
+                onKeyUp={ctx.handleUpdatePatterns.bind(ctx)}
+                onChange={ctx.handleGlobalChannels.bind(ctx)}
+                value={globalChannels}
+                placeholder={"Channels ( "+maskedInputPatterns+")"}/>
+              <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder={"Transformation"}/>
+              <input className={"Input" + ctx.state.globalOnClickClass + " draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder={"Commands"} />
+            </div>
+            <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
+          </div>
         </div>
         <p>{"(Select) click,  (save) ⇧ + click, (delete) ⌥ + click"}</p>
         <div className={'StoredGlobalParams'}>
@@ -1081,9 +1090,6 @@ render() {
       h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
       margin = 7,
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
-
-
-  console.log('RENDERING HOME');
 
   let layouts = _.filter(ctx.props.layout.windows, ['isVisible', true, 'i', 'dummy']);
   return <div>

@@ -26,13 +26,11 @@ class Channels extends Component {
       loop: {isLoop: true, pauseTurn: 0, hasSilenced: false}
     }
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const ctx = this;
-  //   console.log(nextProps.click.current, ctx.props.click.current);
-  //   if (nextProps.click.current !== ctx.props.click.current)
-  //     return false;
-  //   return true;
+  //
+  // shouldComponentUpdate(nextProps) {
+  //   const differentTitle = this.props.click.current !== nextProps.click.current;
+  //   // const differentDone = this.props.done !== nextProps.done
+  //   return differentTitle //|| differentDone;
   // }
 
   componentDidUpdate(prevProps, prevState) {
@@ -42,6 +40,8 @@ class Channels extends Component {
 
   sendPatterns(){
     const ctx = this;
+
+    console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
 
     const tidalServerLink = 'localhost:3001';
     const { click, solo } = ctx.props;
@@ -59,13 +59,11 @@ class Channels extends Component {
       })
 
       var runNo, stepvalue = '';
-      // console.log('sendPatterns for '+chan.name,  solo);
       if (!solo.isSolo || (solo.isSolo && solo.soloValue)) {
         runNo = Math.floor( click.current % chan.step);
         if (runNo !== undefined) {
           stepvalue = chan.vals[runNo];
         }
-        // console.log(chan, stepvalue, runNo);
         if (stepvalue !== ""){
           store.dispatch(sendPatterns(tidalServerLink, chan, stepvalue,
               scenePatterns, click, ctx.props.globalparams ));
@@ -102,8 +100,6 @@ class Channels extends Component {
   render() {
     const ctx = this;
     const { item } = ctx.props;
-
-    console.log('RENDERING CHANNEL '+item.name);
 
     if (item.scene !== ctx.props.active)
       return item.key && (

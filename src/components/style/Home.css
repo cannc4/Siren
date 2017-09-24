@@ -129,9 +129,10 @@
   margin-bottom: 8px;
 }
 .GlobalParamsInputsII {
+  display: flex;
+  flex-direction: column;
   width: calc(100% - 5px);
   padding: 1px;
-  border: 1px solid #000;
   margin-bottom: 8px;
 }
 .StoredGlobalParams {
@@ -322,26 +323,18 @@ div.cm-s-_style.CodeMirror {
   text-rendering: optimizeSpeed;
   text-align: left;
   vertical-align: center;
-  border: 0.5px solid rgba(125,125,125, 0.65);
+  border: none;
   background: rgba(0,0,0,0.3);
   padding: 0 5px 0 5px;
   z-index: 50;
 }
+.GridItem.even {
+  background: rgba(0,0,0,0.45);
+}
 
 /*Active Individual Grid Cells*/
-.GridItem-active {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(125,125,125, 0.65);
-  display: flex;
-  resize: none;
-  flex-grow: 1;
-  width: 100%;
-  font-size: 1vw;
-  font-weight: bold;
-  line-height: 20px;
-  vertical-align: center;
-  text-rendering: optimizeSpeed;
-  text-align: left;
+.GridItem.active {
+  background-color: rgba(200,200,90, 0.2);
 }
 
 /*Selected Grid Items*/
