@@ -352,151 +352,133 @@ export const TidalTick = (server) => {
 var math = require('mathjs');
 // var patListBack = [];
 // var clickPrev;
-export const sendPatterns = (server, channel_namestepvalue ,
-	 channels, scenePatterns, click, globalparams) => {
+export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 
 	return dispatch => {
-		const x =  _.compact(_.map(channel_namestepvalue, function(ch, j){
+		const getFinalPattern = () => {
+			console.log('INDEXJS ', channel, stepValue);
 
-		// channel
-		var k = Object.keys(ch);
+			// channel
+			var k = channel.name;
 
-		// pattern
-		var v = Object.values(ch);
+			// pattern
+			var v = stepValue;
 
-		const getParameters = (v) => {
-			var param = [];
-			_.map(_.split(v, /[`]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
+			const getParameters = (v) => {
+				var param = [];
+				_.map(_.split(v, /[`]+/g), (p1, p2) => {
+					p1 = _.trim(p1);
 
-				if(p1 !== "") param.push(p1);
-			});
-			return param;
-		}
-		//gets mathematical expression
-		// const getMathExpr = (v) => {
-		// 	var maths = [];
-		// 	_.map(_.split(v, /[&]+/g), (p1, p2) => {
-		// 		p1 = _.trim(p1);
-		//
-		// 		if(p1 !== "") maths.push(p1);
-		// 	});
-		// 	return maths;
-		// }
-
-		// pattern name
-		const cellName = getParameters(v)[0];
-
-		// command of the pattern
-		const cmd = _.find(scenePatterns, c => c.name === cellName);
-		var newCommand;
-
-		// CPS channel handling
-		if( k === 'cps'){
-			newCommand = cellName;
-			return [k + " " + newCommand, "sendOSC d_OSC $ "] ;
-		}
-		// other channels
-		else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
-			var cellItem = _.slice(getParameters(v), 1);
-			newCommand= cmd.pattern;
-			// Construct the parameter list from command
-			var parameters = _.concat( _.split(cmd.params, ','),'t');
-
-			// For each parameter in parameter list
-			_.forEach(parameters, function(value, i) {
-				// Temporal parameter
-				if(value === 't'){
-					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
-				}
-				// Random parameter
-				else if(_.indexOf(cellItem[i], '|') !== -1 )
-				{
-					cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
-					var bounds = _.split(cellItem[i], ',');
-					if(bounds[0] !== undefined && bounds[0] !== "" &&
-						 bounds[1] !== undefined && bounds[1] !== ""){
-							 bounds[0] = parseFloat(bounds[0]);
-							 bounds[1] = parseFloat(bounds[1]);
-							 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
-							 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-					}
-				}
-				// Value parameter
-				else {
-					newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-				}
-			});
-
-
-			// Math Parser
-			// eslint-disable-next-line
-			_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
-				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
-			})
-			// solo or not (obsolete)
-			var channel_id,
-					// channel_type,
-					channel_transition,
-					// 	channel_name,
-					transitionHolder,
-					soloHolder,
-					_k;
-
-			_.each(channels, function(chantwo,i){
-				if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
-					// channel_type = chantwo.type;
-					channel_transition = chantwo.transition;
-					// channel_name = chantwo.name;
-					channel_id = chantwo.cid;
-					soloHolder = k[0];
-				 	transitionHolder = "" ;
-				 	_k = k;
-
-				}
-			})
-
-			if (channel_transition === "" ||channel_transition === undefined ){
-				soloHolder = k ;
-				transitionHolder = " $ ";
+					if(p1 !== "") param.push(p1);
+				});
+				return param;
 			}
-
-			else if(channel_transition !== undefined && channel_transition!== ""){
-				transitionHolder = " " + channel_transition+ " $ ";
-				soloHolder = "t"+ (channel_id +1);
-			}
-			// else if(solo === k){
-			// 		soloHolder = "solo $ " + _k ;
-			// 		transitionHolder = " $ ";
+			//gets mathematical expression
+			// const getMathExpr = (v) => {
+			// 	var maths = [];
+			// 	_.map(_.split(v, /[&]+/g), (p1, p2) => {
+			// 		p1 = _.trim(p1);
+			//
+			// 		if(p1 !== "") maths.push(p1);
+			// 	});
+			// 	return maths;
 			// }
 
-			var pattern;
-			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
-				var storechan = _k + " $ ";
-				pattern = storechan + newCommand;
-				globalparams.storedPatterns[channel_id] = '';
-				globalparams.storedPatterns[channel_id] = pattern;
-				channel_id++;
-				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
-					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
-					}
-					else {
-						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
-					}
-				}
-					else {
-						pattern = soloHolder + transitionHolder + newCommand ;
-					}
-					return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"];
+			// pattern name
+			const cellName = getParameters(v)[0];
 
+			// command of the pattern
+			const cmd = _.find(scenePatterns, c => c.name === cellName);
+			var newCommand;
+
+			// CPS channel handling
+			if( k === 'cps'){
+				newCommand = cellName;
+				return [k + " " + newCommand, "sendOSC d_OSC $ "] ;
 			}
-			else {
-				pattern = soloHolder  + transitionHolder + newCommand;
-				globalparams.storedPatterns[channel_id] = '';
-				globalparams.storedPatterns[channel_id] = pattern;
-				channel_id++;
-				if (globalparams.globalChannels.includes(channel_id.toString()) || globalparams.globalChannels.includes(0)){
+			// other channels
+			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+				var cellItem = _.slice(getParameters(v), 1);
+				newCommand = cmd.pattern;
+				// Construct the parameter list from command
+				const parameters = _.concat( _.split(cmd.params, ','),'t');
+
+				// For each parameter in parameter list
+				_.forEach(parameters, function(value, i) {
+					// Temporal parameter
+					if(value === 't'){
+						newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
+					}
+					// Random parameter
+					else if(_.indexOf(cellItem[i], '|') !== -1 )
+					{
+						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
+						var bounds = _.split(cellItem[i], ',');
+						if(bounds[0] !== undefined && bounds[0] !== "" &&
+							 bounds[1] !== undefined && bounds[1] !== ""){
+								 bounds[0] = parseFloat(bounds[0]);
+								 bounds[1] = parseFloat(bounds[1]);
+								 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
+								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+						}
+					}
+					// Value parameter
+					else {
+						newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+					}
+				});
+
+
+				// Math Parser
+				// eslint-disable-next-line
+				_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
+					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
+				})
+				// solo or not (obsolete)
+				var	transitionHolder,
+						soloHolder;
+				// var channel_id,
+						// channel_type,
+						// channel_transition,
+						// 	channel_name,
+						// _k;
+
+				// _.each(channels, function(chantwo,i){
+				// 	if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
+				// 		// channel_type = chantwo.type;
+				// 		channel_transition = chantwo.transition;
+				// 		// channel_name = chantwo.name;
+				// 		channel_id = chantwo.cid;
+				// 		soloHolder = k[0];
+				// 	 	transitionHolder = "" ;
+				// 	 	_k = k;
+				//
+				// 	}
+				// })
+
+				if (channel.transition === "" || channel.transition === undefined ){
+					transitionHolder = " $ ";
+					soloHolder = k ;
+				}
+				else {
+					transitionHolder = " " + channel.transition + " $ ";
+					soloHolder = "t"+ (channel.cid +1);
+				}
+				// else if(solo === k){
+				// 		soloHolder = "solo $ " + _k ;
+				// 		transitionHolder = " $ ";
+				// }
+
+				var pattern;
+				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
+					pattern = k + " $ " + newCommand;
+				}
+				else {
+					pattern = soloHolder  + transitionHolder + newCommand;
+				}
+
+				globalparams.storedPatterns[channel.cid] = pattern;
+				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
 					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
 						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
 					}
@@ -508,52 +490,18 @@ export const sendPatterns = (server, channel_namestepvalue ,
 					pattern = soloHolder + transitionHolder + newCommand ;
 				}
 
-				// if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
-				// 	newCommand = globalTransformations+ newCommand + " " + globalCommands
-				// 	newCommand = newCommand.replaceAll(' s ', ' image ');
-				// 	newCommand = newCommand.replaceAll('n ', 'npy ');
-				// 	newCommand = newCommand.replaceAll('speed', 'pspeed');
-				// 	newCommand = newCommand.replaceAll('nudge', 'threshold');
-				// 	newCommand = newCommand.replaceAll('room', 'blur');
-				// 	newCommand = newCommand.replaceAll('end', 'median');
-				// 	newCommand = newCommand.replaceAll('coarse', 'edge');
-				// 	newCommand = newCommand.replaceAll('up', 'hough');
-				// 	newCommand = newCommand.replaceAll('gain', 'means');
-				// 	return [pattern, "v1 $ "+ newCommand] ;
-				// }
-				// else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
-				// 	pattern =  "v1 $ " + newCommand;
-				// 	newCommand = newCommand.replaceAll('image', 's');
-				// 	newCommand = newCommand.replaceAll('npy', 'n');
-				// 	newCommand = newCommand.replaceAll('pspeed', 'speed');
-				// 	newCommand = newCommand.replaceAll('threshold', 'nudge');
-				// 	newCommand = newCommand.replaceAll('blur', 'room');
-				// 	newCommand = newCommand.replaceAll('median', 'end');
-				// 	newCommand = newCommand.replaceAll('edge', 'coarse');
-				// 	newCommand = newCommand.replaceAll('hough', 'up');
-				//
-				// 	console.log(pattern, "d1 $ "+ newCommand);
-				// 	return [pattern, "d1 $ "+ newCommand] ;
-				// }
-
-				console.log(pattern);
+				console.log('actually sending it: ', pattern);
 				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 			}
+			else
+				return false;
 		}
-		else
-			return false;
-		}))
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
 		}).catch(function (error) {
 			console.error(error);
 		});
-	//}
-	// clickPrev = click.current;
-}
-// else {
-// 	return [];
-//}
+	}
 }
 
 export const continousPattern = (server, pattern) => {

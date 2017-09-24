@@ -48,6 +48,8 @@ class REPL {
     this.tidalSendLine(':{');
     const splits = expression.split('\n');
 
+    console.log('tidalSendExpression: -----> ', splits);
+
     for (let i = 0; i < splits.length; i++) {
       this.tidalSendLine(splits[i]);
     }
@@ -152,6 +154,7 @@ const Siren = () => {
 
   const sendPatterns = (patterns, reply) => {
     _.each(patterns, c => {
+      console.log('appjs sendPatterns: ', c);
       TidalData.TidalConsole.tidalSendExpression(c[0]);
       TidalData.TidalConsole.tidalSendExpression(c[1]);
     })

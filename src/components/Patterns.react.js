@@ -8,6 +8,12 @@ import 'codemirror/lib/codemirror.css';
 import '../assets/_style.css'
 import '../assets/_rule.js';
 
+// Grid Layout
+var ReactGridLayout = require('react-grid-layout');
+var WidthProvider = ReactGridLayout.WidthProvider;
+var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
 class Patterns extends Component {
   constructor(props) {
     super(props)
@@ -106,31 +112,18 @@ class Patterns extends Component {
         lineWrapping: true,
         showCursorWhenSelecting: true
     };
-
-    // function getStyleSheet(unique_title) {
-    //   for(var i=0; i<document.styleSheets.length; i++) {
-    //     var sheet = document.styleSheets[i];
-    //     if(sheet.title == unique_title) {
-    //       return sheet;
-    //     }
-    //   }
-    // }
-    //
-    // var sheet = getStyleSheet('_style');
-    // console.log(sheet);
-    // sheet.insertRule(".cm-s-_style.CodeMirror { background: #f5f5f5; color: #202020; height: "+100+"px; }", 0);
-
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <div key={item.key} className="PatternItem draggableCancel" >
+      <div key={item.key} className={"PatternItem draggableCancel"} data-grid={{i: item.key, x:0, y: item.index*2, w: Infinity, h: 4, minH: 3}} >
         <div key={name} >
           <div key={name} className={'PatternItemInputs'}>
-            <input className={'Input draggableCancel'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-            <input className={'Input draggableCancel'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
-            <button className={'Button draggableCancel'} onClick={handleDelete}>{'Delete'} </button>
+            <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+            <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
-          <CodeMirror className={'PatternItemCodeMirror'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+          <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
         </div>
       </div>
     )
@@ -142,7 +135,9 @@ class Patterns extends Component {
   }
 
   render() {
-    const ctx = this
+    const ctx = this;
+
+    console.log("RENDERING PATTERNS");
     const { modelName, name } = ctx.state;
     var items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);
@@ -154,6 +149,10 @@ class Patterns extends Component {
         }
       }
     })
+    var iterator = 0;
+    _.each(items, function(d){
+      d.index = iterator++;
+    })
 
     const changeName = ctx.changeName.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
@@ -164,9 +163,17 @@ class Patterns extends Component {
           <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
           <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
-        <div>
+
+        <ResponsiveReactGridLayout
+            className={"layout_patterns"}
+            breakpoints={{lg: 1200, md: 996, sm: 768, xs: 360}}
+            cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+            rowHeight={30}
+            margin={[2,10]}
+            draggableCancel={'.draggableCancelNested'}
+          >
           {renderItems(items)}
-        </div>
+        </ResponsiveReactGridLayout>
       </div>
     );
   }

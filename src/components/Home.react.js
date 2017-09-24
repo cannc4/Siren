@@ -34,8 +34,8 @@ import '../assets/_style.css';
 import '../assets/_rule.js';
 
 // Grid Layout
-var WidthProvider = require('react-grid-layout').WidthProvider;
 var ReactGridLayout = require('react-grid-layout');
+var WidthProvider = ReactGridLayout.WidthProvider;
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
@@ -81,6 +81,7 @@ class Home extends Component {
       c_id: 0,
       c_transition: '',
       csize: 1,
+      soloArray: _.times(8, _.stubFalse),
       manual_layout_trig: true,
       default_layout: [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, isVisible: true},
                        {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, isVisible: true},
@@ -295,14 +296,21 @@ handleUnselection() {
   store.dispatch(selectCell([]))
 }
 
-renderChannel(scene_key, item){
+renderChannel(scene_key, channelLen, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
-  return <div key={item.key} data-grid={{x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
+
+  return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
           <Channels key={item.key}
             active={activeMatrix}
             scene_key={scene_key}
-            item={item}/>
+            item={item}
+            solo={{isSolo: _.indexOf(ctx.state.soloArray, true) !== -1, soloValue: ctx.state.soloArray[item.cid]}}
+            soloOnClick={function(cid) {
+              var temp = _.times(channelLen, _.stubFalse)
+              temp[cid] = !ctx.state.soloArray[cid];
+              ctx.setState({soloArray: temp});
+            }}/>
          </div>
 }
 
@@ -319,9 +327,10 @@ renderPlayer() {
               cols={36}
               width={2000}
               rowHeight={40}
+              margin={[2,10]}
               draggableCancel={'.draggableCancel'}
             >
-            {_.map(items, ctx.renderChannel.bind(ctx, sceneKey))}
+            {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items.length))}
           </ReactGridLayout>
           </div>)
 }
@@ -401,7 +410,7 @@ renderScene(item, dbKey, i) {
     ctx.setState({ activeMatrix: item.matName,
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
       globalTransformations: '', globalCommands:'', globalChannels: '',
-      pressed:gpressed, sceneIndex:item.key});
+      pressed:gpressed, sceneIndex:item.key, soloArray: _.times(item.channels.length, _.stubFalse)});
     ctx.updateMatrix(item);
 
     store.dispatch(globalStore(sglobals,[]));
@@ -780,6 +789,7 @@ click = () => {
   console.log('You clicked an item');
 };
 
+// TEMP:
 tidalcps (value) {
   const ctx = this;
   const {click } = ctx.props;
@@ -787,6 +797,8 @@ tidalcps (value) {
   var temp = click;
   temp.times = body;
   ctx.setState({click:temp});
+
+  console.log("TIDALCPS");
 }
 
 handleClick = (e, data) => {
@@ -1069,6 +1081,9 @@ render() {
       h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
       margin = 7,
       row_height = (h-(vertical_n+1)*margin)/vertical_n;
+
+
+  console.log('RENDERING HOME');
 
   let layouts = _.filter(ctx.props.layout.windows, ['isVisible', true, 'i', 'dummy']);
   return <div>
