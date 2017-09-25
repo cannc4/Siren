@@ -5,7 +5,8 @@ import store from '../store';
 import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
-import { fbdeletechannelinscene, fbupdatechannelinscene, sendPatterns } from '../actions';
+import { fbdeletechannelinscene, fbupdatechannelinscene,
+         sendPatterns, consoleSubmit } from '../actions';
 
 class Channels extends Component {
   constructor(props) {
@@ -26,62 +27,67 @@ class Channels extends Component {
       loop: {isLoop: true, pauseTurn: 0, hasSilenced: false}
     }
   }
-  //
-  // shouldComponentUpdate(nextProps) {
-  //   const differentTitle = this.props.click.current !== nextProps.click.current;
-  //   // const differentDone = this.props.done !== nextProps.done
-  //   return differentTitle //|| differentDone;
-  // }
 
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
-    ctx.sendPatterns();
+    const { click } = ctx.props;
+
+    if (click.isActive && click.flag % click.times === 0) {
+      ctx.sendPatterns();
+    }
   }
 
   sendPatterns(){
     const ctx = this;
-
-    console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
-
-    const tidalServerLink = 'localhost:3001';
     const { click, solo } = ctx.props;
     const { loop } = ctx.state;
-    const allScenes = ctx.props.matrices;
-    const chan = ctx.props.item;
+    const channel = ctx.props.item;
 
-    if (click.isActive && click.flag % click.times === 0) {
-      // Find the dictionary definitions of functions
-      var scenePatterns;
-      _.each(allScenes, function(d){
-        if(d.matName === ctx.props.active){
-          scenePatterns = d.patterns;
-        }
-      })
-
-      var runNo, stepvalue = '';
+    if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) ) {
       if (!solo.isSolo || (solo.isSolo && solo.soloValue)) {
-        runNo = Math.floor( click.current % chan.step);
-        if (runNo !== undefined) {
-          stepvalue = chan.vals[runNo];
+        var runNo, stepvalue = "";
+
+        console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
+
+        // Find the dictionary definitions of functions
+        var scenePatterns;
+        _.each(ctx.props.matrices, function(d){
+          if(d.matName === ctx.props.active){
+            scenePatterns = d.patterns;
+          }
+        })
+
+        runNo = _.floor(click.current % channel.step);
+
+        if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
+          runNo = channel.step-1;
+          store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
+          ctx.setState({loop: {isLoop: loop.isLoop,
+                               pauseTurn: loop.pauseTurn,
+                               hasSilenced: true}});
+          return;
+        }
+
+        if (!_.isUndefined(runNo)) {
+          stepvalue = channel.vals[runNo];
         }
         if (stepvalue !== ""){
-          store.dispatch(sendPatterns(tidalServerLink, chan, stepvalue,
-              scenePatterns, click, ctx.props.globalparams ));
+          store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
+            scenePatterns, click, ctx.props.globalparams ));
         }
       }
     }
   }
 
 
-  renderStep(item, _, i) {
+  renderStep(item, __, i) {
     const ctx = this;
     const { click } = ctx.props;
-    const step = parseInt(item.step, 10);
-    const current = parseInt(click.current, 10);
-    var   currentStep = Math.floor( current % step);
+    const { loop } = ctx.state;
+    var   currentStep = _.floor(click.current % item.step);
 
-    if (!ctx.state.loop.isLoop && (parseInt(current / step, 10) > ctx.state.loop.pauseTurn))
-      currentStep = step-1;
+    if (!loop.isLoop && (_.toInteger(click.current / item.step) > loop.pauseTurn))
+      currentStep = item.step - 1;
 
     return(
       <SelectableComponent
@@ -99,7 +105,8 @@ class Channels extends Component {
   // Render whole matrix
   render() {
     const ctx = this;
-    const { item } = ctx.props;
+    const { item, solo } = ctx.props;
+    const { loop } = ctx.state;
 
     if (item.scene !== ctx.props.active)
       return item.key && (
@@ -132,20 +139,26 @@ class Channels extends Component {
                 { transition: value, key: item.key },
                 ctx.props.scene_key)
     }
-    const tests = ({ target: { value }}) => {
+    const onClickFocus = ({ target: { value }}) => {
       this.nameInput.focus();
     }
     const loopChannel = event => {
       this.setState({loop: {isLoop: !this.state.loop.isLoop,
-                            pauseTurn: this.props.click.current / item.step,
+                            pauseTurn: _.toInteger(this.props.click.current / item.step),
                             hasSilenced: false}});
     }
     const step = parseInt(item.step, 10);
+    var channelClass = "ChannelItem";
+    if ((!loop.isLoop &&  loop.hasSilenced) ||
+        ( solo.isSolo && !solo.soloValue))
+    {
+      channelClass += " disabled";
+    }
     return item.key && (
-      <div key={item.key} className={"ChannelItem"}>
+      <div key={item.key} className={channelClass}>
         <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
           <div className={"ChannelItemHeader"}>
-            <button className={"Button "+ this.state.loop.isLoop} onClick={loopChannel}>⭯</button>
+            <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
             <button className={"Button "+ ctx.props.solo.soloValue} onClick={soloChannel}>S</button>
           </div>
           <p>{item.name}</p>
@@ -156,7 +169,7 @@ class Channels extends Component {
           key={item.key+'_t'} className={"GridItem-transition draggableCancel"}
           placeholder={" - "}  value={item.transition}
           onChange={updateTransition}
-          onClick={tests}/>
+          onClick={onClickFocus}/>
       </div>
     )
   }

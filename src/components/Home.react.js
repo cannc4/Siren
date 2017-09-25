@@ -315,10 +315,6 @@ renderChannel(scene_key, channelLen, item){
 renderPlayer() {
   const ctx = this;
   const { activeMatrix } = ctx.state;
-
-  // _.reject(ctx.props.channel, function(o) {
-  //   return o.scene !== activeMatrix;
-  // });
   const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
   const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
   var items;

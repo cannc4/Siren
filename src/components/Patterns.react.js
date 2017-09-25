@@ -136,8 +136,6 @@ class Patterns extends Component {
 
   render() {
     const ctx = this;
-
-    console.log("RENDERING PATTERNS");
     const { modelName, name } = ctx.state;
     var items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);

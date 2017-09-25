@@ -138,6 +138,7 @@
 .StoredGlobalParams {
   background: rgba(200, 200, 200, 0.05);
   border: 1px solid #000;
+  min-height: 35px;
   height: auto;
 }
 .StoredGlobalParams button {
@@ -176,14 +177,14 @@ div.cm-s-_style.CodeMirror {
   border: 1px solid rgba(120, 120, 120, 0.75);
   width: 98%;
   background: none;
-  margin-top: 3px;
+  margin: 1px;
 }
 /*Active Scene Items on Scene Panel*/
 .SceneItem-active {
   border: 1px solid rgba(200, 200, 200, 0.75);
-  width: 98%; /*But whyy*/
+  width: 98%;
   background: rgba(255,255,102,0.25);
-  margin-top: 3px;
+  margin: 1px;
 }
 
 
@@ -290,6 +291,11 @@ div.cm-s-_style.CodeMirror {
   min-width: 100px;
   padding: 0;
 }
+/*Individual Channels -- disabled style*/
+.ChannelItem.disabled {
+  border: 1px groove rgba(200, 200, 200, 0.75);
+  opacity: 0.4;
+}
 
 /* Matrix header styling*/
 .ChannelItemHeader {
@@ -354,7 +360,6 @@ div.cm-s-_style.CodeMirror {
 /*Individual Transition Cells*/
 .GridItem-transition {
   width: 100%;
-  margin-bottom: 100px;
   height: 30px;
   min-height: 30px;
   font-size: 1vw;
