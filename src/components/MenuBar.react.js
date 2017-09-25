@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
+import _ from 'lodash';
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
          initTidalConsole, killTidalConsole} from '../actions'
+
+var keymaster = require('keymaster');
 
 class MenuBar extends Component {
   constructor(props) {
@@ -23,6 +26,19 @@ class MenuBar extends Component {
       times: 2
     }
   }
+
+  componentDidMount(props,state){
+    const ctx = this;
+
+    keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
+  }
+
+  componentWillUnmount(props, state) {
+    const ctx = this;
+
+    keymaster.unbind('ctrl+space', ctx.toggleClick.bind(ctx));
+  }
+
   componentDidUpdate() {
     const ctx = this;
     if (ctx.state.path !== location.pathname){
@@ -31,6 +47,10 @@ class MenuBar extends Component {
   }
 
   ////////////////////////////// TIMER STARTS ////////////////////////////
+  toggleClick = () => {
+    store.dispatch(chokeClick())
+  }
+
   startTimer = event => {
     if(event.shiftKey)
       store.dispatch(resetClick());
@@ -68,10 +88,12 @@ class MenuBar extends Component {
 
 
     const changeTimes = ({target: {value}}) => {
-      if (!isNaN(parseInt(value, 10))){
-        ctx.setState({times : parseInt(value, 10)});
-        ctx.props.click.times = parseInt(value, 10);
+      ctx.setState({times : value});
+
+      if (_.toInteger(value) === 0){
+        value = 2;
       }
+      ctx.props.click.times = _.toInteger(value);
     }
 
     const loginGG = () => {
@@ -86,18 +108,19 @@ class MenuBar extends Component {
       <div>
         <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
       </div>
-      <div className={"TimerControls"}>
+      <div style={{display: 'flex', flexDirection: 'row', height: 40}}>
         {!tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
         {tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
-        {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-
-        <p style={{paddingLeft: 15, paddingReft: 5}}>{'Rate: '}</p>
-        <input className={'TimesInput'} value={times} onChange={changeTimes}/>
+        <div className={"TimerControls"}>
+          {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          <p style={{paddingLeft: 15, paddingRight: 5}}>{'Rate: '}</p>
+          <input className={'TimesInput'} value={times} onChange={changeTimes}/>
+        </div>
       </div>
       <div className={"User"}>
         <div>
-          {ctx.props.user.user.email && <button style={{fontWeight: "bold"}} id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
+          {ctx.props.user.user.email && <button style={{fontWeight: "bold", paddingRight: 5}} id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
         </div>
         <div>
           {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}

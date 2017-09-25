@@ -120,7 +120,7 @@ class Patterns extends Component {
           <div key={name} className={'PatternItemInputs'}>
             <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
             <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-            <input className={'Input draggableCancelNested'} type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
           <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>

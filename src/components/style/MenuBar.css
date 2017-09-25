@@ -39,18 +39,19 @@
 
 .TimerControls{
   display: flex;
-  width: 830px;
   flex-direction: row;
+  border: 0.5px solid rgba(125,125,125, 0.8);
+  margin-left: 30px;
+  padding: 0 10px 0 5px;
   justify-content: center;
   align-items: center;
 }
 
 .TimesInput {
   font-size: 12px;
-  border: 0.5px solid rgba(125,125,125, 0.8);
   text-align: center;
   vertical-align: center;
-  width: 10%!important;
+  width: 30px;
 }
 
 @keyframes flash {
