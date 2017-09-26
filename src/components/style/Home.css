@@ -70,13 +70,7 @@
   color: #fff;
   font-weight: bold;
 }
-.ChannelItemHeader button {
-  padding: 0 5px 0 5px;
-  margin: 3px;
-  border: 1px solid rgba(200,200,200, 0.85);
-  color: #ddd;
-  font-weight: bolder;
-}
+
 
 
 /*------------SETTINGS------------*/
@@ -290,7 +284,9 @@ div.cm-s-_style.CodeMirror {
   min-height: 35px;
   min-width: 100px;
   padding: 0;
+  box-shadow: 0px 0px 4px #000;
 }
+
 /*Individual Channels -- disabled style*/
 .ChannelItem.disabled {
   border: 1px groove rgba(200, 200, 200, 0.75);
@@ -300,13 +296,33 @@ div.cm-s-_style.CodeMirror {
 /* Matrix header styling*/
 .ChannelItemHeader {
   display: inline-flex;
-  min-height: 30px;
-  justify-content: space-between;
+  height: 80px;
+  justify-content:flex-end;
   background: rgba(200,200,200,0.1);
-  border: 0.5px solid rgba(200, 200, 200, 0.75);
+  /*border: 0.5px solid rgba(200, 200, 200, 0.75);*/
   font-size: 14px;
   line-height: 0px;
   font-weight: bold;
+}
+.ChannelItemHeaderButtons {
+  display: flex;
+  flex-direction: column;
+}
+.ChannelItemHeaderButtons h4 {
+  font-family: 'Inconsolata';
+  font-weight: bolder;
+  color: #ccc;
+  padding-left: 15px;
+  padding-top: 6px;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+}
+.ChannelItemHeader button {
+  padding: 5 !important;
+  margin: 1;
+  border: 1px solid rgba(0, 0, 0, 0.85);
+  color: #ddd;
+  font-weight: bolder;
 }
 .Visual {
   background: rgba(152, 122, 40, 1);
@@ -359,15 +375,23 @@ div.cm-s-_style.CodeMirror {
 
 /*Individual Transition Cells*/
 .GridItem-transition {
-  width: 100%;
+  width: calc(100% - 23px);
   height: 30px;
-  min-height: 30px;
   font-size: 1vw;
-  text-align: center;
+  text-align: left;
   vertical-align: center;
   overflow-y: auto;
-  border: 1px solid rgba(125,125,125, 0.4);
-  background: rgba(0, 0, 0, 0.8);
+  border: none;
+  margin-left: 15px;
+  background: rgba(0, 0, 0, 0.1);
+}
+.GridItem-transition::-webkit-input-placeholder { /* Chrome */
+  color: #ddd;
+  font-weight: bold;
+  transition: opacity 250ms ease-in-out;
+}
+.GridItem-transition:focus::-webkit-input-placeholder {
+  opacity: 0.5;
 }
 
 /* Table column sizing

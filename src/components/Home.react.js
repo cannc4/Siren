@@ -298,7 +298,7 @@ renderChannel(scene_key, channelLen, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
 
-  return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
+  return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+2}}>
           <Channels key={item.key}
             active={activeMatrix}
             scene_key={scene_key}
@@ -328,8 +328,9 @@ renderPlayer() {
               cols={36}
               width={2000}
               rowHeight={40}
-              margin={[2,10]}
+              margin={[2,0]}
               draggableCancel={'.draggableCancel'}
+              verticalCompact={false}
             >
             {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items_length))}
           </ReactGridLayout>

@@ -45,10 +45,6 @@ class Channels extends Component {
 
     if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) ) {
       if (!solo.isSolo || (solo.isSolo && solo.soloValue)) {
-        var runNo, stepvalue = "";
-
-        console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
-
         // Find the dictionary definitions of functions
         var scenePatterns;
         _.each(ctx.props.matrices, function(d){
@@ -57,8 +53,7 @@ class Channels extends Component {
           }
         })
 
-        runNo = _.floor(click.current % channel.step);
-
+        var runNo = _.floor(click.current % channel.step);
         if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
           runNo = channel.step-1;
           store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
@@ -68,6 +63,9 @@ class Channels extends Component {
           return;
         }
 
+        console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
+
+        var stepvalue = "";
         if (!_.isUndefined(runNo)) {
           stepvalue = channel.vals[runNo];
         }
@@ -157,19 +155,21 @@ class Channels extends Component {
     return item.key && (
       <div key={item.key} className={channelClass}>
         <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
-          <div className={"ChannelItemHeader"}>
-            <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
+          <div className={"ChannelItemHeaderButtons"}>
+            <button className={"Button"} onClick={deleteChannel}>X</button>
             <button className={"Button "+ ctx.props.solo.soloValue} onClick={soloChannel}>S</button>
+            <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
           </div>
-          <p>{item.name}</p>
-          <button className={"Button"} onClick={deleteChannel}>X</button>
+          <div className={"ChannelItemHeaderButtons"}>
+            <h4>{item.name}</h4>
+            <input ref={(input) => { this.nameInput = input; }}
+              key={item.key+'_t'} className={"GridItem-transition draggableCancel"}
+              placeholder={" ࿚ "}  value={item.transition}
+              onChange={updateTransition}
+              onClick={onClickFocus}/>
+          </div>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
-        <input ref={(input) => { this.nameInput = input; }}
-          key={item.key+'_t'} className={"GridItem-transition draggableCancel"}
-          placeholder={" - "}  value={item.transition}
-          onChange={updateTransition}
-          onClick={onClickFocus}/>
       </div>
     )
   }
