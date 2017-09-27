@@ -316,15 +316,42 @@ export const initTidalConsole = (server) => {
 	return dispatch => {
 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
 		.then((response) => {
-
 			dispatch({type: 'FETCH_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});
 	}
 }
-export const killTidalConsole = (server) => {
-	console.log("Implement stopping the server");
+export const bootSystem = (server, expression) => {
+	return dispatch => {
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/boot', {'b_config' :expression})
+		.then((response) => {
+			dispatch({type: 'CONFIG_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+export const dCon = ( expression) => {
+	return dispatch => {
+			dispatch({type: 'DEBUG_TIDAL', payload: expression })
+		};
+}
+//SC BINDING
+// export const dConSC = ( expression) => {
+// 	return dispatch => {
+// 			dispatch({type: 'DEBUG_SCCOMMAND', payload: expression })
+// 		};
+// }
+export const killTidalConsole = (server, expression) => {
+	return dispatch => {
+		if (!expression) return;
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
+		.then((response) => {
+			dispatch({ type: 'FETCH_SCCOMMAND', payload: false })
+		}).catch(function (error) {
+		});
+	}
 }
 export const exitSC = (server) => {
 	return dispatch => {
@@ -498,6 +525,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
+			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -560,6 +588,7 @@ export const consoleSubmit = (server, expression) => {
 	return dispatch => {
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
+			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});

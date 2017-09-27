@@ -23,20 +23,23 @@ class MenuBar extends Component {
       }],
       username: 'vou',
       tidalServerLink: 'localhost:3001',
-      times: 2
+      times: 2,
+      tidalMenu: false,
+      boot: 0
     }
   }
 
   componentDidMount(props,state){
     const ctx = this;
-
     keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
+    keymaster('shift+space', ctx.stopTimer.bind(ctx));
   }
 
   componentWillUnmount(props, state) {
     const ctx = this;
 
     keymaster.unbind('ctrl+space', ctx.toggleClick.bind(ctx));
+    keymaster.unbind('shift+space', ctx.stopTimer.bind(ctx));
   }
 
   componentDidUpdate() {
@@ -51,26 +54,38 @@ class MenuBar extends Component {
     store.dispatch(chokeClick())
   }
 
+
   startTimer = event => {
-    if(event.shiftKey)
-      store.dispatch(resetClick());
-    else
       store.dispatch(chokeClick());
   }
 
   stopTimer = event => {
-    if(event.shiftKey)
       store.dispatch(resetClick());
-    else
-      store.dispatch(chokeClick());
   }
   ////////////////////////////// TIMER ENDS ////////////////////////////
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink } = ctx.state;
-
+    const { tidalServerLink, tidalMenu, boot } = ctx.state;
+    if(boot === 0){
+    ctx.setState({tidalMenu:true , boot: 1});
     store.dispatch(initTidalConsole(tidalServerLink));
+
+  }
+  else{
+    ctx.setState({tidalMenu:true});
+    console.log(ctx.props)
+    const sc_exit = "\"" + ctx.props.user.user.config.scd_start + "\"" + ".load;";
+    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+  }
+  }
+
+  stopTidal() {
+    const ctx=this;
+    const { tidalServerLink,tidalMenu,boot } = ctx.state;
+    const sc_exit = "s.quit;"
+    ctx.setState({tidalMenu:false });
+    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
   }
 
   stopTidal() {
@@ -82,11 +97,11 @@ class MenuBar extends Component {
   render() {
     const ctx = this;
 
-    const { times } = ctx.state;
+    const { times, tidalMenu } = ctx.state;
     const { tidal, click } = ctx.props;
     const { version } = ctx.props.menu;
 
-
+    console.log(ctx.props.tidal.config)
     const changeTimes = ({target: {value}}) => {
       ctx.setState({times : value});
 
@@ -109,8 +124,8 @@ class MenuBar extends Component {
         <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
       </div>
       <div style={{display: 'flex', flexDirection: 'row', height: 40}}>
-        {!tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
-        {tidal.isActive && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
+        {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
+        {tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
         <div className={"TimerControls"}>
           {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
           {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}

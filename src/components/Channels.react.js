@@ -7,7 +7,7 @@ import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
          sendPatterns, consoleSubmit } from '../actions';
-
+var keymaster = require('keymaster');
 class Channels extends Component {
   constructor(props) {
     super(props)
@@ -26,6 +26,23 @@ class Channels extends Component {
       isSolo: props.solo.soloValue,
       loop: {isLoop: true, pauseTurn: 0, hasSilenced: false}
     }
+  }
+  componentDidMount(props,state){
+    const ctx = this;
+    keymaster('ctrl+1', ctx.focusChannel.bind(ctx));
+  }
+
+  componentWillUnmount(props, state) {
+    const ctx = this;
+    keymaster.unbind('ctrl+1', ctx.focusChannel.bind(ctx));
+  }
+  focusChannel = () => {
+    const ctx = this;
+    const { item } = ctx.props;
+    if(item.cid === 0){
+      this.nameInput.focus();
+    }
+
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -62,8 +79,6 @@ class Channels extends Component {
                                hasSilenced: true}});
           return;
         }
-
-        console.log('sendPatterns ' + ctx.props.item.name + ': ', ctx.props.item);
 
         var stepvalue = "";
         if (!_.isUndefined(runNo)) {

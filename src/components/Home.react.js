@@ -13,7 +13,7 @@ import {sendScPattern, sendSCMatrix,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells,
-      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout} from '../actions'
+      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout, dCon,dConSC} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -98,9 +98,20 @@ class Home extends Component {
 componentDidMount(props,state){
   const ctx = this;
   var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+  var sockett = io('http://localhost:3004/'); // TIP: io() with no args does auto-discovery
+  //var sockettSC = io('http://localhost:3005/'); // TIP: io() with no args does auto-discovery
   socket.on("osc", data => {
     store.dispatch(startClick());
   })
+  sockett.on("dcon", data => {
+    console.log(data);
+    store.dispatch(dCon(data ));
+  })
+  // sockettSC.on("dconSC", data => {
+  //   console.log(data);
+  //   store.dispatch(dConSC(data ));
+  // })
+
   socket.on("dc", data => {
     store.dispatch(stopClick());
   })
@@ -1062,6 +1073,9 @@ renderLayouts(layoutItem, k) {
       <div className={'Console PanelAdjuster'}>
         <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
         <textarea className={"ConsoleTextBox" + ctx.state.SCOnClickClass + " draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+      </div>
+      <div className = {'Console PanelAdjuster'}>
+       {ctx.props.tidal.debugconsole}
       </div>
     </div>);
   }

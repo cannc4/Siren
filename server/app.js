@@ -11,7 +11,9 @@ const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 var exec = require('child_process').exec;
 var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
-
+var jsonfile = require('jsonfile')
+var dcon = socketIo.listen(3004);
+var dconSC = socketIo.listen(3005);
 class REPL {
 
   hush() {
@@ -19,12 +21,16 @@ class REPL {
   }
 
   doSpawn() {
+
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
      this.repl.stderr.on('data', (data) => {
        console.error(data.toString('utf8'));
+       dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
      });
-     this.repl.stdout.on('data', data => console.error(data));
-  }
+     this.repl.stdout.on('data', data => {
+     dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
+     console.error(data)});
+     }
 
   initTidal() {
 
@@ -35,6 +41,21 @@ class REPL {
     }
   }
 
+  initSC() {
+    const self = this;
+   // console.log("INITSC", req);
+    supercolliderjs.resolveOptions(config.path).then((options) => {
+      const SCLang = supercolliderjs.sclang.SCLang;
+      const lang = new SCLang(options);
+      lang.boot().then((sclang) => {
+        self.sc = lang;
+        setTimeout(function(){
+          const samples = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
+          lang.interpret(samples);
+        }, 4000)
+      });
+    });
+  }
   stdinWrite(pattern) {
     this.repl.stdin.write(pattern);
   }
@@ -47,48 +68,26 @@ class REPL {
   tidalSendExpression(expression) {
     this.tidalSendLine(':{');
     const splits = expression.split('\n');
-
-    console.log('tidalSendExpression: -----> ', splits);
-
     for (let i = 0; i < splits.length; i++) {
       this.tidalSendLine(splits[i]);
     }
     this.tidalSendLine(':}');
   }
 
-  initSC() {
-    const self = this;
-    supercolliderjs.resolveOptions(config.path).then((options) => {
-      const SCLang = supercolliderjs.sclang.SCLang;
-      const lang = new SCLang(options);
-      lang.boot().then((sclang) => {
-        self.sc = lang;
-        setTimeout(function(){
-          const samples = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
-          lang.interpret(samples);
-
-        }, 4000)
-      });
-    });
-  }
-  // exitSC() {
-  //     const self = this;
-  //     supercolliderjs.resolveOptions(config.path).then((options) => {
-  //     const SCLang = supercolliderjs.sclang.SCLang;
-  //     const lang = new SCLang(options);
-  //     lang.quit()
-  //   });
-  // }
   sendSC(message) {
     var self = this;
-    self.sc.interpret(message);
+    self.sc.interpret(message).then(function(result) {
+      // result is a native javascript array
+      //dconSC.sockets.emit('dconSC', ({dconSC: result.toString('utf8')}));
+    }, function(error) {
+      console.error(error);
+    });
   }
 
   start() {
     this.doSpawn();
     this.initTidal();
     this.initSC();
-    //synchs();
   }
 }
 
@@ -105,6 +104,7 @@ const Siren = () => {
 
   var tick = socketIo.listen(3003);
 
+
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
     var address = UDPserver.address();
@@ -114,6 +114,7 @@ const Siren = () => {
 
   UDPserver.on("message", function (msg, rinfo) {
     // console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
+    tick.sockets.emit('osc', {osc:msg});
     tick.sockets.emit('osc', {osc:msg});
   });
 
@@ -163,14 +164,34 @@ const Siren = () => {
 
   const sendScPattern = (expr, reply) => {
     TidalData.TidalConsole.sendSC(expr);
-    console.log(expr);
     reply.status(200).send(expr);
+  }
+
+
+  const generateConfig = (b_config,reply) => {
+    var configfile = __dirname + '/../config/config.json'
+    fs.writeFile(configfile, JSON.stringify(b_config), function(err) {
+      if(err) {
+          return console.log(err);
+          //reply.status(500).json({configGen: false});
+      }
+      else{
+        console.log("Config file is saved");
+        reply.status(200).json({configGen: true});
+      }
+    });
   }
 
   app.use("/", express.static(path.join(__dirname, "public")));
 
-  app.get('/tidal', (req, reply) => startTidal(reply));
-  // app.get('/tidaltick', (req, reply) => startTidal(reply));
+  app.get('/tidal', (reply) => {
+    startTidal(reply);
+  });
+
+  app.post('/boot', (req, reply) => {
+    const {b_config} = req.body;
+    generateConfig(b_config,reply);
+  });
 
   app.post('/pattern', (req, reply) => {
     const { pattern } = req.body;
