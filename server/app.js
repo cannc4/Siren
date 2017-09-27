@@ -108,13 +108,11 @@ const Siren = () => {
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
     var address = UDPserver.address();
-    console.log("UDP server listening on " +
-        address.address + ":" + address.port);
+    console.log("UDP server listening on " + address.address + ":" + address.port);
   });
 
   UDPserver.on("message", function (msg, rinfo) {
     // console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
-    tick.sockets.emit('osc', {osc:msg});
     tick.sockets.emit('osc', {osc:msg});
   });
 

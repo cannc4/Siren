@@ -52,10 +52,11 @@
   color: #aaa;
   border: 1px solid rgba(125,125,125, 0.8);
   cursor: pointer;
-  padding: 10px 8px 10px 8px;
+  padding: 0.30vh 0.24vw 0.30vh 0.24vw;
 }
 .Button:hover {
   border: 1px solid rgba(200,200,200, 0.8);
+  box-shadow: inset  0px 0px 5px rgba(200,200,200, 0.8);
   background: rgba(255,255,102,0.15);
 }
 .Button:active {
@@ -66,8 +67,8 @@
   border: 1px dashed rgba(200,200,200, 0.9);
 }
 .Button.true {
-  background: rgba(255,255,102,0.45);
-  color: #fff;
+  background: #ccc;
+  color: #333;
   font-weight: bold;
 }
 
@@ -242,6 +243,15 @@ div.cm-s-_style.CodeMirror {
 
 
 
+/*------------DEBUG CONSOLE PANEL------------*/
+.DebugConsole {
+  color: #ccc;
+  /*display: flex;
+  flex-direction: column;*/
+}
+
+
+
 
 /*------------PATTERN HISTORY PANEL------------*/
 /*Pattern History Fields (???)*/
@@ -284,7 +294,6 @@ div.cm-s-_style.CodeMirror {
   min-height: 35px;
   min-width: 100px;
   padding: 0;
-  box-shadow: 0px 0px 4px #000;
 }
 
 /*Individual Channels -- disabled style*/
@@ -296,34 +305,34 @@ div.cm-s-_style.CodeMirror {
 /* Matrix header styling*/
 .ChannelItemHeader {
   display: inline-flex;
-  height: 80px;
-  justify-content:flex-end;
+  height: 40px;
+  justify-content:space-between;
   background: rgba(200,200,200,0.1);
   /*border: 0.5px solid rgba(200, 200, 200, 0.75);*/
   font-size: 14px;
-  line-height: 0px;
+  line-height: 40px;
   font-weight: bold;
 }
+
+.ChannelItemHeader button {
+  color: #ddd;
+  border: 1px solid rgba(30, 30, 30, 0.5);
+  box-shadow:   0px 0px 5px rgba(0,0,0, 0.3);
+}
+
 .ChannelItemHeaderButtons {
   display: flex;
   flex-direction: column;
 }
-.ChannelItemHeaderButtons h4 {
+.ChannelItemHeader p {
   font-family: 'Inconsolata';
   font-weight: bolder;
+  justify-content: center;
+  vertical-align:middle;
   color: #ccc;
-  padding-left: 15px;
-  padding-top: 6px;
-  text-decoration: underline;
-  text-decoration-style: wavy;
+  margin: 0 10px 0 10px;
 }
-.ChannelItemHeader button {
-  padding: 5 !important;
-  margin: 1;
-  border: 1px solid rgba(0, 0, 0, 0.85);
-  color: #ddd;
-  font-weight: bolder;
-}
+
 .Visual {
   background: rgba(152, 122, 40, 1);
 }
@@ -375,19 +384,19 @@ div.cm-s-_style.CodeMirror {
 
 /*Individual Transition Cells*/
 .GridItem-transition {
-  width: calc(100% - 23px);
-  height: 30px;
-  font-size: 1vw;
-  text-align: left;
+  width: calc(80% - 40px);
+  height: 40px;
+  font-size: 1.3vh;
+  text-align: center;
   vertical-align: center;
   overflow-y: auto;
   border: none;
-  margin-left: 15px;
   background: rgba(0, 0, 0, 0.1);
 }
 .GridItem-transition::-webkit-input-placeholder { /* Chrome */
-  color: #ddd;
-  font-weight: bold;
+  color: #ccc;
+  opacity: 0.8;
+  font-size: 1vh;
   transition: opacity 250ms ease-in-out;
 }
 .GridItem-transition:focus::-webkit-input-placeholder {

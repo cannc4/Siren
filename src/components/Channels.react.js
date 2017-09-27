@@ -171,18 +171,16 @@ class Channels extends Component {
       <div key={item.key} className={channelClass}>
         <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
           <div className={"ChannelItemHeaderButtons"}>
-            <button className={"Button"} onClick={deleteChannel}>X</button>
             <button className={"Button "+ ctx.props.solo.soloValue} onClick={soloChannel}>S</button>
             <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
           </div>
-          <div className={"ChannelItemHeaderButtons"}>
-            <h4>{item.name}</h4>
-            <input ref={(input) => { this.nameInput = input; }}
-              key={item.key+'_t'} className={"GridItem-transition draggableCancel"}
-              placeholder={" ࿚ "}  value={item.transition}
-              onChange={updateTransition}
-              onClick={onClickFocus}/>
-          </div>
+          <p>{item.name}</p>
+          <input ref={(input) => { this.nameInput = input; }}
+            key={item.key+'_t'} className={"GridItem-transition draggableCancel"}
+            placeholder={" transition "}  value={item.transition}
+            onChange={updateTransition}
+            onClick={onClickFocus}/>
+          <button className={"Button"} onClick={deleteChannel}>X</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
       </div>

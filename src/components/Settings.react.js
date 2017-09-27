@@ -1,16 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-<<<<<<< HEAD
-// import _ from 'lodash';
-
-import { fbsaveconfig } from '../actions'
-
-=======
 import store from '../store';
 // import _ from 'lodash';
 //import config from './../config/config.json'
 import { fbsaveconfig,bootSystem } from '../actions'
->>>>>>> 20a0c21c7c1632e2c3276eadca983f562459e806
 class Settings extends Component {
   constructor(props) {
     super(props)
@@ -24,35 +17,7 @@ class Settings extends Component {
       samples_path: props.user.user.config.samples_path,
       path: props.user.user.config.path,
       tidal_boot: props.user.user.config.tidal_boot,
-<<<<<<< HEAD
-      tidal_sync: props.user.user.config.tidal_sync,
       scd_start: props.user.user.config.scd_start
-    }
-  }
-
-  writeConfigLocal() {
-    const ctx = this;
-
-    // local save
-    function download(text, name, type) {
-      var a = document.createElement("a");
-      var file = new Blob([text], {type: type});
-      a.href = URL.createObjectURL(file);
-      a.download = name;
-      a.click();
-    }
-    download(JSON.stringify(ctx.state), 'config.json', 'text/plain');
-  }
-
-  writeConfigDB() {
-    const ctx = this;
-
-    // online database save
-    if(ctx.props.uid !== undefined)
-      fbsaveconfig('Accounts', ctx.props.uid, ctx.state);
-=======
-      scd_start: props.user.user.config.scd_start,
-      path: props.user.user.config.path
     }
   }
 
@@ -60,14 +25,13 @@ class Settings extends Component {
     const ctx = this;
     const tidalServerLink = 'localhost:3001';
 
-    
+
     if(ctx.props.uid !== undefined){
       // online database save
       fbsaveconfig('Accounts', ctx.props.uid, ctx.state);
       // Config Generation
       store.dispatch(bootSystem(tidalServerLink,ctx.props.user.user.config));
     }
->>>>>>> 20a0c21c7c1632e2c3276eadca983f562459e806
   }
 
   updateValue(params, {target: { value }}) {
@@ -79,12 +43,9 @@ class Settings extends Component {
     const ctx = this;
     return (<div className={'Settings PanelAdjuster draggableCancel'}>
       <div className={'SettingsItem'}>
-<<<<<<< HEAD
-=======
         <p className={'SettingsLabel'}>Port:</p>  <input className={'Input'} value={this.state.port} onChange={ctx.updateValue.bind(ctx, 'port')}/>
       </div>
       <div className={'SettingsItem'}>
->>>>>>> 20a0c21c7c1632e2c3276eadca983f562459e806
         <p className={'SettingsLabel'}>User Path:</p>  <input className={'Input'} value={this.state.userpath} onChange={ctx.updateValue.bind(ctx, 'userpath')}/>
       </div>
       <div className={'SettingsItem'}>
@@ -100,27 +61,6 @@ class Settings extends Component {
         <p className={'SettingsLabel'}>SClang Config:</p>  <input className={'Input'} value={this.state.sclang_conf} onChange={ctx.updateValue.bind(ctx, 'sclang_conf')}/>
       </div>
       <div className={'SettingsItem'}>
-<<<<<<< HEAD
-        <p className={'SettingsLabel'}>Port:</p>  <input className={'Input'} value={this.state.port} onChange={ctx.updateValue.bind(ctx, 'port')}/>
-      </div>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>Sample Path:</p>  <input className={'Input'} value={this.state.samples_path} onChange={ctx.updateValue.bind(ctx, 'samples_path')}/>
-      </div>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>Config Path:</p>  <input className={'Input'} value={this.state.path} onChange={ctx.updateValue.bind(ctx, 'path')}/>
-      </div>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>Tidal Boot:</p>  <input className={'Input'} value={this.state.tidal_boot} onChange={ctx.updateValue.bind(ctx, 'tidal_boot')}/>
-      </div>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>Tidal Sync:</p>  <input className={'Input'} value={this.state.tidal_sync} onChange={ctx.updateValue.bind(ctx, 'tidal_sync')}/>
-      </div>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>scd Start:</p>  <input className={'Input'} value={this.state.scd_start} onChange={ctx.updateValue.bind(ctx, 'scd_start')}/>
-      </div>
-      <div style={{display: 'inline-flex', justifyContent: 'space-around'}}>
-        <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigLocal.bind(ctx)}>Save Locally</button>
-=======
         <p className={'SettingsLabel'}>Sample Path:</p>  <input className={'Input'} value={this.state.samples_path} onChange={ctx.updateValue.bind(ctx, 'samples_path')}/>
       </div>
       <div className={'SettingsItem'}>
@@ -133,8 +73,6 @@ class Settings extends Component {
       <p className={'SettingsLabel'}>Config Path:</p>  <input className={'Input'} value={this.state.path} onChange={ctx.updateValue.bind(ctx, 'path')}/>
     </div>
       <div style={{display: 'inline-flex', justifyContent: 'space-around'}}>
-        
->>>>>>> 20a0c21c7c1632e2c3276eadca983f562459e806
         <button className={'Button'} style={{paddingBottom: "10px"}} onClick={ctx.writeConfigDB.bind(ctx)}>Save Database</button>
       </div>
     </div>)

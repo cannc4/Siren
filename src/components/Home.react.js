@@ -18,6 +18,7 @@ import {sendScPattern, sendSCMatrix,
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Settings from './Settings.react';
+import DebugConsole from './DebugConsole.react';
 import Firebase from 'firebase';
 import store from '../store';
 import _ from 'lodash';
@@ -90,6 +91,7 @@ class Home extends Component {
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
                        {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
+                       {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
                        {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
     }
   }
@@ -97,15 +99,11 @@ class Home extends Component {
 //Clock for Haskell
 componentDidMount(props,state){
   const ctx = this;
+
   var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-  var sockett = io('http://localhost:3004/'); // TIP: io() with no args does auto-discovery
   //var sockettSC = io('http://localhost:3005/'); // TIP: io() with no args does auto-discovery
   socket.on("osc", data => {
     store.dispatch(startClick());
-  })
-  sockett.on("dcon", data => {
-    console.log(data);
-    store.dispatch(dCon(data ));
   })
   // sockettSC.on("dconSC", data => {
   //   console.log(data);
@@ -309,7 +307,7 @@ renderChannel(scene_key, channelLen, item){
   const ctx = this;
   const { activeMatrix } = ctx.state;
 
-  return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+2}}>
+  return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
           <Channels key={item.key}
             active={activeMatrix}
             scene_key={scene_key}
@@ -341,7 +339,7 @@ renderPlayer() {
               rowHeight={40}
               margin={[2,0]}
               draggableCancel={'.draggableCancel'}
-              verticalCompact={false}
+              verticalCompact={true}
             >
             {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items_length))}
           </ReactGridLayout>
@@ -1074,8 +1072,15 @@ renderLayouts(layoutItem, k) {
         <textarea className={"ConsoleTextBox" + ctx.state.tidalOnClickClass + " draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
         <textarea className={"ConsoleTextBox" + ctx.state.SCOnClickClass + " draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
       </div>
-      <div className = {'Console PanelAdjuster'}>
-       {ctx.props.tidal.debugconsole}
+    </div>);
+  }
+  else if (layoutItem.i === 'debugconsole') {
+    return layoutItem.isVisible && (<div key={'debugconsole'} data-grid={getGridParameters('debugconsole')}>
+      <div className={"PanelHeader"}> ■ Debug Console
+        <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "debugconsole")}>X</span>
+      </div>
+      <div className = {'DebugConsole PanelAdjuster'}>
+        <DebugConsole />
       </div>
     </div>);
   }
