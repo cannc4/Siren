@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import store from '../store';
-import './MenuBar.css'
+import _ from 'lodash';
+import './style/MenuBar.css'
 
-import { GitHubLogin, logout, chokeClick,resetClick, initTidalConsole} from '../actions'
+import { GitHubLogin, logout, chokeClick, resetClick,
+         initTidalConsole, killTidalConsole} from '../actions'
+
+var keymaster = require('keymaster');
 
 class MenuBar extends Component {
   constructor(props) {
@@ -20,9 +23,25 @@ class MenuBar extends Component {
       }],
       username: 'vou',
       tidalServerLink: 'localhost:3001',
-      times: 2
+      times: 2,
+      tidalMenu: false,
+      boot: 0
     }
   }
+
+  componentDidMount(props,state){
+    const ctx = this;
+    keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
+    keymaster('shift+space', ctx.stopTimer.bind(ctx));
+  }
+
+  componentWillUnmount(props, state) {
+    const ctx = this;
+
+    keymaster.unbind('ctrl+space', ctx.toggleClick.bind(ctx));
+    keymaster.unbind('shift+space', ctx.stopTimer.bind(ctx));
+  }
+
   componentDidUpdate() {
     const ctx = this;
     if (ctx.state.path !== location.pathname){
@@ -31,42 +50,59 @@ class MenuBar extends Component {
   }
 
   ////////////////////////////// TIMER STARTS ////////////////////////////
+  toggleClick = () => {
+    store.dispatch(chokeClick())
+  }
+
+
   startTimer = event => {
-    const ctx = this;
-    if(event.shiftKey)
-      store.dispatch(resetClick());
-    else
       store.dispatch(chokeClick());
   }
 
   stopTimer = event => {
-    const ctx = this;
-    if(event.shiftKey)
       store.dispatch(resetClick());
-    else
-      store.dispatch(chokeClick());
   }
   ////////////////////////////// TIMER ENDS ////////////////////////////
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink } = ctx.state;
+    const { tidalServerLink, tidalMenu, boot } = ctx.state;
+    if(boot === 0){
+    ctx.setState({tidalMenu:true , boot: 1});
     store.dispatch(initTidalConsole(tidalServerLink));
+    
+  }
+  else{
+    ctx.setState({tidalMenu:true});
+    console.log(ctx.props)
+    const sc_exit = "\"" + ctx.props.user.user.config.scd_start + "\"" + ".load;";
+    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+  }
+  }
+
+  stopTidal() {
+    const ctx=this;
+    const { tidalServerLink,tidalMenu,boot } = ctx.state;
+    const sc_exit = "s.quit;"
+    ctx.setState({tidalMenu:false });
+    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
   }
 
   render() {
     const ctx = this;
 
-    const { times } = ctx.state;
-    const { tidal, click, patterns } = ctx.props;
+    const { times ,tidalMenu} = ctx.state;
+    const { tidal, click } = ctx.props;
     const { version } = ctx.props.menu;
 
-
+    console.log(ctx.props.tidal.config)
     const changeTimes = ({target: {value}}) => {
-      if (!isNaN(parseInt(value))){
-        ctx.setState({times : parseInt(value)});
-        ctx.props.click.times = parseInt(value);
+      ctx.setState({times : value});
+
+      if (_.toInteger(value) === 0){
+        value = 2;
       }
+      ctx.props.click.times = _.toInteger(value);
     }
 
     const loginGG = () => {
@@ -78,25 +114,26 @@ class MenuBar extends Component {
     }
 
     return (<div className='MenuBar boxshadow'>
-      <a href={"https://github.com/cannc4/Siren"}>
-      σειρήνα
-      </a>
-      <a style={{fontSize: '10px'}} href={"https://github.com/cannc4/Siren"}>{version}</a>
-      <div className={"TimerControls"}>
-        {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
-        {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-        <p>  Rate &nbsp;&nbsp;  </p>
-        <input className={'TimesInput'} value={times} onChange={changeTimes}/>
+      <div>
+        <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
+      </div>
+      <div style={{display: 'flex', flexDirection: 'row', height: 40}}>
+        {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
+        {tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
+        <div className={"TimerControls"}>
+          {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          <p style={{paddingLeft: 15, paddingRight: 5}}>{'Rate: '}</p>
+          <input className={'TimesInput'} value={times} onChange={changeTimes}/>
+        </div>
       </div>
       <div className={"User"}>
         <div>
-          {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
+          {ctx.props.user.user.email && <button style={{fontWeight: "bold", paddingRight: 5}} id={'logout'} onClick={fblogout}>{ctx.props.user.user.name}</button>}
         </div>
         <div>
-          {ctx.props.user.user.email && <button id={'logout'} onClick={fblogout}>Logout</button>}
-          {!ctx.props.user.user.email && <button id={'login'} onClick={loginGG}>Login</button>}
+          {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}
+          {!ctx.props.user.user.email && <button className={"Button"} id={'login'} onClick={loginGG}>Login</button>}
         </div>
       </div>
     </div>)

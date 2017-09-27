@@ -5,6 +5,7 @@ import sccommand from './sccommand';
 import tidal from './tidal';
 import click from './click';
 import channel from './channel';
+import layout from './layout';
 import cell from './cell';
 import menu from './menu';
 import globalparams from './global';
@@ -35,6 +36,7 @@ const rootReducer = combineReducers({
   user,
   usererror,
   click,
+  layout,
   menu,
   globalparams,
   cell,

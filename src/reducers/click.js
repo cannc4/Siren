@@ -7,7 +7,7 @@ export default (state = INITIAL_STATE, action) => {
       if (k.isActive === true){
         k.flag++;
         if (k.flag % k.times === 0){
-          k.current = k.current + 1;
+          k.current += 1;
         }
       }
       return {...k};

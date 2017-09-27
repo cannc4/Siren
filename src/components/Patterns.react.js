@@ -5,8 +5,14 @@ import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene 
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-var CodeMirrorStyle = require('../assets/_style.css');
+import '../assets/_style.css'
 import '../assets/_rule.js';
+
+// Grid Layout
+var ReactGridLayout = require('react-grid-layout');
+var WidthProvider = ReactGridLayout.WidthProvider;
+var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 class Patterns extends Component {
   constructor(props) {
@@ -61,10 +67,11 @@ class Patterns extends Component {
       } else {
         value = obj;
       }
-      var re = /`(\w+)`/g, match, matches = [];
-      while (match = re.exec(value)) {
+      var re = /`(\w+)`/g, match = re.exec(value), matches = [];
+      while (match) {
         if(_.indexOf(matches, match[1]) === -1)
           matches.push(match[1]);
+        match = re.exec(value);
       }
       _.remove(matches, function(n) {
         return n === 't';
@@ -86,7 +93,7 @@ class Patterns extends Component {
     const handleDelete = () => {
       const payload = { key: item.key };
 
-      if(confirm("This pattern will be deleted from " + ctx.props.active + "scene "))
+      if(confirm("This pattern will be deleted from the scene '" + ctx.props.active + "'"))
         _.each(Object.values(ctx.props["matrices"]), function(d){
           if(d.matName === ctx.props.active){
             ctx.setState({sceneKey: d.key});
@@ -105,37 +112,20 @@ class Patterns extends Component {
         lineWrapping: true,
         showCursorWhenSelecting: true
     };
-
-    function getStyleSheet(unique_title) {
-      for(var i=0; i<document.styleSheets.length; i++) {
-        var sheet = document.styleSheets[i];
-        if(sheet.title == unique_title) {
-          return sheet;
-        }
-      }
-    }
-    //
-    // var sheet = getStyleSheet('_style');
-    // console.log(sheet);
-    // sheet.insertRule(".cm-s-_style.CodeMirror { background: #f5f5f5; color: #202020; height: "+100+"px; }", 0);
-
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <li key={item.key} className="easter" >
-        <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-          <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
-            <div key={name} style={{ display: 'flex', flexDirection: 'column', flex: 3}}>
-              <input type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-              <input type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-              <button onClick={handleDelete}>{'Delete'} </button>
-            </div>
+      <div key={item.key} className={"PatternItem draggableCancel"} data-grid={{i: item.key, x:0, y: item.index*2, w: Infinity, h: 4, minH: 3}} >
+        <div key={name} >
+          <div key={name} className={'PatternItemInputs'}>
+            <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+            <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
-          <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+          <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
         </div>
-      </li>
+      </div>
     )
   }
 
@@ -145,7 +135,7 @@ class Patterns extends Component {
   }
 
   render() {
-    const ctx = this
+    const ctx = this;
     const { modelName, name } = ctx.state;
     var items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);
@@ -157,23 +147,31 @@ class Patterns extends Component {
         }
       }
     })
+    var iterator = 0;
+    _.each(items, function(d){
+      d.index = iterator++;
+    })
 
     const changeName = ctx.changeName.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
 
-    const viewPortWidth = '100%'
-
     return (
       <div>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
-          <input className={'newPatternInput'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
-          <button className={'newPatternButton'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
+        <div className={'PatternItem PatternItemInputs'}>
+          <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
+          <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
-        <div style={{ width: viewPortWidth }}>
-          <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-            {renderItems(items)}
-          </ul>
-        </div>
+
+        <ResponsiveReactGridLayout
+            className={"layout_patterns"}
+            breakpoints={{lg: 1200, md: 996, sm: 768, xs: 360}}
+            cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+            rowHeight={30}
+            margin={[2,10]}
+            draggableCancel={'.draggableCancelNested'}
+          >
+          {renderItems(items)}
+        </ResponsiveReactGridLayout>
       </div>
     );
   }

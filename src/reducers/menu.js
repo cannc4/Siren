@@ -1,5 +1,5 @@
 const modelName = 'MENU';
-const INITIAL_STATE = { version: '0.4' };
+const INITIAL_STATE = { version: '0.5' };
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'VERSION_'+modelName:
