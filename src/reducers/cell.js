@@ -7,12 +7,18 @@ export default (state = INITIAL_STATE, action) => {
         const p = state;
         // console.log('cell reducer: ', action.payload);
         if (action.payload.cid !== undefined){
-            if(p.vals[action.payload.cid][action.payload.cell_index]=== undefined){
-                p.vals[action.payload.cid][action.payload.cell_index].push(action.payload.cell_value);
+            if(p.vals[action.payload.cid]!== undefined){
+                if(p.vals[action.payload.cid][action.payload.cell_index]=== undefined){
+                    p.vals[action.payload.cid][action.payload.cell_index].push(action.payload.cell_value);
+                }
+                else{
+                p.vals[action.payload.cid][action.payload.cell_index] = action.payload.cell_value;
+                }
             }
             else{
-            p.vals[action.payload.cid][action.payload.cell_index] = action.payload.cell_value;
+                p.vals[action.payload.cid] = action.payload.cell_value;
             }
+            
         }
         // console.log("REFINE" + p.vals);
         return {...p};

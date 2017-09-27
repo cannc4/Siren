@@ -691,6 +691,9 @@ export const createChannel = (newc) => {
 export const updateChannel = (item) => {
 	return  { type: 'UPDATE_CHANNEL', payload: item }
 }
+export const stepChannel = () => {
+	return  { type: 'STEP_CHANNEL'}
+}
 export const deleteChannel = (key) => {
 	return  { type: 'DELETE_CHANNEL', payload: key }
 }

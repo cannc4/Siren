@@ -22,6 +22,10 @@ export default (state = INITIAL_STATE, action) => {
       var k = state;
       delete k[action.payload];
       return {...k};
+    case 'STEP_'+modelName:
+      var l = state;
+      
+      return {...l};
     default:
       return state;
   }

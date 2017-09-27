@@ -13,7 +13,7 @@ import {sendScPattern, sendSCMatrix,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells,
-      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout, dCon,dConSC} from '../actions'
+      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout, dCon,dConSC, stepChannel} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -302,6 +302,22 @@ handleSelection (selectedKeys) {
 handleUnselection() {
   store.dispatch(selectCell([]))
 }
+onLayoutChangeChannel(items, layout, x) {
+  const ctx = this;
+  _.each(items, function(j) {
+    if(j.key === x.i){
+      j.step = x.h - 1;
+      const sceneKey = _.findKey(ctx.props.matrices, ['matName', j.scene]);
+      fbupdatechannelinscene('Matrices', j, sceneKey);
+      store.dispatch(stepChannel());
+    }
+  });
+  // ctx.setState({manual_layout_trig: false});
+  // fbupdatelayout("Accounts", temp_layouts, ctx.props.user.user.uid);
+  // store.dispatch(updateLayout(temp_layouts));
+  console.log(x);  
+}
+
 
 renderChannel(scene_key, channelLen, item){
   const ctx = this;
@@ -340,6 +356,7 @@ renderPlayer() {
               margin={[2,0]}
               draggableCancel={'.draggableCancel'}
               verticalCompact={true}
+              onResizeStart={ctx.onLayoutChangeChannel.bind(ctx, items)}
             >
             {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items_length))}
           </ReactGridLayout>

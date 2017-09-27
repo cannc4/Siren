@@ -75,10 +75,6 @@ class Cell extends Component {
       store.dispatch(updateCell(c_cell));
       const val = ctx.props.cell.vals;
 
-      console.log(val);
-      console.log(val[ctx.state.cid]);
-      console.log(ctx.state.c_key);
-
       const nc = { vals: val[ctx.state.cid], key: ctx.state.c_key };
       ctx.setState({value: value});
       fbupdatechannelinscene('Matrices', nc, ctx.state.s_key);

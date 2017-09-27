@@ -28,6 +28,14 @@ class MenuBar extends Component {
       boot: 0
     }
   }
+  // shouldComponentUpdate = (nextProps, nextState) => {
+  //   if(nextState !== this.state) {
+  //     return true;
+  //   }
+  //   else {
+  //     return false;
+  //   }
+  // }
 
   componentDidMount(props,state){
     const ctx = this;
