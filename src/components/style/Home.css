@@ -28,6 +28,7 @@
   border-style: double;
   border-width: 1px;
   border-color: rgba(180,180,180, 1);
+  border-radius: 5px;
   font-weight: bold;
   color: #ddd;
 }
@@ -205,6 +206,7 @@ div.cm-s-_style.CodeMirror {
   width: 30px;
   border-style: double;
   border-width: 1px;
+  border-radius: 5px;
   border-color: rgba(180,180,180, 1);
   color: #ddd;
 }
@@ -294,11 +296,13 @@ div.cm-s-_style.CodeMirror {
   min-height: 35px;
   min-width: 100px;
   padding: 0;
+
+  transition: opacity 100ms ease-in-out;
 }
 
 /*Individual Channels -- disabled style*/
 .ChannelItem.disabled {
-  border: 1px groove rgba(200, 200, 200, 0.75);
+  /*border: 1px groove rgba(200, 200, 200, 0.75);*/
   opacity: 0.4;
 }
 
@@ -350,7 +354,7 @@ div.cm-s-_style.CodeMirror {
   resize: none;
   width: 100%;
   line-height: 20px;
-  font-size: 1vw;
+  font-size: 1.5vh;
   text-rendering: optimizeSpeed;
   text-align: left;
   vertical-align: center;
@@ -392,6 +396,7 @@ div.cm-s-_style.CodeMirror {
   overflow-y: auto;
   border: none;
   background: rgba(0, 0, 0, 0.1);
+  box-shadow: inset  0px 0px 5px #333;
 }
 .GridItem-transition::-webkit-input-placeholder { /* Chrome */
   color: #ccc;

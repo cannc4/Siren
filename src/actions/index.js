@@ -377,8 +377,7 @@ export const TidalTick = (server) => {
 
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
-// var patListBack = [];
-// var clickPrev;
+
 export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 
 	return dispatch => {
@@ -400,16 +399,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				});
 				return param;
 			}
-			//gets mathematical expression
-			// const getMathExpr = (v) => {
-			// 	var maths = [];
-			// 	_.map(_.split(v, /[&]+/g), (p1, p2) => {
-			// 		p1 = _.trim(p1);
-			//
-			// 		if(p1 !== "") maths.push(p1);
-			// 	});
-			// 	return maths;
-			// }
 
 			// pattern name
 			const cellName = getParameters(v)[0];
@@ -439,14 +428,14 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					// Random parameter
 					else if(_.indexOf(cellItem[i], '|') !== -1 )
 					{
-						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
+						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
+						console.log('cellItem ', cellItem[i]);
 						var bounds = _.split(cellItem[i], ',');
 						if(bounds[0] !== undefined && bounds[0] !== "" &&
-							 bounds[1] !== undefined && bounds[1] !== ""){
+						bounds[1] !== undefined && bounds[1] !== ""){
 								 bounds[0] = parseFloat(bounds[0]);
 								 bounds[1] = parseFloat(bounds[1]);
-								 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
-								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), _.random(_.min(bounds), _.max(bounds)));
 						}
 					}
 					// Value parameter
@@ -464,24 +453,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				// solo or not (obsolete)
 				var	transitionHolder,
 						soloHolder;
-				// var channel_id,
-						// channel_type,
-						// channel_transition,
-						// 	channel_name,
-						// _k;
-
-				// _.each(channels, function(chantwo,i){
-				// 	if(k[0] === (Object.values(chantwo)[2])){//check if the right channel
-				// 		// channel_type = chantwo.type;
-				// 		channel_transition = chantwo.transition;
-				// 		// channel_name = chantwo.name;
-				// 		channel_id = chantwo.cid;
-				// 		soloHolder = k[0];
-				// 	 	transitionHolder = "" ;
-				// 	 	_k = k;
-				//
-				// 	}
-				// })
 
 				if (channel.transition === "" || channel.transition === undefined ){
 					transitionHolder = " $ ";
@@ -491,10 +462,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					transitionHolder = " " + channel.transition + " $ ";
 					soloHolder = "t"+ (channel.cid +1);
 				}
-				// else if(solo === k){
-				// 		soloHolder = "solo $ " + _k ;
-				// 		transitionHolder = " $ ";
-				// }
 
 				var pattern;
 				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
@@ -526,10 +493,17 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
 			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
+
 		}).catch(function (error) {
 			console.error(error);
 		});
 	}
+}
+
+export const setExecution = () => {
+	return dispatch => {
+		dispatch({ type: 'EXECUTION_CLICK' })
+	};
 }
 
 export const continousPattern = (server, pattern) => {

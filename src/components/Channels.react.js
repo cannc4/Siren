@@ -6,8 +6,8 @@ import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         sendPatterns, consoleSubmit } from '../actions';
-var keymaster = require('keymaster');
+         sendPatterns, consoleSubmit, setExecution } from '../actions';
+
 class Channels extends Component {
   constructor(props) {
     super(props)
@@ -27,29 +27,23 @@ class Channels extends Component {
       loop: {isLoop: true, pauseTurn: 0, hasSilenced: false}
     }
   }
-  componentDidMount(props,state){
-    const ctx = this;
-    keymaster('ctrl+1', ctx.focusChannel.bind(ctx));
-  }
 
-  componentWillUnmount(props, state) {
-    const ctx = this;
-    keymaster.unbind('ctrl+1', ctx.focusChannel.bind(ctx));
-  }
   focusChannel = () => {
     const ctx = this;
     const { item } = ctx.props;
     if(item.cid === 0){
       this.nameInput.focus();
     }
-
   }
 
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
     const { click } = ctx.props;
 
-    if (click.isActive && click.flag % click.times === 0) {
+    if (click.isActive &&
+        click.flag % click.times === 0 &&
+        !click.isExecuted)
+    {
       ctx.sendPatterns();
     }
   }
@@ -85,6 +79,7 @@ class Channels extends Component {
           stepvalue = channel.vals[runNo];
         }
         if (stepvalue !== ""){
+          store.dispatch(setExecution());
           store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
             scenePatterns, click, ctx.props.globalparams ));
         }
@@ -121,6 +116,8 @@ class Channels extends Component {
     const { item, solo } = ctx.props;
     const { loop } = ctx.state;
 
+    console.log("Channel render ");
+
     if (item.scene !== ctx.props.active)
       return item.key && (
         <div key={item.key}></div>
@@ -149,8 +146,8 @@ class Channels extends Component {
       const ctx = this;
       item.transition = value;
       fbupdatechannelinscene('Matrices',
-                { transition: value, key: item.key },
-                ctx.props.scene_key)
+                             { transition: value, key: item.key },
+                             ctx.props.scene_key)
     }
     const onClickFocus = ({ target: { value }}) => {
       this.nameInput.focus();

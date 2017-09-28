@@ -1108,6 +1108,8 @@ renderLayouts(layoutItem, k) {
 render() {
   const ctx=this;
 
+  console.log('Homereact render');
+
   // Layout height params for fullscreen
   var vertical_n = 20,
       h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
