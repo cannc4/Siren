@@ -140,6 +140,7 @@ class MenuBar extends Component {
           {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}
           {!ctx.props.user.user.email && <button className={"Button"} id={'login'} onClick={loginGG}>Login</button>}
         </div>
+        <button className={"Button"} onClick={function() {location.reload(true);}}>⭯</button>
       </div>
     </div>)
   }
