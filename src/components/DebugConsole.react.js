@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
 import io from 'socket.io-client';
+import _ from 'lodash';
 import './style/Home.css'
 
 import { dCon } from '../actions'
@@ -24,9 +25,6 @@ class DebugConsole extends Component {
 
   render() {
     const ctx = this;
-
-    console.log('DebugConsole: ', ctx.props.tidal.debugconsole)
-    console.log('click: ', ctx.props.click)
 
     return (<div className={'DebugConsole'}>
       {_.toString(ctx.props.tidal.debugconsole)}

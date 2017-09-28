@@ -74,42 +74,33 @@ class MenuBar extends Component {
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink, tidalMenu, boot } = ctx.state;
+    const { tidalServerLink, boot } = ctx.state;
     if(boot === 0){
-    ctx.setState({tidalMenu:true , boot: 1});
-    store.dispatch(initTidalConsole(tidalServerLink));
-
-  }
-  else{
-    ctx.setState({tidalMenu:true});
-    console.log(ctx.props)
-    const sc_exit = "\"" + ctx.props.user.user.config.scd_start + "\"" + ".load;";
-    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
-  }
-  }
-
-  stopTidal() {
-    const ctx=this;
-    const { tidalServerLink,tidalMenu,boot } = ctx.state;
-    const sc_exit = "s.quit;"
-    ctx.setState({tidalMenu:false });
-    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+      ctx.setState({tidalMenu:true , boot: 1});
+      store.dispatch(initTidalConsole(tidalServerLink));
+    }
+    else{
+      ctx.setState({tidalMenu:true});
+      const sc_exit = "\"" + ctx.props.user.user.config.scd_start + "\".load;";
+      store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+    }
   }
 
   stopTidal() {
     const ctx=this;
     const { tidalServerLink } = ctx.state;
-    store.dispatch(killTidalConsole(tidalServerLink));
+    const sc_exit = "s.quit;"
+    ctx.setState({tidalMenu:false });
+    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
   }
 
   render() {
     const ctx = this;
 
     const { times, tidalMenu } = ctx.state;
-    const { tidal, click } = ctx.props;
+    const { click } = ctx.props;
     const { version } = ctx.props.menu;
 
-    console.log(ctx.props.tidal.config)
     const changeTimes = ({target: {value}}) => {
       ctx.setState({times : value});
 

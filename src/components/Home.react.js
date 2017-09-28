@@ -13,7 +13,7 @@ import {sendScPattern, sendSCMatrix,
       startClick,stopClick,globalStore,fbupdateglobalsinscene,
       fbcreatechannelinscene, fbupdatechannelinscene, selectCell,
       createChannel, deleteChannel, createCell, bootCells,
-      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout, dCon,dConSC, stepChannel} from '../actions'
+      updateLayout, forceUpdateLayout, fbupdatelayout, fbsavelayout, fbdeletecustomlayout, stepChannel} from '../actions'
 
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
@@ -105,10 +105,6 @@ componentDidMount(props,state){
   socket.on("osc", data => {
     store.dispatch(startClick());
   })
-  // sockettSC.on("dconSC", data => {
-  //   console.log(data);
-  //   store.dispatch(dConSC(data ));
-  // })
 
   socket.on("dc", data => {
     store.dispatch(stopClick());
@@ -312,10 +308,7 @@ onLayoutChangeChannel(items, layout, x) {
       store.dispatch(stepChannel());
     }
   });
-  // ctx.setState({manual_layout_trig: false});
-  // fbupdatelayout("Accounts", temp_layouts, ctx.props.user.user.uid);
-  // store.dispatch(updateLayout(temp_layouts));
-  console.log(x);  
+  // console.log(x);
 }
 
 
@@ -825,8 +818,6 @@ tidalcps (value) {
   var temp = click;
   temp.times = body;
   ctx.setState({click:temp});
-
-  console.log("TIDALCPS");
 }
 
 handleClick = (e, data) => {
@@ -878,7 +869,6 @@ onLayoutChange(layout) {
 }
 
 onLoadCustomLayout = (layout_id, event) => {
-  console.log(event, layout_id);
   const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
   if (event.altKey) {
     fbdeletecustomlayout("Accounts", this.props.user.user.uid, layout_id);
@@ -1096,7 +1086,7 @@ renderLayouts(layoutItem, k) {
       <div className={"PanelHeader"}> ■ Debug Console
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "debugconsole")}>X</span>
       </div>
-      <div className = {'DebugConsole PanelAdjuster'}>
+      <div className={'DebugConsole PanelAdjuster'}>
         <DebugConsole />
       </div>
     </div>);
