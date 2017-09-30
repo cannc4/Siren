@@ -13,10 +13,8 @@ s.waitForBoot {
  ~dirt.loadSoundFiles("/Users/canince/dropbox/whalehouse/99s/*");
  s.sync;
  ~dirt.start(57120, (0,2 .. 9));
-
   "SUPERDIRT LOADED".postln;
-  // StageLimiter.activate;
-  2.wait;
+  1.wait;
   s.makeGui;
   s.meter;
   s.scope;

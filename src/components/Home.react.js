@@ -83,6 +83,7 @@ class Home extends Component {
       c_transition: '',
       csize: 1,
       soloArray: _.times(8, _.stubFalse),
+      muteArray: _.times(8, _.stubFalse),
       manual_layout_trig: true,
       default_layout: [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, isVisible: true},
                        {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, isVisible: true},
@@ -330,10 +331,16 @@ renderChannel(scene_key, channelLen, item){
             scene_key={scene_key}
             item={item}
             solo={{isSolo: _.indexOf(ctx.state.soloArray, true) !== -1, soloValue: ctx.state.soloArray[item.cid]}}
+            mute={{isMute: _.indexOf(ctx.state.muteArray, true) !== -1, muteValue: ctx.state.muteArray[item.cid]}}
             soloOnClick={function(cid) {
               var temp = _.times(channelLen, _.stubFalse)
               temp[cid] = !ctx.state.soloArray[cid];
               ctx.setState({soloArray: temp});
+            }}
+            muteOnClick={function(cid) {
+              var temp = _.times(channelLen, _.stubFalse);
+              temp[cid] = !ctx.state.muteArray[cid];
+              ctx.setState({muteArray: temp});
             }}/>
          </div>
 }
@@ -440,7 +447,7 @@ renderScene(item, dbKey, i) {
     ctx.setState({ activeMatrix: item.matName,
       matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
       globalTransformations: '', globalCommands:'', globalChannels: '',
-      pressed:gpressed, sceneIndex:item.key, soloArray: _.times(item.channels.length, _.stubFalse)});
+      pressed:gpressed, sceneIndex:item.key, muteArray: _.times(item.channels.length, _.stubFalse),soloArray: _.times(item.channels.length, _.stubFalse)});
     ctx.updateMatrix(item);
 
     store.dispatch(globalStore(sglobals,[]));
