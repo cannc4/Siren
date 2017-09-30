@@ -3,6 +3,7 @@ node_modules/rx/ts/core/observable.ts
 deps/
 config/
 dist/
+vis/
 build/
 .DS_Store
 vis/media/

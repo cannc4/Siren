@@ -1,8 +1,23 @@
 # Updates
-### Global controls and Pattern History (Experimental)
-There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. `shift+click` overwrites the presets and pressing `rec` creates a new one.
-These parameters directly access to the patterns in the history. (i.e active patterns)
-There is now a dedicated channel called `G` to sequence the channels you want to include within global controls. You can specify the index of global and channels like : "1 `1 2 4`" where first `1` is the index of global and `1 2 4` are the channel numbers.
+
+###Version 0.4
+
+
+###Dynamic Channels
+
+In version 0.4, channels can be added dynamically using the channel menu. Any type of anything can be defined really. It just needs to go in `tidal-boot-default.hs` or compiled using `console`.
+
+
+### Global modifiers and Pattern History (Experimental)
+
+There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and
+sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+ click` clears the desired slot and `alt+ click` overwrites it.
+These modifiers are applied to the patterns shown in the pattern history section. (i.e active patterns)
+Channels that you want to modify can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means that modifiers will be applied to all channels in the scene.
+
+###Haskell-based timer
+
+Timer is now in sync with Tidal's cycles and `rate` affects the overall gate time of the cycle.
 
 
 # Siren

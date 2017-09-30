@@ -3,32 +3,23 @@ import { Provider } from 'react-redux';
 import { Router, Route, browserHistory, IndexRoute } from 'react-router';
 import store from '../store';
 import App from '../components/App';
-import Patterns from '../components/Patterns.react';
-import Live from '../components/Live.react';
 import Home from '../components/Home.react';
-
 import {
-  handleEnterHome,
-  handleEnterLive
+  handleEnterHome
 } from './callbacks';
+
+// <Route
+//   path="/patterns"
+//   component={Patterns}
+// />
 
 export default (
   <Provider store={store}>
     <Router history={browserHistory}>
       <Route path="/" component={App} onEnter={handleEnterHome}>
         <IndexRoute component={Home}/>
-        <Route
-          path="/patterns"
-          component={Patterns}
-        />
-        </Route>
-        <Route path="/live" component={App} onEnter={handleEnterLive}>
-      <IndexRoute component={Live}/>
-      <Route
-        path="/patterns"
-        component={Patterns}
-      />
-    </Route>
+
+      </Route>
     </Router>
   </Provider>
 )

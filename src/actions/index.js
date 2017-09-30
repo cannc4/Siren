@@ -5,8 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-import { handleEnterHome } from '../routes'
-import worker from './tworker.js'
+
 Firebase.initializeApp({
 
 		 apiKey: "AIzaSyD7XtMeL8wakGWpsK4Vbg7zdkPkLQzjaGI",
@@ -14,113 +13,37 @@ Firebase.initializeApp({
 		 databaseURL: "https://eseq-f5fe0.firebaseio.com"
 
 });
-
 const models = {
-	Accounts: {
-		dataSource: Firebase.database().ref("/accounts"),
-		model: {
-			email: 'String',
-			name: 'String',
-			uid: 'String',
-		}
-	},
-	Patterns: {
-		dataSource: Firebase.database().ref("/patterns"),
-		model: {
-			name: 'String',
-			params: 'String',
-			pattern: 'String',
-			skey: 'String',
-			uid: 'String'
-		}
-	},
-	Live: {
-		dataSource: Firebase.database().ref("/live"),
-		model: {
-			timer: 'Object',
-			values: 'Object'
-		}
-	},
-	Matrices: {
-		dataSource: Firebase.database().ref("/matrices"),
-		model: {
-			name: 'String',
-			durations: 'Object',
-			values: 'Object',
-			transitions: 'Object',
-			patterns: 'Object',
-			sceneIndex: 'Integer',
-			storedGlobals: 'Object',
-			uid: 'String'
-		}
-	}
+  Accounts: {
+    dataSource: Firebase.database().ref("/accounts"),
+    model: {
+      email: 'String',
+      name: 'String',
+      uid: 'String',
+			layouts: 'Object'
+    }
+  },
+  Matrices: {
+    dataSource: Firebase.database().ref("/matrices"),
+    model: {
+      name: 'String',
+      patterns: 'Object',
+			channels: 'Object',
+      sceneIndex: 'Integer',
+      storedGlobals: 'Object',
+      uid: 'String'
+    }
+  }
 }
-
+// eslint-disable-next-line
 String.prototype.replaceAt = function(index, character) {
 	return this.substr(0, index) + character + this.substr(index+character.length);
 }
-//
-// var client = dgram.createSocket('udp4');
-//
-// client.on('listening', function () {
-//     var address = client.address();
-//     console.log('UDP Server listening on ' + address.address + ":" + address.port);
-// });
-//
-// client.on('message', function (message, remote) {
-//
-//     console.log(remote.address + ':' + remote.port +' - ' + message);
-//
-// });
-//
-// client.send(message, 0, message.length, PORT, HOST, function(err, bytes) {
-//
-//     if (err) throw err;
-//     console.log('UDP message sent to ' + HOST +':'+ PORT);
-//
-// var PORT = 3002;
-// var HOST = '127.0.0.1';
-//
-// var client = dgram.createSocket('udp4');
-//
-// client.on('listening', function () {
-//     var address = client.address();
-//     console.log('UDP Server listening on ' + address.address + ":" + address.port);
-// });
-//
-// client.on('message', function (message, remote) {
-//
-//     console.log(remote.address + ':' + remote.port +' - ' + message);
-//
-// });
-//
-//
-// export const incTimer = () => {
-//   return { type: 'INC_TIMER'}
-// };
-//
-// export const click = () => {
-//   return dispatch => {
-//     timer = setInterval(x, (duration / steps * 1000), dispatch);
-//   }
-// }
-// export const incClick = () => {
-//   return { type: 'INC_TIMER'}
-// };
-//
-
-
-export function sendZapier(data) {
-	const { url } = data;
-	delete data.url;
-	axios.post(url, JSON.stringify(data))
-	.then(function (response) {
-		console.log(response);
-	})
-	.catch(function (error) {
-		console.error(error);
-	});
-}
+// eslint-disable-next-line
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
 
 export function fetchModels() {
 	return _.map(models, (e, key) => { return key.toLowerCase() })
@@ -156,7 +79,8 @@ export function fbauth() {
 						uid: user.uid,
 						name: user.displayName,
 						email: user.email,
-						key: user.uid
+						key: user.uid,
+						layouts: user.layouts
 					}))
 				})
 			}
@@ -183,6 +107,25 @@ export function fbfetch(model) {
 		})
 	}
 }
+export function fbfetchlayout(model) {
+	return dispatch => {
+		models[model].dataSource.ref.on('value', data => {
+			if (Firebase.auth().currentUser !== null)
+			{
+				const { uid } = Firebase.auth().currentUser;
+				const u = _.find(data.val(), (d) => d.uid === uid);
+
+				if (u !== null && u !== undefined) {
+					// console.log('fbfetchlayout: ', Object.values(u.layouts.default_layout));
+					dispatch({
+						type: 'UPDATE_LAYOUT',
+						payload: _.filter(Object.values(u.layouts.default_layout), ['isVisible', true])
+					})
+				}
+			}
+		})
+	}
+}
 export function fbfetchscenes(model) {
 	return dispatch => {
 		models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
@@ -202,6 +145,7 @@ export function fbfetchscenes(model) {
 		})
 	}
 }
+
 export function fbcreate(model, data) {
 	if (data['key']) {
 		return models[model].dataSource.child(data['key']).update({...data})
@@ -218,60 +162,23 @@ export function fbcreatepatterninscene(model, data, s_key) {
 		return newObj.update({ key: newObj.key })
 	}
 }
-export function fbFetchLive (model){
+export function fbcreatechannelinscene(model, data, s_key){
+	if (data['key']) {
+		return models[model].dataSource.child(data['key']).update({...data})
+	} else {
+		const newObj = models[model].dataSource.child(s_key).child("channels").push(data);
 
-	return dispatch => {
-		models[model].dataSource.ref.on('value', data => {
+		newObj.update({ key: newObj.key })
+		return newObj.key
 
-			if(data.val().timer.notf === "start") {
-				store.dispatch(startTimer(data.val().timer.duration, data.val().timer.steps));
-			}
-			else if(data.val().timer.notf === "pause"){
-				store.dispatch(pauseTimer());
-			}
-			else if(data.val().timer.notf === "stop"){
-				store.dispatch(stopTimer());
-			}
-
-			store.dispatch(fbLiveUpdate(data.val().values));
-		});
 	}
-
 }
 
-export const fbLiveUpdate = (values) => {
-	function placeValue(row, col, item, container){
-		if (container[parseInt(row)+1] === undefined)
-			container[parseInt(row)+1] = {};
-		container[parseInt(row)+1][col] = item;
-	}
-
-	_.forEach(values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue(rowKey-1, colKey, cell, values);
-		});
-	});
-
-	return dispatch => {
-		dispatch({ type: 'FETCH_LIVE_MAT', payload: values});
-	};
-}
-
-export function fbLiveTimer(model, data) {
-	models[model].dataSource.child('timer').set(data);
-}
-
-export function fbSyncMatrix (model,data){
-	models[model].dataSource.child('timer').set({duration: data.duration,
-							steps: data.steps,
-							notf: "running"});
-	return models[model].dataSource.child('values').update(data.values);
-}
-
+// data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
 	{
-		var datakey, sceneIndex, values, patterns, uid, transition, duration, storedGlobals;
+		var datakey, sceneIndex, patterns, channels, storedGlobals;
 		models[model].dataSource.ref.once('value', dat => {
 			var u_id = Firebase.auth().currentUser.uid;
 			if ( u_id !== null)
@@ -280,13 +187,10 @@ export function fbcreateMatrix(model, data) {
 				if(obj !== undefined && obj !== null && u_id === obj.uid){
 					datakey = obj.key;
 					sceneIndex = obj.sceneIndex;
-					// transitions = obj.transition;
-					// duration = obj.duration;
-					// storedGlobals = obj.globals;
-					if (obj.transitions !== undefined) transition = obj.transitions;
+					if (obj.channels !== undefined) channels = obj.channels;
 					if (obj.globals !== undefined) storedGlobals = obj.globals;
 					if (obj.patterns !== undefined) patterns = obj.patterns;
-					uid = obj.uid;
+					u_id = obj.uid;
 				}
 			}
 		});
@@ -294,8 +198,8 @@ export function fbcreateMatrix(model, data) {
 		if(patterns === undefined)
 			patterns = [];
 
-		if(transition === undefined)
-			transition = [];
+		if(channels === undefined)
+			channels = [];
 
 		if(storedGlobals === undefined)
 			storedGlobals = [];
@@ -303,18 +207,30 @@ export function fbcreateMatrix(model, data) {
 		if (datakey) {
 			data.sceneIndex = sceneIndex;
 			data.patterns = patterns;
+			data.channels = channels;
 			data.globals = storedGlobals;
 			return models[model].dataSource.child(datakey).update({...data})
-		} else {
+
+		}
+		else {
 			if (data.patterns === undefined)
 				data.patterns  = [];
-			if (data.transitions === undefined)
-				data.transitions = [];
+
+			channels = data.channels
+			data.channels = []
+
 			if (data.globals === undefined)
-					data.storedGlobals = [];
+				data.storedGlobals = [];
 
 			const newObj = models[model].dataSource.push(data);
-			return newObj.update({ key: newObj.key })
+			newObj.update({ key: newObj.key })
+
+			_.each(channels, function(x) {
+				x.scene = data.matName
+				const newChn = models[model].dataSource.child(newObj.key).child('channels').push(x);
+				newChn.update({ key : newChn.key })
+			})
+
 		}
 	}
 }
@@ -329,8 +245,7 @@ export function fbupdatepatterninscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbupdateglobalsinscene(model, data, s_key) {
-	//--
-	models[model].dataSource.child(s_key).child("storedGlobals").push(data)
+	models[model].dataSource.child(s_key).child("storedGlobals").update({...data})
 }
 export function fbdelete(model, data) {
 	models[model].dataSource.child(data['key']).remove();
@@ -341,6 +256,9 @@ export function fbdeletepatterninscene(model, data, s_key) {
 export function fborder(model, data, key) {
 	if(data.patterns === undefined)
 		data.patterns = {};
+
+	if(data.channels === undefined)
+		data.channels = {};
 
 	models[model].dataSource.child(key).update({...data})
 	models[model].dataSource.orderByChild('sceneIndex');
@@ -356,15 +274,15 @@ export function GitHubLogin() {
 		Firebase.auth().getRedirectResult().then(result => {
 			if (result.credential) {
 				// This gives you a GitHub Access Token. You can use it to access the GitHub API.
-				var token = result.credential.accessToken;
+				// var token = result.credential.accessToken;
 			}
 			// The signed-in user info
-			var user = result.user;
+			// var user = result.user;
 		}).catch(function(error) {
-			var errorCode = error.code;
-			var errorMessage = error.message;
-			var email = error.email;
-			var credential = error.credential;
+			// var errorCode = error.code;
+			// var errorMessage = error.message;
+			// var email = error.email;
+			// var credential = error.credential;
 			dispatch({
 				type: FETCH_ACCOUNTS_ERROR,
 				payload: error
@@ -394,220 +312,198 @@ export function logout() {
 	}
 }
 
+export const initTidalConsole = (server) => {
+	return dispatch => {
+		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+		.then((response) => {
+			dispatch({type: 'FETCH_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+export const bootSystem = (server, expression) => {
+	return dispatch => {
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/boot', {'b_config' :expression})
+		.then((response) => {
+			dispatch({type: 'CONFIG_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+export const dCon = ( expression) => {
+	return dispatch => {
+			dispatch({type: 'DEBUG_TIDAL', payload: expression })
+		};
+}
+//SC BINDING
+// export const dConSC = ( expression) => {
+// 	return dispatch => {
+// 			dispatch({type: 'DEBUG_SCCOMMAND', payload: expression })
+// 		};
+// }
+export const killTidalConsole = (server, expression) => {
+	return dispatch => {
+		if (!expression) return;
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
+		.then((response) => {
+			dispatch({ type: 'FETCH_SCCOMMAND', payload: false })
+		}).catch(function (error) {
+		});
+	}
+}
+export const exitSC = (server) => {
+	return dispatch => {
+		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+		.then((response) => {
+			dispatch({type: 'FETCH_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
 
-export const initMyTidal = (server) => {
-	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
-		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
-export const exitSC = (server) => {
-	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
-		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
-export const exitSC = (server) => {
+export const TidalTick = (server) => {
   return dispatch => {
-    axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+    axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
     .then((response) => {
       dispatch({type: 'FETCH_TIDAL', payload: response.data })
     }).catch(function (error) {
-      console.error(error);
+      console.log(error);
     });
   }
 }
 
-// export const TidalTick = (server) => {
-//   return dispatch => {
-//     axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
-//     .then((response) => {
-//       dispatch({type: 'FETCH_TIDAL', payload: response.data })
-//     }).catch(function (error) {
-//       console.log(error);
-//     });
-//   }
-// }
-export const assignTimer = (timer,steps, _index) => {
-	var dum =timer.current + (_index - timer.current%steps);
-	return {
-		type: 'ASSIGN_TIMER', payload: timer.id , current : dum
-	};
-}
-
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.replace(new RegExp(search, 'g'), replacement);
-};
-
 ////////////////// PARSER STARTS HERE //////////////////
 var math = require('mathjs');
-var patListBack = [];
-export const sendPatterns = (server,vals, patterns =[], solo, transition, channels, timer,globalTransformations,globalCommands, storedPatterns) => {
+
+export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
+
 	return dispatch => {
-		const x =  _.compact(_.map(vals,(v,k) => {
-		// gets parameters list
-		const getParameters = (v) => {
-			var param = [];
-			_.map(_.split(v, /[`]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
+		const getFinalPattern = () => {
+			console.log('INDEXJS ', channel, stepValue);
 
-				if(p1 !== "") param.push(p1);
-			});
-			return param;
-		}
+			// channel
+			var k = channel.name;
 
-		const getMathExpr = (v) => {
-			var maths = [];
-			_.map(_.split(v, /[&]+/g), (p1, p2) => {
-				p1 = _.trim(p1);
+			// pattern
+			var v = stepValue;
 
-				if(p1 !== "") maths.push(p1);
-			});
-			return maths;
-		}
+			const getParameters = (v) => {
+				var param = [];
+				_.map(_.split(v, /[`]+/g), (p1, p2) => {
+					p1 = _.trim(p1);
 
-		// pattern name
-		const cellName = getParameters(v)[0];
+					if(p1 !== "") param.push(p1);
+				});
+				return param;
+			}
 
-		// command of the pattern
-		const cmd = _.find(patterns, c => c.name === cellName);
+			// pattern name
+			const cellName = getParameters(v)[0];
 
-		// CPS channel handling
-		if(_.indexOf(channels,k) === _.indexOf(channels,'cps')){
-			var newCommand = cellName;
-			return [k + " " + newCommand, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-		}
-		// other channels
-		else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
-			var cellItem = _.slice(getParameters(v), 1);
-			var newCommand = cmd.pattern;
+			// command of the pattern
+			const cmd = _.find(scenePatterns, c => c.name === cellName);
+			var newCommand;
 
-			// Construct the parameter list from command
-			var parameters = _.concat( _.split(cmd.params, ','),'t');
+			// CPS channel handling
+			if( k === 'cps'){
+				newCommand = cellName;
+				return [k + " " + newCommand, "sendOSC d_OSC $ "] ;
+			}
+			// other channels
+			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+				var cellItem = _.slice(getParameters(v), 1);
+				newCommand = cmd.pattern;
+				// Construct the parameter list from command
+				const parameters = _.concat( _.split(cmd.params, ','),'t');
 
-			// For each parameter in parameter list
-			_.forEach(parameters, function(value, i) {
-				// Temporal parameter
-				if(value === 't'){
-					newCommand = _.replace(newCommand, new RegExp("`t`", "g"), timer.current);
+				// For each parameter in parameter list
+				_.forEach(parameters, function(value, i) {
+					// Temporal parameter
+					if(value === 't'){
+						newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
+					}
+					// Random parameter
+					else if(_.indexOf(cellItem[i], '|') !== -1 )
+					{
+						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
+						console.log('cellItem ', cellItem[i]);
+						var bounds = _.split(cellItem[i], ',');
+						if(bounds[0] !== undefined && bounds[0] !== "" &&
+						bounds[1] !== undefined && bounds[1] !== ""){
+								 bounds[0] = parseFloat(bounds[0]);
+								 bounds[1] = parseFloat(bounds[1]);
+								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), _.random(_.min(bounds), _.max(bounds)));
+						}
+					}
+					// Value parameter
+					else {
+						newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+					}
+				});
+
+
+				// Math Parser
+				// eslint-disable-next-line
+				_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
+					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
+				})
+				// solo or not (obsolete)
+				var	transitionHolder,
+						soloHolder;
+
+				if (channel.transition === "" || channel.transition === undefined ){
+					transitionHolder = " $ ";
+					soloHolder = k ;
 				}
-				// Random parameter
-				else if(_.indexOf(cellItem[i], '|') != -1 )
-				{
-					cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], ']'));
-					var bounds = _.split(cellItem[i], ',');
-					if(bounds[0] !== undefined && bounds[0] !== "" &&
-						 bounds[1] !== undefined && bounds[1] !== ""){
-							 bounds[0] = parseFloat(bounds[0]);
-							 bounds[1] = parseFloat(bounds[1]);
-							 cellItem[i] = _.random(_.min(bounds), _.max(bounds));
-							 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+				else {
+					transitionHolder = " " + channel.transition + " $ ";
+					soloHolder = "t"+ (channel.cid +1);
+				}
+
+				var pattern;
+				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
+					pattern = k + " $ " + newCommand;
+				}
+				else {
+					pattern = soloHolder  + transitionHolder + newCommand;
+				}
+
+				globalparams.storedPatterns[channel.cid] = pattern;
+				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
+					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+					}
+					else {
+						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
 					}
 				}
-				// Value parameter
 				else {
-					newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+					pattern = soloHolder + transitionHolder + newCommand ;
 				}
-			});
 
-			// Math Parser
-			var re = /\&(.*?)\&/g;
-			_.forEach(_.words(newCommand, re), function(val, i){
-				newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
-			})
-			// solo or not (obsolete)
-			var soloHolder = k;
-			var transitionHolder = "" ;
-			var _k = k;
-			if(_.indexOf(channels,_k) === _.indexOf(channels, 'cps')){
-				transitionHolder = _k;
-				soloHolder = " ";
+				console.log('actually sending it: ', pattern);
+				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
 			}
-			else {
-				if (transition[_.indexOf(channels,_k)] === "" || transition[_.indexOf(channels,_k)] === undefined ){
-					soloHolder = k ;
-					transitionHolder = " $ ";
-				}
-
-				else if(transition[_.indexOf(channels,_k)] !== undefined && transition[_.indexOf(channels,_k)] !== ""){
-					transitionHolder = " " + transition[_.indexOf(channels,_k)]+ " $ ";
-					soloHolder = "t"+ (_.indexOf(channels,_k)+1);
-				}
-
-				else if(solo[_.indexOf(channels,_k)] === true){
-					soloHolder = "solo $ " + _k ;
-					transitionHolder = " $ ";
-				}
-			}
-
-			if (_k === 'm1' || _k === 'm2' ||  _k === 'm3' ||  _k === 'm4' || _k === 'v1' || _k === 'u1'){
-
-				var storechan = _k + " $ ";
-				pattern = storechan+ newCommand;
-				storedPatterns[_.indexOf(channels,_k)] = '';
-				storedPatterns[_.indexOf(channels,_k)] = pattern;
-				console.log(pattern);
-				return [pattern,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"]
-
-			}
-			else {
-				var storechan = "d"+ (_.indexOf(channels,_k)+1) + " $ ";
-				var storepat= storechan+ newCommand;
-				//var orbit = " #orbit " + _.indexOf(channels,_k);
-				storepat = storepat;
-				storedPatterns[_.indexOf(channels,_k)] = '';
-				storedPatterns[_.indexOf(channels,_k)] = storepat;
-				var pattern = soloHolder + transitionHolder +globalTransformations+ newCommand + " " + globalCommands;
-				if (_.indexOf(channels,_k) === _.indexOf(channels, 'd1')){
-					newCommand = globalTransformations+ newCommand + " " + globalCommands
-					newCommand = newCommand.replaceAll(' s ', ' image ');
-					newCommand = newCommand.replaceAll('n ', 'npy ');
-					newCommand = newCommand.replaceAll('speed', 'pspeed');
-					newCommand = newCommand.replaceAll('nudge', 'threshold');
-					newCommand = newCommand.replaceAll('room', 'blur');
-					newCommand = newCommand.replaceAll('end', 'median');
-					newCommand = newCommand.replaceAll('coarse', 'edge');
-					newCommand = newCommand.replaceAll('up', 'hough');
-					newCommand = newCommand.replaceAll('gain', 'means');
-					return [pattern, "v1 $ "+ newCommand] ;
-				}
-				else if (_.indexOf(channels,_k) === _.indexOf(channels, 'v1')){
-					pattern =  "v1 $ " + newCommand;
-					newCommand = newCommand.replaceAll('image', 's');
-					newCommand = newCommand.replaceAll('npy', 'n');
-					newCommand = newCommand.replaceAll('pspeed', 'speed');
-					newCommand = newCommand.replaceAll('threshold', 'nudge');
-					newCommand = newCommand.replaceAll('blur', 'room');
-					newCommand = newCommand.replaceAll('median', 'end');
-					newCommand = newCommand.replaceAll('edge', 'coarse');
-					newCommand = newCommand.replaceAll('hough', 'up');
-
-					console.log(pattern, "d1 $ "+ newCommand);
-					return [pattern, "d1 $ "+ newCommand] ;
-				}
-				else {
-					return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
-				}
-			}
+			else
+				return false;
 		}
-		else
-			return false;
-		}))
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/patterns', { 'patterns': x })
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
+			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
+
 		}).catch(function (error) {
 			console.error(error);
 		});
 	}
+}
+
+export const setExecution = () => {
+	return dispatch => {
+		dispatch({ type: 'EXECUTION_CLICK' })
+	};
 }
 
 export const continousPattern = (server, pattern) => {
@@ -621,54 +517,36 @@ export const continousPattern = (server, pattern) => {
 	}
 }
 ////////////////// PARSER ENDS HERE //////////////////
-
-
-
-export const updateMatrix = (patterns, values, i, transition, duration, steps, channels) => {
-	function placeValue2D(row, col, item, container){
-		if(item !== undefined){
-			if (container[parseInt(row)+1] === undefined)
-				container[parseInt(row)+1] = {};
-			container[parseInt(row)+1][col] = item;
-		}
-	}
-	function placeValue1D(index, item, container){
-		if(item !== undefined)
-			container[parseInt(index)] = item;
-		else
-			container[parseInt(index)] = '';
-
-			// if (container[parseInt(index)] === undefined)
-			//   container[parseInt(index)] = '';
-	}
-
-	_.forEach(values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue2D(rowKey-1, colKey, '', values);
-		});
-	});
-
-	_.forEach(i.values, function(rowValue, rowKey) {
-		_.forEach(rowValue, function(cell, colKey) {
-			placeValue2D(rowKey-1, colKey, cell, values);
-		});
-	});
-
-	for (var i = 0; i < channels.length; i++) {
-		placeValue1D(i, transition[i], transition);
-	}
-
-	_.forEach(duration, function(obj, index) {
-		store.dispatch(updateTimerduration(index,obj,steps));
-	});
-
-	// TODO durations
-
+export const updateMatrix = (item) => {
+	//reducer
 	return dispatch => {
-		dispatch({ type: 'ADD_TIMER'});
+		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
 	};
 }
-
+export const selectCell = (selectedcell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'SELECT_CELL', payload: selectedcell });
+    };
+}
+export const updateCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'REFINE_CELL', payload: cell });
+    };
+}
+export const bootCells = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'BOOT_CELL', payload: cell });
+    };
+}
+export const createCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'CREATE_CELL', payload: cell });
+    };
+}
 export const sendScPattern = (server, expression) => {
 	return dispatch => {
 		if (!expression) return;
@@ -684,6 +562,7 @@ export const consoleSubmit = (server, expression) => {
 	return dispatch => {
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
+			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -716,17 +595,11 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 				var stp=storedPatterns[chan-1];
 				if(stp !== undefined){
 					ch = stp.match(b)[0];
-					ch = ch + ' $ ';
+					ch += ' $ ';
 					stp = stp.substring(stp.indexOf('$')+1);
-					console.log(stp);
-					var pp =  ch  + currentglobal[1]  + stp + currentglobal[0];
-					console.log(pp);
-					pat.push(pp);
+					pat.push(ch  + currentglobal[1]  + stp + currentglobal[0]);
 				}
 			});
-					// for (var j = 0; j < storedPatterns.length; j++) {
-					// 			pat.push(storedPatterns[j]);
-					// }
 			}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
 		.then((response) => {
@@ -741,21 +614,27 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {
 	return dispatch => {
 		var b = new RegExp("^[A-Za-z0-9]+", "g");
-		var ch = expression.match(b)[0];
-		console.log(ch);
-		if (ch === 'm1' || ch === 'm2' ||  ch === 'm3' ||  ch === 'm4' || ch === 'v1' || ch === 'u1'){
-			storedPatterns[_.indexOf(channels,ch)] = '';
-			storedPatterns[_.indexOf(channels,ch)] = expression;
+		var chan = expression.match(b)[0];
+		if ( expression === 'jou'){
+			_.each(channels, function (ch, i) {
+				if(ch.type === 'Audio'){
+				storedPatterns[ch.cid] = ch.name + ' $ silence';
+				}
+			})
 		}
-		else if ( expression === 'jou'){
-			for (var i = 0; i < storedPatterns.length; i++) {
-				storedPatterns[i] = channels[i] + ' $ silence' ;
-			}
-
+		else if ( expression === 'mjou'){
+			_.each(channels, function (ch, i) {
+				if(ch.type === 'MIDI'){
+					storedPatterns[ch.cid] = ch.name + ' $ silence';
+				}
+			})
 		}
 		else{
-			storedPatterns[_.indexOf(channels,ch)] = '';
-			storedPatterns[_.indexOf(channels,ch)] = expression;
+			_.each(channels, function (ch, i) {
+				if(chan === ch.name){
+					storedPatterns[ch.cid] = expression;
+				}
+			})
 		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
 		.then((response) => {
@@ -765,74 +644,60 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 	}
 }
 
-
-export const globalUpdate = (t, c) => {
+export const globalUpdate = (t, c, d) => {
 	return {
-		type: 'UPDATE_GLOBAL', transform: t, command: c
+		type: 'UPDATE_GLOBAL', transform: t, command: c, channel:d
 	}
 }
-export const globalStore = (storedG) => {
+export const globalStore = (storedG,storedPatterns) => {
 	return {
-		type: 'STORE_GLOBAL', storedGlobals: storedG
+		type: 'STORE_GLOBAL', storedGlobals: storedG, storedPatterns: storedPatterns
 	}
 }
 
 export const resetPattern = () => ({type: 'RESET_CC'});
 export const fetchPattern = () => ({type: 'FETCH_CC'});
 
-var timer = [];
-export const updateTimerduration = (_index,_duration,_steps) => {
-	if(_duration === "" || !isNaN(parseInt(_duration)))
-		return {
-			type: 'UPDATE_TIMER', payload: _index, duration : _duration
+export const createChannel = (newc) => {
+	return  {
+		type: 'CREATE_CHANNEL',  payload: newc }
+}
+export const updateChannel = (item) => {
+	return  { type: 'UPDATE_CHANNEL', payload: item }
+}
+export const stepChannel = (channel) => {
+	return  { type: 'RESTEP_CELL', payload: channel}
+}
+export const deleteChannel = (key) => {
+	return  { type: 'DELETE_CHANNEL', payload: key }
+}
+
+export function forceUpdateLayout(windows, current_layout_length) {
+	// react-grid-layout only rerenders when number of layouts have changed.
+	// Add or remove a dummy layout to change the number of layouts, and force
+	// it to rerender itself
+	if(windows.length === current_layout_length){
+		if(_.find(windows, function(o) { return o.i === 'dummy'; })){
+			windows = _.reject(windows, ['i', 'dummy']);
 		}
-}
-
-var timerWorker= [];
-export const createTimer = (_index,_duration, _steps) => {
-
-		timerWorker[_index] = new Worker("./src/actions/tworker.js");
-		timerWorker[_index].onmessage = function(e) {
-			if (e.data.type == "tick") {
-					store.dispatch(updtmr(e.data.id));
-					timer[_index] = e.data.msg;
-			}
+		else {
+			windows = _.concat(windows, {i: 'dummy', x: 11, y: 100, w: 5, h: 4, minW: 2, isVisible: false});
 		}
-		return {
-		type: 'CREATE_TIMER', payload: _index, duration : _duration
+	}
+	return dispatch => {
+		dispatch({ type: 'UPDATE_LAYOUT', payload: windows });
+	}
+}
+export function updateLayout(windows) {
+	return dispatch => {
+		dispatch({ type: 'UPDATE_LAYOUT', payload: windows });
 	}
 }
 
-export const updtmr = (_index) => {
-
-	return {
-			 type: 'INC_TIMER', payload: _index
-		 }
+export function chokeClick() {
+	return  { type: 'TOGGLE_CLICK'};
 }
 
-var stopParam = [];
-export const startIndividualTimer = (_index,_duration, _steps) => {
-	if(!stopParam[_index]){
-		stopParam[_index] = true;
-		timerWorker[_index].postMessage({type : "start", id: _index, duration: _duration, steps: _steps, timer: timer[_index]});
-	}
-}
-
-export const pauseIndividualTimer = (_index) => {
-	stopParam[_index] = false;
-	timerWorker[_index].postMessage({type : "pause", id: _index,timer: timer[_index]});
-	return {
-		type: 'PAUSE_TIMER', payload: _index
-	}
-}
-
-export const stopIndividualTimer = (_index) => {
-	stopParam[_index] = false;
-	timerWorker[_index].postMessage({type : "stop", id: _index, timer: timer[_index]});
-	return {
-		type: 'STOP_TIMER', payload: _index
-	}
-}
 
 export function startClick() {
 	return dispatch => {
@@ -840,8 +705,51 @@ export function startClick() {
 	}
 }
 
-export function stopClick() {
+export function resetClick() {
 	return dispatch => {
-		dispatch({ type: 'STOP_CLICK'});
+		dispatch({ type: 'RESET_CLICK'});
+	}
+}
+
+export function fbupdatechannelinscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+}
+
+export function fbdeletechannelinscene(model, s_key, c_key) {
+	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+	store.dispatch(deleteChannel(c_key));
+}
+
+export function fbsavelayout(model, layout, uid, c_id) {
+	if ( uid !== undefined ) {
+		var temp_layouts = {};
+		_.forEach(layout, function(o) {
+			temp_layouts[o.i] = o;
+		})
+		models[model].dataSource.child(uid).child("layouts").child("customs").child(c_id).set(temp_layouts)
+	}
+}
+
+export function fbdeletecustomlayout(model, uid, c_id) {
+	if ( uid !== undefined ) {
+		models[model].dataSource.child(uid).child("layouts").child("customs").child(c_id).remove();
+	}
+}
+
+
+export function fbupdatelayout(model, layout, uid) {
+	// console.log(layout, uid);
+	if ( uid !== undefined ) {
+		var temp_layouts = {};
+		_.forEach(layout, function(o) {
+			temp_layouts[o.i] = o;
+		})
+		models[model].dataSource.child(uid).child("layouts").child("default_layout").set(temp_layouts)
+	}
+}
+
+export function fbsaveconfig(model, uid, config) {
+	if ( uid !== undefined ) {
+		models[model].dataSource.child(uid).child("config").update({...config});
 	}
 }
