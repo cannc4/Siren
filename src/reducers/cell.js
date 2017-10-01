@@ -1,11 +1,9 @@
-// import _ from 'lodash';
 const modelName = 'CELL';
 const INITIAL_STATE = {vals: [[]], selectedCells:[]};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'REFINE_'+modelName:
         const p = state;
-        // console.log('cell reducer: ', action.payload);
         if (action.payload.cid !== undefined){
             if(p.vals[action.payload.cid]!== undefined){
                 if(p.vals[action.payload.cid][action.payload.cell_index]=== undefined){
@@ -20,7 +18,6 @@ export default (state = INITIAL_STATE, action) => {
             }
             
         }
-        // console.log("REFINE" + p.vals);
         return {...p};
     case 'BOOT_'+modelName:
         const d = state;
@@ -45,6 +42,18 @@ export default (state = INITIAL_STATE, action) => {
         }
         // console.log("REFINE" + z.vals);
       return {...z};
+    case 'RESTEP_'+modelName:
+      var l = state;
+      var newVals = [];
+      for(var a = 0 ; a < action.payload.vals.length; a++){
+        if(l.vals[action.payload.cid][a]!== undefined){
+          newVals[a] = l.vals[action.payload.cid][a];          
+        }
+        else
+          newVals[a] = ''
+    }
+      l.vals[action.payload.cid] = newVals;
+      return {...l};
     case 'SELECT_'+modelName:
       const e = state;
       e.selectedCells = action.payload;

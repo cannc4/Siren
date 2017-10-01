@@ -24,6 +24,7 @@ class Channels extends Component {
 			tolerance: 0,
 			selectOnMouseMove: false,
       isSolo: props.solo.soloValue,
+      isMute: props.mute.muteValue,
       loop: {isLoop: true, pauseTurn: 0, hasSilenced: false}
     }
   }
@@ -50,12 +51,13 @@ class Channels extends Component {
 
   sendPatterns(){
     const ctx = this;
-    const { click, solo } = ctx.props;
+    const { click, solo, mute} = ctx.props;
     const { loop } = ctx.state;
     const channel = ctx.props.item;
 
     if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) ) {
       if (!solo.isSolo || (solo.isSolo && solo.soloValue)) {
+        if (!mute.isMute || !mute.muteValue) {
         // Find the dictionary definitions of functions
         var scenePatterns;
         _.each(ctx.props.matrices, function(d){
@@ -82,6 +84,10 @@ class Channels extends Component {
           store.dispatch(setExecution());
           store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
             scenePatterns, click, ctx.props.globalparams ));
+          }
+        }
+        else{
+          store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
         }
       }
     }
@@ -113,7 +119,7 @@ class Channels extends Component {
   // Render whole matrix
   render() {
     const ctx = this;
-    const { item, solo } = ctx.props;
+    const { item, solo, mute } = ctx.props;
     const { loop } = ctx.state;
 
     console.log("Channel render ");
@@ -142,6 +148,10 @@ class Channels extends Component {
       const ctx = this;
       ctx.props.soloOnClick(item.cid);
     }
+    const muteChannel = event => {
+      const ctx = this;
+      ctx.props.muteOnClick(item.cid);
+    }
     const updateTransition = ({target : {value}}) => {
       const ctx = this;
       item.transition = value;
@@ -160,7 +170,8 @@ class Channels extends Component {
     const step = parseInt(item.step, 10);
     var channelClass = "ChannelItem";
     if ((!loop.isLoop &&  loop.hasSilenced) ||
-        ( solo.isSolo && !solo.soloValue))
+        ( solo.isSolo && !solo.soloValue) ||
+        ( mute.isMute && mute.muteValue))
     {
       channelClass += " disabled";
     }
@@ -178,6 +189,7 @@ class Channels extends Component {
             onChange={updateTransition}
             onClick={onClickFocus}/>
           <button className={"Button"} onClick={deleteChannel}>X</button>
+          <button className={"Button"+ ctx.props.mute.muteValue} onClick={muteChannel}>M</button>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
       </div>

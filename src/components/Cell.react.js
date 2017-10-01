@@ -73,8 +73,9 @@ class Cell extends Component {
     const setText = ({ target: { value }}) => {
       const c_cell = { cell_value: value, cid: ctx.state.cid, c_key: ctx.state.c_key, cell_index: ctx.state.index};
       store.dispatch(updateCell(c_cell));
+     // const sceneKey = _.findKey(ctx.props.matrices, ['matName', ctx.props.active]);
+      //const val = ctx.props.cell.vals;
       const val = ctx.props.cell.vals;
-
       const nc = { vals: val[ctx.state.cid], key: ctx.state.c_key };
       ctx.setState({value: value});
       fbupdatechannelinscene('Matrices', nc, ctx.state.s_key);
