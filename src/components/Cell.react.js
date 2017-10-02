@@ -104,4 +104,8 @@ class Cell extends Component {
   }
 }
 
+
+// another React Performance
+// import debugRender from 'react-render-debugger';
+
 export default connect(state => state)(Cell);

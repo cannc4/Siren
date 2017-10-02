@@ -62,13 +62,17 @@ class MenuBar extends Component {
     store.dispatch(chokeClick())
   }
 
-
   startTimer = event => {
-      store.dispatch(chokeClick());
+    store.dispatch(chokeClick());
   }
 
   stopTimer = event => {
+    if(event.shiftKey)
       store.dispatch(resetClick());
+    else {
+      store.dispatch(chokeClick());
+    }
+
   }
   ////////////////////////////// TIMER ENDS ////////////////////////////
 
@@ -122,12 +126,12 @@ class MenuBar extends Component {
       <div>
         <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
       </div>
-      <div style={{display: 'flex', flexDirection: 'row', height: 40}}>
+      <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
         {tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
         <div className={"TimerControls"}>
-          {!click.isActive && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-          {click.isActive && <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          {!click.isActive && <img src={require('../assets/play@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
+          {click.isActive && <img src={require('../assets/stop@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
           <p style={{paddingLeft: 15, paddingRight: 5}}>{'Rate: '}</p>
           <input className={'TimesInput'} value={times} onChange={changeTimes}/>
         </div>

@@ -3,6 +3,22 @@
   overflow: auto;
 }
 
+/*Disable views in specific cases*/
+.disabledView {
+  pointer-events: none;
+  filter: opacity(30%);
+}
+.enabledView {
+  pointer-events: auto;
+  filter: opacity(100%);
+}
+
+
+.renderLog {
+  background: #0a0 !important;
+}
+
+
 /*Log-in Button Animation*/
 @keyframes flusa {
   from {background-color: rgba(255,255,102,0.2);}
@@ -272,6 +288,10 @@ div.cm-s-_style.CodeMirror {
 
 /*------------ADD CHANNEL PANEL------------*/
 .AddChannel {
+  display: flex;
+  flex-direction: row;
+  padding: 1px;
+  border: 1px solid #000;
 }
 
 
@@ -302,7 +322,6 @@ div.cm-s-_style.CodeMirror {
 
 /*Individual Channels -- disabled style*/
 .ChannelItem.disabled {
-  /*border: 1px groove rgba(200, 200, 200, 0.75);*/
   opacity: 0.4;
 }
 

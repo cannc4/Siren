@@ -34,6 +34,11 @@ import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_style.css';
 import '../assets/_rule.js';
 
+// React Performance
+// import ReactPerfTool from 'react-perf-tool';
+// import Perf from 'react-addons-perf';
+// import 'react-perf-tool/lib/styles.css';
+
 // Grid Layout
 var ReactGridLayout = require('react-grid-layout');
 var WidthProvider = ReactGridLayout.WidthProvider;
@@ -277,6 +282,17 @@ addChannel() {
   })
 }
 
+submitAddChannel = event => {
+  event.persist();
+  const body = event.target.value
+  const ctx = this;
+  if(event.keyCode === 13 && event.ctrlKey && body){
+    event.target.className += " Executed";
+    setTimeout(function(){ _.replace(event.target.className, " Executed", ""); }, 500);
+    ctx.addChannel();
+  }
+}
+
 handleChannelName = event => {
   this.setState({c_name: event.target.value});
 }
@@ -307,7 +323,7 @@ onLayoutChangeChannel(items, layout, x) {
       var newVals = [];
       for(var a = 0 ; a < j.step; a++){
         if(j.vals[a]!==undefined){
-          newVals[a] = j.vals[a];          
+          newVals[a] = j.vals[a];
         }
         else
           newVals[a] = ''
@@ -419,7 +435,7 @@ addItem() {
       fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
       ctx.setState({sceneIndex: snd, storedGlobals: globals});
       ctx.setState({activeMatrix: matName});
-  
+
     }
     else {
       alert("Scene title should be unique and longer than 1 character");
@@ -455,10 +471,7 @@ renderScene(item, dbKey, i) {
     _.forEach(item.channels, function(ch, i){
       const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
       store.dispatch(bootCells(c_cell));
-      store.dispatch(stepChannel(ch)); 
-        console.log(ch);
-    
-    
+      store.dispatch(stepChannel(ch));
     });
   }
 
@@ -933,6 +946,17 @@ resetLayout() {
   store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
 }
 
+enableDisableClassname(defaultClass) {
+  const ctx = this;
+  const { activeMatrix } = ctx.state
+  if ( activeMatrix !== undefined && activeMatrix !== '' ) {
+    return defaultClass + ' enabledView';
+  }
+  else {
+    return defaultClass + ' disabledView';
+  }
+}
+
 renderLayouts(layoutItem, k) {
   const ctx = this;
 
@@ -940,6 +964,8 @@ renderLayouts(layoutItem, k) {
           pressed, storedGlobals, globalTransformations, globalCommands,
           globalChannels,c_type, c_name, c_step,
           c_transition,globalsq } = ctx.state
+
+  const layoutVisibility = (ctx.props.user.user.email ? ' enabledView' : ' disabledView')
 
   const items = ctx.props[ctx.state.modelName.toLowerCase()];
   const historyOptions = {
@@ -973,7 +999,7 @@ renderLayouts(layoutItem, k) {
   }
 
   if (layoutItem.i === 'matrix') {
-    return layoutItem.isVisible && (<div key={'matrix'} data-grid={getGridParameters('matrix')} >
+    return layoutItem.isVisible && (<div key={'matrix'} className={layoutVisibility} data-grid={getGridParameters('matrix')} >
       <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "matrix")}>X</span>
       </div>
@@ -987,7 +1013,7 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'scenes') {
-    return layoutItem.isVisible && (<div key={"scenes"} data-grid={getGridParameters('scenes')}>
+    return layoutItem.isVisible && (<div key={"scenes"} className={layoutVisibility} data-grid={getGridParameters('scenes')}>
       <div>
         <div className={"PanelHeader"}> ■ All Scenes
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
@@ -1010,17 +1036,17 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'patterns') {
-    return layoutItem.isVisible && (<div key={'patterns'} data-grid={getGridParameters('patterns')}>
+    return layoutItem.isVisible && (<div key={'patterns'} className={layoutVisibility} data-grid={getGridParameters('patterns')}>
       <div className={"PanelHeader"}> ■ Patterns in <span style={{fontWeight: 'bold'}}>{'"'+activeMatrix+'"'}</span>
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "patterns")}>X</span>
       </div>
-      <div className={"AllPatterns PanelAdjuster"} >
+      <div className={ctx.enableDisableClassname("AllPatterns PanelAdjuster")} >
         <Patterns active={activeMatrix}/>
       </div>
     </div>);
   }
   else if (layoutItem.i === 'pattern_history') {
-    return layoutItem.isVisible && (<div key={'pattern_history'} data-grid={getGridParameters('pattern_history')}>
+    return layoutItem.isVisible && (<div key={'pattern_history'} className={layoutVisibility} data-grid={getGridParameters('pattern_history')}>
       <div className={"PanelHeader"}> ■ Pattern History
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "pattern_history")}>X</span>
       </div>
@@ -1032,25 +1058,27 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'channel_add') {
-    return layoutItem.isVisible && (<div key={'channel_add'} data-grid={getGridParameters('channel_add')}>
+    return layoutItem.isVisible && (<div key={'channel_add'} className={layoutVisibility} data-grid={getGridParameters('channel_add')}>
       <div className={"PanelHeader"}> ■ Add Channel
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "channel_add")}>X</span>
       </div>
-      <div className={'AddChannel PanelAdjuster'}>
-        <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
-        <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} value={c_name} placeholder="Name "/>
-        <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} value={c_step} placeholder="Step "/>
-        <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} value={c_transition} placeholder="Transition (optional)"/>
+      <div className={ctx.enableDisableClassname('AddChannel PanelAdjuster')}>
+        <div>
+          <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} onKeyUp={ctx.submitAddChannel.bind(ctx)} value={c_name} placeholder="Name " />
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} onKeyUp={ctx.submitAddChannel.bind(ctx)} value={c_step} placeholder="Step "/>
+          <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} onKeyUp={ctx.submitAddChannel.bind(ctx)} value={c_transition} placeholder="Transition (optional)"/>
+        </div>
         <button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)}>Add</button>
       </div>
     </div>);
   }
   else if (layoutItem.i === 'globals') {
-    return (<div key={'globals'} data-grid={getGridParameters('globals')}>
+    return (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
       <div className={"PanelHeader"}> ■ Global Parameters
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "globals")}>X</span>
       </div>
-      <div className={"GlobalParams PanelAdjuster"}>
+      <div className={ctx.enableDisableClassname("GlobalParams PanelAdjuster")}>
         <p>Sequencer: ⌥ + Enter, ⇧ + Enter</p>
         <div className={'GlobalParamsInputs'}>
           <div className={'GlobalSequencer'}>
@@ -1091,7 +1119,7 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'console') {
-    return layoutItem.isVisible && (<div key={'console'} data-grid={getGridParameters('console')}>
+    return layoutItem.isVisible && (<div key={'console'} className={layoutVisibility} data-grid={getGridParameters('console')}>
       <div className={"PanelHeader"}> ■ Console
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "console")}>X</span>
       </div>
@@ -1102,7 +1130,7 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'debugconsole') {
-    return layoutItem.isVisible && (<div key={'debugconsole'} data-grid={getGridParameters('debugconsole')}>
+    return layoutItem.isVisible && (<div key={'debugconsole'} className={layoutVisibility} data-grid={getGridParameters('debugconsole')}>
       <div className={"PanelHeader"}> ■ Debug Console
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "debugconsole")}>X</span>
       </div>
@@ -1112,7 +1140,7 @@ renderLayouts(layoutItem, k) {
     </div>);
   }
   else if (layoutItem.i === 'setting') {
-    return layoutItem.isVisible && (<div key={'setting'} data-grid={getGridParameters('setting')}>
+    return layoutItem.isVisible && (<div key={'setting'} className={layoutVisibility} data-grid={getGridParameters('setting')}>
       <div className={"PanelHeader"}> ■ Config Settings
         <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "setting")}>X</span>
       </div>
@@ -1186,7 +1214,6 @@ render() {
       })}
     </SubMenu>
   </ContextMenu>
-
   </div>
   }
 }

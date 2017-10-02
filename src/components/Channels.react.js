@@ -180,7 +180,7 @@ class Channels extends Component {
         <div key={item.key+'_h'} className={"ChannelItemHeader " + item.type }>
           <div className={"ChannelItemHeaderButtons"}>
             <button className={"Button "+ ctx.props.solo.soloValue} onClick={soloChannel}>S</button>
-            <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
+            <button className={"Button "+ ctx.props.mute.muteValue} onClick={muteChannel}>M</button>
           </div>
           <p>{item.name}</p>
           <input ref={(input) => { this.nameInput = input; }}
@@ -188,8 +188,10 @@ class Channels extends Component {
             placeholder={" transition "}  value={item.transition}
             onChange={updateTransition}
             onClick={onClickFocus}/>
+          <div className={"ChannelItemHeaderButtons"}>
           <button className={"Button"} onClick={deleteChannel}>X</button>
-          <button className={"Button"+ ctx.props.mute.muteValue} onClick={muteChannel}>M</button>
+            <button className={"Button "+ ctx.state.loop.isLoop} onClick={loopChannel}>⭯</button>
+          </div>
         </div>
         {_.map(Array.apply(null, Array(step)), ctx.renderStep.bind(ctx, item))}
       </div>
@@ -197,4 +199,7 @@ class Channels extends Component {
   }
 }
 
-export default connect(state => state)(Channels);
+// another React Performance
+import debugRender from 'react-render-debugger';
+
+export default connect(state => state)(debugRender(Channels));

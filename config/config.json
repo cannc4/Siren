@@ -1,12 +1,1 @@
-{
-  "userpath": "/Users/canince",
-  "debug": true,
-  "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.2.1-x86_64/usr/bin/ghci-8.2.1",
-  "sclang": "/Applications/SuperCollider/SuperCollider.app/Contents/MacOS/sclang",
-  "scsynth": "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth",
-  "sclang_conf": "/Users/canince/Library/Application Support/SuperCollider/sclang_conf.yaml",
-  "port": 3001,
-  "path" : "/Users/canince/Documents/github/Siren/config/config.json",
-  "tidal_boot": "/Users/canince/Documents/github/Siren/config/tidal-boot-default.hs",
-  "scd_start": "/Users/canince/Documents/github/Siren/config/scd-start-default.scd"
-}
+{"debug":true,"ghcipath":"C:\\Program Files\\Haskell Platform\\8.0.1\\bin\\ghci.exe","path":"C:\\GitHub\\Siren\\config\\config.json","port":"3001","samples_path":"C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*","scd_start":"C:\\GitHub\\Siren\\config\\scd-start-default.scd","sclang":"C:\\Program Files\\SuperCollider-3.8.0\\sclang.exe","sclang_conf":"C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml","scsynth":"C:\\Program Files\\SuperCollider-3.8.0\\scsynth.exe","tidal_boot":"C:\\GitHub\\Siren\\config\\tidal-boot-default.hs","tidal_sync":"C:\\GitHub\\Siren\\sync\\sync.hs","userpath":"C:\\Users\\Mert"}

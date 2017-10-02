@@ -177,4 +177,6 @@ class Patterns extends Component {
   }
 }
 
-export default connect(state => state)(Patterns);
+import debugRender from 'react-render-debugger';
+export default connect(state => state)(debugRender(Patterns));
+// export default connect(state => state)(Patterns);

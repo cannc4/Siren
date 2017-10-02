@@ -4,10 +4,9 @@ const INITIAL_STATE = { isActive: false, pattern: [], config: false, debugconsol
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'FETCH_'+modelName:
-      const tidal = action.payload
+      const tidal = action.payload;
       return tidal;
     case 'CONFIG_'+modelName:
-      
       const k = state;
       k.config = action.payload;
       return k;
