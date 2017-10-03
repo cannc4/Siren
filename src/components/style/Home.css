@@ -13,7 +13,7 @@
   filter: opacity(100%);
 }
 
-
+/*Render Debuggin*/
 .renderLog {
   background: #0a0 !important;
 }
@@ -384,6 +384,17 @@ div.cm-s-_style.CodeMirror {
 }
 .GridItem.even {
   background: rgba(0,0,0,0.45);
+}
+.GridItem.odd::-webkit-input-placeholder { /* Chrome */
+  color: #777;
+  text-align: right;
+  vertical-align:bottom;
+  opacity: 0.8;
+  font-size: 1vh;
+  transition: opacity 250ms ease-in-out;
+}
+.GridItem.odd:focus::-webkit-input-placeholder {
+  opacity: 0.5;
 }
 
 /*Active Individual Grid Cells*/

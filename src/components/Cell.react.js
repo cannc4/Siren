@@ -91,6 +91,9 @@ class Cell extends Component {
     if(ctx.props.index % 2 === 0) {
       className += ' even'
     }
+    else {
+      className += ' odd'
+    }
     if(_.indexOf(ctx.props.cell.selectedCells, ctx.state.cid+"_"+ctx.state.index) >= 0) {
       className += ' selected';
     }
@@ -99,6 +102,7 @@ class Cell extends Component {
                 className={className + " draggableCancel"} type="text"
                 value={ctx.state.value}
                 onChange={setText}
+                placeholder={ctx.props.index % 2 === 1 ? _.toString(ctx.props.index+1) : ''}
                 onClick={tests}/>
       </div>
   }
