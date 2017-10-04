@@ -223,6 +223,15 @@ class Home extends Component {
       ctx.executionCss(event);
       ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
     }
+    else if(event.keyCode === 13 && event.shiftKey && body){
+      // TODO: Implement shift+enter for line execution
+      // /\n\r|\n|\r/
+      // console.log('consolesubmit: ', event.target.selectionStart,  event.target.selectionEnd, _.split(body, ''));
+      // console.log('begin: ', _.lastIndexOf(body, /\r?\n/g, event.target.selectionStart));
+      // console.log('end: ', _.indexOf(body, /\r?\n/g, event.target.selectionStart));
+      // console.log(body.substring(event.target.selectionStart, event.target.selectionEnd));
+      // ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
+    }
   }
 
   // Add Channel Inputs
