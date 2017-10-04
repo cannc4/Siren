@@ -167,28 +167,66 @@ const Siren = () => {
 
 
   const generateConfig = (b_config,reply) => {
-    var configfile = __dirname + '/../config/config.json'
-    fs.writeFile(configfile, JSON.stringify(b_config), function(err) {
+    var configfile = path.join(__dirname, '..', 'config', 'config.json');
+    fs.writeFile(configfile, JSON.stringify(b_config), { flag: 'wx' }, function(err) {
       if(err) {
-          return console.log(err);
-          //reply.status(500).json({configGen: false});
+          return console.error("home-made error: ", err);
       }
-      else{
-        console.log("Config file is saved");
-        reply.status(200).json({configGen: true});
-      }
+      console.log(" - Config file is saved");
+      reply.status(200).json({configGen: true});
+    });
+  }
+  const modifySCDStart = (b_config, reply) => {
+
+    var content,
+        samples_path,
+        scdstartfile = path.join(__dirname, '..', 'config', 'scd-start-default.scd');
+
+    // Windows
+    if (_.indexOf(config.samples_path, '\\') !== -1) {
+      samples_path = _.join(_.split(config.samples_path, /\/|\\/), "\\\\");
+    }
+    // UNIX
+    else {
+      samples_path = _.join(_.split(config.samples_path, /\/|\\/), path.sep);
+    }
+
+    console.log("PATH !! ", samples_path);
+
+    fs.readFile(scdstartfile, function read(err, data) {
+        if (err) return console.error("home-made error: ", err);
+        content = data;
+
+        // Replaces the samples_path from config
+        content = _.replace(content,
+                            /~dirt.loadSoundFiles\("[A-Za-z0-9\/\\*: ]*"\);/,
+                            "~dirt.loadSoundFiles(\""+samples_path+"\");");
+
+        // Write file back
+        fs.writeFile(scdstartfile, content, function(err) {
+          if(err) {
+              return console.error("home-made error: ", err);
+          }
+          console.log(" - scdstartfile saved");
+        });
     });
   }
 
   app.use("/", express.static(path.join(__dirname, "public")));
 
-  app.get('/tidal', (reply) => {
+  app.post('/tidal', (req, reply) => {
+    const {b_config} = req.body;
+    console.log(b_config);
+    generateConfig(b_config,reply);
+    modifySCDStart(b_config,reply);
+
     startTidal(reply);
   });
 
   app.post('/boot', (req, reply) => {
     const {b_config} = req.body;
     generateConfig(b_config,reply);
+    modifySCDStart(b_config,reply);
   });
 
   app.post('/pattern', (req, reply) => {

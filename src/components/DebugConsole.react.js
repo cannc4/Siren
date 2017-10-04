@@ -32,6 +32,6 @@ class DebugConsole extends Component {
   }
 }
 
-import debugRender from 'react-render-debugger';
-export default connect(state => state)(debugRender(DebugConsole));
-// export default connect(state => state)(DebugConsole);
+// import debugRender from 'react-render-debugger';
+// export default connect(state => state)(debugRender(DebugConsole));
+export default connect(state => state)(DebugConsole);

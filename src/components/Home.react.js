@@ -45,10 +45,10 @@ import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/dialog/dialog.js';
 import 'codemirror/addon/dialog/dialog.css';
-import '../assets/_style.css';
 import '../assets/_rule.js';
 
 // CSS Imports
+import './style/_style.css';
 import './style/Layout.css';
 import './style/Dropdown.css';
 import './style/Home.css';

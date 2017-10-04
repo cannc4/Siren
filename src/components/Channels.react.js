@@ -83,7 +83,7 @@ class Channels extends Component {
         if (stepvalue !== ""){
           store.dispatch(setExecution());
           store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
-            scenePatterns, click, ctx.props.globalparams ));
+            scenePatterns, click, ctx.props.globalparams, solo.isSolo));
           }
         }
         else{
@@ -200,6 +200,7 @@ class Channels extends Component {
 }
 
 // another React Performance
-import debugRender from 'react-render-debugger';
+// import debugRender from 'react-render-debugger';
+// export default connect(state => state)(debugRender(Channels));
 
-export default connect(state => state)(debugRender(Channels));
+export default connect(state => state)(Channels);

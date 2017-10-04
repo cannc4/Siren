@@ -79,7 +79,7 @@ class Settings extends Component {
   }
 }
 
-import debugRender from 'react-render-debugger';
-export default connect(state => state)(debugRender(Settings));
+// import debugRender from 'react-render-debugger';
+// export default connect(state => state)(debugRender(Settings));
 
-// export default connect(state => state)(Settings);
+export default connect(state => state)(Settings);
