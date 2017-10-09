@@ -5,8 +5,8 @@ import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene 
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-import '../assets/_style.css'
 import '../assets/_rule.js';
+import './style/_style.css'
 
 // Grid Layout
 var ReactGridLayout = require('react-grid-layout');
@@ -152,13 +152,24 @@ class Patterns extends Component {
       d.index = iterator++;
     })
 
+    const handleSubmitAddPattern = event => {
+      const body = event.target.value
+      const ctx = this;
+      if(event.keyCode === 13 && event.ctrlKey && body){
+        event.persist();
+        event.target.className += ' Executed';
+        _.delay(function(){ _.replace(event.target.className, ' Executed', ''); },
+                500);
+        ctx.addPattern();
+      }
+    }
     const changeName = ctx.changeName.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
 
     return (
       <div>
         <div className={'PatternItem PatternItemInputs'}>
-          <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
+          <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName} onKeyUp={handleSubmitAddPattern}/>
           <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
 
@@ -177,6 +188,6 @@ class Patterns extends Component {
   }
 }
 
-import debugRender from 'react-render-debugger';
-export default connect(state => state)(debugRender(Patterns));
-// export default connect(state => state)(Patterns);
+// import debugRender from 'react-render-debugger';
+// export default connect(state => state)(debugRender(Patterns));
+export default connect(state => state)(Patterns);

@@ -1,12 +1,10 @@
 # Updates
 
-###Version 0.4
-
+###Version 0.5
 
 ###Dynamic Channels
 
-In version 0.4, channels can be added dynamically using the channel menu. Any type of anything can be defined really. It just needs to go in `tidal-boot-default.hs` or compiled using `console`.
-
+In version 0.5, channels can be added dynamically using the channel menu. Channels has to be defined appropriatly in `tidal-boot-default.hs` or compiled using `console`.
 
 ### Global modifiers and Pattern History (Experimental)
 
@@ -15,20 +13,15 @@ sections can be recalled by creating presets. Pressing `Rec` button saves the ac
 These modifiers are applied to the patterns shown in the pattern history section. (i.e active patterns)
 Channels that you want to modify can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means that modifiers will be applied to all channels in the scene.
 
-###Haskell-based timer
-
-Timer is now in sync with Tidal's cycles and `rate` affects the overall gate time of the cycle.
-
-
 # Siren
 
 *Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
 
-**Note:** This is a beta release (*v0.3*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
+**Note:** This is a beta release (*v0.5*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
 
 ## Download
 
-In order to download a copy of the repository, either download repository `as a ZIP file` at [https://github.com/cannc4/sq](github.com/cannc4/sq), or use command line to `clone` repository.
+In order to download a copy of the repository, either download repository `as a ZIP file` at [https://github.com/cannc4/siren](github.com/cannc4/siren), or use command line to `clone` repository.
 
 ```
 git clone https://github.com/cannc4/Siren.git
@@ -73,23 +66,19 @@ then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser 
 
 ![](src/assets/readme_images/panel.png)
 - Login / Logout to the system using Github authentication
-- Boot `SuperCollider` by pressing the square button
+- Start `SuperCollider` by pressing the Start Server button
   + The button will turn into a circle once it successfully boots (check console for possible errors)
-- Start all timers with `play` button
+- Timers with `play` button
+
 
 ## Scenes
 | ![](src/assets/readme_images/scenes.png) | ![](src/assets/readme_images/channel.png) | ![](src/assets/readme_images/patterns.png) |   
 |---|---|---|
 | **Figure (a)** | **Figure (b)** | **Figure (c)** |
 
-### Duration and Timer
+### Channels
 
-Duration of each channel can be specified using the textarea next to channel number on top of the grid. Duration is the time it takes to reach the last step in seconds.
-
-`ctrl + enter` starts selected timer and `shift + enter` stops it.
-
-Alternatively, `ctrl + channel number` starts the desired channel and `shift + channel number` stops it.
-
+- Channels has transitions and 
 *examples in Figure (b)*
 - Channel number (i.e. `2`)
 - Channel duration (i.e. `20` seconds)

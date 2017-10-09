@@ -85,7 +85,19 @@ class MenuBar extends Component {
     }
     else{
       ctx.setState({tidalMenu:true});
-      const sc_exit = "\"" + ctx.props.user.user.config.scd_start + "\".load;";
+      const scdstartfile = ctx.props.user.user.config.scd_start
+      var scdstartfileAdjusted;
+
+      // Windows
+      if (_.indexOf(scdstartfile, '\\') !== -1) {
+        scdstartfileAdjusted = _.join(_.split(scdstartfile, /\/|\\/), "\\\\");
+      }
+      // UNIX
+      else {
+        scdstartfileAdjusted = _.join(_.split(scdstartfile, /\/|\\/), '/');
+      }
+
+      const sc_exit = "\"" + scdstartfileAdjusted + "\".load;";
       store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
     }
   }
