@@ -519,6 +519,12 @@ export const continousPattern = (server, pattern) => {
 	}
 }
 ////////////////// PARSER ENDS HERE //////////////////
+
+export const seekTimer = (step) => {
+	return dispatch => {
+		dispatch({ type: 'SEEK_CLICK', payload: step});
+	};
+}
 export const updateMatrix = (item) => {
 	//reducer
 	return dispatch => {

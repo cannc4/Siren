@@ -306,6 +306,29 @@ div.cm-s-_style.CodeMirror {
   overflow-x: auto;
 }
 
+.layout_matrix {
+  margin: 0 0 0 2px;
+}
+
+.MatrixScroll {
+  width: 40px;
+  height: calc(90%-120px);
+  border: 1px solid rgba(200, 200, 200, 0.65);
+  border-radius: 5px;
+  margin: 0 0 0 5px;
+
+  transform: translate(0px, 40px);
+  box-shadow: inset 0px 0px 50px rgba(0,0,0, 1);
+}
+.Timeline {
+  width: 100vw;
+  background: rgba(200, 200, 200, 0.15);
+  height: 40px;
+  cursor: ns-resize;
+  z-index: 500;
+  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.25);
+}
+
 /*Individual Channels*/
 .ChannelItem {
   padding-left: 2px;
@@ -316,7 +339,7 @@ div.cm-s-_style.CodeMirror {
   min-height: 35px;
   min-width: 100px;
   padding: 0;
-
+  z-index: 2;
   transition: opacity 100ms ease-in-out;
 }
 
@@ -400,6 +423,8 @@ div.cm-s-_style.CodeMirror {
 /*Active Individual Grid Cells*/
 .GridItem.active {
   background-color: rgba(200,200,90, 0.2);
+
+  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
 }
 
 /*Selected Grid Items*/

@@ -41,6 +41,7 @@
     "nwjs-builder-phoenix": "^1.9.0"
   },
   "dependencies": {
+    "7zip-bin-win": "^2.1.1",
     "axios": "^0.14.0",
     "body-parser": "^1.15.2",
     "debug": "^3.0.0",
@@ -63,6 +64,7 @@
     "react-codemirror": "^0.3.0",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^15.4.2",
+    "react-draggable": "^3.0.3",
     "react-dropdown": "^1.2.5",
     "react-flex-layout": "^0.9.6",
     "react-grid-layout": "^0.15.0",
@@ -87,7 +89,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "startnw": "run .",
-    "buildnw": "run --mac --x64 --mirror https://dl.nwjs.io/ .",
+    "buildnw": "run --win --x64 --mirror https://dl.nwjs.io/ .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
