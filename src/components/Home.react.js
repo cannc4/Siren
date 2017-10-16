@@ -24,6 +24,7 @@ import {sendScPattern,
         createCell,
         selectCell,
         bootCells,
+        seekTimer,
         updateLayout,
         forceUpdateLayout,
         stepChannel} from '../actions';
@@ -40,6 +41,7 @@ import DebugConsole from './DebugConsole.react';
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import { SelectableGroup } from 'react-selectable';
 import Dropdown from 'react-dropdown'
+import Draggable from 'react-draggable'
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
@@ -108,6 +110,7 @@ class Home extends Component {
       c_id: 0,
       c_transition: '',
       csize: 1,
+      controlledPosition: {x: 0, y: 40},
       soloArray: _.times(8, _.stubFalse),
       muteArray: _.times(8, _.stubFalse),
       manual_layout_trig: true,
@@ -116,7 +119,7 @@ class Home extends Component {
                        {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
                        {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
-                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
+                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: false},
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
                        {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
                        {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
@@ -172,13 +175,15 @@ class Home extends Component {
     const {csize} = ctx.state;
 
     if(prevProps !== ctx.props){
-    var temp=0;
-    var chans = ctx.props.channel;
-    _.each(chans, function(ch,k){
-      temp = csize * 10;
-    })
-    temp = temp.toString().match(/.{1}/g).join(' ');
-    ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns, csize : temp});
+      var temp=0;
+      var max_step = 0;
+      var chans = ctx.props.channel;
+      _.each(chans, function(ch,k){
+        temp = csize * 10;
+        max_step = _.max(ch.step, max_step);
+      })
+      temp = temp.toString().match(/.{1}/g).join(' ');
+      ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns, csize : temp});
     }
   }
 
@@ -592,12 +597,35 @@ class Home extends Component {
       const { activeMatrix } = ctx.state;
       const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
       const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
+      const onClick = event => {
+        const ctx = this;
+        var posX = event.nativeEvent.offsetX,
+            posY = event.nativeEvent.offsetY;
+
+        ctx.setState({controlledPosition: {x: 0, y: _.toInteger(posY/40)*40}});
+
+        store.dispatch(seekTimer(_.toInteger(posY/40)));
+      };
+      const onDragStop = (event, position) => {
+        const ctx = this;
+        const {x, y} = position;
+        console.log('drag stopped: ', position);
+        ctx.setState({controlledPosition: {x: 0 , y: _.toInteger(y/40)*40}});
+
+        store.dispatch(seekTimer(_.toInteger(y/40)));
+      }
       var items;
       if (!_.isUndefined(scene)) {
         items = scene.channels;
       }
       const items_length = _.isUndefined(items) ? 0 : items.length;
       return (<div className={"AllChannels draggableCancel"}>
+      {activeMatrix && <div className={'MatrixScroll'} onDoubleClick={onClick}>
+        <Draggable position={ctx.state.controlledPosition} axis="y" bounds="parent" grid={[40, 40]} onStop={onDragStop}>
+          <div className="Timeline">
+          </div>
+        </Draggable>
+      </div>}
       <ReactGridLayout
         className={"layout_matrix"}
         cols={36}
@@ -820,7 +848,7 @@ class Home extends Component {
       </div>);
     }
     else if (layoutItem.i === 'globals') {
-      return (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
+      return layoutItem.isVisible && (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
         <div className={"PanelHeader"}> ■ Global Parameters
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "globals")}>X</span>
         </div>

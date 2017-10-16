@@ -312,11 +312,13 @@ export function logout() {
 	}
 }
 
-export const initTidalConsole = (server) => {
+// boot and start tidal
+export const initTidalConsole = (server, expression) => {
 	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal', {'b_config' :expression})
 		.then((response) => {
 			dispatch({type: 'FETCH_TIDAL', payload: response.data })
+			dispatch({type: 'CONFIG_TIDAL', payload: response.data })
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -376,19 +378,15 @@ export const TidalTick = (server) => {
 }
 
 ////////////////// PARSER STARTS HERE //////////////////
-var math = require('mathjs');
-
-export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
-
+export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams, solo) => {
 	return dispatch => {
 		const getFinalPattern = () => {
 			console.log('INDEXJS ', channel, stepValue);
 
-			// channel
-			var k = channel.name;
+			var math = require('mathjs');
 
-			// pattern
-			var v = stepValue;
+			// channel, pattern
+			var k = channel.name, v = stepValue;
 
 			const getParameters = (v) => {
 				var param = [];
@@ -398,6 +396,34 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					if(p1 !== "") param.push(p1);
 				});
 				return param;
+			}
+			const processParameters = (parameters, newCommand, cellItem) => {
+				// For each parameter in parameter list
+				_.forEach(parameters, function(value, i) {
+					// Temporal parameter
+					if(value === 't'){
+						newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
+					}
+					// Random parameter
+					// TODO: FIX
+					else if(_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length-1)
+					{
+						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
+						console.log('cellItem ', cellItem[i]);
+						var bounds = _.split(cellItem[i], ',');
+						if(bounds[0] !== undefined && bounds[0] !== "" &&
+							 bounds[1] !== undefined && bounds[1] !== ""){
+								 bounds[0] = parseFloat(bounds[0]);
+								 bounds[1] = parseFloat(bounds[1]);
+								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), _.random(_.min(bounds), _.max(bounds)));
+						}
+					}
+					// Value parameter
+					else {
+						newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+					}
+				});
+				return newCommand
 			}
 
 			// pattern name
@@ -416,52 +442,27 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
 				var cellItem = _.slice(getParameters(v), 1);
 				newCommand = cmd.pattern;
-				// Construct the parameter list from command
-				const parameters = _.concat( _.split(cmd.params, ','),'t');
 
-				// For each parameter in parameter list
-				_.forEach(parameters, function(value, i) {
-					// Temporal parameter
-					if(value === 't'){
-						newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
-					}
-					// Random parameter
-					else if(_.indexOf(cellItem[i], '|') !== -1 )
-					{
-						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
-						console.log('cellItem ', cellItem[i]);
-						var bounds = _.split(cellItem[i], ',');
-						if(bounds[0] !== undefined && bounds[0] !== "" &&
-						bounds[1] !== undefined && bounds[1] !== ""){
-								 bounds[0] = parseFloat(bounds[0]);
-								 bounds[1] = parseFloat(bounds[1]);
-								 newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), _.random(_.min(bounds), _.max(bounds)));
-						}
-					}
-					// Value parameter
-					else {
-						newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
-					}
-				});
-
+				// Applies parameters
+				newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
 
 				// Math Parser
 				// eslint-disable-next-line
 				_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
 					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 				})
-				// solo or not (obsolete)
-				var	transitionHolder,
-						soloHolder;
 
-				if (channel.transition === "" || channel.transition === undefined ){
-					transitionHolder = " $ ";
-					soloHolder = k ;
-				}
-				else {
-					transitionHolder = " " + channel.transition + " $ ";
-					soloHolder = "t"+ (channel.cid +1);
-				}
+				// Prepare transition and solo
+				var	transitionHolder, soloHolder;
+				if (channel.transition === "" || channel.transition === undefined )
+					transitionHolder = k + " $ ";
+				else
+					transitionHolder = "t"+ (channel.cid +1) + " " + channel.transition + " $ ";
+
+				if (solo === true )
+					soloHolder = "solo $ ";
+				else
+					soloHolder = "";
 
 				var pattern;
 				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
@@ -471,6 +472,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					pattern = soloHolder  + transitionHolder + newCommand;
 				}
 
+				// Apply global parameters
 				globalparams.storedPatterns[channel.cid] = pattern;
 				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
 					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
@@ -517,6 +519,12 @@ export const continousPattern = (server, pattern) => {
 	}
 }
 ////////////////// PARSER ENDS HERE //////////////////
+
+export const seekTimer = (step) => {
+	return dispatch => {
+		dispatch({ type: 'SEEK_CLICK', payload: step});
+	};
+}
 export const updateMatrix = (item) => {
 	//reducer
 	return dispatch => {

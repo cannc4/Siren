@@ -136,7 +136,7 @@ class MenuBar extends Component {
 
     return (<div className='MenuBar boxshadow'>
       <div>
-        <h1 className={"Logo"}>siren<span className={'Version'}>{'('+version+')'}</span></h1>
+      {<img src={require('../assets/logo.png')}  height={32} width={32}/> }
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}

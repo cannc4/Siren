@@ -1,6 +1,5 @@
 node_modules/
 deps/
-config/config.json
 dist/
 build/
 server/public/
