@@ -1,5 +1,5 @@
 # Siren
-*Siren*, is a tracker interface that embodies abstractions where programming is realized as the medium for modular(?) pattern sequencing. It is based on a hierarchical structure that consists of scenes and channels. Separate channels have independent patterns; a complete song consists of a master list of repeated patterns. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns. 
+*Siren*, is a tracker interface that embodies abstractions where programming is realized as the medium for pattern sequencing in a modular fashion. It is based on a hierarchical structure that consists of scenes and channels. Separate channels have independent patterns; a complete song consists of a master list of repeated patterns. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns. 
 
 
 Supported programming languages : 
@@ -32,11 +32,10 @@ npm i
 ```
 
 
-
-
-
 ```
-TEMP: In order to bind software dependencies, edit full paths in config/config.json according to your file system formatting and save the file. Copy paste your startup files to scd-start-default.scd and tidal-boot-default.hs into config folder or set the appropriate paths in config.json
+In order to bind software dependencies, edit full paths in config/config.json according to your file system formatting and save the file. Copy paste your startup files to scd-start-default.scd and tidal-boot-default.hs into config folder or set the appropriate paths in config.json
+
+Note that it's possible to target required paths using the `Settings` module in the interface.
 ```
 
 
@@ -60,16 +59,17 @@ then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser
 
 ### Scenes
 
-Each scene comprises of unique channels, global modifiers and patterns.
-*example in Figure (a)*- Textbox for scene name (i.e. `docs`) - `Update`/`Add` button- `Clear Matrix` button
+Scenes are the core of `Siren` and a scene serves as a framework to the composition. Each scene comprises of unique channels, global modifiers and patterns. 
+
+*example in Figure (a)*- Textbox for scene name - `Update`/`Add` button- `Clear Matrix` button
 
 
 ### Sequencer (aka Matrix) 
 #### Channels
+
 Channels can be added using `Add Channel` layout and consists of `type`, `name`, `step` and `transition` parameters. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
 
 You can add channels using next module:
-
 
 ### Add Channel
 Please note that channels has to be defined appropriately in `tidal-boot-default.hs` or compiled using `console`.
@@ -101,7 +101,6 @@ Tidal patterns are stored in the `dictionary` on the right hand side of the inte
 Mathematical expressions can be used in the patterns in the dictionary, parser evaluates the expressions when enclosed with `&` symbol.*example in Figure (c)*- Math expression enclosed by `& ... &` (i.e. in the body of `jvv`: ```... [~ f3 &`t`%3 &] ~ ...```)
 
 
-
 #### Value Parameters
 Any character sequence inside Siren pattern can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want.
 
@@ -116,8 +115,6 @@ or
 ### Pattern History
 This module stores the successfully compiled patterns to keep track of the running sequences.
 
-### Scenes
-
 ### Console
 This module serves as a CLI(Command-Line-Interface) to Haskell and SuperCollider 
 
@@ -131,13 +128,7 @@ In this module, it’s possible to set various settings of Siren such as startup
 ### Debug Console
 This module serves as a debug console for GHC. 
 
-
-
-
-
-
 ##Notes
-- Pause timers for a few seconds if you see too much flood in GHC terminal. (stack gets full)- `npm run siren` starts up the server - it's not required if you want to refresh the interface however you need to manually close node and restart it if `scsynth` crashes
 
 ## Known Bugs
 

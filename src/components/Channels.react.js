@@ -6,7 +6,7 @@ import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         sendPatterns, consoleSubmit, setExecution } from '../actions';
+         sendPatterns, consoleSubmit, setExecution,sendScPattern } from '../actions';
 
 class Channels extends Component {
   constructor(props) {
@@ -80,11 +80,18 @@ class Channels extends Component {
         if (!_.isUndefined(runNo)) {
           stepvalue = channel.vals[runNo];
         }
-        if (stepvalue !== ""){
-          store.dispatch(setExecution());
-          store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
-            scenePatterns, click, ctx.props.globalparams, solo.isSolo));
+        if (channel.type !== "SuperCollider"){
+          if (stepvalue !== ""){
+            store.dispatch(setExecution());
+            store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
+              scenePatterns, click, ctx.props.globalparams, solo.isSolo));
+            }
           }
+          else{
+            store.dispatch(sendScPattern('localhost:3001', stepvalue));
+          }
+
+        
         }
         else{
           store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));

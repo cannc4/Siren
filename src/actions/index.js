@@ -460,7 +460,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					transitionHolder = "t"+ (channel.cid +1) + " " + channel.transition + " $ ";
 
 				if (solo === true )
-					soloHolder = "solo $ ";
+					soloHolder = "$ solo";
 				else
 					soloHolder = "";
 

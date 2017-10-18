@@ -75,7 +75,7 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 // import 'react-perf-tool/lib/styles.css';
 
 // Channel Types
-const channelOptions = ['SCSynth', 'Visual', 'MIDI']
+const channelOptions = ['Tidal', 'Visual', 'Tidal-MIDI', 'SuperCollider']
 
 class Home extends Component {
   constructor(props) {
@@ -119,7 +119,7 @@ class Home extends Component {
                        {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
                        {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
-                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: false},
+                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
                        {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
                        {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
