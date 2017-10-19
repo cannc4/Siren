@@ -172,18 +172,9 @@ class Home extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
-    const {csize} = ctx.state;
 
     if(prevProps !== ctx.props){
-      var temp=0;
-      var max_step = 0;
-      var chans = ctx.props.channel;
-      _.each(chans, function(ch,k){
-        temp = csize * 10;
-        max_step = _.max(ch.step, max_step);
-      })
-      temp = temp.toString().match(/.{1}/g).join(' ');
-      ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns, csize : temp});
+      ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns});
     }
   }
 
@@ -586,7 +577,7 @@ class Home extends Component {
           ctx.setState({soloArray: temp});
         }}
         muteOnClick={function(cid) {
-          var temp = _.times(channelLen, _.stubFalse);
+          var temp = ctx.state.muteArray;
           temp[cid] = !ctx.state.muteArray[cid];
           ctx.setState({muteArray: temp});
         }}/>
@@ -614,13 +605,21 @@ class Home extends Component {
 
         store.dispatch(seekTimer(_.toInteger(y/40)));
       }
+
       var items;
       if (!_.isUndefined(scene)) {
         items = scene.channels;
       }
       const items_length = _.isUndefined(items) ? 0 : items.length;
+
+      var max_step = 0;
+      _.each(ctx.props.channel, function(ch,k){
+        if(ch.scene === activeMatrix)
+          max_step = _.max([ch.step, max_step]);
+      });
+
       return (<div className={"AllChannels draggableCancel"}>
-      {activeMatrix && <div className={'MatrixScroll'} onDoubleClick={onClick}>
+      {activeMatrix && <div className={'MatrixScroll'} style={{height: (max_step)*40}} onDoubleClick={onClick}>
         <Draggable position={ctx.state.controlledPosition} axis="y" bounds="parent" grid={[40, 40]} onStop={onDragStop}>
           <div className="Timeline">
           </div>

@@ -8,15 +8,11 @@
   right: 0;
   z-index: 1;
   border-bottom: 1px solid #333;
-  padding: 10px 30px 6px 0;
+  padding: 10px 30px 6px 15px;
 }
 
 .Logo {
   margin-bottom: 0px !important;
-  font-family: 'Inconsolata';
-  font-weight: lighter;
-  padding-left: 20px;
-  background: rgba(200,200,200, 0.15);
   color: #bbb;
 }
 .Version {

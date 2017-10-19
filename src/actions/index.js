@@ -378,7 +378,7 @@ export const TidalTick = (server) => {
 }
 
 ////////////////// PARSER STARTS HERE //////////////////
-export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams, solo) => {
+export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 	return dispatch => {
 		const getFinalPattern = () => {
 			console.log('INDEXJS ', channel, stepValue);
@@ -409,7 +409,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					else if(_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length-1)
 					{
 						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
-						console.log('cellItem ', cellItem[i]);
 						var bounds = _.split(cellItem[i], ',');
 						if(bounds[0] !== undefined && bounds[0] !== "" &&
 							 bounds[1] !== undefined && bounds[1] !== ""){
@@ -453,37 +452,36 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				})
 
 				// Prepare transition and solo
-				var	transitionHolder, soloHolder;
+				var	transitionHolder;
 				if (channel.transition === "" || channel.transition === undefined )
 					transitionHolder = k + " $ ";
 				else
 					transitionHolder = "t"+ (channel.cid +1) + " " + channel.transition + " $ ";
 
-				if (solo === true )
-					soloHolder = "$ solo";
-				else
-					soloHolder = "";
-
 				var pattern;
+				if (channel.type === "SuperCollider") {
+					sendScPattern('localhost:3001', newCommand);
+				}
+
 				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
 					pattern = k + " $ " + newCommand;
 				}
 				else {
-					pattern = soloHolder  + transitionHolder + newCommand;
+					pattern = transitionHolder + newCommand;
 				}
 
 				// Apply global parameters
 				globalparams.storedPatterns[channel.cid] = pattern;
 				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
 					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-						pattern = soloHolder + transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+						pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
 					}
 					else {
-						pattern = soloHolder + transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+						pattern = transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
 					}
 				}
 				else {
-					pattern = soloHolder + transitionHolder + newCommand ;
+					pattern = transitionHolder + newCommand ;
 				}
 
 				console.log('actually sending it: ', pattern);

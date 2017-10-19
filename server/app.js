@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import config from '../config/config.json'
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
@@ -14,14 +13,13 @@ var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
 var jsonfile = require('jsonfile')
 var dcon = socketIo.listen(3004);
 var dconSC = socketIo.listen(3005);
-class REPL {
 
+class REPL {
   hush() {
     this.tidalSendExpression('hush');
   }
 
-  doSpawn() {
-
+  doSpawn(config) {
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
      this.repl.stderr.on('data', (data) => {
        console.error(data.toString('utf8'));
@@ -32,8 +30,7 @@ class REPL {
      console.error(data)});
      }
 
-  initTidal() {
-
+  initTidal(config) {
     this.myPatterns = { values: [] };
     const patterns = fs.readFileSync(config.tidal_boot).toString().split('\n');
     for (let i = 0; i < patterns.length; i++) {
@@ -41,12 +38,17 @@ class REPL {
     }
   }
 
-  initSC() {
+  initSC(config) {
     const self = this;
    // console.log("INITSC", req);
     supercolliderjs.resolveOptions(config.path).then((options) => {
+      options.sclang = config.sclang;
+      options.scsynth = config.scsynth;
+      options.sclang_conf = config.sclang_conf;
+
       const SCLang = supercolliderjs.sclang.SCLang;
       const lang = new SCLang(options);
+      console.log(' -- initSC: ', config.path, '\n', options);
       lang.boot().then((sclang) => {
         self.sc = lang;
         setTimeout(function(){
@@ -56,6 +58,13 @@ class REPL {
       });
     });
   }
+
+  start(config) {
+    this.doSpawn(config);
+    this.initTidal(config);
+    this.initSC(config);
+  }
+
   stdinWrite(pattern) {
     this.repl.stdin.write(pattern);
   }
@@ -84,11 +93,7 @@ class REPL {
     });
   }
 
-  start() {
-    this.doSpawn();
-    this.initTidal();
-    this.initSC();
-  }
+
 }
 
 const TidalData = {
@@ -103,7 +108,6 @@ const Siren = () => {
   var UDPserver = dgram.createSocket("udp4");
 
   var tick = socketIo.listen(3003);
-
 
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
@@ -130,14 +134,14 @@ const Siren = () => {
     next();
   });
 
-  const startTidal = (reply) => {
+  const startTidal = (b_config, reply) => {
     if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed === false) {
       reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     } else {
       if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed) {
         TidalData.TidalConsole = new REPL();
       }
-      TidalData.TidalConsole.start();
+      TidalData.TidalConsole.start(b_config);
       TidalData.TidalConsole.myPatterns.values.push('initiate tidal');
       reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     }
@@ -165,50 +169,14 @@ const Siren = () => {
     reply.status(200).send(expr);
   }
 
-
-  const generateConfig = (b_config,reply) => {
+  const generateConfig = (config,reply) => {
     var configfile = path.join(__dirname, '..', 'config', 'config.json');
-    fs.writeFile(configfile, JSON.stringify(b_config), { flag: 'wx' }, function(err) {
+    console.log(' - configfile: ', configfile);
+    fs.writeFile(configfile, JSON.stringify(config), { flag: 'w' }, function(err) {
       if(err) {
-          return console.error("home-made error: ", err);
+          return console.error("home-made write error: ", err);
       }
       console.log(" - Config file is saved");
-      reply.status(200).json({configGen: true});
-    });
-  }
-  const modifySCDStart = (b_config, reply) => {
-
-    var content,
-        samples_path,
-        scdstartfile = path.join(__dirname, '..', 'config', 'scd-start-default.scd');
-
-    // Windows
-    if (_.indexOf(config.samples_path, '\\') !== -1) {
-      samples_path = _.join(_.split(config.samples_path, /\/|\\/), "\\\\");
-    }
-    // UNIX
-    else {
-      samples_path = _.join(_.split(config.samples_path, /\/|\\/), path.sep);
-    }
-
-    console.log("PATH !! ", samples_path);
-
-    fs.readFile(scdstartfile, function read(err, data) {
-        if (err) return console.error("home-made error: ", err);
-        content = data;
-
-        // Replaces the samples_path from config
-        content = _.replace(content,
-                            /~dirt.loadSoundFiles\("[A-Za-z0-9\/\\*: ]*"\);/,
-                            "~dirt.loadSoundFiles(\""+samples_path+"\");");
-
-        // Write file back
-        fs.writeFile(scdstartfile, content, function(err) {
-          if(err) {
-              return console.error("home-made error: ", err);
-          }
-          console.log(" - scdstartfile saved");
-        });
     });
   }
 
@@ -218,15 +186,15 @@ const Siren = () => {
     const {b_config} = req.body;
     console.log(b_config);
     generateConfig(b_config,reply);
-    modifySCDStart(b_config,reply);
+    // modifySCDStart(b_config,reply);
 
-    startTidal(reply);
+    startTidal(b_config, reply);
   });
 
   app.post('/boot', (req, reply) => {
     const {b_config} = req.body;
     generateConfig(b_config,reply);
-    modifySCDStart(b_config,reply);
+    // modifySCDStart(b_config,reply);
   });
 
   app.post('/pattern', (req, reply) => {
@@ -250,8 +218,8 @@ const Siren = () => {
 
   app.get('*', errorHandler);
 
-  app.listen(config.port, () => {
-    console.log(`Server started at http://localhost:${config.port}`);
+  app.listen(3001, () => {
+    console.log(`Server started at http://localhost:${3001}`);
   });
 
 }

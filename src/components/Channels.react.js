@@ -55,43 +55,40 @@ class Channels extends Component {
     const { loop } = ctx.state;
     const channel = ctx.props.item;
 
-    if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) ) {
-      if (!solo.isSolo || (solo.isSolo && solo.soloValue)) {
-        if (!mute.isMute || !mute.muteValue) {
-        // Find the dictionary definitions of functions
-        var scenePatterns;
-        _.each(ctx.props.matrices, function(d){
-          if(d.matName === ctx.props.active){
-            scenePatterns = d.patterns;
+    if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) )
+    {
+      if (!solo.isSolo || (solo.isSolo && solo.soloValue))
+      {
+        if (!mute.isMute || !mute.muteValue)
+        {
+          // Find the dictionary definitions of functions
+          var scenePatterns;
+          _.each(ctx.props.matrices, function(d){
+            if(d.matName === ctx.props.active){
+              scenePatterns = d.patterns;
+            }
+          })
+
+          var runNo = _.floor(click.current % channel.step);
+          if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
+            runNo = channel.step-1;
+            store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
+            ctx.setState({loop: {isLoop: loop.isLoop,
+                                 pauseTurn: loop.pauseTurn,
+                                 hasSilenced: true}});
+            return;
           }
-        })
 
-        var runNo = _.floor(click.current % channel.step);
-        if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
-          runNo = channel.step-1;
-          store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
-          ctx.setState({loop: {isLoop: loop.isLoop,
-                               pauseTurn: loop.pauseTurn,
-                               hasSilenced: true}});
-          return;
-        }
+          var stepvalue = "";
+          if (!_.isUndefined(runNo)) {
+            stepvalue = channel.vals[runNo];
+          }
 
-        var stepvalue = "";
-        if (!_.isUndefined(runNo)) {
-          stepvalue = channel.vals[runNo];
-        }
-        if (channel.type !== "SuperCollider"){
           if (stepvalue !== ""){
             store.dispatch(setExecution());
             store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
-              scenePatterns, click, ctx.props.globalparams, solo.isSolo));
-            }
+              scenePatterns, click, ctx.props.globalparams));
           }
-          else{
-            store.dispatch(sendScPattern('localhost:3001', stepvalue));
-          }
-
-        
         }
         else{
           store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));

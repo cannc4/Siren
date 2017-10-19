@@ -81,7 +81,7 @@ class MenuBar extends Component {
     const { tidalServerLink, boot } = ctx.state;
     if(boot === 0){
       ctx.setState({tidalMenu:true , boot: 1});
-      store.dispatch(initTidalConsole(tidalServerLink));
+      store.dispatch(initTidalConsole(tidalServerLink, ctx.props.user.user.config));
     }
     else{
       ctx.setState({tidalMenu:true});
@@ -135,8 +135,8 @@ class MenuBar extends Component {
     }
 
     return (<div className='MenuBar boxshadow'>
-      <div>
-      {<img src={require('../assets/logo.png')}  height={32} width={32}/> }
+      <div className={'Logo'}>
+      {<img src={require('../assets/logo.svg')}  height={40} width={40}/> }
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
