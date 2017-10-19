@@ -75,7 +75,7 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 // import 'react-perf-tool/lib/styles.css';
 
 // Channel Types
-const channelOptions = ['SCSynth', 'Visual', 'MIDI']
+const channelOptions = ['Tidal', 'Visual', 'Tidal-MIDI', 'SuperCollider']
 
 class Home extends Component {
   constructor(props) {
@@ -848,7 +848,7 @@ class Home extends Component {
       </div>);
     }
     else if (layoutItem.i === 'globals') {
-      return (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
+      return layoutItem.isVisible && (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
         <div className={"PanelHeader"}> ■ Global Parameters
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "globals")}>X</span>
         </div>
