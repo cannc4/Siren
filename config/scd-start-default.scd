@@ -6,7 +6,7 @@
 
   s.waitForBoot {
     ~dirt = SuperDirt(2, s);
-    ~dirt.loadSoundFiles("{samples_path}");
+    ~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*");
     "SUPERDIRT LOADED".postln;
 
     s.sync;

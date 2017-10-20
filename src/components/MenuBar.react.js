@@ -28,7 +28,8 @@ class MenuBar extends Component {
       tidalServerLink: 'localhost:3001',
       times: 2,
       tidalMenu: false,
-      boot: 0
+      boot: 0,
+      serversListening: false
     }
   }
   // shouldComponentUpdate = (nextProps, nextState) => {
@@ -59,9 +60,15 @@ class MenuBar extends Component {
 
     socket.on('connect', (reason) => {
       console.log("connect: ", reason);
+      ctx.setState({serversListening: true});
+    });
+    socket.on('reconnect', (reason) => {
+      console.log("reconnect: ", reason);
+      ctx.setState({serversListening: true});
     });
     socket.on('disconnect', (reason) => {
       console.log("disconnect: ", reason);
+      ctx.setState({serversListening: false, boot: 0, tidalMenu: false});
     });
 
     keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
@@ -105,11 +112,15 @@ class MenuBar extends Component {
     const ctx=this;
     const { tidalServerLink, boot } = ctx.state;
     if(boot === 0){
-      ctx.setState({tidalMenu:true , boot: 1});
+      _.delay(function() {
+        ctx.setState({tidalMenu:true , boot: 1});
+      }, 600)
       store.dispatch(initTidalConsole(tidalServerLink, ctx.props.user.user.config));
     }
     else{
-      ctx.setState({tidalMenu:true});
+      _.delay(function() {
+        ctx.setState({tidalMenu:true});
+      }, 600)
       const scdstartfile = ctx.props.user.user.config.scd_start
       var scdstartfileAdjusted;
 
@@ -138,7 +149,7 @@ class MenuBar extends Component {
   render() {
     const ctx = this;
 
-    const { times, tidalMenu } = ctx.state;
+    const { times, tidalMenu, serversListening } = ctx.state;
     const { click } = ctx.props;
     // const { version } = ctx.props.menu;
 
@@ -159,13 +170,26 @@ class MenuBar extends Component {
       store.dispatch(logout())
     }
 
+    // needs improvement
+    var serverStatusClass = 'ServerStatus';
+    if (!serversListening) {
+      serverStatusClass += ' inactive';
+    }
+    else if (serversListening && !tidalMenu) {
+      serverStatusClass += ' ready';
+    }
+    else if (serversListening && tidalMenu) {
+      serverStatusClass += ' running';
+    }
+
     return (<div className='MenuBar boxshadow'>
       <div className={'Logo'}>
-      {<img role="presentation" src={require('../assets/logo.svg')}  height={40} width={40}/> }
+      {<img role="presentation" src={require('../assets/logo.svg')}  height={35} width={35}/> }
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
-        {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
-        {tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
+        <div className={serverStatusClass}></div>
+        {!tidalMenu && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
+        {tidalMenu && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView') } onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
         <div className={"TimerControls"}>
           {!click.isActive && <img src={require('../assets/play@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
           {click.isActive && <img src={require('../assets/stop@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
