@@ -6,7 +6,7 @@ import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         sendPatterns, consoleSubmit, setExecution,sendScPattern } from '../actions';
+         sendPatterns, consoleSubmit, setExecution } from '../actions';
 
 class Channels extends Component {
   constructor(props) {

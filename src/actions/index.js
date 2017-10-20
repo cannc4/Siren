@@ -324,27 +324,6 @@ export const initTidalConsole = (server, expression) => {
 		});
 	}
 }
-export const bootSystem = (server, expression) => {
-	return dispatch => {
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/boot', {'b_config' :expression})
-		.then((response) => {
-			dispatch({type: 'CONFIG_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
-export const dCon = ( expression) => {
-	return dispatch => {
-			dispatch({type: 'DEBUG_TIDAL', payload: expression })
-		};
-}
-//SC BINDING
-// export const dConSC = ( expression) => {
-// 	return dispatch => {
-// 			dispatch({type: 'DEBUG_SCCOMMAND', payload: expression })
-// 		};
-// }
 export const killTidalConsole = (server, expression) => {
 	return dispatch => {
 		if (!expression) return;
@@ -366,6 +345,18 @@ export const exitSC = (server) => {
 	}
 }
 
+export const dCon = ( expression) => {
+	return dispatch => {
+			dispatch({type: 'DEBUG_TIDAL', payload: expression })
+		};
+}
+//SC BINDING
+// export const dConSC = ( expression) => {
+// 	return dispatch => {
+// 			dispatch({type: 'DEBUG_SCCOMMAND', payload: expression })
+// 		};
+// }
+
 export const TidalTick = (server) => {
   return dispatch => {
     axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidaltick')
@@ -377,7 +368,80 @@ export const TidalTick = (server) => {
   }
 }
 
-////////////////// PARSER STARTS HERE //////////////////
+export const setExecution = () => {
+	return dispatch => {
+		dispatch({ type: 'EXECUTION_CLICK' })
+	};
+}
+
+export const continousPattern = (server, pattern) => {
+	return dispatch => {
+		const x = pattern;
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x] })
+		.then((response) => {
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+
+export const seekTimer = (step) => {
+	return dispatch => {
+		dispatch({ type: 'SEEK_CLICK', payload: step});
+	};
+}
+export const updateMatrix = (item) => {
+	//reducer
+	return dispatch => {
+		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
+	};
+}
+export const selectCell = (selectedcell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'SELECT_CELL', payload: selectedcell });
+    };
+}
+export const updateCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'REFINE_CELL', payload: cell });
+    };
+}
+export const bootCells = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'BOOT_CELL', payload: cell });
+    };
+}
+export const createCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'CREATE_CELL', payload: cell });
+    };
+}
+export const sendScPattern = (server, expression) => {
+	return dispatch => {
+		if (!expression) return;
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
+		.then((response) => {
+			dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
+		}).catch(function (error) {
+		});
+	}
+}
+
+export const consoleSubmit = (server, expression) => {
+	return dispatch => {
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
+		.then((response) => {
+			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+
 export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 	return dispatch => {
 		const getFinalPattern = () => {
@@ -405,7 +469,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 						newCommand = _.replace(newCommand, new RegExp("`t`", "g"), click.current);
 					}
 					// Random parameter
-					// TODO: FIX
 					else if(_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length-1)
 					{
 						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
@@ -493,87 +556,12 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
 			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
-
 		}).catch(function (error) {
 			console.error(error);
 		});
 	}
 }
 
-export const setExecution = () => {
-	return dispatch => {
-		dispatch({ type: 'EXECUTION_CLICK' })
-	};
-}
-
-export const continousPattern = (server, pattern) => {
-	return dispatch => {
-		const x = pattern;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x] })
-		.then((response) => {
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
-////////////////// PARSER ENDS HERE //////////////////
-
-export const seekTimer = (step) => {
-	return dispatch => {
-		dispatch({ type: 'SEEK_CLICK', payload: step});
-	};
-}
-export const updateMatrix = (item) => {
-	//reducer
-	return dispatch => {
-		dispatch({ type: 'UPDATE_CHANNEL', payload: item});
-	};
-}
-export const selectCell = (selectedcell) => {
-    //reducer
-    return dispatch => {
-        dispatch({ type: 'SELECT_CELL', payload: selectedcell });
-    };
-}
-export const updateCell = (cell) => {
-    //reducer
-    return dispatch => {
-        dispatch({ type: 'REFINE_CELL', payload: cell });
-    };
-}
-export const bootCells = (cell) => {
-    //reducer
-    return dispatch => {
-        dispatch({ type: 'BOOT_CELL', payload: cell });
-    };
-}
-export const createCell = (cell) => {
-    //reducer
-    return dispatch => {
-        dispatch({ type: 'CREATE_CELL', payload: cell });
-    };
-}
-export const sendScPattern = (server, expression) => {
-	return dispatch => {
-		if (!expression) return;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
-		.then((response) => {
-			dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
-		}).catch(function (error) {
-		});
-	}
-}
-
-export const consoleSubmit = (server, expression) => {
-	return dispatch => {
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [expression] })
-		.then((response) => {
-			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
 export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
 	return dispatch => {
 		const getParameters = (v) => {

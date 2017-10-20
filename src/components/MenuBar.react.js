@@ -115,7 +115,7 @@ class MenuBar extends Component {
 
     const { times, tidalMenu } = ctx.state;
     const { click } = ctx.props;
-    const { version } = ctx.props.menu;
+    // const { version } = ctx.props.menu;
 
     const changeTimes = ({target: {value}}) => {
       ctx.setState({times : value});
@@ -136,7 +136,7 @@ class MenuBar extends Component {
 
     return (<div className='MenuBar boxshadow'>
       <div className={'Logo'}>
-      {<img src={require('../assets/logo.svg')}  height={40} width={40}/> }
+      {<img role="presentation" src={require('../assets/logo.svg')}  height={40} width={40}/> }
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         {!tidalMenu && <button className={'Button draggableCancel'} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
