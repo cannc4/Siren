@@ -435,7 +435,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 			// CPS channel handling
 			if( k === 'cps'){
 				newCommand = cellName;
-				return [k + " " + newCommand, "sendOSC d_OSC $ "] ;
+				return [ k + " " + newCommand ];
 			}
 			// other channels
 			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
@@ -485,7 +485,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				}
 
 				console.log('actually sending it: ', pattern);
-				return [pattern, "sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+cellItem+"\"]"] ;
+				return [ pattern ];
 			}
 			else
 				return false;
@@ -509,7 +509,7 @@ export const setExecution = () => {
 export const continousPattern = (server, pattern) => {
 	return dispatch => {
 		const x = pattern;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x,"sendOSC d_OSC $ Message \"tree\" [string \"command\", string \""+6+"\"]"] })
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': [x] })
 		.then((response) => {
 		}).catch(function (error) {
 			console.error(error);

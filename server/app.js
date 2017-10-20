@@ -5,12 +5,15 @@ import { spawn } from 'child_process';
 import errorHandler from './errorHandler';
 import express from 'express';
 import bodyParser from 'body-parser';
+
 const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
+
 var exec = require('child_process').exec;
 var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
 var jsonfile = require('jsonfile')
+
 var dcon = socketIo.listen(3004);
 var dconSC = socketIo.listen(3005);
 
@@ -21,14 +24,16 @@ class REPL {
 
   doSpawn(config) {
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
-     this.repl.stderr.on('data', (data) => {
-       console.error(data.toString('utf8'));
-       dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
-     });
-     this.repl.stdout.on('data', data => {
-     dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
-     console.error(data)});
-     }
+    this.repl.stderr.on('data', (data) => {
+      console.error(data.toString('utf8'));
+      dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
+    });
+    this.repl.stdout.on('data', data => {
+      console.error(data)
+      dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
+    });
+    console.log(" ## GHC Spawned");
+  }
 
   initTidal(config) {
     this.myPatterns = { values: [] };
@@ -36,6 +41,7 @@ class REPL {
     for (let i = 0; i < patterns.length; i++) {
       this.tidalSendLine(patterns[i]);
     }
+    console.log(" ## Tidal initialized");
   }
 
   initSC(config) {
@@ -48,12 +54,17 @@ class REPL {
 
       const SCLang = supercolliderjs.sclang.SCLang;
       const lang = new SCLang(options);
-      console.log(' -- initSC: ', config.path, '\n', options);
+      console.log(' -- initSC1: ', config.path);
+      console.log(' -- initSC2: ', options);
       lang.boot().then((sclang) => {
+        console.log(' -- SC: booted  ', sclang);
         self.sc = lang;
         setTimeout(function(){
           const samples = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", config.samples_path)
-          lang.interpret(samples);
+          console.log(' -- SC samples: ', samples);
+          lang.interpret(samples).then(() => {
+            console.log(' -- SCD interpreted: ' );
+          });
         }, 4000)
       });
     });
@@ -76,10 +87,7 @@ class REPL {
 
   tidalSendExpression(expression) {
     this.tidalSendLine(':{');
-    const splits = expression.split('\n');
-    for (let i = 0; i < splits.length; i++) {
-      this.tidalSendLine(splits[i]);
-    }
+    this.tidalSendLine(expression);
     this.tidalSendLine(':}');
   }
 
@@ -92,8 +100,6 @@ class REPL {
       console.error(error);
     });
   }
-
-
 }
 
 const TidalData = {
@@ -112,11 +118,10 @@ const Siren = () => {
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
     var address = UDPserver.address();
-    console.log("UDP server listening on " + address.address + ":" + address.port);
+    console.log(" ## UDP server listening on " + address.address + ":" + address.port);
   });
 
   UDPserver.on("message", function (msg, rinfo) {
-    // console.log("server got: " + msg + " from " +rinfo.address + ":" + rinfo.port);
     tick.sockets.emit('osc', {osc:msg});
   });
 
@@ -135,12 +140,17 @@ const Siren = () => {
   });
 
   const startTidal = (b_config, reply) => {
+    console.log(' -- 1 ');
     if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed === false) {
+      console.log(' -- 2 ');
       reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     } else {
+      console.log(' -- 3 ');
       if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed) {
+        console.log(' -- 4 ');
         TidalData.TidalConsole = new REPL();
       }
+      console.log(' -- 5 ');
       TidalData.TidalConsole.start(b_config);
       TidalData.TidalConsole.myPatterns.values.push('initiate tidal');
       reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
@@ -157,7 +167,6 @@ const Siren = () => {
 
   const sendPatterns = (patterns, reply) => {
     _.each(patterns, c => {
-      console.log('appjs sendPatterns: ', c);
       TidalData.TidalConsole.tidalSendExpression(c[0]);
       TidalData.TidalConsole.tidalSendExpression(c[1]);
     })
@@ -183,43 +192,40 @@ const Siren = () => {
   app.use("/", express.static(path.join(__dirname, "public")));
 
   app.post('/tidal', (req, reply) => {
-    const {b_config} = req.body;
-    console.log(b_config);
+    const { b_config } = req.body;
     generateConfig(b_config,reply);
-    // modifySCDStart(b_config,reply);
 
     startTidal(b_config, reply);
   });
 
   app.post('/boot', (req, reply) => {
-    const {b_config} = req.body;
-    generateConfig(b_config,reply);
-    // modifySCDStart(b_config,reply);
+    const { b_config } = req.body;
+    generateConfig(b_config, reply);
   });
 
   app.post('/pattern', (req, reply) => {
     const { pattern } = req.body;
-    console.log('Pattern inbound:', pattern);
+    console.log(' ## Pattern inbound:', pattern);
     sendPattern(pattern, reply);
   });
 
   app.post('/patterns', (req, reply) => {
     const { patterns } = req.body;
-    console.log('Pattern inbound:', patterns);
+    console.log(' ## Patterns inbound:', patterns);
     sendPatterns(patterns, reply);
   });
 
   app.post('/scpattern', (req, reply) => {
     const {pattern} = req.body;
     _.replace(pattern, "\\", '');
-    console.log('ScPattern inbound:', pattern);
+    console.log(' ## SC Pattern inbound:', pattern);
     sendScPattern(pattern, reply);
   })
 
   app.get('*', errorHandler);
 
   app.listen(3001, () => {
-    console.log(`Server started at http://localhost:${3001}`);
+    console.log(` ## Server started at http://localhost:${3001}`);
   });
 
 }

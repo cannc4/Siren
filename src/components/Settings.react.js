@@ -13,7 +13,7 @@ class Settings extends Component {
       sclang: props.user.user.config.sclang,
       scsynth: props.user.user.config.scsynth,
       sclang_conf: props.user.user.config.sclang_conf,
-      port: props.user.user.config.port,
+      port: 3001,
       samples_path: props.user.user.config.samples_path,
       path: props.user.user.config.path,
       tidal_boot: props.user.user.config.tidal_boot,
@@ -24,7 +24,6 @@ class Settings extends Component {
   writeConfigDB() {
     const ctx = this;
     const tidalServerLink = 'localhost:3001';
-
 
     if(ctx.props.uid !== undefined){
       // online database save
@@ -42,9 +41,6 @@ class Settings extends Component {
   render() {
     const ctx = this;
     return (<div className={'Settings PanelAdjuster draggableCancel'}>
-      <div className={'SettingsItem'}>
-        <p className={'SettingsLabel'}>Port:</p>  <input className={'Input'} value={this.state.port} onChange={ctx.updateValue.bind(ctx, 'port')}/>
-      </div>
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>User Path:</p>  <input className={'Input'} value={this.state.userpath} onChange={ctx.updateValue.bind(ctx, 'userpath')}/>
       </div>

@@ -5,6 +5,14 @@
   s.quit;
 
   s.waitForBoot {
-    SuperDirt.start;
-  };
+    ~dirt = SuperDirt(2, s);
+    ~dirt.loadSoundFiles("{samples_path}");
+    "SUPERDIRT LOADED".postln;
+
+    s.sync;
+    ~dirt.start(57120, (0, 2 .. 9));
+
+    0.2.wait;
+    "SIREN ARRIVED".postln;
+  }
 )

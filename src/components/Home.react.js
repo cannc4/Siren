@@ -590,8 +590,8 @@ class Home extends Component {
       const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
       const onClick = event => {
         const ctx = this;
-        var posX = event.nativeEvent.offsetX,
-            posY = event.nativeEvent.offsetY;
+        // var posX = event.nativeEvent.offsetX,
+        var posY = event.nativeEvent.offsetY;
 
         ctx.setState({controlledPosition: {x: 0, y: _.toInteger(posY/40)*40}});
 
@@ -599,7 +599,7 @@ class Home extends Component {
       };
       const onDragStop = (event, position) => {
         const ctx = this;
-        const {x, y} = position;
+        const {y} = position;
         console.log('drag stopped: ', position);
         ctx.setState({controlledPosition: {x: 0 , y: _.toInteger(y/40)*40}});
 
