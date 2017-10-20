@@ -32,7 +32,7 @@ class REPL {
       console.error(data)
       dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
     });
-    console.log(" ## 	 GHC Spawned");
+    console.log(" ## -->   GHC Spawned");
   }
 
   initTidal(config) {
@@ -41,7 +41,7 @@ class REPL {
     for (let i = 0; i < patterns.length; i++) {
       this.tidalSendLine(patterns[i]);
     }
-    console.log(" ## 	 Tidal initialized");
+    console.log(" ## -->   Tidal initialized");
   }
 
   initSC(config) {
@@ -74,6 +74,7 @@ class REPL {
           console.log(' -- SC samples: ', samples);
           lang.interpret(samples).then(() => {
             console.log(' -- SCD interpreted: ' );
+
           });
         }, 4000)
       });
@@ -110,6 +111,15 @@ class REPL {
       console.error(error);
     });
   }
+
+  statusSC() {
+    var self = this;
+    self.sc.interpret("s.status();").then(function(result) {
+      console.log('status: ', result);
+    }, function(error) {
+      console.log(error);
+    });
+  }
 }
 
 const TidalData = {
@@ -128,7 +138,7 @@ const Siren = () => {
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
     var address = UDPserver.address();
-    console.log(" ## 	 UDP server listening on " + address.address + ":" + address.port);
+    console.log(" ## -->   UDP server listening on " + address.address + ":" + address.port);
   });
 
   UDPserver.on("message", function (msg, rinfo) {
@@ -150,15 +160,19 @@ const Siren = () => {
   });
 
   const startTidal = (b_config, reply) => {
-    if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed === false) {
-      reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
-    } else {
-      if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed) {
-        TidalData.TidalConsole = new REPL();
+    try{
+      if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed === false) {
+        reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
+      } else {
+        if (TidalData.TidalConsole.repl && TidalData.TidalConsole.repl.killed) {
+          TidalData.TidalConsole = new REPL();
+        }
+        TidalData.TidalConsole.start(b_config);
+        TidalData.TidalConsole.myPatterns.values.push('initiate tidal');
+        reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
       }
-      TidalData.TidalConsole.start(b_config);
-      TidalData.TidalConsole.myPatterns.values.push('initiate tidal');
-      reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
+    }catch(e) {
+      reply.status(500).json({ isActive: TidalData.TidalConsole.repl.killed, pattern: TidalData.TidalConsole.myPatterns });
     }
   };
 
@@ -189,7 +203,7 @@ const Siren = () => {
   const generateConfig = (config,reply) => {
     var configfile = path.join(__dirname, '..', 'config', 'config.json');
     console.log(' - configfile: ', configfile);
-    fs.writeFile(configfile, JSON.stringify(config), { flag: 'w' }, function(err) {
+    fs.writeFileSync(configfile, JSON.stringify(config), { flag: 'w' }, function(err) {
       if(err) {
           return console.error("home-made write error: ", err);
       }
@@ -201,39 +215,43 @@ const Siren = () => {
 
   app.post('/tidal', (req, reply) => {
     const { b_config } = req.body;
-    // generateConfig(b_config,reply);
+    generateConfig(b_config,reply);
 
     startTidal(b_config, reply);
   });
 
   app.post('/boot', (req, reply) => {
     const { b_config } = req.body;
-    // generateConfig(b_config, reply);
+    generateConfig(b_config, reply);
+  });
+
+  app.get('/status', (req, reply) => {
+    TidalData.TidalConsole.statusSC();
   });
 
   app.post('/pattern', (req, reply) => {
     const { pattern } = req.body;
-    console.log(' ## 	 Pattern inbound:', pattern);
+    console.log(' ## -->   Pattern inbound:', pattern);
     sendPattern(pattern, reply);
   });
 
   app.post('/patterns', (req, reply) => {
     const { patterns } = req.body;
-    console.log(' ## 	 Patterns inbound:', patterns);
+    console.log(' ## -->   Patterns inbound:', patterns);
     sendPatterns(patterns, reply);
   });
 
   app.post('/scpattern', (req, reply) => {
     const {pattern} = req.body;
     _.replace(pattern, "\\", '');
-    console.log(' ## 	 SC Pattern inbound:', pattern);
+    console.log(' ## -->   SC Pattern inbound:', pattern);
     sendScPattern(pattern, reply);
   })
 
   app.get('*', errorHandler);
 
   app.listen(3001, () => {
-    console.log(` ## 	 Server started at http://localhost:${3001}`);
+    console.log(` ## -->   Server started at http://localhost:${3001}`);
   });
 
 }

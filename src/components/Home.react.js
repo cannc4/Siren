@@ -15,8 +15,6 @@ import {sendScPattern,
         fbsavelayout,
         fbdeletecustomlayout,
         updateMatrix,
-        startClick,
-        stopClick,
         globalUpdate,
         globalStore,
         createChannel,
@@ -32,7 +30,6 @@ import {sendScPattern,
 import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-import io from 'socket.io-client';
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Settings from './Settings.react';
@@ -129,16 +126,6 @@ class Home extends Component {
   // Component functions
   componentDidMount(props,state){
     const ctx = this;
-
-    var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-    //var sockettSC = io('http://localhost:3005/'); // TIP: io() with no args does auto-discovery
-    socket.on("osc", data => {
-      store.dispatch(startClick());
-    })
-
-    socket.on("dc", data => {
-      store.dispatch(stopClick());
-    })
 
     keymaster('shift+r', ctx.resetLayout.bind(ctx));
     keymaster('shift+f', ctx.makeMatrixFullscreen.bind(ctx));

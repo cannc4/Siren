@@ -317,8 +317,8 @@ export const initTidalConsole = (server, expression) => {
 	return dispatch => {
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal', {'b_config' :expression})
 		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
-			dispatch({type: 'CONFIG_TIDAL', payload: response.data })
+			dispatch({type: 'FETCH_TIDAL', payload: response })
+			dispatch({type: 'CONFIG_TIDAL', payload: response })
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -338,7 +338,7 @@ export const exitSC = (server) => {
 	return dispatch => {
 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/tidal')
 		.then((response) => {
-			dispatch({type: 'FETCH_TIDAL', payload: response.data })
+			dispatch({type: 'FETCH_TIDAL', payload: response })
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -552,10 +552,21 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 			}
 			else
 				return false;
-		}
+			}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': _.compact(getFinalPattern()) })
 		.then((response) => {
 			dispatch({ type: 'DEBUG_TIDAL', payload: response.data })
+		}).catch(function (error) {
+			console.error(error);
+		});
+	}
+}
+
+export const scStatus = (server) => {
+	return dispatch => {
+		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/status', { })
+		.then((response) => {
+			console.log('SCStatus: ', response);
 		}).catch(function (error) {
 			console.error(error);
 		});
@@ -576,9 +587,9 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 
 		const globalindex = getParameters(vals)[0];
 		if(globalindex !== undefined){
-		var pat = [],ch;
-		// command of the pattern
-		var currentglobal = Object.values(storedGlobals[globalindex]);
+			var pat = [],ch;
+			// command of the pattern
+			var currentglobal = Object.values(storedGlobals[globalindex]);
 			var activeChannels = _.slice(getParameters(vals), 1);
 			// Construct the active channel list from channel list
 			var tch = [];
@@ -594,15 +605,13 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 					pat.push(ch  + currentglobal[1]  + stp + currentglobal[0]);
 				}
 			});
-			}
+		}
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/pattern', { 'pattern': pat })
 		.then((response) => {
 		}).catch(function (error) {
 			console.error(error);
 		});
-
-		}
-
+	}
 }
 
 export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {

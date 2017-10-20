@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
 import _ from 'lodash';
+import io from 'socket.io-client';
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
-         initTidalConsole, killTidalConsole} from '../actions'
+         initTidalConsole, killTidalConsole,
+         startClick,
+         stopClick,} from '../actions'
 
 var keymaster = require('keymaster');
 
@@ -39,6 +42,28 @@ class MenuBar extends Component {
 
   componentDidMount(props,state){
     const ctx = this;
+
+    var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+    //var sockettSC = io('http://localhost:3005/');
+    socket.on("osc", data => {
+      store.dispatch(startClick());
+    })
+
+    socket.on("dc", data => {
+      store.dispatch(stopClick());
+    })
+
+    socket.on('error', function(err){
+      console.log("Error: " + err.message);
+    })
+
+    socket.on('connect', (reason) => {
+      console.log("connect: ", reason);
+    });
+    socket.on('disconnect', (reason) => {
+      console.log("disconnect: ", reason);
+    });
+
     keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
     keymaster('shift+space', ctx.stopTimer.bind(ctx));
   }
