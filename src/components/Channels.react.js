@@ -6,12 +6,13 @@ import _ from 'lodash';
 import Cell from './Cell.react'
 const SelectableComponent = createSelectable(Cell);
 import { fbdeletechannelinscene, fbupdatechannelinscene,
-         sendPatterns, consoleSubmit, setExecution } from '../actions';
+         sendPatterns, consoleSubmit, setExecution,sendScPattern } from '../actions';
 
 class Channels extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      tidalServerLink: 'localhost:3001',
       modelName : 'Channels',
       cid: '',
       scene_name: '',
@@ -52,7 +53,7 @@ class Channels extends Component {
   sendPatterns(){
     const ctx = this;
     const { click, solo, mute} = ctx.props;
-    const { loop } = ctx.state;
+    const { loop, tidalServerLink } = ctx.state;
     const channel = ctx.props.item;
 
     if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) )
@@ -72,7 +73,7 @@ class Channels extends Component {
           var runNo = _.floor(click.current % channel.step);
           if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
             runNo = channel.step-1;
-            store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
+            store.dispatch(consoleSubmit(tidalServerLink, channel.name + " $ silence"));
             ctx.setState({loop: {isLoop: loop.isLoop,
                                  pauseTurn: loop.pauseTurn,
                                  hasSilenced: true}});
@@ -86,18 +87,25 @@ class Channels extends Component {
 
           if (stepvalue !== ""){
             store.dispatch(setExecution());
-            store.dispatch(sendPatterns('localhost:3001', channel, stepvalue,
+            store.dispatch(sendPatterns(tidalServerLink, channel, stepvalue,
               scenePatterns, click, ctx.props.globalparams));
+          }
+          if (ctx.props.sccommand.scpat !== ""){
+
+            ctx.sendScPattern(tidalServerLink,ctx.props.sccommand.scpat);
+            
           }
         }
         else{
-          store.dispatch(consoleSubmit('localhost:3001', channel.name + " $ silence"));
+          store.dispatch(consoleSubmit(tidalServerLink, channel.name + " $ silence"));
         }
       }
     }
   }
 
-
+  sendScPattern(tidalServerLink, pattern) {
+    store.dispatch(sendScPattern(tidalServerLink, pattern));
+  }
   renderStep(item, __, i) {
     const ctx = this;
     const { click } = ctx.props;

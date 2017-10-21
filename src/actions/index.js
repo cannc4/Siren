@@ -422,6 +422,7 @@ export const createCell = (cell) => {
 }
 export const sendScPattern = (server, expression) => {
 	return dispatch => {
+		console.log(expression);
 		if (!expression) return;
 		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scpattern', { 'pattern': expression })
 		.then((response) => {
@@ -500,6 +501,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				newCommand = cellName;
 				return [ k + " " + newCommand ];
 			}
+			
 			// other channels
 			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
 				var cellItem = _.slice(getParameters(v), 1);
@@ -522,12 +524,15 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					transitionHolder = "t"+ (channel.cid +1) + " " + channel.transition + " $ ";
 
 				var pattern;
-				if (channel.type === "SuperCollider") {
-					sendScPattern('localhost:3001', newCommand);
-				}
-
+			
 				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
 					pattern = k + " $ " + newCommand;
+				}
+				else if( channel.type === "SuperCollider"){
+
+					dispatch({ type: 'UPDATE_SCCOMMAND', payload: newCommand });
+					//this.sendScPattern('localhost:3001', newCommand);
+					//console.log(newCommand);
 				}
 				else {
 					pattern = transitionHolder + newCommand;
