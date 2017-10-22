@@ -559,16 +559,16 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 	}
 }
 
-export const scStatus = (server) => {
-	return dispatch => {
-		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/status', { })
-		.then((response) => {
-			console.log('SCStatus: ', response);
-		}).catch(function (error) {
-			console.error(error);
-		});
-	}
-}
+// export const scStatus = (server) => {
+// 	return dispatch => {
+// 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/status', { })
+// 		.then((response) => {
+// 			console.log('SCStatus: ', response);
+// 		}).catch(function (error) {
+// 			console.error(error);
+// 		});
+// 	}
+// }
 
 export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
 	return dispatch => {

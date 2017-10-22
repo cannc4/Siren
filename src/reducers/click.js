@@ -15,14 +15,11 @@ export default (state = INITIAL_STATE, action) => {
       return {...k};
     case 'SEEK_'+modelName:
         const l = state;
-        console.log(l);
         l.current = action.payload;
-        console.log(l);
         return {...l};
     case 'EXECUTION_'+modelName:
       const a = state;
       a.isExecuted = true;
-      console.log(a);
       return {...a};
     case 'STOP_'+modelName:
       const z = state;

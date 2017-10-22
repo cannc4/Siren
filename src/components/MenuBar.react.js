@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
-         initTidalConsole, sendScPattern,
+         initTidalConsole, sendScPattern, dCon,
          startClick,
          stopClick} from '../actions'
 
@@ -29,23 +29,15 @@ class MenuBar extends Component {
       times: 2,
       tidalMenu: false,
       boot: 0,
-      serversListening: false
+      serversListening: false,
+      socket_sc: io('http://localhost:3005/'),
+      socket_tick: io('http://localhost:3003/')
     }
   }
-  // shouldComponentUpdate = (nextProps, nextState) => {
-  //   if(nextState !== this.state) {
-  //     return true;
-  //   }
-  //   else {
-  //     return false;
-  //   }
-  // }
 
   componentDidMount(props,state){
     const ctx = this;
-
-    var socket_tick = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-    var socket_sc = io('http://localhost:3005/');
+    const { socket_sc, socket_tick } = ctx.state;
 
     socket_sc.on('connect', (reason) => {
       console.log("connect: ", reason);
@@ -53,38 +45,32 @@ class MenuBar extends Component {
     });
     socket_sc.on('disconnect', (reason) => {
       console.log("connect: ", reason);
-      ctx.setState({boot: 1, tidalMenu: false})
+      ctx.setState({boot: 0, tidalMenu: false})
     });
     socket_sc.on("sclog", data => {
-      console.log('SC LOG:', data);
+      // puts into debug console
+      store.dispatch(dCon(data));
       if(_.startsWith(data.sclog, 'SIREN')) {
-        console.log('SIRENNNNN???? ');
         ctx.setState({boot: 1, tidalMenu: true})
       }
     })
 
-    socket_tick.on("osc", data => {
+
+    socket_tick.on('connect', (reason) => {
+      console.log("Port 3003 Connected: ", reason);
+      ctx.setState({serversListening: true});
+    });
+    socket_tick.on("/tick2react", data => {
+      console.log("Port 3003 tick2react: ");
       store.dispatch(startClick());
     })
 
-    socket_tick.on("dc", data => {
+    socket_tick.on("/tick2react-done", data => {
+      console.log("Port 3003 tick2react-done: ");
       store.dispatch(stopClick());
     })
-
-    socket_tick.on('error', function(err){
-      console.log("Error: " + err.message);
-    })
-
-    socket_tick.on('connect', (reason) => {
-      console.log("connect: ", reason);
-      ctx.setState({serversListening: true});
-    });
-    socket_tick.on('reconnect', (reason) => {
-      console.log("reconnect: ", reason);
-      ctx.setState({serversListening: true});
-    });
     socket_tick.on('disconnect', (reason) => {
-      console.log("disconnect: ", reason);
+      console.log("Port 3003 Disconnected: ", reason);
       ctx.setState({serversListening: false, boot: 0, tidalMenu: false});
     });
 
@@ -127,7 +113,7 @@ class MenuBar extends Component {
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink, boot } = ctx.state;
+    const { tidalServerLink, boot, socket_sc } = ctx.state;
     if(boot === 0){
       store.dispatch(initTidalConsole(tidalServerLink, ctx.props.user.user.config));
     }
@@ -145,15 +131,19 @@ class MenuBar extends Component {
       }
 
       const sc_load = "\"" + scdstartfileAdjusted + "\".load;";
+      socket_sc.connect()
+      store.dispatch(chokeClick())
       store.dispatch(sendScPattern(tidalServerLink, sc_load));
     }
   }
 
   stopTidal() {
-    const ctx=this;
-    const { tidalServerLink } = ctx.state;
+    const ctx = this;
+    const { tidalServerLink, socket_sc } = ctx.state;
     const sc_exit = "s.quit;"
+    socket_sc.disconnect();
     ctx.setState({boot: 1, tidalMenu: false});
+    store.dispatch(chokeClick())
     store.dispatch(sendScPattern(tidalServerLink, sc_exit));
   }
 

@@ -91,11 +91,10 @@ class Channels extends Component {
               scenePatterns, click, ctx.props.globalparams));
           }
           if (ctx.props.sccommand.scpat !== ""){
-
             ctx.sendScPattern(tidalServerLink,ctx.props.sccommand.scpat);
-            
           }
         }
+        // BUG -- only sends this part on mute
         else{
           store.dispatch(consoleSubmit(tidalServerLink, channel.name + " $ silence"));
         }

@@ -51,25 +51,15 @@ class REPL {
       options.scsynth = config.scsynth;
       options.sclang_conf = config.sclang_conf;
 
-      // const SCLang = supercolliderjs.sclang.SCLang;
-      // const lang = new SCLang(options);
       supercolliderjs.lang.boot(options).then((sclang) => {
         self.sc = sclang;
+        console.log('options: ', sclang);
 
         var dconSC = socketIo.listen(3005);
         sclang.on('stdout', function(d) {
           dconSC.sockets.emit('sclog', {sclog: d});
         });
 
-        // console.log('scjs server:', supercolliderjs.server.Server);
-        // supercolliderjs.server.Server.receive.subscribe(
-        //   function(next){
-        //     console.log(next);
-        // }, function(error){
-        //   console.log(error);
-        // }, function(complete) {
-        //   console.log(complete);
-        // });
         setTimeout(function(){
           var samples_path;
           // Windows
@@ -122,15 +112,6 @@ class REPL {
       console.error(error);
     });
   }
-
-  statusSC() {
-    var self = this;
-    self.sc.interpret("s.status();").then(function(result) {
-      console.log('status: ', result);
-    }, function(error) {
-      console.log(error);
-    });
-  }
 }
 
 const TidalData = {
@@ -153,11 +134,11 @@ const Siren = () => {
   });
 
   UDPserver.on("message", function (msg, rinfo) {
-    tick.sockets.emit('osc', {osc:msg});
+    tick.sockets.emit('/tick2react', {osc:msg});
   });
 
   UDPserver.on("disconnect", function (msg) {
-    tick.sockets.emit('dc', {osc:msg});
+    tick.sockets.emit('/tick2react-done', {osc:msg});
   });
 
   UDPserver.bind(3002);
@@ -234,10 +215,6 @@ const Siren = () => {
   app.post('/boot', (req, reply) => {
     const { b_config } = req.body;
     generateConfig(b_config, reply);
-  });
-
-  app.get('/status', (req, reply) => {
-    TidalData.TidalConsole.statusSC();
   });
 
   app.post('/pattern', (req, reply) => {

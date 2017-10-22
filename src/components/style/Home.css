@@ -380,13 +380,16 @@ div.cm-s-_style.CodeMirror {
   margin: 0 10px 0 10px;
 }
 
+.Tidal {
+  background: rgba(42, 85, 110, 1);
+}
 .Visual {
   background: rgba(152, 122, 40, 1);
 }
-.SCSynth {
-  background: rgba(42, 85, 110, 1);
+.SuperCollider {
+  background: rgba(200,200,200,0.4);
 }
-.MIDI {
+.Tidal-MIDI {
   background: rgba(172, 87, 60, 1)
 }
 
