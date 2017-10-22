@@ -1,8 +1,6 @@
 :set prompt ""
 :module Sound.Tidal.Context
 
-import Sound.Tidal.Utils
-
 (cps, getNow) <- bpsUtils
 
 (d1,t1) <- superDirtSetters getNow

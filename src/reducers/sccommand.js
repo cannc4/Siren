@@ -1,6 +1,6 @@
 import _ from 'lodash';
 const modelName = 'SCCOMMAND';
-const INITIAL_STATE = { commands: [], debugconsole: '' };
+const INITIAL_STATE = { commands: [], debugconsole: '',scpat: '' };
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'FETCH_'+modelName:
@@ -14,6 +14,11 @@ export default (state = INITIAL_STATE, action) => {
         c.debugconsole = _.drop( c.debugconsole , console_len);
       }
       return c;
+    case 'UPDATE_'+modelName:
+      if (action.payload !== ''){
+        state.scpat = action.payload;
+      }
+      return state;
     default:
       return state;
   }

@@ -9,10 +9,8 @@
     ~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*");
     "SUPERDIRT LOADED".postln;
 
-    s.sync;
-    ~dirt.start(57120, (0, 2 .. 9));
-
     0.2.wait;
-    "SIREN ARRIVED".postln;
-  }
+    "SIREN LOADED".postln;
+
+  };
 )

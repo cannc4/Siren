@@ -15,14 +15,13 @@ var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
 var jsonfile = require('jsonfile')
 
 var dcon = socketIo.listen(3004);
-var dconSC = socketIo.listen(3005);
 
 class REPL {
   hush() {
     this.tidalSendExpression('hush');
   }
 
-  doSpawn(config) {
+  doSpawn(config, reply) {
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
     this.repl.stderr.on('data', (data) => {
       console.error(data.toString('utf8'));
@@ -44,7 +43,7 @@ class REPL {
     console.log(" ## -->   Tidal initialized");
   }
 
-  initSC(config) {
+  initSC(config, reply) {
     const self = this;
    // console.log("INITSC", req);
     supercolliderjs.resolveOptions(config.path).then((options) => {
@@ -52,13 +51,25 @@ class REPL {
       options.scsynth = config.scsynth;
       options.sclang_conf = config.sclang_conf;
 
-      const SCLang = supercolliderjs.sclang.SCLang;
-      const lang = new SCLang(options);
-      console.log(' -- initSC1: ', config.path);
-      console.log(' -- initSC2: ', options);
-      lang.boot().then((sclang) => {
-        console.log(' -- SC: booted  ', sclang);
-        self.sc = lang;
+      // const SCLang = supercolliderjs.sclang.SCLang;
+      // const lang = new SCLang(options);
+      supercolliderjs.lang.boot(options).then((sclang) => {
+        self.sc = sclang;
+
+        var dconSC = socketIo.listen(3005);
+        sclang.on('stdout', function(d) {
+          dconSC.sockets.emit('sclog', {sclog: d});
+        });
+
+        // console.log('scjs server:', supercolliderjs.server.Server);
+        // supercolliderjs.server.Server.receive.subscribe(
+        //   function(next){
+        //     console.log(next);
+        // }, function(error){
+        //   console.log(error);
+        // }, function(complete) {
+        //   console.log(complete);
+        // });
         setTimeout(function(){
           var samples_path;
           // Windows
@@ -71,10 +82,8 @@ class REPL {
           }
 
           const samples = fs.readFileSync(config.scd_start).toString().replace("{samples_path}", samples_path)
-          console.log(' -- SC samples: ', samples);
-          lang.interpret(samples).then(() => {
-            console.log(' -- SCD interpreted: ' );
-
+          sclang.interpret(samples).then((samplePromise) => {
+            console.log(' ## -->   SuperCollider initialized' );
           });
         }, 4000)
       });
@@ -105,8 +114,10 @@ class REPL {
   sendSC(message) {
     var self = this;
     self.sc.interpret(message).then(function(result) {
+      console.log('sendSC:' , result);
+      return result;
       // result is a native javascript array
-      //dconSC.sockets.emit('dconSC', ({dconSC: result.toString('utf8')}));
+      // dconSC.sockets.emit('dconSC', ({dconSC: result.toString('utf8')}));
     }, function(error) {
       console.error(error);
     });
@@ -194,9 +205,9 @@ const Siren = () => {
     reply.status(200).json({ isActive: !TidalData.TidalConsole.repl.killed, patterns: TidalData.TidalConsole.myPatterns });
   };
 
-  const sendScPattern = (expr, reply) => {
-    TidalData.TidalConsole.sendSC(expr);
-    reply.status(200).send(expr);
+  const sendScPattern = (pattern, reply) => {
+    const sc_message = TidalData.TidalConsole.sendSC(pattern);
+    reply.status(200).json({ pattern, sc_message });
   }
 
   //// Not working

@@ -6,9 +6,9 @@ import io from 'socket.io-client';
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
-         initTidalConsole, killTidalConsole,
+         initTidalConsole, sendScPattern,
          startClick,
-         stopClick,} from '../actions'
+         stopClick} from '../actions'
 
 var keymaster = require('keymaster');
 
@@ -44,29 +44,46 @@ class MenuBar extends Component {
   componentDidMount(props,state){
     const ctx = this;
 
-    var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-    //var sockettSC = io('http://localhost:3005/');
-    socket.on("osc", data => {
+    var socket_tick = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
+    var socket_sc = io('http://localhost:3005/');
+
+    socket_sc.on('connect', (reason) => {
+      console.log("connect: ", reason);
+      ctx.setState({boot: 1, tidalMenu: true})
+    });
+    socket_sc.on('disconnect', (reason) => {
+      console.log("connect: ", reason);
+      ctx.setState({boot: 1, tidalMenu: false})
+    });
+    socket_sc.on("sclog", data => {
+      console.log('SC LOG:', data);
+      if(_.startsWith(data.sclog, 'SIREN')) {
+        console.log('SIRENNNNN???? ');
+        ctx.setState({boot: 1, tidalMenu: true})
+      }
+    })
+
+    socket_tick.on("osc", data => {
       store.dispatch(startClick());
     })
 
-    socket.on("dc", data => {
+    socket_tick.on("dc", data => {
       store.dispatch(stopClick());
     })
 
-    socket.on('error', function(err){
+    socket_tick.on('error', function(err){
       console.log("Error: " + err.message);
     })
 
-    socket.on('connect', (reason) => {
+    socket_tick.on('connect', (reason) => {
       console.log("connect: ", reason);
       ctx.setState({serversListening: true});
     });
-    socket.on('reconnect', (reason) => {
+    socket_tick.on('reconnect', (reason) => {
       console.log("reconnect: ", reason);
       ctx.setState({serversListening: true});
     });
-    socket.on('disconnect', (reason) => {
+    socket_tick.on('disconnect', (reason) => {
       console.log("disconnect: ", reason);
       ctx.setState({serversListening: false, boot: 0, tidalMenu: false});
     });
@@ -112,15 +129,9 @@ class MenuBar extends Component {
     const ctx=this;
     const { tidalServerLink, boot } = ctx.state;
     if(boot === 0){
-      _.delay(function() {
-        ctx.setState({tidalMenu:true , boot: 1});
-      }, 600)
       store.dispatch(initTidalConsole(tidalServerLink, ctx.props.user.user.config));
     }
-    else{
-      _.delay(function() {
-        ctx.setState({tidalMenu:true});
-      }, 600)
+    else {
       const scdstartfile = ctx.props.user.user.config.scd_start
       var scdstartfileAdjusted;
 
@@ -133,8 +144,8 @@ class MenuBar extends Component {
         scdstartfileAdjusted = _.join(_.split(scdstartfile, /\/|\\/), '/');
       }
 
-      const sc_exit = "\"" + scdstartfileAdjusted + "\".load;";
-      store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+      const sc_load = "\"" + scdstartfileAdjusted + "\".load;";
+      store.dispatch(sendScPattern(tidalServerLink, sc_load));
     }
   }
 
@@ -142,14 +153,14 @@ class MenuBar extends Component {
     const ctx=this;
     const { tidalServerLink } = ctx.state;
     const sc_exit = "s.quit;"
-    ctx.setState({tidalMenu:false });
-    store.dispatch(killTidalConsole(tidalServerLink,sc_exit));
+    ctx.setState({boot: 1, tidalMenu: false});
+    store.dispatch(sendScPattern(tidalServerLink, sc_exit));
   }
 
   render() {
     const ctx = this;
 
-    const { times, tidalMenu, serversListening } = ctx.state;
+    const { times, tidalMenu, serversListening, boot } = ctx.state;
     const { click } = ctx.props;
     // const { version } = ctx.props.menu;
 
@@ -188,7 +199,8 @@ class MenuBar extends Component {
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         <div className={serverStatusClass}></div>
-        {!tidalMenu && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
+        {(!tidalMenu && boot === 0) && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Boot Server</button>}
+        {(!tidalMenu && boot === 1) && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
         {tidalMenu && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView') } onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
         <div className={"TimerControls"}>
           {!click.isActive && <img src={require('../assets/play@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}

@@ -1144,6 +1144,7 @@ class Home extends Component {
     const ctx=this;
 
     console.log('Homereact render');
+    console.log(ctx.props.sccommand.commands);
 
     // Layout height params for fullscreen
     var vertical_n = 20,
