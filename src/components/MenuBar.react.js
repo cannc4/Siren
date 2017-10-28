@@ -74,15 +74,15 @@ class MenuBar extends Component {
       ctx.setState({serversListening: false, boot: 0, tidalMenu: false});
     });
 
-    keymaster('ctrl+space', ctx.toggleClick.bind(ctx));
-    keymaster('shift+space', ctx.stopTimer.bind(ctx));
+    keymaster('ctrl+enter', ctx.toggleClick.bind(ctx));
+    keymaster('shift+enter', ctx.stopTimer.bind(ctx));
   }
 
   componentWillUnmount(props, state) {
     const ctx = this;
 
-    keymaster.unbind('ctrl+space', ctx.toggleClick.bind(ctx));
-    keymaster.unbind('shift+space', ctx.stopTimer.bind(ctx));
+    keymaster.unbind('ctrl+enter', ctx.toggleClick.bind(ctx));
+    keymaster.unbind('shift+enter', ctx.stopTimer.bind(ctx));
   }
 
   componentDidUpdate() {

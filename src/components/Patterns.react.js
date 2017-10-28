@@ -115,7 +115,7 @@ class Patterns extends Component {
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <div key={item.key} className={"PatternItem draggableCancel"} data-grid={{i: item.key, x:0, y: item.index*2, w: Infinity, h: 4, minH: 3}} >
+      <div key={item.key} className={"PatternItem draggableCancel"} data-grid={{i: item.key, x:0, y: item.index*2, w: Infinity, h: 3, minH: 2}} >
         <div key={name} >
           <div key={name} className={'PatternItemInputs'}>
             <div className={"PatternPanelHeader draggableCancel"}> ■ </div>

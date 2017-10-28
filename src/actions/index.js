@@ -617,14 +617,14 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 		var chan = expression.match(b)[0];
 		if ( expression === 'jou'){
 			_.each(channels, function (ch, i) {
-				if(ch.type === 'Audio'){
+				if(ch.type === 'Tidal' || ch.type === 'SCSynth' || ch.type === 'Audio'){
 				storedPatterns[ch.cid] = ch.name + ' $ silence';
 				}
 			})
 		}
 		else if ( expression === 'mjou'){
 			_.each(channels, function (ch, i) {
-				if(ch.type === 'MIDI'){
+				if(ch.type === 'Tidal-MIDI' || ch.type === 'MIDI'){
 					storedPatterns[ch.cid] = ch.name + ' $ silence';
 				}
 			})

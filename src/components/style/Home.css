@@ -238,8 +238,6 @@ div.cm-s-_style.CodeMirror {
 .PatternItemCodeMirror {
   resize:both;
   overflow-y: auto;
-  resize: none;
-  min-height: 80px;
   width: 100%;
   border: 1px rgba(125,100,100, 0.8);
 }
@@ -250,13 +248,16 @@ div.cm-s-_style.CodeMirror {
 /*------------CONSOLE PANEL------------*/
 /*Tidal and SC Console textboxes*/
 .Console {
+
+  display: flex;
+  flex-direction: column;
 }
 .ConsoleTextBox {
   border: 1px solid rgba(120, 120, 120, 0.75);
   font-size: 14px;
   margin: 0 2.5px 0 2.5px;
   height: calc(100% - 35px);
-  width: calc(50% - 5px);
+  
 }
 
 
@@ -379,7 +380,12 @@ div.cm-s-_style.CodeMirror {
   color: #ccc;
   margin: 0 10px 0 10px;
 }
-
+.Audio {
+  background: rgba(42, 85, 110, 1);
+}
+.SCSynth {
+  background: rgba(42, 85, 110, 1);
+}
 .Tidal {
   background: rgba(42, 85, 110, 1);
 }
@@ -392,7 +398,9 @@ div.cm-s-_style.CodeMirror {
 .Tidal-MIDI {
   background: rgba(172, 87, 60, 1)
 }
-
+.MIDI {
+  background: rgba(172, 87, 60, 1)
+}
 /*Individual Grid Cells*/
 .GridItem {
   display: flex;
