@@ -86,6 +86,7 @@ class Channels extends Component {
           }
 
           if (stepvalue !== ""){
+            console.log('GLOBALPARAMS ARRAY: ', ctx.props.globalparams);
             store.dispatch(setExecution());
             store.dispatch(sendPatterns(tidalServerLink, channel, stepvalue,
               scenePatterns, click, ctx.props.globalparams));
@@ -94,7 +95,8 @@ class Channels extends Component {
             ctx.sendScPattern(tidalServerLink,ctx.props.sccommand.scpat);
           }
         }
-        // BUG -- only sends this part on mute
+        // BUG: only sends this part on mute
+        // BUG: send 3 times if there are 3 channels in the scene
         else{
           store.dispatch(consoleSubmit(tidalServerLink, channel.name + " $ silence"));
         }
@@ -148,7 +150,6 @@ class Channels extends Component {
           if(ch.scene=== ctx.props.active){
             ch.cid = _cid;
             _cid++;
-            ctx.props.globalparams.storedPatterns[item.cid] = '';
             fbupdatechannelinscene('Matrices', ch, ctx.props.scene_key)
 
           }

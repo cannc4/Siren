@@ -53,7 +53,7 @@ class REPL {
 
       supercolliderjs.lang.boot(options).then((sclang) => {
         self.sc = sclang;
-        console.log('options: ', sclang);
+        // console.log('options: ', sclang);
 
         var dconSC = socketIo.listen(3005);
         sclang.on('stdout', function(d) {

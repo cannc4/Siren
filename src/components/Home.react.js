@@ -42,8 +42,6 @@ import Draggable from 'react-draggable'
 
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/dialog/dialog.js';
-import 'codemirror/addon/dialog/dialog.css';
 import '../assets/_rule.js';
 
 // CSS Imports
@@ -213,7 +211,7 @@ class Home extends Component {
       // console.log('begin: ', _.lastIndexOf(body, /\r?\n/g, event.target.selectionStart));
       // console.log('end: ', _.indexOf(body, /\r?\n/g, event.target.selectionStart));
       // console.log(body.substring(event.target.selectionStart, event.target.selectionEnd));
-      // ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
+      ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
     }
   }
 
@@ -717,6 +715,10 @@ class Home extends Component {
     store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
   }
 
+  onPatternHistoryChange(obj) {
+    console.log('onChange', obj.target);
+  }
+
   renderLayouts(layoutItem, k) {
     const ctx = this;
 
@@ -736,8 +738,7 @@ class Home extends Component {
           styleSelectedText:true,
           showToken:true,
           lineWrapping: true,
-          showCursorWhenSelecting: true,
-          readOnly: true
+          showCursorWhenSelecting: true
     };
     const maskedInputDurations=  _.repeat("1.1  ", 4);
     const maskedInputPatterns = "1 | " + _.repeat("1  ", storedPatterns.length-1);
@@ -812,7 +813,8 @@ class Home extends Component {
         </div>
         <div className={"PanelAdjuster"}>
          {_.map(storedPatterns, (c, i) => {
-            return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[i]} options={historyOptions}/>
+            console.log('pattern_history', i, c);
+            return <CodeMirror key={i} className={'defaultPatternHistoryArea'} name={"defaultPatternArea"} value={c} onChange={ctx.onPatternHistoryChange.bind(ctx)} options={historyOptions}/>
           })}
         </div>
       </div>);

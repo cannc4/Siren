@@ -530,8 +530,11 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					pattern = transitionHolder + newCommand;
 				}
 
-				// Apply global parameters
+				// stored patterns
+				globalparams.storedPatterns[channel.cid] = '';
 				globalparams.storedPatterns[channel.cid] = pattern;
+
+				// Apply global parameters
 				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
 					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
 						pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
