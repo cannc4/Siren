@@ -475,7 +475,26 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					}
 					// Value parameter
 					else {
-						newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), cellItem[i]);
+						// Value is NOT provided in the gridcell
+						if (cellItem[i] === '' || cellItem[i] === undefined) 	{
+							// Look for the default value (e.g. "`x?slow 3`")
+							// eslint-disable-next-line
+							var re = new RegExp("`(("+value+"\?)[^`]+)`", "g"), match = re.exec(newCommand);
+
+							// We have a default parameter ready
+							if (match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
+								const defaultValue = match[1].substring(_.indexOf(match[1], '?')+1);
+								newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), defaultValue);
+							}
+							// We have nothing, using most general parameter i.e. 1
+							else {
+								newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), 1);
+							}
+						}
+						// Value IS provided in the gridcell
+						else {
+							newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), cellItem[i]);
+						}
 					}
 				});
 				return newCommand
@@ -500,7 +519,8 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				newCommand = cmd.pattern;
 
 				// Applies parameters
-				newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
+				if(cmd.params !== '')
+					newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
 
 				// Math Parser
 				// eslint-disable-next-line
@@ -561,17 +581,6 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 		});
 	}
 }
-
-// export const scStatus = (server) => {
-// 	return dispatch => {
-// 		axios.get('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/status', { })
-// 		.then((response) => {
-// 			console.log('SCStatus: ', response);
-// 		}).catch(function (error) {
-// 			console.error(error);
-// 		});
-// 	}
-// }
 
 export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
 	return dispatch => {

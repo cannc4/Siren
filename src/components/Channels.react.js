@@ -86,7 +86,6 @@ class Channels extends Component {
           }
 
           if (stepvalue !== ""){
-            console.log('GLOBALPARAMS ARRAY: ', ctx.props.globalparams);
             store.dispatch(setExecution());
             store.dispatch(sendPatterns(tidalServerLink, channel, stepvalue,
               scenePatterns, click, ctx.props.globalparams));
@@ -135,7 +134,7 @@ class Channels extends Component {
     const { item, solo, mute } = ctx.props;
     const { loop } = ctx.state;
 
-    console.log("Channel render ");
+    // console.log("Channel render ");
 
     if (item.scene !== ctx.props.active)
       return item.key && (

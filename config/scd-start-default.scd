@@ -4,6 +4,8 @@
   s.options.memSize = 8192 * 16;
   s.quit;
 
+  OSCFunc.trace(true);
+
   s.waitForBoot {
     ~dirt = SuperDirt(2, s);
     ~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\Whalehouse\\99s\\*");
@@ -15,4 +17,5 @@
     0.2.wait;
     "SIREN LOADED".postln;
   };
+
 )

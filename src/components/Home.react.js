@@ -33,6 +33,7 @@ import store from '../store';
 import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Settings from './Settings.react';
+import PatternHistory from './PatternHistory.react';
 import DebugConsole from './DebugConsole.react';
 
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
@@ -40,12 +41,7 @@ import { SelectableGroup } from 'react-selectable';
 import Dropdown from 'react-dropdown'
 import Draggable from 'react-draggable'
 
-import CodeMirror from 'react-codemirror';
-import 'codemirror/lib/codemirror.css';
-import '../assets/_rule.js';
-
 // CSS Imports
-import './style/_style.css';
 import './style/Layout.css';
 import './style/Dropdown.css';
 import './style/Home.css';
@@ -585,7 +581,6 @@ class Home extends Component {
       const onDragStop = (event, position) => {
         const ctx = this;
         const {y} = position;
-        console.log('drag stopped: ', position);
         ctx.setState({controlledPosition: {x: 0 , y: _.toInteger(y/40)*40}});
 
         store.dispatch(seekTimer(_.toInteger(y/40)));
@@ -715,10 +710,6 @@ class Home extends Component {
     store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
   }
 
-  onPatternHistoryChange(obj) {
-    console.log('onChange', obj.target);
-  }
-
   renderLayouts(layoutItem, k) {
     const ctx = this;
 
@@ -730,16 +721,6 @@ class Home extends Component {
     const layoutVisibility = (ctx.props.user.user.email ? ' enabledView' : ' disabledView')
 
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
-    const historyOptions = {
-          mode: '_rule',
-          theme: '_style',
-          fixedGutter: true,
-          scroll: false,
-          styleSelectedText:true,
-          showToken:true,
-          lineWrapping: true,
-          showCursorWhenSelecting: true
-    };
     const maskedInputDurations=  _.repeat("1.1  ", 4);
     const maskedInputPatterns = "1 | " + _.repeat("1  ", storedPatterns.length-1);
     const updateScPattern = event  => {
@@ -812,10 +793,7 @@ class Home extends Component {
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "pattern_history")}>X</span>
         </div>
         <div className={"PanelAdjuster"}>
-         {_.map(storedPatterns, (c, i) => {
-            console.log('pattern_history', i, c);
-            return <CodeMirror key={i} className={'defaultPatternHistoryArea'} name={"defaultPatternArea"} value={c} onChange={ctx.onPatternHistoryChange.bind(ctx)} options={historyOptions}/>
-          })}
+          <PatternHistory patterns={storedPatterns}/>
         </div>
       </div>);
     }
@@ -1145,8 +1123,8 @@ class Home extends Component {
   render() {
     const ctx=this;
 
-    console.log('Homereact render');
-    console.log(ctx.props.sccommand.commands);
+    // console.log('Homereact render');
+    // console.log(ctx.props.sccommand.commands);
 
     // Layout height params for fullscreen
     var vertical_n = 20,

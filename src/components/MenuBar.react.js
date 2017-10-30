@@ -48,7 +48,11 @@ class MenuBar extends Component {
       ctx.setState({boot: 0, tidalMenu: false})
     });
     socket_sc.on("sclog", data => {
-      // puts into debug console
+      const parseOSCMessage = (message) => {
+        return '{'+_.replace(message, "OSC Message Received:", '')+'}';
+      };
+
+      console.log(parseOSCMessage(data.sclog));
       store.dispatch(dCon(data));
       if(_.startsWith(data.sclog, 'SIREN')) {
         ctx.setState({boot: 1, tidalMenu: true})
@@ -61,7 +65,7 @@ class MenuBar extends Component {
       ctx.setState({serversListening: true});
     });
     socket_tick.on("/tick2react", data => {
-      console.log("Port 3003 tick2react: ");
+      // console.log("Port 3003 tick2react: ");
       store.dispatch(startClick());
     })
 

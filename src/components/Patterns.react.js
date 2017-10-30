@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
 
-import CodeMirror from 'react-codemirror';
+import {UnControlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
 import '../assets/_rule.js';
 import './style/_style.css'
@@ -19,8 +19,7 @@ class Patterns extends Component {
     super(props)
     this.state = {
       name: '',
-      params: [],
-      paramValues: [],
+      params: '',
 
       modelName: this.constructor.name,
       sceneKey: '',
@@ -60,57 +59,25 @@ class Patterns extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
-    const handleChangeParams = (obj) => {
-      const { paramValues, params } = ctx.state;
-
-      var value, name;
-      if(obj.target !== undefined){
-        value = obj.target.value;
-        name = obj.target.name;
-      } else {
-        value = obj;
-      }
-      console.log(obj.target, paramValues);
-
-      var temp = paramValues;
-      temp[[name]] = value;
-      ctx.setState({paramValues: temp});
-
-      _.find(params, name).name = value;
-      ctx.setState({ params: params});
-
-      console.log(obj.target, paramValues, params);
-
-      console.log(obj.target, value, name);
-    }
-    const handleChange = (obj) => {
-      var value, name;
-      if(obj.target !== undefined){
-        value = obj.target.value;
-        name = obj.target.name;
-      } else {
-        value = obj;
-      }
-      console.log("handleChange", value, name);
-      var re = /`(\w+)`/g, match = re.exec(value), matches = [];
+    const handleChange = (editor, metadata, value) => {      
+      // parse pattern for parameters
+      var re = /`([^`]+)`/g, match = re.exec(value), matches = [];
       while (match) {
-        if(_.indexOf(matches, match[1]) === -1)
-          matches.push(match[1]);
+        const param_default = _.split(match[1], '?');
+        if(_.indexOf(matches, param_default[0]) === -1){
+          matches.push(param_default[0]);
+        }
         match = re.exec(value);
       }
       _.remove(matches, function(n) {
         return n === 't';
       });
-      var paramsArray =  _.map(matches, function(c){
-        if (ctx.state.paramValues[[c]] === undefined)   return 1;
-        else return ctx.state.paramValues[[c]];
-      })
-      console.log("handleChange", matches, paramsArray);
-      ctx.setState({ params: _.zipObject(matches, paramsArray)});
-      const payload = { key: dbKey };
-      payload[name === undefined ? 'pattern' : name] = value;
-      payload['params'] = this.state.params;
+      ctx.setState({ params: matches.toString()});
 
+      // write into database
+      const payload = { key: dbKey };
+      payload['pattern'] = value;
+      payload['params'] = ctx.state.params;
       _.each(Object.values(ctx.props["matrices"]), function(d){
         if(d.matName === ctx.props.active){
           ctx.setState({sceneKey: d.key});
@@ -150,10 +117,7 @@ class Patterns extends Component {
           <div key={name} className={'PatternItemInputs'}>
             <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
             <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-            {_.map(item["params"], function(param_value, param_name) {
-              console.log('render ', param_name, param_value);
-              return <div>{param_name}<input key={param_name} className={'Input draggableCancelNested'} name={param_name} value={ctx.state.paramValues[[param_name]]} onChange={handleChangeParams.bind(ctx)} /></div>
-            })}
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
           <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
