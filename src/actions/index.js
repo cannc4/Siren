@@ -438,7 +438,7 @@ export const consoleSubmit = (server, expression) => {
 export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 	return dispatch => {
 		const getFinalPattern = () => {
-			console.log('INDEXJS ', channel, stepValue);
+			console.log('INDEXJS ', stepValue);
 
 			var math = require('mathjs');
 
@@ -566,8 +566,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				else {
 					pattern = transitionHolder + newCommand ;
 				}
-
-				console.log('actually sending it: ', pattern);
+				
 				return [ pattern ];
 			}
 			else

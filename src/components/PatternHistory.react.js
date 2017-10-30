@@ -32,9 +32,7 @@ class PatternHistory extends Component {
                            className={'defaultPatternHistoryArea draggableCancel'}
                            value={c}
                            options={options}
-                           onChange={(editor, metadata, value) => {
-                             console.log('CodeMirror On Change', editor, metadata, value);
-                           }}
+                           onChange={(editor, metadata, value) => {}}
                            />
       })}
      </div>

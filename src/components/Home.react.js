@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import {sendScPattern,
+import {
         sendGlobals,
-        consoleSubmitHistory,
-        consoleSubmit,
+
+
         fbcreateMatrix,
         fbdelete,
         fborder,
@@ -34,6 +34,7 @@ import Patterns from './Patterns.react';
 import Channels from './Channels.react';
 import Settings from './Settings.react';
 import PatternHistory from './PatternHistory.react';
+import Console from './Console.react';
 import DebugConsole from './DebugConsole.react';
 
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
@@ -75,7 +76,6 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      scPattern: '',
       click : {flag:0,
               times:0,
               current:null,
@@ -180,37 +180,6 @@ class Home extends Component {
   ////////////////////////////// UTILITIES ///////////////////////////
 
   ////////////////////////////// HANDLERS ////////////////////////////
-  // Console
-  handleSCSubmit = event => {
-    const body=event.target.value
-    const ctx=this;
-    const {scPattern, tidalServerLink }=ctx.state;
-    if(event.keyCode === 13 && event.ctrlKey && body){
-      ctx.executionCss(event);
-      ctx.sendScPattern(tidalServerLink, scPattern);
-    }
-  }
-  handleGHCSubmit = event => {
-    const body = event.target.value;
-    const ctx = this;
-    const {tidalServerLink} = ctx.state;
-    const storedPatterns = ctx.props.globalparams.storedPatterns;
-    const channels = ctx.props.channel;
-    if(event.keyCode === 13 && event.ctrlKey && body){
-      ctx.executionCss(event);
-      ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
-    }
-    else if(event.keyCode === 13 && event.shiftKey && body){
-      // TODO: Implement shift+enter for line execution
-      // /\n\r|\n|\r/
-      // console.log('consolesubmit: ', event.target.selectionStart,  event.target.selectionEnd, _.split(body, ''));
-      // console.log('begin: ', _.lastIndexOf(body, /\r?\n/g, event.target.selectionStart));
-      // console.log('end: ', _.indexOf(body, /\r?\n/g, event.target.selectionStart));
-      // console.log(body.substring(event.target.selectionStart, event.target.selectionEnd));
-      ctx.consoleSubmitHistory(tidalServerLink, body, storedPatterns,channels);
-    }
-  }
-
   // Add Channel Inputs
   handleChannelName = event => {
     this.setState({c_name: event.target.value});
@@ -299,17 +268,6 @@ class Home extends Component {
     ctx.setState({globalsq: event.target.value});
   }
   ////////////////////////////// HANDLERS ////////////////////////////
-
-
-  ////////////////////////////// CONSOLE ////////////////////////////
-  consoleSubmit(tidalServerLink, value){
-    store.dispatch(consoleSubmit(tidalServerLink, value));
-  }
-  consoleSubmitHistory(tidalServerLink, value,storedPatterns,channels){
-    store.dispatch(consoleSubmitHistory(tidalServerLink, value, storedPatterns,channels));
-  }
-
-  ////////////////////////////// CONSOLE ////////////////////////////
 
 
   ////////////////////////////// SCENES ////////////////////////////
@@ -713,7 +671,7 @@ class Home extends Component {
   renderLayouts(layoutItem, k) {
     const ctx = this;
 
-    const { scPattern, activeMatrix, storedPatterns,
+    const { activeMatrix, storedPatterns,
             pressed, storedGlobals, globalTransformations, globalCommands,
             globalChannels,c_type, c_name, c_step,
             c_transition,globalsq } = ctx.state
@@ -723,9 +681,6 @@ class Home extends Component {
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
     const maskedInputDurations=  _.repeat("1.1  ", 4);
     const maskedInputPatterns = "1 | " + _.repeat("1  ", storedPatterns.length-1);
-    const updateScPattern = event  => {
-      ctx.setState({scPattern: event.target.value})
-    }
     const getGridParameters = (specifier) => {
       const itemToCopy = _.find(ctx.props.layout.windows, ['i', specifier]);
       var newGridParameters = {x: 0, y:100, h:1, w:1, minW:0, isVisible: false};
@@ -864,8 +819,7 @@ class Home extends Component {
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "console")}>X</span>
         </div>
         <div className={'Console PanelAdjuster'}>
-          <textarea className={"ConsoleTextBox draggableCancel"} key={'tidalsubmit'} onKeyUp={ctx.handleGHCSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
-          <textarea className={"ConsoleTextBox draggableCancel"} key={'scsubmit'} onKeyUp={ctx.handleSCSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+          <Console tidalServerLink={ctx.state.tidalServerLink}/>
         </div>
       </div>);
     }
@@ -1111,13 +1065,6 @@ class Home extends Component {
                               vals,channels));
   }
   ////////////////////////////// GLOBALS ////////////////////////////
-
-
-  ////////////////////////////// CONSOLE ////////////////////////////
-  sendScPattern(tidalServerLink, pattern) {
-    store.dispatch(sendScPattern(tidalServerLink, pattern));
-  }
-  ////////////////////////////// CONSOLE ////////////////////////////
 
   // Main render method
   render() {

@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
 
-import {UnControlled as CodeMirror} from 'react-codemirror2'
+import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
 import '../assets/_rule.js';
 import './style/_style.css'
@@ -59,7 +59,7 @@ class Patterns extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
-    const handleChange = (editor, metadata, value) => {      
+    const handleChange = (editor, metadata, value) => {
       // parse pattern for parameters
       var re = /`([^`]+)`/g, match = re.exec(value), matches = [];
       while (match) {
@@ -120,7 +120,14 @@ class Patterns extends Component {
             <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
             <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
-          <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+          <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'}
+                      name={"pattern"}
+                      value={item["pattern"]}
+                      options={options}
+                      onBeforeChange={handleChange.bind(ctx)}
+                      onChange={(editor, metadata, value) => {
+                      }}
+                    />
         </div>
       </div>
     )
