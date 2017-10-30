@@ -285,8 +285,9 @@ div.cm-s-_style.CodeMirror {
   display: flex;
   flex-direction: column;
   font-size: 12px;
+  margin: 2.5px;
   width: 100%;
-  height: 100%;
+  height: 30px;
 }
 
 

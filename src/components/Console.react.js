@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import store from '../store';
-import _ from 'lodash';
+// import _ from 'lodash';
 
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
@@ -27,7 +27,8 @@ class Console extends Component {
   handleSCSubmit = (editor, event) => {
     const body=event.target.value
     const ctx=this;
-    const {scPattern, tidalServerLink }=ctx.state;
+    const { scPattern }=ctx.state;
+    const { tidalServerLink } = ctx.props;
     if(event.keyCode === 13 && event.ctrlKey && body){
       ctx.sendScPattern(tidalServerLink, scPattern);
     }

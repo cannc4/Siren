@@ -521,10 +521,13 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				// Applies parameters
 				if(cmd.params !== '')
 					newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
+				else
+					newCommand = processParameters(['t'], newCommand, cellItem);
 
 				// Math Parser
 				// eslint-disable-next-line
 				_.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
+					console.log(val);
 					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 				})
 
@@ -566,7 +569,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				else {
 					pattern = transitionHolder + newCommand ;
 				}
-				
+
 				return [ pattern ];
 			}
 			else
