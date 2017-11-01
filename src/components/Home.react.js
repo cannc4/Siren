@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import {
-        sendGlobals,
-
-
+import {sendGlobals,
         fbcreateMatrix,
         fbdelete,
         fborder,

@@ -55,9 +55,31 @@ class REPL {
         self.sc = sclang;
         // console.log('options: ', sclang);
 
-        var dconSC = socketIo.listen(3005);
+        var dconSC = socketIo.listen(3006);
+        // var dconUnity = socketIo.listen(3007);
         sclang.on('stdout', function(d) {
-          dconSC.sockets.emit('sclog', {sclog: d});
+          // Converts 'd' into an object
+          var re = /\[.+\]/g, match = re.exec(d);
+          if(match !== null && match !== undefined && match[0] !== undefined) {
+            var msg = _.split(_.trim(match[0], '[]'), ',')
+            _.each(msg, function(m, i) {
+              msg[i] = _.trim(m)
+            })
+
+            var time = 0;
+            re = /(time:).+/g;
+            match = re.exec(d);
+            if(match !== null && match !== undefined && match[0] !== undefined) {
+              time = _.toNumber(_.trim(match[0].substring(5)));
+            }
+
+            const obj = {type: _.trim(msg[0]),
+                         time: time,
+                         vals: _.fromPairs(_.chunk(_.drop(msg), 2))}
+
+            dconSC.sockets.emit('sclog', {sclog: obj});
+            // dconUnity.sockets.emit('sclog', {sclog: obj});
+          }
         });
 
         setTimeout(function(){

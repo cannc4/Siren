@@ -28,53 +28,12 @@ class Cell extends Component {
                    s_key: this.props.s_key});
   }
 
-  // shouldComponentUpdate = (nextProps, nextState) => {
-  //   if(nextState.value !== this.state.value) {
-  //     return true;
-  //   }
-  //   else if(nextProps.currentStep === nextState.index ||
-  //           nextProps.currentStep === this.state.index+1 ||
-  //           nextProps.currentStep === 0) {
-  //     return true;
-  //   }
-  //   else {
-  //     return false;
-  //   }
-  // }
-
-//   componentWillUpdate(nextProps, nextState){
-//     if(nextProps.currentStep === nextState.state.index){
-//        this.setState({ className : 'playbox-active'});
-//         //ctx.setState({isActive: true});
-//     }
-//     else{
-//         console.log("here2");
-//         this.setState({ className : 'playbox'});
-//     }
-//   }
-// componentWillUpdate(nextProps, nextState) {
-//     // only update chart if the data has changed
-//     if (nextProps.currentStep === nextState.index) {
-//         this.setState({className : 'playbox' });
-//     }
-//     if (nextProps.currentStep !== this.state.index) {
-//         this.setState({className : 'playbox-active' });
-//     }
-//   }
-
-// componentDidUpdate(prevProps, prevState) {
-    // const ctx = this;
-    // const {className} = ctx.state;
-    //
-    // ctx.setState({className:ctx.props.cssname});
-// }
   render() {
     const ctx = this;
     const setText = ({ target: { value }}) => {
       const c_cell = { cell_value: value, cid: ctx.state.cid, c_key: ctx.state.c_key, cell_index: ctx.state.index};
       store.dispatch(updateCell(c_cell));
-     // const sceneKey = _.findKey(ctx.props.matrices, ['matName', ctx.props.active]);
-      //const val = ctx.props.cell.vals;
+      // const sceneKey = _.findKey(ctx.props.matrices, ['matName', ctx.props.active]);
       const val = ctx.props.cell.vals;
       const nc = { vals: val[ctx.state.cid], key: ctx.state.c_key };
       ctx.setState({value: value});

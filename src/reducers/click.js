@@ -4,7 +4,6 @@ export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'INC_'+modelName:
       const k = state;
-      // console.log('...');
       if (k.isActive === true){
         k.flag++;
         if (k.flag % k.times === 0){

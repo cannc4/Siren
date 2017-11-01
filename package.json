@@ -70,6 +70,7 @@
     "react-grid-layout": "^0.15.0",
     "react-maskedinput": "^4.0.0",
     "react-number-editor": "^4.0.2",
+    "react-p5-wrapper": "0.0.4",
     "react-perf-tool": "^0.2.2",
     "react-redux": "^4.4.5",
     "react-render-debugger": "^1.0.2",

@@ -60,6 +60,8 @@ class Console extends Component {
   }
 
   render() {
+    // TODO: WRITE THESE TO DB
+    
     const ctx = this;
     const { ghcPattern, scPattern } = ctx.state;
 

@@ -18,4 +18,5 @@
     "SIREN LOADED".postln;
   };
 
+  s.sendMsg("/notify", 0);
 )

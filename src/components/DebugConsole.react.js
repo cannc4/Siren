@@ -25,9 +25,16 @@ class DebugConsole extends Component {
 
   render() {
     const ctx = this;
+    var message = ctx.props.tidal.debugconsole;
+    if(_.isObject(message)) {
+      message = JSON.stringify(message);
+    }
+    else {
+      message = _.toString(message);
+    }
 
     return (<div className={'DebugConsole'}>
-      {_.toString(ctx.props.tidal.debugconsole)}
+      {message}
     </div>)
   }
 }
