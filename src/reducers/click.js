@@ -1,5 +1,5 @@
 const modelName = 'CLICK';
-const INITIAL_STATE = {flag:0, times: 1, current:0 , isActive:false, isExecuted: false};
+const INITIAL_STATE = {flag:0, times: 1, current:0 , isActive:false, isExecuted: false, response: {}};
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case 'INC_'+modelName:
@@ -36,6 +36,10 @@ export default (state = INITIAL_STATE, action) => {
       b.current = 0;
       b.flag = 0;
       return {...b};
+    case 'MESSAGE_'+modelName:
+      let m = state;
+      m.response = action.payload;
+      return {...m};
     default:
       return state;
   }

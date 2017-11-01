@@ -423,6 +423,12 @@ export const sendScPattern = (server, expression) => {
 		});
 	}
 }
+export const saveScOutputMessage = (message) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'MESSAGE_CLICK', payload: message });
+    };
+}
 
 export const consoleSubmit = (server, expression) => {
 	return dispatch => {

@@ -3,15 +3,12 @@ import { connect } from 'react-redux';
 import store from '../store';
 import io from 'socket.io-client';
 import _ from 'lodash';
-import P5Wrapper from 'react-p5-wrapper';
-import sketch from './sketches/tempo';
 
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
          initTidalConsole, sendScPattern, dCon,
-         startClick,
-         stopClick} from '../actions'
+         startClick, stopClick, saveScOutputMessage} from '../actions'
 
 var keymaster = require('keymaster');
 
@@ -55,15 +52,15 @@ class MenuBar extends Component {
     socket_sc.on("sclog", data => {
       const message = data.sclog;
       if(message.type === '/play2'){
+        store.dispatch(saveScOutputMessage(message));
         console.log(message.time, message.vals);
-        ctx.setState({cycleInfo: message.vals, cycleTime: message.time});
+        // ctx.setState({cycleInfo: message.vals, cycleTime: message.time});
       }
       store.dispatch(dCon(data));
       if(_.startsWith(data.sclog, 'SIREN')) {
         ctx.setState({boot: 1, tidalMenu: true})
       }
     })
-
 
     socket_tick.on('connect', (reason) => {
       console.log("Port 3003 Connected: ", reason);
@@ -197,7 +194,6 @@ class MenuBar extends Component {
         <div className={'Logo'}>
         {<img role="presentation" src={require('../assets/logo.svg')}  height={35} width={35}/> }
         </div>
-        <P5Wrapper sketch={sketch} click={click.current} cycleInfo={ctx.state.cycleInfo} cycleTime={ctx.state.cycleTime}/>
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         <div className={serverStatusClass}></div>

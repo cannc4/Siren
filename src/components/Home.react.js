@@ -32,6 +32,7 @@ import Channels from './Channels.react';
 import Settings from './Settings.react';
 import PatternHistory from './PatternHistory.react';
 import Console from './Console.react';
+import Canvas from './Canvas.react';
 import DebugConsole from './DebugConsole.react';
 
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
@@ -41,9 +42,9 @@ import Draggable from 'react-draggable'
 
 // CSS Imports
 import './style/Layout.css';
-import './style/Dropdown.css';
 import './style/Home.css';
 import './style/Menu.css';
+import './style/Dropdown.css';
 import './style/ContextMenu.css';
 
 // Key binding
@@ -107,10 +108,11 @@ class Home extends Component {
                        {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
                        {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
                        {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
-                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: true},
+                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: false},
                        {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
                        {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
-                       {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
+                       {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
+                       {i: 'canvas', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
     }
   }
 
@@ -704,6 +706,14 @@ class Home extends Component {
           enabled={false}>
           {ctx.renderPlayer()}
         </SelectableGroup>
+      </div>);
+    }
+    else if (layoutItem.i === 'canvas') {
+      return layoutItem.isVisible && (<div key={'canvas'} ref={'canvas'} className={layoutVisibility} data-grid={getGridParameters('canvas')} >
+        <div className={"PanelHeader"}> ■ Canvas
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "canvas")}>X</span>
+        </div>
+        <Canvas />
       </div>);
     }
     else if (layoutItem.i === 'scenes') {
