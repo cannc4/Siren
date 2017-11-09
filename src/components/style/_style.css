@@ -18,7 +18,7 @@
 .cm-s-_style .CodeMirror-linenumber { color: #000; font-weight: bolder;;}
 .cm-s-_style .CodeMirror-cursor { border-left: 1px solid #fff; }
 .cm-s-_style.CodeMirror {  background-color:rgba(0, 0, 0, 0.1);  }
-.cm-s-_style span.cm-comment { color: #8f5536; }
+.cm-s-_style span.cm-comment { color: #a1d38b; }
 .cm-s-_style span.cm-atom { color: #aa759f; }
 .cm-s-_style span.cm-number { color: #f4bf75; }
 

@@ -11,7 +11,6 @@ import './style/_style.css';
 import {sendScPattern,
         consoleSubmit,
         consoleSubmitHistory,
-
         } from '../actions';
 
 class Console extends Component {

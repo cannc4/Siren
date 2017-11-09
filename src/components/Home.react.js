@@ -22,7 +22,9 @@ import {sendGlobals,
         seekTimer,
         updateLayout,
         forceUpdateLayout,
-        stepChannel} from '../actions';
+        stepChannel,
+        consoleSubmit,
+        consoleSubmitHistory} from '../actions';
 
 import _ from 'lodash';
 import Firebase from 'firebase';
@@ -236,9 +238,9 @@ class Home extends Component {
   handleUpdatePatterns = event => {
     const ctx = this;
     const {tidalServerLink,globalCommands,
-          globalTransformations} = ctx.state;
+          globalTransformations,storedPatterns} = ctx.state;
     const channels = ctx.props.channel;
-    const storedPatterns = ctx.props.globalparams.storedPatterns;
+    
 
     if(event.keyCode === 13 && event.ctrlKey){
       ctx.executionCss(event);
@@ -288,7 +290,7 @@ class Home extends Component {
       return true;
     }
 
-    const { matName, storedGlobals } = ctx.state;
+    const { matName, storedGlobals,storedPatterns } = ctx.state;
     const { uid } =ctx.props.user.user;
     const items =ctx.props[ctx.state.modelName.toLowerCase()];
     // const propstoredGlobals = ctx.props.globalparams.storedGlobals;
@@ -309,7 +311,7 @@ class Home extends Component {
 
       if ( checkSceneName(matName, items) ) {
         var snd = Object.values(items).length;
-        store.dispatch(globalStore(globals, ctx.props.globalparams.storedPatterns));
+        store.dispatch(globalStore(globals, storedPatterns));
         fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
         ctx.setState({sceneIndex: snd, storedGlobals: globals});
         ctx.setState({activeMatrix: matName});
@@ -484,12 +486,9 @@ class Home extends Component {
         j.step = x.h - 1;
         var newVals = [];
         for(var a = 0 ; a < j.step; a++){
-          if(j.vals[a]!==undefined){
-            newVals[a] = j.vals[a];
-          }
-          else
-            newVals[a] = ''
-      }
+          if(j.vals[a]!==undefined)  newVals[a] = j.vals[a];
+          else                       newVals[a] = ''
+        }
         j.vals = newVals;
         const sceneKey = _.findKey(ctx.props.matrices, ['matName', j.scene]);
         fbupdatechannelinscene('Matrices', j, sceneKey);
@@ -709,10 +708,11 @@ class Home extends Component {
       </div>);
     }
     else if (layoutItem.i === 'canvas') {
-      return layoutItem.isVisible && (<div key={'canvas'} ref={'canvas'} className={layoutVisibility} data-grid={getGridParameters('canvas')} >
+      return layoutItem.isVisible && (<div key={'canvas'} className={layoutVisibility} id={'canvasLayout'} data-grid={getGridParameters('canvas')} >
         <div className={"PanelHeader"}> ■ Canvas
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "canvas")}>X</span>
         </div>
+
         <Canvas />
       </div>);
     }
@@ -857,10 +857,19 @@ class Home extends Component {
 
 
   ////////////////////////////// GLOBALS ////////////////////////////
+
+  
+  consoleSubmit(tidalServerLink, value){
+    store.dispatch(consoleSubmit(tidalServerLink, value));
+  }
+  consoleSubmitHistory(tidalServerLink, value, storedPatterns, channels){
+    store.dispatch(consoleSubmitHistory(tidalServerLink, value, storedPatterns,channels));
+  }
+
   clicked = event => {
     const ctx=this;
     const {pressed, storedGlobals, globalChannels,
-          globalCommands,globalTransformations,sceneIndex} =ctx.state;
+          globalCommands,globalTransformations,sceneIndex,storedPatterns} =ctx.state;
     const globalparams = ctx.props.globalparams;
     const scenes = ctx.props.matrices;
 
@@ -900,13 +909,13 @@ class Home extends Component {
                               command: globalCommands,
                               selectedChannels: globalChannels};
       fbupdateglobalsinscene('Matrices', ttm, matkey);
-      store.dispatch(globalStore(ttm, globalparams.storedPatterns));
+      store.dispatch(globalStore(ttm, storedPatterns));
       store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
       ctx.setState({storedGlobals: ttm});
     }
     else {
       ttm = storedGlobals[event.target.id];
-      store.dispatch(globalStore(globalparams.storedGlobals,globalparams.storedPatterns));
+      store.dispatch(globalStore(globalparams.storedGlobals,storedPatterns));
       store.dispatch(globalUpdate(ttm.command, ttm.transform, ttm.selectedChannels));
       ctx.setState({globalTransformations:ttm.transform, globalCommands:ttm.command,
                     globalChannels: ttm.selectedChannels, storedGlobals: storedGlobals})
@@ -1021,8 +1030,7 @@ class Home extends Component {
   }
   sequenceGlobals = (selected_global_index) => {
     const ctx = this;
-    const {tidalServerLink, storedGlobals, pressed} = ctx.state;
-    const storedPatterns = ctx.props.globalparams.storedPatterns;
+    const {tidalServerLink, storedGlobals, pressed,storedPatterns} = ctx.state;
 
     for (var i = 0; i < storedPatterns.length; i++) {
     if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
@@ -1111,7 +1119,7 @@ class Home extends Component {
         Does nothing
       </MenuItem>
       <MenuItem divider />
-      <SubMenu title={'Windows'}>
+      <SubMenu title={'Modules'}>
         {_.map(ctx.state.default_layout, function(layoutItem, key) {
           if(_.find(layouts, { 'i': layoutItem.i, 'isVisible': true }) )
             return <MenuItem key={key} onClick={ctx.onRemovelayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}<span style={{float: 'right'}}>√</span></MenuItem>;

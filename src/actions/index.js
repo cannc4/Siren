@@ -41,7 +41,7 @@ String.prototype.replaceAt = function(index, character) {
 }
 // eslint-disable-next-line
 String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
+    let target = this;
     return target.replace(new RegExp(search, 'g'), replacement);
 };
 
@@ -129,11 +129,11 @@ export function fbfetchlayout(model) {
 export function fbfetchscenes(model) {
 	return dispatch => {
 		models[model].dataSource.ref.orderByChild('sceneIndex').on('value', data => {
-			var temp = [];
+			let temp = [];
 			if (Firebase.auth().currentUser !== null)
 			{
 				data.forEach(function(c){
-					var u_id = Firebase.auth().currentUser.uid;
+					let u_id = Firebase.auth().currentUser.uid;
 					if(c.val().uid === u_id)
 						temp.push(c.val());
 				})
@@ -178,9 +178,9 @@ export function fbcreatechannelinscene(model, data, s_key){
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
 	{
-		var datakey, sceneIndex, patterns, channels, storedGlobals;
+		let datakey, sceneIndex, patterns, channels, storedGlobals;
 		models[model].dataSource.ref.once('value', dat => {
-			var u_id = Firebase.auth().currentUser.uid;
+			let u_id = Firebase.auth().currentUser.uid;
 			if ( u_id !== null)
 			{
 				const obj = _.find(dat.val(), (d) => (d.matName === data.matName));
@@ -274,15 +274,15 @@ export function GitHubLogin() {
 		Firebase.auth().getRedirectResult().then(result => {
 			if (result.credential) {
 				// This gives you a GitHub Access Token. You can use it to access the GitHub API.
-				// var token = result.credential.accessToken;
+				// let token = result.credential.accessToken;
 			}
 			// The signed-in user info
-			// var user = result.user;
+			// let user = result.user;
 		}).catch(function(error) {
-			// var errorCode = error.code;
-			// var errorMessage = error.message;
-			// var email = error.email;
-			// var credential = error.credential;
+			// let errorCode = error.code;
+			// let errorMessage = error.message;
+			// let email = error.email;
+			// let credential = error.credential;
 			dispatch({
 				type: FETCH_ACCOUNTS_ERROR,
 				payload: error
@@ -423,7 +423,7 @@ export const sendScPattern = (server, expression) => {
 		});
 	}
 }
-export const saveScOutputMessage = (message) => {
+export const saveScBootInfo = (message) => {
     //reducer
     return dispatch => {
         dispatch({ type: 'MESSAGE_CLICK', payload: message });
@@ -446,13 +446,13 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 		const getFinalPattern = () => {
 			console.log('INDEXJS ', stepValue);
 
-			var math = require('mathjs');
+			let math = require('mathjs');
 
 			// channel, pattern
-			var k = channel.name, v = stepValue;
+			let k = channel.name, v = stepValue;
 
 			const getParameters = (v) => {
-				var param = [];
+				let param = [];
 				_.map(_.split(v, /[`]+/g), (p1, p2) => {
 					p1 = _.trim(p1);
 
@@ -471,7 +471,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					else if(_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length-1)
 					{
 						cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
-						var bounds = _.split(cellItem[i], ',');
+						let bounds = _.split(cellItem[i], ',');
 						if(bounds[0] !== undefined && bounds[0] !== "" &&
 							 bounds[1] !== undefined && bounds[1] !== ""){
 								 bounds[0] = parseFloat(bounds[0]);
@@ -485,7 +485,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 						if (cellItem[i] === '' || cellItem[i] === undefined) 	{
 							// Look for the default value (e.g. "`x?slow 3`")
 							// eslint-disable-next-line
-							var re = new RegExp("`(("+value+"\?)[^`]+)`", "g"), match = re.exec(newCommand);
+							let re = new RegExp("`(("+value+"\?)[^`]+)`", "g"), match = re.exec(newCommand);
 
 							// We have a default parameter ready
 							if (match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
@@ -511,7 +511,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 
 			// command of the pattern
 			const cmd = _.find(scenePatterns, c => c.name === cellName);
-			var newCommand;
+			let newCommand;
 
 			// CPS channel handling
 			if( k === 'cps'){
@@ -521,7 +521,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 
 			// other channels
 			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
-				var cellItem = _.slice(getParameters(v), 1);
+				let cellItem = _.slice(getParameters(v), 1);
 				newCommand = cmd.pattern;
 
 				// Applies parameters
@@ -538,19 +538,17 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				})
 
 				// Prepare transition and solo
-				var	transitionHolder;
-				if (channel.transition === "" || channel.transition === undefined )
-					transitionHolder = k + " $ ";
-				else
-					transitionHolder = "t"+ (channel.cid +1) + " " + channel.transition + " $ ";
-
-				var pattern;
-
-				if (k === 'm1' || k === 'm2' ||  k === 'm3' ||  k === 'm4' || k === 'v1' || k === 'u1'){
-					pattern = k + " $ " + newCommand;
+				let	transitionHolder, pattern;
+				if (channel.type === "Tidal" && channel.transition !== "" && channel.transition !== undefined ){
+					let na = channel.name.substring(1,channel.name.length);
+					transitionHolder = "t"+ na + " " + channel.transition + " $ ";
 				}
-				else if( channel.type === "SuperCollider"){
+				else {
+					transitionHolder = k + " $ ";
+				}
 
+				
+				 if( channel.type === "SuperCollider"){
 					dispatch({ type: 'UPDATE_SCCOMMAND', payload: newCommand });
 					//this.sendScPattern('localhost:3001', newCommand);
 					//console.log(newCommand);
@@ -593,7 +591,7 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) => {
 	return dispatch => {
 		const getParameters = (v) => {
-				var param = [];
+				let param = [];
 				_.map(_.split(v, /[`]+/g), (p1, p2) => {
 					p1 = _.trim(p1);
 
@@ -604,17 +602,17 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 
 		const globalindex = getParameters(vals)[0];
 		if(globalindex !== undefined){
-			var pat = [],ch;
+			let pat = [],ch;
 			// command of the pattern
-			var currentglobal = Object.values(storedGlobals[globalindex]);
-			var activeChannels = _.slice(getParameters(vals), 1);
+			let currentglobal = Object.values(storedGlobals[globalindex]);
+			let activeChannels = _.slice(getParameters(vals), 1);
 			// Construct the active channel list from channel list
-			var tch = [];
+			let tch = [];
 			activeChannels = _.split(activeChannels, ' ');
-			var b = new RegExp("^[A-Za-z0-9]+", "g");
+			let b = new RegExp("^[A-Za-z0-9]+", "g");
 			_.forEach(activeChannels, function(chan, i) {
 				tch.push (chan);
-				var stp=storedPatterns[chan-1];
+				let stp=storedPatterns[chan-1];
 				if(stp !== undefined){
 					ch = stp.match(b)[0];
 					ch += ' $ ';
@@ -633,8 +631,8 @@ export const sendGlobals = (server,storedPatterns,storedGlobals, vals,channels) 
 
 export const consoleSubmitHistory = (server, expression, storedPatterns,channels) => {
 	return dispatch => {
-		var b = new RegExp("^[A-Za-z0-9]+", "g");
-		var chan = expression.match(b)[0];
+		let b = new RegExp("^[A-Za-z0-9]+", "g");
+		let chan = expression.match(b)[0];
 		if ( expression === 'jou'){
 			_.each(channels, function (ch, i) {
 				if(ch.type === 'Tidal' || ch.type === 'SCSynth' || ch.type === 'Audio'){
@@ -742,7 +740,7 @@ export function fbdeletechannelinscene(model, s_key, c_key) {
 
 export function fbsavelayout(model, layout, uid, c_id) {
 	if ( uid !== undefined ) {
-		var temp_layouts = {};
+		let temp_layouts = {};
 		_.forEach(layout, function(o) {
 			temp_layouts[o.i] = o;
 		})
@@ -760,7 +758,7 @@ export function fbdeletecustomlayout(model, uid, c_id) {
 export function fbupdatelayout(model, layout, uid) {
 	// console.log(layout, uid);
 	if ( uid !== undefined ) {
-		var temp_layouts = {};
+		let temp_layouts = {};
 		_.forEach(layout, function(o) {
 			temp_layouts[o.i] = o;
 		})

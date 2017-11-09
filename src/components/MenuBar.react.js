@@ -7,8 +7,8 @@ import _ from 'lodash';
 import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
-         initTidalConsole, sendScPattern, dCon,
-         startClick, stopClick, saveScOutputMessage} from '../actions'
+         initTidalConsole, sendScPattern, saveScBootInfo,
+         startClick, stopClick} from '../actions'
 
 var keymaster = require('keymaster');
 
@@ -27,41 +27,17 @@ class MenuBar extends Component {
       username: 'vou',
       tidalServerLink: 'localhost:3001',
       times: 2,
-      tidalMenu: false,
-      boot: 0,
       serversListening: false,
-      socket_sc: io('http://localhost:3006/'),  // Port 3005 is skipped because
-      socket_tick: io('http://localhost:3003/'),// a HTC Vive process is using it
-      cycleInfo: [],
-      cycleTime: 0
+      socket_tick: io('http://localhost:3003/')
     }
   }
 
   componentDidMount(props,state){
     const ctx = this;
-    const { socket_sc, socket_tick } = ctx.state;
+    const { socket_tick } = ctx.state;
 
-    socket_sc.on('connect', (reason) => {
-      console.log("connect: ", reason);
-      ctx.setState({boot: 1, tidalMenu: true})
-    });
-    socket_sc.on('disconnect', (reason) => {
-      console.log("connect: ", reason);
-      ctx.setState({boot: 0, tidalMenu: false})
-    });
-    socket_sc.on("sclog", data => {
-      const message = data.sclog;
-      if(message.type === '/play2'){
-        store.dispatch(saveScOutputMessage(message));
-        console.log(message.time, message.vals);
-        // ctx.setState({cycleInfo: message.vals, cycleTime: message.time});
-      }
-      store.dispatch(dCon(data));
-      if(_.startsWith(data.sclog, 'SIREN')) {
-        ctx.setState({boot: 1, tidalMenu: true})
-      }
-    })
-
+ 
+    
     socket_tick.on('connect', (reason) => {
       console.log("Port 3003 Connected: ", reason);
       ctx.setState({serversListening: true});
@@ -77,9 +53,11 @@ class MenuBar extends Component {
     })
     socket_tick.on('disconnect', (reason) => {
       console.log("Port 3003 Disconnected: ", reason);
-      ctx.setState({serversListening: false, boot: 0, tidalMenu: false});
+      store.dispatch(saveScBootInfo({boot: 0, tidalMenu: false}));
+      ctx.setState({serversListening: false});
     });
-
+    store.dispatch(saveScBootInfo({boot:0, tidalMenu:false}));
+    
     keymaster('ctrl+enter', ctx.toggleClick.bind(ctx));
     keymaster('shift+enter', ctx.stopTimer.bind(ctx));
   }
@@ -119,7 +97,8 @@ class MenuBar extends Component {
 
   runTidal() {
     const ctx=this;
-    const { tidalServerLink, boot, socket_sc } = ctx.state;
+    const { tidalServerLink, socket_sc } = ctx.state;
+    const { boot } = ctx.props.click.response;
     if(boot === 0){
       store.dispatch(initTidalConsole(tidalServerLink, ctx.props.user.user.config));
     }
@@ -148,7 +127,7 @@ class MenuBar extends Component {
     const { tidalServerLink, socket_sc } = ctx.state;
     const sc_exit = "s.quit;"
     socket_sc.disconnect();
-    ctx.setState({boot: 1, tidalMenu: false});
+    store.dispatch(saveScBootInfo({boot: 1, tidalMenu: false}));
     store.dispatch(chokeClick())
     store.dispatch(sendScPattern(tidalServerLink, sc_exit));
   }
@@ -156,9 +135,9 @@ class MenuBar extends Component {
   render() {
     const ctx = this;
 
-    const { times, tidalMenu, serversListening, boot } = ctx.state;
+    const { times, serversListening } = ctx.state;
     const { click } = ctx.props;
-    // const { version } = ctx.props.menu;
+    const { boot, tidalMenu } = ctx.props.click.response;
 
     const changeTimes = ({target: {value}}) => {
       ctx.setState({times : value});
