@@ -56,7 +56,7 @@ class MenuBar extends Component {
       store.dispatch(saveScBootInfo({boot: 0, tidalMenu: false}));
       ctx.setState({serversListening: false});
     });
-    store.dispatch(saveScBootInfo({boot:0, tidalMenu:false}));
+    store.dispatch(saveScBootInfo({boot:0, tidalMenu:true}));
     
     keymaster('ctrl+enter', ctx.toggleClick.bind(ctx));
     keymaster('shift+enter', ctx.stopTimer.bind(ctx));
@@ -155,7 +155,7 @@ class MenuBar extends Component {
       ctx.setState({username: ''});
       store.dispatch(logout())
     }
-
+    
     // needs improvement
     let serverStatusClass = 'ServerStatus';
     if (!serversListening) {

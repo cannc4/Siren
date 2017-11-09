@@ -273,7 +273,7 @@ class Home extends Component {
 
 
   ////////////////////////////// SCENES ////////////////////////////
-  addItem() {
+  addScene() {
     const ctx = this;
     let patterns = [],
         globals = [],
@@ -313,7 +313,74 @@ class Home extends Component {
       if ( checkSceneName(matName, items) ) {
         let snd = Object.values(items).length;
         store.dispatch(globalStore(globals, storedPatterns));
+        console.log(matName, patterns, channels, uid, storedGlobals);
         fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
+        ctx.setState({sceneIndex: snd, storedGlobals: globals});
+        ctx.setState({activeMatrix: matName});
+      }
+      else {
+        alert("Scene title should be unique and longer than 1 character");
+      }
+    }
+  }
+
+  duplicateScene() {
+    const ctx = this;
+    let patterns = [],
+        globals = [],
+        channels = []
+    const checkSceneName = function(newName, items) {
+      if (newName.length < 1) {
+        return false;
+      }
+
+      _.each(Object.values(items), function(m, i) {
+        if (m.matName === newName) {
+          return false;
+        }
+      })
+      return true;
+    }
+
+    const { matName, storedGlobals,storedPatterns,activeMatrix } = ctx.state;
+    const { uid } =ctx.props.user.user;
+    const items =ctx.props[ctx.state.modelName.toLowerCase()];
+    // const propstoredGlobals = ctx.props.globalparams.storedGlobals;
+
+    globals = storedGlobals;
+    if(uid !== null && uid !== undefined){
+    //  Get active patterns and channels
+      _.each(items, function(d){
+        if(d.uid === uid && d.matName === activeMatrix){
+          patterns = d.patterns;
+          globals = d.storedGlobals;
+          channels = d.channels;
+        }
+      })
+
+      let nc;
+      _.each(channels,function(ch){
+        nc = { scene: matName,
+          cid: ch.cid,
+          type: ch.type,
+          name: ch.name,
+          transition: ch.transition,
+          step: ch.step,
+          vals: ch.vals
+        };
+      })
+     
+      if ( checkSceneName(matName, items) ) {
+        let snd = Object.values(items).length;
+        
+      
+        let skey = fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
+        store.dispatch(globalStore(globals, storedPatterns));
+
+        let obj = fbcreatechannelinscene('Matrices', nc, skey)
+        nc['key'] = obj;
+        //store.dispatch(createChannel(nc));
+      
         ctx.setState({sceneIndex: snd, storedGlobals: globals});
         ctx.setState({activeMatrix: matName});
       }
@@ -726,8 +793,8 @@ class Home extends Component {
           <div className={'Scenes PanelAdjuster'}>
             <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.handleSceneNameChange.bind(ctx)}/>
             <div style={{display: 'inline-flex', justifyContent: 'space-between'}}>
-              {ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Update Scene</button>}
-              {!ctx.state.sceneSentinel && <button className={'Button draggableCancel'} onClick={ctx.addItem.bind(ctx)}>Add New Scene</button>}
+              { <button className={'Button draggableCancel'} onClick={ctx.addScene.bind(ctx)}>Add</button>}
+              {<button className={'Button draggableCancel'} onClick={ctx.duplicateScene.bind(ctx)}>Duplicate</button>}
               <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
             </div>
             <div className={'AllScenes'}>
