@@ -63,14 +63,14 @@ class Channels extends Component {
         if (!mute.isMute || !mute.muteValue)
         {
           // Find the dictionary definitions of functions
-          var scenePatterns;
+          let scenePatterns;
           _.each(ctx.props.matrices, function(d){
             if(d.matName === ctx.props.active){
               scenePatterns = d.patterns;
             }
           })
 
-          var runNo = _.floor(click.current % channel.step);
+          let runNo = _.floor(click.current % channel.step);
           if (!loop.isLoop && (_.toInteger(click.current / channel.step) > loop.pauseTurn)) {
             runNo = channel.step-1;
             store.dispatch(consoleSubmit(tidalServerLink, channel.name + " $ silence"));
@@ -80,7 +80,7 @@ class Channels extends Component {
             return;
           }
 
-          var stepvalue = "";
+          let stepvalue = "";
           if (!_.isUndefined(runNo)) {
             stepvalue = channel.vals[runNo];
           }
@@ -110,7 +110,7 @@ class Channels extends Component {
     const ctx = this;
     const { click } = ctx.props;
     const { loop } = ctx.state;
-    var   currentStep = _.floor(click.current % item.step);
+    let   currentStep = _.floor(click.current % item.step);
 
     if (!loop.isLoop && (_.toInteger(click.current / item.step) > loop.pauseTurn))
       currentStep = item.step - 1;
@@ -123,6 +123,7 @@ class Channels extends Component {
         index={i}
         c_cid={item.cid}
         currentStep={currentStep}
+        active={ ctx.props.active}
         s_key={ctx.props.scene_key} >
       </SelectableComponent>
     )
@@ -144,7 +145,7 @@ class Channels extends Component {
     const deleteChannel = event => {
       if (confirm('Are you sure you want to delete this channel?')) {
         fbdeletechannelinscene('Matrices', ctx.props.scene_key, item.key)
-        var _cid = 0;
+        let _cid = 0;
         _.each(Object.values(ctx.props.channel), function(ch,i){
           if(ch.scene=== ctx.props.active){
             ch.cid = _cid;
@@ -179,7 +180,7 @@ class Channels extends Component {
                             hasSilenced: false}});
     }
     const step = parseInt(item.step, 10);
-    var channelClass = "ChannelItem";
+    let channelClass = "ChannelItem";
     if ((!loop.isLoop &&  loop.hasSilenced) ||
         ( solo.isSolo && !solo.soloValue) ||
         ( mute.isMute && mute.muteValue))

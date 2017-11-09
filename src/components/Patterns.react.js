@@ -9,9 +9,9 @@ import '../assets/_rule.js';
 import './style/_style.css'
 
 // Grid Layout
-var ReactGridLayout = require('react-grid-layout');
-var WidthProvider = ReactGridLayout.WidthProvider;
-var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+let ReactGridLayout = require('react-grid-layout');
+let WidthProvider = ReactGridLayout.WidthProvider;
+let ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 class Patterns extends Component {
@@ -28,7 +28,7 @@ class Patterns extends Component {
   }
   //Pattern Dictionary
   addPattern() {
-    var flag = false;
+    let flag = false;
     const ctx = this
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === ctx.props.active){
@@ -61,7 +61,7 @@ class Patterns extends Component {
     const ctx = this;
     const handleChange = (editor, metadata, value) => {
       // parse pattern for parameters
-      var re = /`([^`]+)`/g, match = re.exec(value), matches = [];
+      let re = /`([^`]+)`/g, match = re.exec(value), matches = [];
       while (match) {
         const param_default = _.split(match[1], '?');
         if(_.indexOf(matches, param_default[0]) === -1){
@@ -99,7 +99,7 @@ class Patterns extends Component {
         })
     }
 
-    var options = {
+    let options = {
         mode: '_rule',
         theme: '_style',
         fixedGutter: true,
@@ -141,7 +141,7 @@ class Patterns extends Component {
   render() {
     const ctx = this;
     const { modelName, name } = ctx.state;
-    var items = ctx.props[modelName.toLowerCase()];
+    let items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);
     _.each(scenes, function(d){
       if(d.matName === ctx.props.active){
@@ -151,7 +151,7 @@ class Patterns extends Component {
         }
       }
     })
-    var iterator = 0;
+    let iterator = 0;
     _.each(items, function(d){
       d.index = iterator++;
     })

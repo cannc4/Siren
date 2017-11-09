@@ -50,15 +50,15 @@ import './style/Dropdown.css';
 import './style/ContextMenu.css';
 
 // Key binding
-var keymaster = require('keymaster');
+let keymaster = require('keymaster');
 
 // Input system
-var MaskedInput = require('react-maskedinput')
+let MaskedInput = require('react-maskedinput')
 
 // Layouting
-var ReactGridLayout = require('react-grid-layout');
-var WidthProvider = ReactGridLayout.WidthProvider;
-var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+let ReactGridLayout = require('react-grid-layout');
+let WidthProvider = ReactGridLayout.WidthProvider;
+let ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 // React Performance measurement
@@ -148,7 +148,7 @@ class Home extends Component {
        ctx.state.username === '')
     {
       ctx.setState({username: nextProps.user.user.name});
-      var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
+      let obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
       Firebase.database().ref("/matrices").child(obj.key).remove();
     }
   }
@@ -222,7 +222,7 @@ class Home extends Component {
     const body=event.target.value
     const ctx=this;
 
-    var temp = body;
+    let temp = body;
     ctx.setState({globalTransformations:temp});
   }
   handleGlobalCommands = event => {
@@ -266,6 +266,7 @@ class Home extends Component {
   }
   handleGlobalsqDuration = event => {
     const ctx=this;
+    
     ctx.setState({globalsq: event.target.value});
   }
   ////////////////////////////// HANDLERS ////////////////////////////
@@ -274,7 +275,7 @@ class Home extends Component {
   ////////////////////////////// SCENES ////////////////////////////
   addItem() {
     const ctx = this;
-    var patterns = [],
+    let patterns = [],
         globals = [],
         channels = []
     const checkSceneName = function(newName, items) {
@@ -310,7 +311,7 @@ class Home extends Component {
       // })
 
       if ( checkSceneName(matName, items) ) {
-        var snd = Object.values(items).length;
+        let snd = Object.values(items).length;
         store.dispatch(globalStore(globals, storedPatterns));
         fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
         ctx.setState({sceneIndex: snd, storedGlobals: globals});
@@ -325,13 +326,13 @@ class Home extends Component {
   renderScene(item, dbKey, i) {
     const ctx = this;
     const { activeMatrix } = ctx.state;
-    var sglobals = [];
+    let sglobals = [];
     _.forEach(item.storedGlobals, function(d, i){
       sglobals.push(d);
     });
 
     const updateMatrix = () => {
-      var gpressed = [];
+      let gpressed = [];
       _.forEach(item.storedGlobals, function(d, i){
         gpressed[i] = false;
       });
@@ -398,7 +399,7 @@ class Home extends Component {
   addChannel() {
     const ctx = this
     const { activeMatrix, c_type, c_name, c_step, c_transition } = ctx.state;
-    var flag = false;
+    let flag = false;
 
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === activeMatrix) {
@@ -420,18 +421,18 @@ class Home extends Component {
             alert('Invalid type');
           }
           else{
-            var _index=0;
+            let _index=0;
             _.each(d.channels, function(chan,i){
               _index++;
             })
             ctx.setState({ c_id : _index });
 
-            var values = {}
-            for(var i = 0; i < c_step; i++){
+            let values = {}
+            for(let i = 0; i < c_step; i++){
               values[i] = '';
             }
 
-            var nc = { scene: activeMatrix,
+            let nc = { scene: activeMatrix,
               cid: _index,
               type: c_type,
               name: c_name,
@@ -440,7 +441,7 @@ class Home extends Component {
               vals: values
             };
 
-            var obj = fbcreatechannelinscene('Matrices', nc, d.key);
+            let obj = fbcreatechannelinscene('Matrices', nc, d.key);
             nc['key'] = obj;
             store.dispatch(createChannel(nc));
             const newCell = {cstep: c_step, cid: _index };
@@ -456,11 +457,11 @@ class Home extends Component {
   }
   clearMatrix(){
     const ctx = this;
-    var { channel, matrices, user} = ctx.props;
+    let { channel, matrices, user} = ctx.props;
     const { activeMatrix } = ctx.state;
 
     // Get scene key
-    var s_key;
+    let s_key;
     _.each(matrices, function(scene, i){
       if(scene.uid === user.user.uid && scene.matName === activeMatrix)
       {
@@ -484,8 +485,8 @@ class Home extends Component {
     _.each(items, function(j) {
       if(j.key === x.i){
         j.step = x.h - 1;
-        var newVals = [];
-        for(var a = 0 ; a < j.step; a++){
+        let newVals = [];
+        for(let a = 0 ; a < j.step; a++){
           if(j.vals[a]!==undefined)  newVals[a] = j.vals[a];
           else                       newVals[a] = ''
         }
@@ -509,12 +510,12 @@ class Home extends Component {
         solo={{isSolo: _.indexOf(ctx.state.soloArray, true) !== -1, soloValue: ctx.state.soloArray[item.cid]}}
         mute={{isMute: _.indexOf(ctx.state.muteArray, true) !== -1, muteValue: ctx.state.muteArray[item.cid]}}
         soloOnClick={function(cid) {
-          var temp = _.times(channelLen, _.stubFalse)
+          let temp = _.times(channelLen, _.stubFalse)
           temp[cid] = !ctx.state.soloArray[cid];
           ctx.setState({soloArray: temp});
         }}
         muteOnClick={function(cid) {
-          var temp = ctx.state.muteArray;
+          let temp = ctx.state.muteArray;
           temp[cid] = !ctx.state.muteArray[cid];
           ctx.setState({muteArray: temp});
         }}/>
@@ -527,8 +528,8 @@ class Home extends Component {
       const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
       const onClick = event => {
         const ctx = this;
-        // var posX = event.nativeEvent.offsetX,
-        var posY = event.nativeEvent.offsetY;
+        // let posX = event.nativeEvent.offsetX,
+        let posY = event.nativeEvent.offsetY;
 
         ctx.setState({controlledPosition: {x: 0, y: _.toInteger(posY/40)*40}});
 
@@ -542,13 +543,13 @@ class Home extends Component {
         store.dispatch(seekTimer(_.toInteger(y/40)));
       }
 
-      var items;
+      let items;
       if (!_.isUndefined(scene)) {
         items = scene.channels;
       }
       const items_length = _.isUndefined(items) ? 0 : items.length;
 
-      var max_step = 0;
+      let max_step = 0;
       _.each(ctx.props.channel, function(ch,k){
         if(ch.scene === activeMatrix)
           max_step = _.max([ch.step, max_step]);
@@ -584,11 +585,11 @@ class Home extends Component {
   }
 
   onAddlayoutItem(specifier){
-    var layouts = this.props.layout.windows;
+    let layouts = this.props.layout.windows;
     store.dispatch(forceUpdateLayout(_.concat(layouts, _.find(this.state.default_layout, ['i', specifier])), layouts.length));
   }
   onRemovelayoutItem(specifier){
-    var layouts = this.props.layout.windows;
+    let layouts = this.props.layout.windows;
     if(layouts !== undefined) {
       _.forEach(layouts, function(item, i) {
         if (item.i === specifier) {
@@ -601,7 +602,7 @@ class Home extends Component {
   }
   onLayoutChange(layout) {
     const ctx = this;
-    var temp_layouts = []
+    let temp_layouts = []
     _.forEach(layout, function(l) {
       const propItem = _.find(ctx.props.layout.windows, ['i', l.i]);
       l.isVisible = propItem.isVisible;
@@ -637,9 +638,9 @@ class Home extends Component {
 
   makeMatrixFullscreen() {
     this.setState({manual_layout_trig: true});
-    var layouts = this.props.layout.windows
+    let layouts = this.props.layout.windows
     if(layouts !== undefined) {
-      var found = false;
+      let found = false;
       _.forEach(layouts, function(item, i) {
         if (item.i === 'matrix') {
           layouts[i].y = 0;
@@ -678,10 +679,10 @@ class Home extends Component {
 
     const items = ctx.props[ctx.state.modelName.toLowerCase()];
     const maskedInputDurations=  _.repeat("1.1  ", 4);
-    const maskedInputPatterns = "1 | " + _.repeat("1  ", storedPatterns.length-1);
+    const maskedInputPatterns = "1 | " + _.repeat("1  ", 10);
     const getGridParameters = (specifier) => {
       const itemToCopy = _.find(ctx.props.layout.windows, ['i', specifier]);
-      var newGridParameters = {x: 0, y:100, h:1, w:1, minW:0, isVisible: false};
+      let newGridParameters = {x: 0, y:100, h:1, w:1, minW:0, isVisible: false};
       if(itemToCopy){
         newGridParameters.x = itemToCopy.x;
         newGridParameters.y = itemToCopy.y;
@@ -873,8 +874,8 @@ class Home extends Component {
     const globalparams = ctx.props.globalparams;
     const scenes = ctx.props.matrices;
 
-    var pr = pressed;
-    for(var sp = 0; sp < pr.length; sp++){
+    let pr = pressed;
+    for(let sp = 0; sp < pr.length; sp++){
       if(parseInt(event.target.id, 10) === sp){
         pr[sp] = true;
       }
@@ -884,7 +885,7 @@ class Home extends Component {
     }
     ctx.setState({ pressed: pr });
 
-    var matkey;
+    let matkey;
     _.each(scenes , function (sc, i) {
       if(sc.key === sceneIndex){
         ctx.setState({storedGlobals: sc.storedGlobals})
@@ -892,7 +893,7 @@ class Home extends Component {
       }
     })
 
-    var ttm;
+    let ttm;
     if (event.altKey) {
       // Delete content of the item
       ttm = storedGlobals;
@@ -926,8 +927,8 @@ class Home extends Component {
     const {pressed,globalChannels,globalTransformations,globalCommands,storedGlobals,
           sceneIndex, storedPatterns}=ctx.state;
 
-    var ns;
-    var temp = {transform: globalTransformations,
+    let ns;
+    let temp = {transform: globalTransformations,
                 command: globalCommands,
                 selectedChannels:globalChannels};
 
@@ -947,8 +948,8 @@ class Home extends Component {
       ns.push(temp);
     }
 
-    var pr = pressed;
-    for(var pk = 0; pk <= storedGlobals.lenght; pk++){
+    let pr = pressed;
+    for(let pk = 0; pk <= storedGlobals.lenght; pk++){
       if(storedGlobals.lenght-1 === pk){
         pr[pk] = true;
       }
@@ -966,8 +967,8 @@ class Home extends Component {
     const {globalsq,storedGlobals,sqActive_UI,
            sqActive,helperindex,global_helperindex} = ctx.state;
 
-    // var gbchan = globalChannels.split(" ");
-    var gbdur = globalsq.split(" ");
+    // let gbchan = globalChannels.split(" ");
+    let gbdur = globalsq.split(" ");
 
     if(gbdur.length >= helperindex)
       ctx.setState({sqActive:false});
@@ -975,7 +976,7 @@ class Home extends Component {
     if(Object.values(storedGlobals).length >= helperindex)
       ctx.setState({global_helperindex:0});
 
-    var compileDuration, selGlobalPair;
+    let compileDuration, selGlobalPair;
     if(sqActive_UI === true){
       if(sqActive === false){
         ctx.setState({helperindex:0});
@@ -985,8 +986,8 @@ class Home extends Component {
         ctx.setState({sqActive :true});
       }
       else if (sqActive === true){
-        var k = helperindex+1;
-        var gk = global_helperindex+1;
+        let k = helperindex+1;
+        let gk = global_helperindex+1;
         ctx.setState({helperindex:k, global_helperindex:gk});
         compileDuration = gbdur[helperindex] * 1000;
         selGlobalPair = _.random(Object.values(storedGlobals).length-1);
@@ -1003,14 +1004,14 @@ class Home extends Component {
 
     const ctx = this;
     const { globalChannels} = ctx.state;
-    var tempAr = [] ;
-    var gbchan = globalChannels.split(" ");
+    let tempAr = [] ;
+    let gbchan = globalChannels.split(" ");
 
     if (gbchan === undefined ||gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='0' ){
-      for (var i = 0; i < storedPatterns.length; i++) {
+      for (let i = 0; i < storedPatterns.length; i++) {
           if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-            var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-            var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+            let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+            let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
             tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
             ctx.consoleSubmit(tidalServerLink, tempAr[i]);
           }
@@ -1018,10 +1019,10 @@ class Home extends Component {
       }
     else {
     _.forEach( gbchan, function(chan, j){
-        var i = parseInt(chan, 10) - 1;
+        let i = parseInt(chan, 10) - 1;
         if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-          var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-          var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+          let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+          let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
           tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
           ctx.consoleSubmit(tidalServerLink, tempAr[i]);
         }
@@ -1032,10 +1033,10 @@ class Home extends Component {
     const ctx = this;
     const {tidalServerLink, storedGlobals, pressed,storedPatterns} = ctx.state;
 
-    for (var i = 0; i < storedPatterns.length; i++) {
+    for (let i = 0; i < storedPatterns.length; i++) {
     if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-      var pr = pressed;
-      for(var sp = 0; sp < pr.length; sp++){
+      let pr = pressed;
+      for(let sp = 0; sp < pr.length; sp++){
         if(selected_global_index === sp){
           pr[sp] = true;
         }
@@ -1044,9 +1045,9 @@ class Home extends Component {
         }
       }
 
-      var patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-      var patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
-      var tr,cm,slc;
+      let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+      let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+      let tr,cm,slc;
       if (storedGlobals[selected_global_index].transform === undefined)
         tr = '';
       else
@@ -1063,7 +1064,7 @@ class Home extends Component {
         slc = storedGlobals[selected_global_index].selectedChannels;
 
 
-      var pattern = patname + tr + patternbody +cm;
+      let pattern = patname + tr + patternbody +cm;
       ctx.consoleSubmit(tidalServerLink, pattern);
       ctx.setState({globalCommands: cm,
                     globalTransformations: tr,
@@ -1089,7 +1090,7 @@ class Home extends Component {
     // console.log(ctx.props.sccommand.commands);
 
     // Layout height params for fullscreen
-    var vertical_n = 20,
+    let vertical_n = 20,
         h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
         margin = 7,
         row_height = (h-(vertical_n+1)*margin)/vertical_n;

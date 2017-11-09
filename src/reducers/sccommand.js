@@ -8,7 +8,7 @@ export default (state = INITIAL_STATE, action) => {
       return state;
     case 'DEBUG_'+modelName:
       const c = state;
-      var console_len = 20;
+      let console_len = 20;
       c.debugconsole = _.concat(c.debugconsole,Object.values(action.payload));
       if(c.debugconsole.length > console_len){
         c.debugconsole = _.drop( c.debugconsole , console_len);

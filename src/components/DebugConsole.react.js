@@ -16,7 +16,7 @@ class DebugConsole extends Component {
   }
 
   componentDidMount() {
-    var sockett = io('http://localhost:3004/'); // TIP: io() with no args does auto-discovery
+    let sockett = io('http://localhost:3004/'); // TIP: io() with no args does auto-discovery
 
     sockett.on("dcon", data => {
       store.dispatch(dCon(data ));
@@ -25,7 +25,7 @@ class DebugConsole extends Component {
 
   render() {
     const ctx = this;
-    var message = ctx.props.tidal.debugconsole;
+    let message = ctx.props.tidal.debugconsole;
     if(_.isObject(message)) {
       message = JSON.stringify(message);
     }

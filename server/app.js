@@ -10,11 +10,11 @@ const startSCD = `${__dirname}/scd_start-default.scd`;
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 
-var exec = require('child_process').exec;
-var synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
-var jsonfile = require('jsonfile')
+let exec = require('child_process').exec;
+let synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
+let jsonfile = require('jsonfile')
 
-var dcon = socketIo.listen(3004);
+let dcon = socketIo.listen(3004);
 
 class REPL {
   hush() {
@@ -61,10 +61,10 @@ class REPL {
         let cycleStack = [[]];
 
 
-        var dconSC = socketIo.listen(3006);
+        let dconSC = socketIo.listen(3006);
 
-        var osc = require("osc");
-        var udpPort = new osc.UDPPort({
+        let osc = require("osc");
+        let udpPort = new osc.UDPPort({
             // This is where sclang is listening for OSC messages.
             remoteAddress: "127.0.0.1",
             remotePort: 3007,
@@ -76,14 +76,14 @@ class REPL {
 
         sclang.on('stdout', function(d) {
           // Converts 'd' into an object
-          var re = /\[.+\]/g, match = re.exec(d);
+          let re = /\[.+\]/g, match = re.exec(d);
           if(match !== null && match !== undefined && match[0] !== undefined) {
-            var msg = _.split(_.trim(match[0], '[]'), ',')
+            let msg = _.split(_.trim(match[0], '[]'), ',')
             _.each(msg, function(m, i) {
               msg[i] = _.trim(m)
             })
 
-            var time = 0;
+            let time = 0;
             re = /(time:).+/g;
             match = re.exec(d);
             if(match !== null && match !== undefined && match[0] !== undefined) {
@@ -95,7 +95,7 @@ class REPL {
               let cycleTime = time;
 
               /// Message for unity
-              var unityMessage = {
+              let unityMessage = {
                 address: "/siren",
                 args: [
                   {
@@ -127,7 +127,7 @@ class REPL {
                 };
               }
               else {
-                var object = _.find(cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber],
+                let object = _.find(cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber],
                                     ['s', cycleInfo.s]);
                 if (object !== undefined) {
                   if(object.t[object.t.length-1].time !== cycleTime)
@@ -151,7 +151,7 @@ class REPL {
         });
 
         setTimeout(function(){
-          var samples_path;
+          let samples_path;
           // Windows
           if (_.indexOf(config.samples_path, '\\') !== -1) {
             samples_path = _.join(_.split(config.samples_path, /\/|\\/), "\\\\");
@@ -192,7 +192,7 @@ class REPL {
   }
 
   sendSC(message) {
-    var self = this;
+    let self = this;
     self.sc.interpret(message).then(function(result) {
       console.log('sendSC:' , result);
       return result;
@@ -211,15 +211,15 @@ const TidalData = {
 const Siren = () => {
   const app = express();
 
-  var udpHosts = [];
-  var dgram = require("dgram");
-  var UDPserver = dgram.createSocket("udp4");
+  let udpHosts = [];
+  let dgram = require("dgram");
+  let UDPserver = dgram.createSocket("udp4");
 
-  var tick = socketIo.listen(3003);
+  let tick = socketIo.listen(3003);
 
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
-    var address = UDPserver.address();
+    let address = UDPserver.address();
     console.log(" ## -->   UDP server listening on " + address.address + ":" + address.port);
   });
 
@@ -283,7 +283,7 @@ const Siren = () => {
 
   //// Not working
   const generateConfig = (config,reply) => {
-    var configfile = path.join(__dirname, '..', 'config', 'config.json');
+    let configfile = path.join(__dirname, '..', 'config', 'config.json');
     console.log(' - configfile: ', configfile);
     fs.writeFileSync(configfile, JSON.stringify(config), { flag: 'w' }, function(err) {
       if(err) {
