@@ -76,6 +76,7 @@ class Cell extends Component {
       ctx.setState({value: value});
       fbupdatechannelinscene('Matrices', nc, ctx.state.s_key);
     }
+   
     const focusCell = ({ target: { value }}) => {
       const ctx = this;  
       ctx.nameInput.focus();

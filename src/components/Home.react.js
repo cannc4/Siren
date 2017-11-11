@@ -18,6 +18,7 @@ import {sendGlobals,
         deleteChannel,
         createCell,
         selectCell,
+        pasteCell,
         bootCells,
         seekTimer,
         updateLayout,
@@ -93,14 +94,17 @@ class Home extends Component {
       global_helperindex:0,
       username: '',
       storedPatterns: [],
+      selectedCellMain: [],
       storedGlobals: [{transform:'', command: '', selectedChannels: ''}],
       pressed : [],
       c_type: '',
       c_name: '',
       c_step: '',
       c_id: 0,
+      copyCell: false,
       c_transition: '',
       csize: 1,
+      ukey:1,
       controlledPosition: {x: 0, y: 40},
       soloArray: _.times(8, _.stubFalse),
       muteArray: _.times(8, _.stubFalse),
@@ -154,7 +158,7 @@ class Home extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     const ctx = this;
-
+    
     if(prevProps !== ctx.props){
       ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns});
     }
@@ -214,9 +218,106 @@ class Home extends Component {
     store.dispatch(selectCell(selectedKeys));
   }
   handleUnselection() {
-    store.dispatch(selectCell([]))
+    //store.dispatch(selectCell([]))
   }
 
+  copyCells(){
+    const ctx = this;
+    const {selectedCellMain, copyCell} = ctx.state;
+    let selectedCells =  ctx.props.cell.selectedCells;
+    let channels = ctx.props.channel;
+    
+    let temparrb = [];
+    for (var a = 0 ; a < selectedCells.length; a++){
+      let selch = selectedCells[a].split('_')
+      _.each(Object.values(channels), function(ch) {  
+          if (ch.cid === parseInt(selch[0])) {
+            let obj = {
+              name: ch.name,
+              val: ch.vals[parseInt(selch[1])],
+              index:parseInt(selch[1]),
+              selIndex:a,
+              cid: ch.cid,
+              key: ch.key
+            }
+            temparrb[a] = obj; 
+          }
+        })
+      }
+      console.log(temparrb, "ON SELECTION");
+    ctx.setState({selectedCellMain: temparrb, copyCell: true});
+  }
+
+  reOrderCells(){
+    const ctx = this;
+    const {selectedCellMain,copyCell} = ctx.state;
+    let channels = ctx.props.channel;
+    let selectedCells =  ctx.props.cell.selectedCells;
+    let vals = ctx.props.cell.vals;
+    const { activeMatrix, ukey } = ctx.state;
+    const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
+
+    
+    console.log(selectedCells, "TARGETS");
+    console.log(vals, "VALS");
+    console.log(selectedCellMain, "MAIN");
+
+    let temparr = vals;
+    
+    for (var a = 0 ; a < selectedCells.length; a++){
+      let selch = selectedCells[a].split('_')
+      if(vals[parseInt(selch[0])][parseInt(selch[1])]!== undefined){
+        if(selectedCellMain[a]['val'] !== undefined){
+            //temparr[parseInt(selch[0])][parseInt(selch[1])] = selectedCellMain[a].val;
+            _.each(Object.values(channels), function(ch) {  
+              if (ch.cid === parseInt(selch[0])) {
+                let ncell = {
+                  name: ch.name,
+                  val: selectedCellMain[a]['val'],
+                  index:parseInt(selch[1]),
+                  sChan: parseInt(selch[0]),
+                  cid: ch.cid,
+                  key: ch.key
+                  
+                }
+                console.log("FINAL OBJECT", ncell);
+                temparr[ncell['sChan']][ncell['index']] = ncell['val'];
+                //const c_cell = { cell_value: ncell.val, cid: ncell.cid, c_key: ncell.key, cell_index: ncell.index};
+                
+                const nc = { vals: temparr[ncell['sChan']], key: ncell['key'] };
+                fbupdatechannelinscene('Matrices', nc, sceneKey);
+                store.dispatch(pasteCell(temparr));
+               // this.setState({ ukey: Math.random() });
+                //store.dispatch(bootCells(c_cell));
+                
+                
+              }
+            })
+            
+          }
+
+          
+      }
+      
+      
+    }
+
+    ctx.setState({copyCell:false})
+  }
+    
+
+
+    
+    
+    // const sceneKey = _.findKey(ctx.props.matrices, ['matName', ctx.props.active]);
+    
+    
+
+
+
+
+
+  
   // Global Parameters
   handleGlobalTransformations = event => {
     const body=event.target.value
@@ -413,7 +514,7 @@ class Home extends Component {
         pressed:gpressed, sceneIndex:item.key, muteArray: _.times(item.channels.length, _.stubFalse),soloArray: _.times(item.channels.length, _.stubFalse)});
         ctx.updateMatrix(item);
 
-        store.dispatch(globalStore(sglobals,[]));
+        store.dispatch(globalStore(sglobals));
         store.dispatch(globalUpdate('', '', ''));
         _.forEach(item.channels, function(ch, i){
           const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
@@ -567,13 +668,14 @@ class Home extends Component {
 
   renderChannel(scene_key, channelLen, item){
     const ctx = this;
-    const { activeMatrix } = ctx.state;
+    const { activeMatrix,copyCell } = ctx.state;
 
     return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
       <Channels key={item.key}
         active={activeMatrix}
         scene_key={scene_key}
         item={item}
+        paste = {copyCell}
         solo={{isSolo: _.indexOf(ctx.state.soloArray, true) !== -1, soloValue: ctx.state.soloArray[item.cid]}}
         mute={{isMute: _.indexOf(ctx.state.muteArray, true) !== -1, muteValue: ctx.state.muteArray[item.cid]}}
         soloOnClick={function(cid) {
@@ -1152,7 +1254,7 @@ class Home extends Component {
   // Main render method
   render() {
     const ctx=this;
-
+    const copyCell = ctx.state;
     // console.log('Homereact render');
     // console.log(ctx.props.sccommand.commands);
 
@@ -1183,9 +1285,12 @@ class Home extends Component {
     </ContextMenuTrigger>
 
     <ContextMenu id="global_context" className={"draggableCancel"}>
-      <MenuItem data={{value: 1}}>
-        Does nothing
+      <MenuItem data={{value: 1}} onClick = {ctx.copyCells.bind(ctx)}>
+        Copy Steps
       </MenuItem>
+      <MenuItem data={{value: 2}} onClick = {ctx.reOrderCells.bind(ctx)}>
+        Paste Steps
+    </MenuItem>
       <MenuItem divider />
       <SubMenu title={'Modules'}>
         {_.map(ctx.state.default_layout, function(layoutItem, key) {
@@ -1212,6 +1317,7 @@ class Home extends Component {
         })}
       </SubMenu>
     </ContextMenu>
+
     </div>
   }
 }

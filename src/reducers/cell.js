@@ -55,9 +55,13 @@ export default (state = INITIAL_STATE, action) => {
       l.vals[action.payload.cid] = newVals;
       return {...l};
     case 'SELECT_'+modelName:
-      const e = state;
-      e.selectedCells = action.payload;
-      return {...e};
+        const e = state;
+        e.selectedCells = action.payload;
+        return {...e};
+    case 'PASTE_'+modelName:
+        const pp = state;
+        pp.vals = action.payload;
+        return {...pp};
     default:
         return state;
   }

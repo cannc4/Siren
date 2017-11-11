@@ -393,6 +393,13 @@ export const selectCell = (selectedcell) => {
         dispatch({ type: 'SELECT_CELL', payload: selectedcell });
     };
 }
+
+export const pasteCell = (vals) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'PASTE_CELL', payload: vals });
+    };
+}
 export const updateCell = (cell) => {
     //reducer
     return dispatch => {
@@ -669,7 +676,7 @@ export const globalUpdate = (t, c, d) => {
 }
 export const globalStore = (storedG,storedPatterns) => {
 	return {
-		type: 'STORE_GLOBAL', storedGlobals: storedG, storedPatterns: storedPatterns
+		type: 'STORE_GLOBAL', storedGlobals: storedG
 	}
 }
 
