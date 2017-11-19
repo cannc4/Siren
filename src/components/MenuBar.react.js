@@ -8,7 +8,7 @@ import './style/MenuBar.css'
 
 import { GitHubLogin, logout, chokeClick, resetClick,
          initTidalConsole, sendScPattern, saveScBootInfo,
-         startClick, stopClick} from '../actions'
+         startClick, stopClick, sendPatterns} from '../actions'
 
 let keymaster = require('keymaster');
 
@@ -135,7 +135,7 @@ class MenuBar extends Component {
   render() {
     const ctx = this;
 
-    const { times, serversListening } = ctx.state;
+    const { times, serversListening,tidalServerLink } = ctx.state;
     const { click } = ctx.props;
     const { boot, tidalMenu } = ctx.props.click.response;
 
@@ -194,6 +194,8 @@ class MenuBar extends Component {
           {ctx.props.user.user.email && <button className={"Button"} id={'logout'} onClick={fblogout}>Logout</button>}
           {!ctx.props.user.user.email && <button className={"Button"} id={'login'} onClick={loginGG}>Login</button>}
         </div>
+        <button className={"Button"} onClick={function() {store.dispatch(sendScPattern(tidalServerLink,"s.volume = 0;"))}}>M</button>
+        <button className={"Button"} onClick={function() {store.dispatch(sendPatterns(tidalServerLink,"hush"))}}>H</button>
         <button className={"Button"} onClick={function() {location.reload(true);}}>⭯</button>
       </div>
     </div>)

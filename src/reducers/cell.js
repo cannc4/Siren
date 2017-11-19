@@ -62,6 +62,11 @@ export default (state = INITIAL_STATE, action) => {
         const pp = state;
         pp.vals = action.payload;
         return {...pp};
+    case 'BALANCE_'+modelName:
+        const u = state;
+        var bval = u.state.vals;
+       //sort array here
+        return {...u};
     default:
         return state;
   }

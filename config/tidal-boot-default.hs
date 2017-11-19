@@ -1,6 +1,6 @@
 :set prompt ""
 :module Sound.Tidal.Context
-
+import DxSevenOSC
 import Sound.Tidal.Utils
 import Sound.Tidal.Scales
 import Sound.Tidal.Chords
@@ -14,9 +14,8 @@ import Sound.Tidal.MIDI.Output
 
 (cps, getNow) <- bpsUtils
 
-dx1 <- dxStream
-dx2 <- dxStream
-dx3 <- dxStream
+dx7 <- dxStream
+
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -35,7 +34,7 @@ m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
 m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
 m5 <- midiStream devices "USB MIDI Device Port 2" 1 synthController
 m6 <- midiStream devices "USB MIDI Device Port 2" 2 synthController
-m7 <- midiStream devices "USB MIDI Device Port 2" 3 synthController
+m7 <- midiStream devices "IAC Bus 1" 1 machinedrumController
 m8 <- midiStream devices "USB MIDI Device Port 2" 4 synthController
 
 let bps x = cps (x/2)
@@ -50,6 +49,10 @@ let bps x = cps (x/2)
 
 
 let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
+    toggle t f p = if (1 == t) then f $ p else id $ p
+    toggles :: Pattern Int -> [Pattern a] -> Pattern a
+    toggles p xs = unwrap $ (xs !!!) <$> p
+    (!!!) xs n = xs !! (n `mod` length xs)
     mutelist xs = filterValues (\x -> notElem x xs)
     mute x = filterValues (x /=)
     capj a b p = within (0.5, 0.75) (jux(rev) . stut 8 a b) p
@@ -57,6 +60,35 @@ let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     cap' a b c d e p = within (a, b) (slow 2 . rev . stut c d e) p
     capz a b p = within (0.5, 0.85) (trunc 0.5 . iter 3 . stut 4 a b) p
     layer fs p = stack $ map ($ p) fs
+    sin = sine
+    sq  = square
+    sc  = scale
+    scx = scalex
+    sinf  f = fast f $ sin    -- sine at freq
+    trif  f = fast f $ tri    -- triangle at freq
+    sawf  f = fast f $ saw    -- saw at freq
+    sqf   f = fast f $ sq     -- square at freq
+    randf f = fast f $ rand   -- rand at freq
+    ssin  i o = sc  i o sin   -- scaled sine
+    stri  i o = sc  i o tri   -- scaled triangle
+    ssaw  i o = sc  i o saw   -- scaled saw
+    ssq   i o = sc  i o sq    -- scaled square
+    srand i o = sc  i o rand  -- scaled rand
+    sxsin i o = scx i o sin   -- scaled exponential sine
+    sxtri i o = scx i o tri   -- scaled exponential triangle
+    sxsaw i o = scx i o saw   -- scaled exponential saw
+    sxsq  i o = scx i o sq    -- scaled exponential sqaure
+    sxrand i o = scx i o rand -- scaled exponential rand
+    ssinf  i o f = fast f $ ssin  i o   -- scaled sine at freq
+    strif  i o f = fast f $ stri  i o   -- scaled triangle at freq
+    ssawf  i o f = fast f $ ssaw  i o   -- scaled saw at freq
+    ssqf   i o f = fast f $ ssq   i o   -- scaled square at freq
+    srandf i o f = fast f $ srand i o   -- scaled rand at freq
+    sxsinf i o f = fast f $ sxsin i o   -- scaled exponential sine at freq
+    sxtrif i o f = fast f $ sxtri i o   -- scaled exponential triangle at freq
+    sxsawf i o f = fast f $ sxsaw i o   -- scaled exponential saw at freq
+    sxsqf  i o f = fast f $ sxsq  i o   -- scaled exponential square at freq
+    sxrandf i o f = fast f $ sxrand i o -- scaled exponential random at freq
     ddelayfeedback = mf "ddelayfeedback"
     ddelay = mf "ddelay"
     ddelaytime = mf "ddelaytime"
@@ -308,9 +340,31 @@ let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     hc = grp [hcutoff_p, hresonance_p]
     bp = grp [bandf_p, bandq_p]
     io = grp [begin_p, end_p]
-
-
-
+    randArcs :: Int -> Pattern [Arc]
+    randArcs n = do rs <- mapM (\x -> (pure $ (toRational x)/(toRational n)) <~ rand) [0 .. (n-1)]
+                    let rats = map toRational rs
+                        total = sum rats
+                        pairs = pairUp $ accum 0 $ map ((/total)) rats
+                    return $ pairs -- seqP $ map (\(a,b) -> (a,b,"x")) pairs
+                      where pairUp [] = []
+                            pairUp xs = (0,head xs):(pairUp' xs)
+                            --
+                            pairUp' [] = []
+                            pairUp' (a:[]) = []
+                            pairUp' (a:b:[]) = [(a,1)]
+                            pairUp' (a:b:xs) = (a,b):(pairUp' (b:xs))
+                            --
+                            accum _ [] = []
+                            accum n (a:xs) = (n+a):(accum (n+a) xs)
+    randStruct n = splitQueries $ Pattern f
+      where f (s,e) = mapSnds' fromJust $ filter (\(_,x,_) -> isJust x) $ as
+              where as = map (\(n, (s',e')) -> ((s' + sam s, e' + sam s),
+                                               subArc (s,e) (s' + sam s, e' + sam s),
+                                               n)
+                             ) $ enumerate $ thd' $ head $ arc (randArcs n) (sam s, nextSam s)
+    compressTo (s,e) p = compress (cyclePos s, e-(sam s)) p
+    substruct' :: Pattern Int -> Pattern a -> Pattern a
+    substruct' s p = Pattern $ \a -> concatMap (\(a', _, i) -> arc (compressTo a' (inside (1/toRational(length (arc s (sam (fst a), nextSam (fst a))))) (rotR (toRational i)) p)) a') (arc s a)
 
 :set prompt "tidal> "
 

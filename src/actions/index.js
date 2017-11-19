@@ -406,6 +406,12 @@ export const updateCell = (cell) => {
         dispatch({ type: 'REFINE_CELL', payload: cell });
     };
 }
+export const balanceCell = (cell) => {
+    //reducer
+    return dispatch => {
+        dispatch({ type: 'BALANCE_CELL', payload: cell });
+    };
+}
 export const bootCells = (cell) => {
     //reducer
     return dispatch => {
@@ -451,7 +457,7 @@ export const consoleSubmit = (server, expression) => {
 export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
 	return dispatch => {
 		const getFinalPattern = () => {
-			console.log('INDEXJS ', server,channel,stepValue,scenePatterns,click,globalparams);
+			// console.log('INDEXJS ', server,channel,stepValue,scenePatterns,click,globalparams);
 
 			let math = require('mathjs');
 
@@ -513,24 +519,20 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				return newCommand
 			}
 
+			let newCommand,pattern;
+			// CPS channel handling		
+			if(channel.name === "cps"){
+				pattern  = channel.name + v;
+				return [ pattern ];
+			}
 			// pattern name
 			const cellName = getParameters(v)[0];
-
 			// command of the pattern
 			const cmd = _.find(scenePatterns, c => c.name === cellName);
-			let newCommand;
-
-			// CPS channel handling
-			if( k === 'cps'){
-				newCommand = cellName;
-				return [ k + " " + newCommand ];
-			}
-
 			// other channels
-			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+			if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
 				let cellItem = _.slice(getParameters(v), 1);
 				newCommand = cmd.pattern;
-
 				// Applies parameters
 				if(cmd.params !== '')
 					newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
@@ -544,43 +546,41 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 				})
 
-				// Prepare transition and solo
-				let	transitionHolder, pattern;
-				if (channel.type === "Tidal" && channel.transition !== "" && channel.transition !== undefined ){
-					let na = channel.name.substring(1,channel.name.length);
-					transitionHolder = "t"+ na + " " + channel.transition + " $ ";
-				}
-				else {
-					transitionHolder = k + " $ ";
-				}
-
-				
+				let	transitionHolder;		
 				 if( channel.type === "SuperCollider"){
 					dispatch({ type: 'UPDATE_SCCOMMAND', payload: newCommand });
-					//this.sendScPattern('localhost:3001', newCommand);
+					this.sendScPattern('localhost:3001', newCommand);
+					pattern = '';
 					//console.log(newCommand);
 				}
 				else {
+					if (channel.type === "Tidal" && channel.transition !== "" && channel.transition !== undefined ){
+						// Prepare transition and solo
+						
+						let na = channel.name.substring(1,channel.name.length);
+						transitionHolder = "t"+ na + " " + channel.transition + " $ ";
+					}
+					else {
+						transitionHolder = k + " $ ";
+					}	
 					pattern = transitionHolder + newCommand;
 				}
 
 				// stored patterns
-				globalparams.storedPatterns[channel.cid] = '';
-				globalparams.storedPatterns[channel.cid] = pattern;
+				if( channel.type !== "SuperCollider" || channel.type !== "Visual" ){
+					globalparams.storedPatterns[channel.cid] = '';
+					globalparams.storedPatterns[channel.cid] = pattern;
 
-				// Apply global parameters
-				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
-					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-						pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
-					}
-					else {
-						pattern = transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+					// Apply global parameters
+					if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
+						if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+							pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+						}
+						else {
+							pattern = transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
+						}
 					}
 				}
-				else {
-					pattern = transitionHolder + newCommand ;
-				}
-				
 				return [ pattern ];
 			}
 			else

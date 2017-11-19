@@ -2,6 +2,10 @@
   react-grid-layout css
 */
 
+.draggableCancel {
+  cursor: pointer;
+}
+
 .react-grid-layout {
   position: relative;
   transition: height 200ms ease;

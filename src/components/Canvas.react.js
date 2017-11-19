@@ -16,10 +16,7 @@ class Canvas extends Component {
     super(props)
     this.state = {
       socket_sc: io('http://localhost:3006/'),  // Port 3005 is skipped because
-      cycleInfo: [],                             // a HTC Vive process is using it
-      cycleNumber: 0,
-      subCycleNumber: 0,
-      cycleOffset: 0
+      trigger_msg: {}                           // a HTC Vive process is using it
     }
   }
 
@@ -36,12 +33,10 @@ class Canvas extends Component {
       store.dispatch(saveScBootInfo({boot: 0, tidalMenu: false}));
     });
     socket_sc.on("/sclog", data => {
-      ctx.setState({cycleInfo: data.sclog,
-                    cycleNumber: data.number,
-                    subCycleNumber: data.subCycleNumber,
-                    cycleOffset: data.cycleOffset});
+      ctx.setState({trigger_msg: data.trigger});
 
-      if(_.startsWith(data.sclog, 'SIREN')) {
+      // console.log("SCLog: ", data.trigger);
+      if(_.startsWith(data.trigger, 'SIREN')) {
         store.dispatch(saveScBootInfo({boot: 1, tidalMenu: true}));
       }
     })
@@ -62,14 +57,13 @@ class Canvas extends Component {
 
     let dimensions = ctx.updateDimensions();
 
-    return (<div>
+    return (<div className={"draggableCancel"}>
       <P5Wrapper sketch={sketch}
                  width={dimensions ? dimensions.w: 600}
                  height={dimensions ? dimensions.h: 90}
-                 cycleStack={ctx.state.cycleInfo}
-                 cycleOffset={ctx.state.cycleOffset}
-                 cycleNumber={ctx.state.cycleNumber}
-                 subCycleNumber={ctx.state.subCycleNumber}/>
+                 activeMatrix={ctx.props.activeMatrix}
+                 message={ctx.state.trigger_msg}
+                 serverLink={ctx.props.serverLink}/>
     </div>);
   }
 }
