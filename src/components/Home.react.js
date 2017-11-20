@@ -162,6 +162,7 @@ class Home extends Component {
     if(prevProps !== ctx.props){
       ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns});
     }
+    console.log(ctx.props);
   }
 
 

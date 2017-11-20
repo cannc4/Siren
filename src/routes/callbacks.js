@@ -6,5 +6,6 @@ export function handleEnterHome() {
   store.dispatch(fbfetch('Accounts'));
   store.dispatch(fbfetchlayout('Accounts'));
   store.dispatch(fbfetchscenes('Matrices'));
+  store.dispatch(fbfetch('Seq'));
   store.dispatch(fbauth());
 }

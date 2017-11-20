@@ -13,27 +13,37 @@ Firebase.initializeApp({
 		 databaseURL: "https://eseq-f5fe0.firebaseio.com"
 
 });
+
 const models = {
-  Accounts: {
-    dataSource: Firebase.database().ref("/accounts"),
-    model: {
-      email: 'String',
-      name: 'String',
-      uid: 'String',
+	Seq: {
+		dataSource: Firebase.database().ref("/seq"),
+		model: {
+			name: 'String',
+			params: 'Object',
+			bitmap: 'Object',
+			uid: 'String'
+		}
+	},
+	Accounts: {
+		dataSource: Firebase.database().ref("/accounts"),
+		model: {
+			email: 'String',
+			name: 'String',
+			uid: 'String',
 			layouts: 'Object'
-    }
-  },
-  Matrices: {
-    dataSource: Firebase.database().ref("/matrices"),
-    model: {
-      name: 'String',
-      patterns: 'Object',
+		}
+  	},
+  	Matrices: {
+		dataSource: Firebase.database().ref("/matrices"),
+		model: {
+			name: 'String',
+			patterns: 'Object',
 			channels: 'Object',
-      sceneIndex: 'Integer',
-      storedGlobals: 'Object',
-      uid: 'String'
-    }
-  }
+			sceneIndex: 'Integer',
+			storedGlobals: 'Object',
+			uid: 'String'
+		}
+  	}
 }
 // eslint-disable-next-line
 String.prototype.replaceAt = function(index, character) {
@@ -162,6 +172,23 @@ export function fbcreatepatterninscene(model, data, s_key) {
 		return newObj.update({ key: newObj.key })
 	}
 }
+export function fbupdatepatterninscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
+}
+export function fbdeletepatterninscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
+}
+
+export function fbcreateseq(model, sq, key) {
+	models[model].dataSource.push(sq);
+}
+export function fbupdateseq(model, sq, key) {
+	models[model].dataSource.child(key).update({...sq});
+}
+export function fbdeleteseq(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("seq").child(data['key']).remove();
+}
+
 export function fbcreatechannelinscene(model, data, s_key){
 	if (data['key']) {
 		return models[model].dataSource.child(data['key']).update({...data})
@@ -173,7 +200,14 @@ export function fbcreatechannelinscene(model, data, s_key){
 
 	}
 }
+export function fbupdatechannelinscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+}
 
+export function fbdeletechannelinscene(model, s_key, c_key) {
+	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+	store.dispatch(deleteChannel(c_key));
+}
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
@@ -237,21 +271,14 @@ export function fbcreateMatrix(model, data) {
 export function fbupdateMatrix(model, data) {
 	models[model].dataSource.child(data['key']).update({...data})
 }
-
 export function fbupdate(model, data) {
 	models[model].dataSource.child(data['key']).update({...data})
-}
-export function fbupdatepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbupdateglobalsinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("storedGlobals").update({...data})
 }
 export function fbdelete(model, data) {
 	models[model].dataSource.child(data['key']).remove();
-}
-export function fbdeletepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
 }
 export function fborder(model, data, key) {
 	if(data.patterns === undefined)
@@ -263,6 +290,7 @@ export function fborder(model, data, key) {
 	models[model].dataSource.child(key).update({...data})
 	models[model].dataSource.orderByChild('sceneIndex');
 }
+
 
 export function GitHubLogin() {
 	return (dispatch) => {
@@ -736,14 +764,7 @@ export function resetClick() {
 	}
 }
 
-export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
-}
 
-export function fbdeletechannelinscene(model, s_key, c_key) {
-	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-	store.dispatch(deleteChannel(c_key));
-}
 
 export function fbsavelayout(model, layout, uid, c_id) {
 	if ( uid !== undefined ) {
