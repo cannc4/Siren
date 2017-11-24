@@ -304,6 +304,38 @@ div.cm-s-_style.CodeMirror {
 
 
 
+/*------------ADD CHANNEL PANEL------------*/
+.Canvas {
+}
+.CanvasControls {
+  background: rgba(27, 27, 27, 1);
+  position: fixed;
+  display: inline-flex;
+  height: 25px;
+  width: calc(100% - 32px);
+  vertical-align: middle; 
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 1px solid rgb(180, 180, 180);
+  border-right: 1px solid rgb(180, 180, 180);
+  padding: 0 15px 0 15px;
+  font-size: 10px;
+}
+.CanvasControls input {
+  margin-top: 2.5px;
+  height: 20px;
+  width: 40px;
+}
+.CanvasControls button {
+  margin-top: 2.5px;
+  height: 20px;
+}
+.CanvasSketch {
+  transform: translate(0, 26px);
+}
+
+
+
 /*------------MATRIX PANEL------------*/
 /*All Channels Together*/
 .AllChannels {

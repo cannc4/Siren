@@ -162,7 +162,6 @@ class Home extends Component {
     if(prevProps !== ctx.props){
       ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns});
     }
-    console.log(ctx.props);
   }
 
 
@@ -219,7 +218,7 @@ class Home extends Component {
     store.dispatch(selectCell(selectedKeys));
   }
   handleUnselection() {
-    store.dispatch(selectCell([]));
+    //store.dispatch(selectCell([]))
   }
 
   copyCells(){
@@ -237,7 +236,9 @@ class Home extends Component {
               name: ch.name,
               val: ch.vals[parseInt(selch[1])],
               index:parseInt(selch[1]),
-              selIndex:a
+              selIndex:a,
+              cid: ch.cid,
+              key: ch.key
             }
             temparrb[a] = obj;
           }
@@ -707,10 +708,7 @@ class Home extends Component {
         const ctx = this;
         const {y} = position;
         ctx.setState({controlledPosition: {x: 0 , y: _.toInteger(y/40)*40}});
-       // const nc = { vals: temparr[ncell['sChan']], key: ncell['key'] };
-        //fbupdatechannelinscene('Matrices', nc, sceneKey);
-        // var cell = {first: index, last:index}
-        //store.dispatch(balanceCell(cell));
+
         store.dispatch(seekTimer(_.toInteger(y/40)));
       }
 
@@ -719,6 +717,7 @@ class Home extends Component {
         items = scene.channels;
       }
       const items_length = _.isUndefined(items) ? 0 : items.length;
+
       let max_step = 0;
       _.each(ctx.props.channel, function(ch,k){
         if(ch.scene === activeMatrix)

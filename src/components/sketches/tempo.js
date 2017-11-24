@@ -1,18 +1,16 @@
 import _ from 'lodash';
 import store from '../../store';
-import { consoleSubmit, resetClick, sendScPattern } from '../../actions'
+import { sendScNote,sendScPattern } from '../../actions'
 
 export default function sketch (p) {
   // primary data
   let message,
       totalCycleCount = 8,
       cycleResolution = 12,
-      sampleResolution = 4,
       cycleIndex = 0,
       subCycleIndex = 0;
 
   // data management
-  let grid = [];
   let samples = [];
   let startCycleNumber = 0;
   let activeMatrix = '';
@@ -25,16 +23,231 @@ export default function sketch (p) {
   let isLabels = true;
   let dragStart = [0, 0];
   let dragEnd = [0, 0];
+  let reload = false;
 
   // playback variables
   let isPlay = false;
-  let isPaused = true;
   let time = 0;
-  let playbackArray = [];
   let serverLink = '';
+  let pg = null;
+
+  let c, gl, program;
+
+  let canvasWorker;
+
+  // Helper Functions
+  const getObject = function(sample_name, sample_number, time) {
+    let sample_index = _.findIndex(samples, ['s', sample_name]);
+    if (sample_index >= 0 && samples[sample_index]) {
+      let numbers = samples[sample_index].n;
+      let number_index = _.findIndex(numbers, ['no', sample_number]);
+      if (number_index >= 0 && numbers[number_index]) {
+        let time_array = numbers[number_index].time;
+        if (time_array[time])
+          return [time_array[time], sample_index, number_index, time];
+      } 
+    } 
+    
+    return;
+  }
+  const getObjectByWorldCoordinates = function(mx, my) {
+    let h = p.height/(samples.length);
+    let sampleIndex = _.toInteger(my/h);
+    if(samples[sampleIndex]){
+      let numbers = samples[sampleIndex].n;
+      let _h = h / numbers.length;
+      let numberIndex = _.toInteger((my - sampleIndex*h)/_h);
+      if(numbers[numberIndex].time) {
+        let x = _.toInteger(p.map(mx, 0, p.width, 0, (cycleResolution*totalCycleCount)));
+        if(numbers[numberIndex].time[x])
+          return [numbers[numberIndex].time[x], sampleIndex, numberIndex, x];    
+      }
+    }
+  }
+  const getObjectPosition = function(mx, my) {
+    let w = p.width/(cycleResolution*totalCycleCount);
+    let h = p.height/(samples.length);
+    let sampleIndex = _.toInteger(my/h);
+    if(samples[sampleIndex]){
+      let numbers = samples[sampleIndex].n;
+      let _h = h / numbers.length;
+      let numberIndex = _.toInteger((my - sampleIndex*h)/_h);
+      if(numbers[numberIndex].time) {
+        let x = _.toInteger(p.map(mx, 0, p.width, 0, (cycleResolution*totalCycleCount)));
+        if(numbers[numberIndex].time[x])
+          return [x*w, sampleIndex*h+numberIndex*_h, w, _h]    
+      }
+    }
+  } 
+  const resetExecution = (x) => {
+    for(let a = 0; a < samples.length; a++) {
+      for(let b = 0; b < samples[a].n.length; b++) {
+        for(let c = 0; c < samples[a].n[b].time.length; c++){
+          if (samples[a].n[b].time[c] && c >= x) {
+            samples[a].n[b].time[c].executed = false;
+          }
+        }
+      }
+    }
+  } 
+
+  //
+  // Initialize a texture and load an image.
+  // When the image finished loading copy it into the texture.
+  //
+  // function loadTexture() {
+  //   function isPowerOf2(value) {
+  //     return (value & (value - 1)) === 0;
+  //   }
+
+  //   const texture = gl.createTexture();
+  //   gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  //   let _temp = [];
+  //   let _sum = 0;
+  //   for(let a = 0; a < samples.length; a++) {
+  //     _sum += samples[a].n.length;
+  //     for(let b = 0; b < samples[a].n.length; b++) {
+  //       for(let c = 0; c < samples[a].n[b].time.length; c++){
+  //         if (samples[a].n[b].time[c]) {
+  //           _temp[b*samples[a].n.length+c] = 150;
+  //           _temp[b*samples[a].n.length+c+1] = 150;
+  //           _temp[b*samples[a].n.length+c+2] = 150;
+  //         }
+  //         else {
+  //           _temp[b*samples[a].n.length+c] = 0;
+  //           _temp[b*samples[a].n.length+c+1] = 0;
+  //           _temp[b*samples[a].n.length+c+2] = 0;
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   const level = 0;
+  //   const internalFormat = gl.RGB;
+  //   const width = totalCycleCount*cycleResolution;
+  //   const height = _sum;
+  //   const border = 0;
+  //   const srcFormat = gl.RGB;
+  //   const srcType = gl.UNSIGNED_BYTE;
+  //   const data = new Uint8Array(_temp);
+
+  //   gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+  //     width, height, border, srcFormat, srcType,
+  //     data);
+
+  //   if (isPowerOf2(width) && isPowerOf2(height)) {
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  //     gl.generateMipmap(gl.TEXTURE_2D);
+  //   } else {
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  //   }
+
+  //   return texture;
+  // }
+
+  // let vsSource = `
+  //   attribute vec4 position;
+  //   varying highp vec2 vTexCoord;
+
+  //   void main() {
+  //     vTexCoord = position.xy;
+  //     gl_Position = vec4(position.xy,0.,1.);
+  //   }`
+  
+  // let fsSource =  `
+  //   precision highp float;
+
+  //   varying highp vec2 vTexCoord;
+
+  //   uniform mediump sampler2D texture;
+  //   uniform float cycles;
+  //   uniform float resolution;
+  //   uniform float samples;
+
+  //   uniform float time;
+  //   uniform vec2 u_resolution;
+    
+  //   void main()
+  //   {
+  //     vec2 st = gl_FragCoord.xy/u_resolution.xy;
+      
+  //     float x = fract((st.x) * (cycles*resolution*0.5));
+  //     float y = fract((st.y) * samples*0.5);
+
+  //     if(x < 0.02 || x > 0.98) 
+  //     {
+  //       gl_FragColor = vec4(1.,1.,1.,0.1);
+  //     }
+  //     else if (y < 0.02 || y > 0.98) 
+  //     {
+  //       gl_FragColor = vec4(1.,0.,0.,0.2);
+  //     }
+  //     else
+  //     {
+  //       gl_FragColor = texture2D(texture, st);
+  //     }
+  //   }`
 
   p.setup = function () {
     p.createCanvas(1080, 95);
+    
+    canvasWorker = new Worker("./src/components/sketches/tworker.js");
+    canvasWorker.postMessage({type : "resetCanvasTimer"});
+    canvasWorker.onmessage = function(e) {
+      if (e.data.type === "seq") {
+        time = e.data.time;
+        console.log(e.data.notes);
+        store.dispatch(sendScNote(serverLink, e.data.notes));
+        
+                
+      }
+      else if(e.data.type === "sendPattern") {
+        //store.dispatch(sendScNote(serverLink, e.data.notes));        
+      }
+    }
+
+    // p.createCanvas(1080, 95, p.WEBGL);
+
+    // c = document.getElementById("defaultCanvas0");
+    // c.width = p.width;
+    // c.height = p.height;
+
+    // gl = c.getContext("webgl");		
+
+    // program = gl.createProgram();
+
+    // //i leave the error-checking unminified
+    // let vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    // gl.shaderSource(vertexShader, vsSource);
+    // gl.compileShader(vertexShader);
+    // if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS))
+    //     console.error(gl.getShaderInfoLog(vertexShader));
+
+    // let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    // gl.shaderSource(fragmentShader, fsSource);
+    // gl.compileShader(fragmentShader);
+    // if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) 
+    //     console.error(gl.getShaderInfoLog(fragmentShader));
+
+    // gl.attachShader(program, vertexShader);
+    // gl.attachShader(program, fragmentShader);
+    // gl.linkProgram(program);
+    // if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
+    //     console.error(gl.getProgramInfoLog(program));
+    
+    // gl.useProgram(program);
+
+    // //https://github.com/xem/MiniShadertoy/blob/gh-pages/index.html	
+    // gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    // gl.enableVertexAttribArray(0);
+    // gl.vertexAttribPointer(0,2,gl.BYTE,0,0,0);
+    // gl.bufferData(gl.ARRAY_BUFFER, new Int8Array([-3,1,1,-3,1,1]), gl.STATIC_DRAW);
+    
   };
 
   p.myCustomRedrawAccordingToNewPropsHandler = function (props) {
@@ -43,6 +256,7 @@ export default function sketch (p) {
       _w = props.width;
       _h = props.height;
       p.resizeCanvas(_w, _h);
+
     }
 
     if (props.serverLink && serverLink !== props.serverLink) {
@@ -55,12 +269,44 @@ export default function sketch (p) {
       if(activeMatrix !== props.activeMatrix) {
         startCycleNumber = 0;
         samples = [];
-        grid = [];
         activeMatrix = props.activeMatrix;
       }
     }
 
+    if (props.play !== undefined) {
+      if (isPlay !== props.play && props.play === true) {
+        console.log('P5 TWORKER -- start');        
+        canvasWorker.postMessage({type : "startCanvasTimer", 
+                                  cycle: totalCycleCount, 
+                                  resolution: cycleResolution,
+                                  samples: samples});
+      }
+      else if (isPlay !== props.play && props.play === false) {
+        console.log('P5 TWORKER -- reset');
+        canvasWorker.postMessage({type : "resetCanvasTimer"});
+      }
+
+      isPlay = props.play;
+    }
+
+    // update resolution and number of total cycles displayed
+    if (props.resolution && props.cycles) {
+      cycleResolution = props.resolution;
+      totalCycleCount = props.cycles;
+    }
+
+    // refreshes the view
+    if (props.reload) {
+      reload = props.reload;
+      if(reload) {
+        samples = [];
+        if(props.message) startCycleNumber = _.toInteger(props.message.cycle);
+        reload = false;
+      }
+    }
+
     // on message -- form a matrix
+    // sample[i] = {s: 'bd', n: [{no: 0, time: [{asd},{asd},{afs},...]}
     if (props.message && message !== props.message && props.message.s !== undefined) {
       message = props.message;
 
@@ -72,71 +318,50 @@ export default function sketch (p) {
         startCycleNumber = _.toInteger(message.cycle);
         
         samples = [];
-        grid = [];
-        
-        console.log('refresh: ', samples, grid);
       }
       
-      // sample[i] = (16 * 12) x n-array
-      
+      message['executed'] = false;
+
       cycleIndex = _.toInteger(_.toNumber(message.cycle) - startCycleNumber);
       subCycleIndex = _.toInteger(_.toNumber(message.cycle)%1.0 * cycleResolution);
       
       let _n = message.n === undefined ? 0 : _.toInteger(message.n);
       let xcoord = cycleIndex*cycleResolution+subCycleIndex;
       
-      let _index = _.indexOf(samples, message.s);
+      let _index = _.findIndex(samples, ['s', message.s]);
       if(_index === -1){
-        samples[samples.length] = message.s;
-        samples.sort();
-      }
-        
-      if(grid[xcoord] === undefined) grid[xcoord] = []
       
-
-
-
-
-
-      
-      let samplesObject = _.find(grid[xcoord], ['s', message.s]); 
-      if(samplesObject === undefined) {
-        grid[xcoord][grid[xcoord].length] = {s: message.s, n: [_n], msg: [message]};
+        samples[samples.length] = {s: message.s, n: [{no: _n, time: []}]};
+        samples = _.sortBy(samples, 's');
       }
       else {
-        let subSampleIndex = _.indexOf(samplesObject.n, _n);
-        if(subSampleIndex === -1) {
-          subSampleIndex = samplesObject.n.length; 
-          samplesObject.n[subSampleIndex] = _n;
-          samplesObject.msg[subSampleIndex] = message;
+        let sampleNumberArray = samples[_index].n;
+        let _subindex = _.findIndex(sampleNumberArray, ['no', _n]);
+        
+        if(_subindex === -1) {
+          let _t = [];
+          _t[xcoord] = message;
+          samples[_index].n[sampleNumberArray.length] = {no: _n, time: _t}
         }
         else {
-          samplesObject.msg[subSampleIndex] = message;
+          let _t = samples[_index].n[_subindex].time;
+          _t[xcoord] = message;
+          samples[_index].n[_subindex].time = _t;
         }
       }
     }
   };
 
   // KEYBOARD INTERACTIONS
-  // p.keyPressed = function () {
-  //   if (p.keyCode === p.SHIFT)  isInteract = true;
-  // }
-  // p.keyReleased = function () {
-  //   if (p.keyCode === p.SHIFT)  isInteract = false;
-  // }
-  // p.keyTyped = function () {
-  //   if (p.key === 'l')  isLabels = !isLabels;
-  //   if (p.key === ' ') {
-  //     isPlay = !isPlay;
-  //     isPaused = !isPaused;
-
-  //     if ( isPlay ) {
-  //       store.dispatch(resetClick());
-  //       store.dispatch(consoleSubmit(serverLink, "hush"));
-  //       store.dispatch(sendScPattern(serverLink, "OSCFunc.trace(false);"));
-  //     }
-  //   }
-  // }
+  p.keyPressed = function () {
+    if (p.keyCode === p.SHIFT)  isInteract = true;
+  }
+  p.keyReleased = function () {
+    if (p.keyCode === p.SHIFT)  isInteract = false;
+  }
+  p.keyTyped = function () {
+    if (p.key === 'l')  isLabels = !isLabels;
+  }
 
   // MOUSE INTERACTIONS
   p.mouseMoved = function () {
@@ -144,185 +369,199 @@ export default function sketch (p) {
     mouseY = p.mouseY;
   }
 
-  // p.mousePressed = function () {
-  //   dragStart = [mouseX, mouseY];
-  // }
-  // p.mouseReleased = function () {
-  //   dragEnd = [p.mouseX, p.mouseY];
+  p.mousePressed = function () {
+    dragStart = [mouseX, mouseY];
+  }
+  p.mouseReleased = function () {
+    dragEnd = [p.mouseX, p.mouseY];
 
-  //   let h = p.height/(maxSamples);
-
-  //   let x = _.toInteger(p.map(dragStart[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //   let y = _.toInteger(p.map(dragStart[1], 0, p.height, 0, (maxSamples)))
-  //   if(grid[x][y]) {
-  //     let z = _.toInteger(p.map(dragStart[1], h*y, h*(y+1), 0, grid[x][y].length))
-  
-  //     if (grid[x][y].length !== 0) {
-  //       let _x = _.toInteger(p.map(dragEnd[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //       let _y = _.toInteger(p.map(dragEnd[1], 0, p.height, 0, (maxSamples)))
-  //       let _z = _.toInteger(p.map(dragEnd[1], h*_y, h*(_y+1), 0, grid[_x][_y].length))
-  
-  //       let obj = grid[x][y][z];
-  //       obj.s = samples[_y];
-  //       obj.n = samplesNumbers[_y][_z];
-  //       grid[x][y][z] = {};
-  //       grid[_x][_y][_z] = obj;
-
-  //       console.log(_z);
-  //     }
-  //   }
-  // }
-
-  // p.mouseClicked = function () {
-  //   if(isInteract){
-  //     let h = p.height/(maxSamples);
-      
-  //     let x = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //     let y = _.toInteger(p.map(p.mouseY, 0, p.height, 0, (maxSamples)))
-  //     if(grid[x][y]) {
-  //       let z = _.toInteger(p.map(p.mouseY, h*y, h*(y+1), 0, grid[x][y].length))
-  
-  //       let obj = {};
-  //       if (grid[x][y].length === 0) {
-  //         obj = {
-  //           's': samples[y],
-  //           'n': 0,
-  //           'cps' : 1,
-  //           'cycle': p.map(x%cycleResolution, 0, cycleResolution, 0, 1),
-  //           'speed': 1,
-  //           'delay': 0,
-  //           'delaytime' : 0,
-  //           'end': 1,
-  //           'gain': 1
-  //         };
-  //       }
-  //       grid[x][y][z] = obj;
-  //     }
-  //   }
-  // }
-
-  p.draw = function () {
-    p.background(30);
-
-    // Get max sample number
-    // let maxSamples = 
-
-    // Grid lines
-    if(true){
-      for(let rows = 0; rows < samples.length; rows++) {
-        p.stroke(255, 15);
-        p.line(0, rows*(p.height/samples.length), p.width, rows*(p.height/samples.length));
-      }
-      for(let cols = 0; cols < cycleResolution*totalCycleCount; cols++) {
-        p.stroke(255, cols%cycleResolution === 0 ? 30 : 5);
-        p.line(cols*(p.width / (totalCycleCount*cycleResolution)), 0,
-               cols*(p.width / (totalCycleCount*cycleResolution)), p.height);
+    if(dragEnd[0] >= 0 && dragEnd[0] < p.width && dragEnd[1] >= 0 && dragEnd[1] < p.height) { 
+      if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) > 5 || p.abs(dragEnd[0]-dragStart[0]) > 5)) {
+        let h = p.height/(samples.length);
         
-        // Highlight some portions of the grid
+        let x = _.toInteger(p.map(dragStart[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
+        let y = _.toInteger(p.map(dragStart[1], 0, p.height, 0, (samples.length)))
+        if(samples[y]) {
+          let z = _.toInteger(p.map(dragStart[1], h*y, h*(y+1), 0, samples[y].n.length))
+          
+          let _x = _.toInteger(p.map(dragEnd[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
+          let _y = _.toInteger(p.map(dragEnd[1], 0, p.height, 0, (samples.length)))
+          let _z = _.toInteger(p.map(dragEnd[1], h*_y, h*(_y+1), 0, samples[_y].n.length))
+          
+          console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
 
+          if (samples[y].n[z].time[x] !== undefined) {
+            samples[_y].n[_z].time[_x] = samples[y].n[z].time[x];
+            samples[_y].n[_z].time[_x].s = samples[_y].s;
+            samples[_y].n[_z].time[_x].n = samples[_y].n[_z].no;
+            
+            delete samples[y].n[z].time[x];
+
+            console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
+          }
+        }
+      }
+      if (!isInteract) {
+        time = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)));
+
+        resetExecution(time)
       }
     }
+  }
 
-      // delete array on tmex 
-    // let time_x = p.map(time%(totalCycleCount*1000), 0, totalCycleCount*1000, 0, p.width);
-    // p.stroke(150);
-    // p.line(time_x, 0, time_x, p.height);
-    // if (!isPaused) {
-    //   let item_x = _.toInteger(p.map(time_x, 0, p.width, 0, (totalCycleCount*cycleResolution)));
-
-    //   let objs = grid[item_x]
-    //   if(objs) {
-    //     for(let a = 0; a < objs.length; a++) {
-    //       for(let b = 0; b < objs[a].length; b++) {
-    //         if(objs[a][b] && _.indexOf(playbackArray, objs[a][b]) === -1)
-    //         {
-    //           playbackArray[playbackArray.length] = objs[a][b];
-                          
-    //           // [ 'latency', 'cps', 'sound', 'offset', 'begin', 'end', 'speed', 'pan', 'velocity', 'vowel', 'cutoff', 'resonance', 'accelerate', 'shape', 'krio', 'gain', 'cut', 'delay', 'delaytime', 'delayfeedback', 'crush', 'coarse', 'hcutoff', 'hresonance', 'bandqf', 'bandq', 'unit' ]
-    //           let pattern = "sound: \"" + objs[a][b].s + ":"+ objs[a][b].n +"\"";
-    //           store.dispatch(sendScPattern(serverLink, "~d1.(("+ pattern +"));"));
-
-    //           console.log(objs[a][b]);
-    //         }
-    //       }
-    //     }
-    //   }
-    //   time += 1000/p.frameRate();
-    // }
-
-    // Draw
-    if (isDraw){
-
-      // console.log(grid, samples);
-      for(let i = 0; i < (totalCycleCount*cycleResolution); i++) {
-        if(grid[i] !== undefined) {
-          for(let j = 0; j < samples.length; j++) {
-            let obj = _.find(grid[i], ['s', samples[j].s])
-
-            let w = p.width/(totalCycleCount*cycleResolution);
-            let h = p.height/(samples.length);
-            for(let k = 0; obj && k < samples[j].n.length; k++) {
-              if(obj.n[k]){
-                let _h = h / samples[j].n.length;
-                let x = i * w;
-                let y = j * h + _.indexOf(samples[j].n, obj.n[k]) * _h;
+  p.mouseClicked = function () {
+    
+    if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) < 5 && p.abs(dragEnd[0]-dragStart[0]) < 5)){
+      let h = p.height/(samples.length);
+      
+      let x = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)))
+      let y = _.toInteger(p.map(p.mouseY, 0, p.height, 0, (samples.length)))
+      if(samples[y]) {
+        let z = _.toInteger(p.map(p.mouseY, h*y, h*(y+1), 0, samples[y].n.length))
   
+        let obj = {};
+        if (samples[y].n[z].time[x] === undefined) {
+          obj = {
+            's': samples[y].s,
+            'n': samples[y].n[z].no,
+            'executed': false,
+            'cps' : 1,
+            'cycle': p.map(x%cycleResolution, 0, cycleResolution, 0, 1),
+            'speed': 1,
+            'delay': 0,
+            'delaytime' : 0,
+            'end': 1,
+            'gain': 1
+          };
+          samples[y].n[z].time[x] = obj;
+        }else{
+          console.log(samples[y].n[z].time[x]);
+          delete samples[y].n[z].time[x];
+        }
+      }
+    }
+  }
+
+  p.draw = function () {
+
+    // loadTexture();
+
+    // //bind your uniforms here
+    // gl.uniform1f(gl.getUniformLocation(program, "cycles"), totalCycleCount);
+    // gl.uniform1f(gl.getUniformLocation(program, "resolution"), cycleResolution);
+    // gl.uniform1f(gl.getUniformLocation(program, "samples"), samples.length);
+    // gl.uniform1f(gl.getUniformLocation(program, "time"), p.millis());
+    // gl.uniform2fv(gl.getUniformLocation(program, "u_resolution"), [p.width, p.height]);
+    
+    // gl.drawArrays(gl.TRIANGLE_FAN, 0, 3);
+    
+    try {
+      p.background(30);
+
+      p.fill(255, 0, 0)
+      p.text(_.toInteger(p.frameRate()), p.width-50, 10)
+
+      // Grid lines
+      if(true){
+        for(let rows = 0; rows < samples.length; rows++) {
+          p.stroke(255, 15);
+          p.line(0, rows*(p.height/samples.length), p.width, rows*(p.height/samples.length));
+          for(let subrows = 1; subrows < samples[rows].n.length; subrows++) {
+            let _y = rows*(p.height/samples.length) + subrows * (p.height/samples.length) / samples[rows].n.length;  
+            p.stroke(255, 5);
+            p.line(0, _y, p.width, _y);    
+          }
+        }
+        for(let cols = 0; cols < cycleResolution*totalCycleCount; cols++) {
+          p.stroke(255, cols%cycleResolution === 0 ? 30 : 5);
+          p.line(cols*(p.width / (totalCycleCount*cycleResolution)), 0,
+                cols*(p.width / (totalCycleCount*cycleResolution)), p.height);
+        }
+      }
+
+      p.stroke(150);
+      let _time = p.map(time, 0, totalCycleCount*cycleResolution, 0, p.width);
+      p.line(_time, 0, _time, p.height);
+      // if (isPlay) {
+      //   // console.log(isPlay, time);
+      //   if(time > p.width) {
+      //     time -= p.width;
+
+      //     resetExecution(0);        
+      //   }
+
+      //   time += p.width/(p.frameRate() * totalCycleCount)
+      // }
+
+      // Draw
+      if (isDraw){
+        // sample[i] = {s: 'bd', n: [{no: 0, time: [{}x96]]}
+        for(let i = 0; i < samples.length; i++) {
+          let _ns = samples[i].n;
+          
+          let w = p.width/(totalCycleCount*cycleResolution);
+          let h = p.height/(samples.length);
+          
+          for (let j = 0; j < _ns.length; j++) {
+            let _h = h / _ns.length;
+
+            let y = i * h + j * _h;
+            for (let k = 0; k < (totalCycleCount*cycleResolution); k++) {
+              if (_ns[j].time && _ns[j].time[k]){
+                let x = k * w;
+    
                 p.stroke(0);
                 p.fill(200);
                 p.rect(x, y, w, _h);
               }
             }
           }
-
         }
       }
-    }
 
-    // if (isLabels) {
-    //   // console.log(samples);
-    //   for(let i = 0; i < maxSamples; i++) {
-    //     let h = p.height/(maxSamples);
-    //     let y = i * h;
-    //     p.fill(255, 150);
-    //     p.rect(0, y+3, 15, h-3);
-    //     p.push();
-    //     p.fill(0);
-    //     p.translate(7, y+h*0.5);
-    //     p.rotate(p.HALF_PI);
-    //     p.textFont("Courier New");
-    //     p.textStyle(p.BOLD);
-    //     p.textAlign(p.CENTER, p.CENTER);
-    //     p.text(samples[i], 0, 0);
-    //     p.pop();
-    //   }
-    // }
+      if (isLabels) {
+        for(let i = 0; i < samples.length; i++) {
+          let h = p.height/(samples.length);
+          let y = i * h;
+          p.fill(255, 150);
+          p.rect(0, y+3, 15, h-3);
+          p.push();
+          p.fill(0);
+          p.translate(7, y+h*0.5);
+          p.rotate(p.HALF_PI);
+          p.textAlign(p.CENTER, p.CENTER);
+          p.text(samples[i].s, 0, 0);
+          p.pop();
+          for (let j = 0; j < samples[i].n.length; j++) {
+            let _h = h / samples[i].n.length;
+            p.fill(255, 100);
+            p.rect(17, y+j*_h+2, 15, _h-3);
+            p.push();
+            p.fill(0);
+            p.translate(24, y+j*_h+_h*0.5);
+            p.rotate(p.HALF_PI);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text(samples[i].n[j].no, 0, 0);
+            p.pop();
+          }
+        }
+      }
 
-    // // Selection indicator
-    // if(true){
-    //   p.stroke(255);
-    //   p.noFill();
-    //   let w = p.width/(cycleResolution*totalCycleCount);
-    //   let h = p.height/(maxSamples);
-    //   let x = _.toInteger(p.map(mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)));
-    //   let y = _.toInteger(p.map(mouseY, 0, p.height, 0, (maxSamples)));
-    //   if(grid[x] && grid[x][y]){
-    //     let z = _.toInteger(p.map(mouseY, y*h, (y+1)*h, 0, grid[x][y].length));
+      // Selection indicator
+      if(true){
+        p.stroke(255, 0, 0);
+        if (isInteract) p.fill(255, 0, 0, 50) 
+        else            p.noFill();
         
-    //     if(samplesNumbers[y]) {
-    //       let _h = h / samplesNumbers[y].length;
-    //       p.rect(x*w,y*h+z*_h, w,_h);
-    //     }
-    //     else {
-    //       p.rect(x*w,y*h, w,h);
-    //     }
-    //   }
-    // }
+        let pos = getObjectPosition(mouseX, mouseY);
+        if(pos) {
+          p.rect(pos[0], pos[1], pos[2], pos[3]);
+        }
+      }
 
-    // Interaction
-    if (isInteract) {
-      p.stroke(255);
-      p.line(mouseX, 0, mouseX, p.height);
-      p.noStroke();
+    }
+    catch(exception) {
+      console.log("Exception thrown: ", exception)
     }
   };
 };

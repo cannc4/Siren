@@ -13,37 +13,27 @@ Firebase.initializeApp({
 		 databaseURL: "https://eseq-f5fe0.firebaseio.com"
 
 });
-
 const models = {
-	Seq: {
-		dataSource: Firebase.database().ref("/seq"),
-		model: {
-			name: 'String',
-			params: 'Object',
-			bitmap: 'Object',
-			uid: 'String'
-		}
-	},
-	Accounts: {
-		dataSource: Firebase.database().ref("/accounts"),
-		model: {
-			email: 'String',
-			name: 'String',
-			uid: 'String',
+  Accounts: {
+    dataSource: Firebase.database().ref("/accounts"),
+    model: {
+      email: 'String',
+      name: 'String',
+      uid: 'String',
 			layouts: 'Object'
-		}
-  	},
-  	Matrices: {
-		dataSource: Firebase.database().ref("/matrices"),
-		model: {
-			name: 'String',
-			patterns: 'Object',
+    }
+  },
+  Matrices: {
+    dataSource: Firebase.database().ref("/matrices"),
+    model: {
+      name: 'String',
+      patterns: 'Object',
 			channels: 'Object',
-			sceneIndex: 'Integer',
-			storedGlobals: 'Object',
-			uid: 'String'
-		}
-  	}
+      sceneIndex: 'Integer',
+      storedGlobals: 'Object',
+      uid: 'String'
+    }
+  }
 }
 // eslint-disable-next-line
 String.prototype.replaceAt = function(index, character) {
@@ -172,23 +162,6 @@ export function fbcreatepatterninscene(model, data, s_key) {
 		return newObj.update({ key: newObj.key })
 	}
 }
-export function fbupdatepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
-}
-export function fbdeletepatterninscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
-}
-
-export function fbcreateseq(model, sq, key) {
-	models[model].dataSource.push(sq);
-}
-export function fbupdateseq(model, sq, key) {
-	models[model].dataSource.child(key).update({...sq});
-}
-export function fbdeleteseq(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("seq").child(data['key']).remove();
-}
-
 export function fbcreatechannelinscene(model, data, s_key){
 	if (data['key']) {
 		return models[model].dataSource.child(data['key']).update({...data})
@@ -200,14 +173,7 @@ export function fbcreatechannelinscene(model, data, s_key){
 
 	}
 }
-export function fbupdatechannelinscene(model, data, s_key) {
-	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
-}
 
-export function fbdeletechannelinscene(model, s_key, c_key) {
-	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
-	store.dispatch(deleteChannel(c_key));
-}
 // data = { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals }
 export function fbcreateMatrix(model, data) {
 	if (Firebase.auth().currentUser !== null)
@@ -271,14 +237,21 @@ export function fbcreateMatrix(model, data) {
 export function fbupdateMatrix(model, data) {
 	models[model].dataSource.child(data['key']).update({...data})
 }
+
 export function fbupdate(model, data) {
 	models[model].dataSource.child(data['key']).update({...data})
+}
+export function fbupdatepatterninscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("patterns").child(data['key']).update({...data})
 }
 export function fbupdateglobalsinscene(model, data, s_key) {
 	models[model].dataSource.child(s_key).child("storedGlobals").update({...data})
 }
 export function fbdelete(model, data) {
 	models[model].dataSource.child(data['key']).remove();
+}
+export function fbdeletepatterninscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("patterns").child(data['key']).remove();
 }
 export function fborder(model, data, key) {
 	if(data.patterns === undefined)
@@ -290,7 +263,6 @@ export function fborder(model, data, key) {
 	models[model].dataSource.child(key).update({...data})
 	models[model].dataSource.orderByChild('sceneIndex');
 }
-
 
 export function GitHubLogin() {
 	return (dispatch) => {
@@ -434,12 +406,6 @@ export const updateCell = (cell) => {
         dispatch({ type: 'REFINE_CELL', payload: cell });
     };
 }
-export const balanceCell = (cell) => {
-    //reducer
-    return dispatch => {
-        dispatch({ type: 'BALANCE_CELL', payload: cell });
-    };
-}
 export const bootCells = (cell) => {
     //reducer
     return dispatch => {
@@ -460,6 +426,16 @@ export const sendScPattern = (server, expression) => {
 		.then((response) => {
 			console.log("sendScPattern response", response);
 			dispatch({ type: 'FETCH_SCCOMMAND', payload: response.data })
+		}).catch(function (error) {
+		});
+	}
+}
+
+export const sendScNote = (server,note) => {
+	return dispatch => {
+		if (!note) return;
+		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scnote', { 'notes': note })
+		.then((response) => {
 		}).catch(function (error) {
 		});
 	}
@@ -547,20 +523,24 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				return newCommand
 			}
 
-			let newCommand,pattern;
-			// CPS channel handling		
-			if(channel.name === "cps"){
-				pattern  = channel.name + v;
-				return [ pattern ];
-			}
 			// pattern name
 			const cellName = getParameters(v)[0];
+
 			// command of the pattern
 			const cmd = _.find(scenePatterns, c => c.name === cellName);
+			let newCommand;
+
+			// CPS channel handling
+			if( k === 'cps'){
+				newCommand = cellName;
+				return [ k + " " + newCommand ];
+			}
+
 			// other channels
-			if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
+			else if(cmd !== undefined && cmd !== null && cmd !== "" && v !== ""){
 				let cellItem = _.slice(getParameters(v), 1);
 				newCommand = cmd.pattern;
+
 				// Applies parameters
 				if(cmd.params !== '')
 					newCommand = processParameters(_.concat( _.split(cmd.params, ','),'t'), newCommand, cellItem);
@@ -574,41 +554,43 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 					newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
 				})
 
-				let	transitionHolder;		
+				// Prepare transition and solo
+				let	transitionHolder, pattern;
+				if (channel.type === "Tidal" && channel.transition !== "" && channel.transition !== undefined ){
+					let na = channel.name.substring(1,channel.name.length);
+					transitionHolder = "t"+ na + " " + channel.transition + " $ ";
+				}
+				else {
+					transitionHolder = k + " $ ";
+				}
+
+
 				 if( channel.type === "SuperCollider"){
 					dispatch({ type: 'UPDATE_SCCOMMAND', payload: newCommand });
-					this.sendScPattern('localhost:3001', newCommand);
-					pattern = '';
+					//this.sendScPattern('localhost:3001', newCommand);
 					//console.log(newCommand);
 				}
 				else {
-					if (channel.type === "Tidal" && channel.transition !== "" && channel.transition !== undefined ){
-						// Prepare transition and solo
-						
-						let na = channel.name.substring(1,channel.name.length);
-						transitionHolder = "t"+ na + " " + channel.transition + " $ ";
-					}
-					else {
-						transitionHolder = k + " $ ";
-					}	
 					pattern = transitionHolder + newCommand;
 				}
 
 				// stored patterns
-				if( channel.type !== "SuperCollider" || channel.type !== "Visual" ){
-					globalparams.storedPatterns[channel.cid] = '';
-					globalparams.storedPatterns[channel.cid] = pattern;
+				globalparams.storedPatterns[channel.cid] = '';
+				globalparams.storedPatterns[channel.cid] = pattern;
 
-					// Apply global parameters
-					if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
-						if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
-							pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
-						}
-						else {
-							pattern = transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
-						}
+				// Apply global parameters
+				if (globalparams.globalChannels.includes(channel.cid.toString()) || globalparams.globalChannels.includes(0)){
+					if(globalparams.globalCommands[0] === '#' || globalparams.globalCommands[1] === '+'||globalparams.globalCommands[1]=== '*'){
+						pattern = transitionHolder + globalparams.globalTransformations + newCommand + globalparams.globalCommands;
+					}
+					else {
+						pattern = transitionHolder + globalparams.globalCommands + newCommand + globalparams.globalTransformations;
 					}
 				}
+				else {
+					pattern = transitionHolder + newCommand ;
+				}
+
 				return [ pattern ];
 			}
 			else
@@ -764,7 +746,14 @@ export function resetClick() {
 	}
 }
 
+export function fbupdatechannelinscene(model, data, s_key) {
+	models[model].dataSource.child(s_key).child("channels").child(data['key']).update({...data})
+}
 
+export function fbdeletechannelinscene(model, s_key, c_key) {
+	models[model].dataSource.child(s_key).child("channels").child(c_key).remove();
+	store.dispatch(deleteChannel(c_key));
+}
 
 export function fbsavelayout(model, layout, uid, c_id) {
 	if ( uid !== undefined ) {
