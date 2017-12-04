@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import store from '../../store';
-import { sendScNote,sendScPattern } from '../../actions'
+import { sendScPattern } from '../../actions'
 
 export default function sketch (p) {
   // primary data
@@ -196,20 +196,16 @@ export default function sketch (p) {
   p.setup = function () {
     p.createCanvas(1080, 95);
     
-    canvasWorker = new Worker("./src/components/sketches/tworker.js");
-    canvasWorker.postMessage({type : "resetCanvasTimer"});
-    canvasWorker.onmessage = function(e) {
-      if (e.data.type === "seq") {
-        time = e.data.time;
-        console.log(e.data.notes);
-        store.dispatch(sendScNote(serverLink, e.data.notes));
-        
-                
-      }
-      else if(e.data.type === "sendPattern") {
-        //store.dispatch(sendScNote(serverLink, e.data.notes));        
-      }
-    }
+    // canvasWorker = new Worker("./src/components/sketches/tworker.js");
+    // canvasWorker.postMessage({type : "resetCanvasTimer"});
+    // canvasWorker.onmessage = function(e) {
+    //   if (e.data.type === "seq") {
+    //     time = e.data.time;
+    //   }
+    //   else if(e.data.type === "sendPattern") {
+    //     store.dispatch(sendScPattern(serverLink, e.data.pattern));        
+    //   }
+    // }
 
     // p.createCanvas(1080, 95, p.WEBGL);
 
@@ -261,7 +257,7 @@ export default function sketch (p) {
 
     if (props.serverLink && serverLink !== props.serverLink) {
       serverLink = props.serverLink;
-      store.dispatch(sendScPattern(serverLink, "~d1 = ~dirt.orbits[0];"));
+      //store.dispatch(sendScPattern(serverLink, "~d1 = ~dirt.orbits[0];"));
     }
 
     // clear data on scene change
@@ -273,21 +269,21 @@ export default function sketch (p) {
       }
     }
 
-    if (props.play !== undefined) {
-      if (isPlay !== props.play && props.play === true) {
-        console.log('P5 TWORKER -- start');        
-        canvasWorker.postMessage({type : "startCanvasTimer", 
-                                  cycle: totalCycleCount, 
-                                  resolution: cycleResolution,
-                                  samples: samples});
-      }
-      else if (isPlay !== props.play && props.play === false) {
-        console.log('P5 TWORKER -- reset');
-        canvasWorker.postMessage({type : "resetCanvasTimer"});
-      }
+    // if (props.play !== undefined) {
+    //   if (isPlay !== props.play && props.play === true) {
+    //     console.log('P5 TWORKER -- start');        
+    //     canvasWorker.postMessage({type : "startCanvasTimer", 
+    //                               cycle: totalCycleCount, 
+    //                               resolution: cycleResolution,
+    //                               samples: samples});
+    //   }
+    //   else if (isPlay !== props.play && props.play === false) {
+    //     console.log('P5 TWORKER -- reset');
+    //     canvasWorker.postMessage({type : "resetCanvasTimer"});
+    //   }
 
-      isPlay = props.play;
-    }
+    //   isPlay = props.play;
+    // }
 
     // update resolution and number of total cycles displayed
     if (props.resolution && props.cycles) {
@@ -353,12 +349,12 @@ export default function sketch (p) {
   };
 
   // KEYBOARD INTERACTIONS
-  p.keyPressed = function () {
-    if (p.keyCode === p.SHIFT)  isInteract = true;
-  }
-  p.keyReleased = function () {
-    if (p.keyCode === p.SHIFT)  isInteract = false;
-  }
+  // p.keyPressed = function () {
+  //   if (p.keyCode === p.SHIFT)  isInteract = true;
+  // }
+  // p.keyReleased = function () {
+  //   if (p.keyCode === p.SHIFT)  isInteract = false;
+  // }
   p.keyTyped = function () {
     if (p.key === 'l')  isLabels = !isLabels;
   }
@@ -369,78 +365,78 @@ export default function sketch (p) {
     mouseY = p.mouseY;
   }
 
-  p.mousePressed = function () {
-    dragStart = [mouseX, mouseY];
-  }
-  p.mouseReleased = function () {
-    dragEnd = [p.mouseX, p.mouseY];
+  // p.mousePressed = function () {
+  //   dragStart = [mouseX, mouseY];
+  // }
+  // p.mouseReleased = function () {
+  //   dragEnd = [p.mouseX, p.mouseY];
 
-    if(dragEnd[0] >= 0 && dragEnd[0] < p.width && dragEnd[1] >= 0 && dragEnd[1] < p.height) { 
-      if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) > 5 || p.abs(dragEnd[0]-dragStart[0]) > 5)) {
-        let h = p.height/(samples.length);
+  //   if(dragEnd[0] >= 0 && dragEnd[0] < p.width && dragEnd[1] >= 0 && dragEnd[1] < p.height) { 
+  //     if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) > 5 || p.abs(dragEnd[0]-dragStart[0]) > 5)) {
+  //       let h = p.height/(samples.length);
         
-        let x = _.toInteger(p.map(dragStart[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-        let y = _.toInteger(p.map(dragStart[1], 0, p.height, 0, (samples.length)))
-        if(samples[y]) {
-          let z = _.toInteger(p.map(dragStart[1], h*y, h*(y+1), 0, samples[y].n.length))
+  //       let x = _.toInteger(p.map(dragStart[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
+  //       let y = _.toInteger(p.map(dragStart[1], 0, p.height, 0, (samples.length)))
+  //       if(samples[y]) {
+  //         let z = _.toInteger(p.map(dragStart[1], h*y, h*(y+1), 0, samples[y].n.length))
           
-          let _x = _.toInteger(p.map(dragEnd[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-          let _y = _.toInteger(p.map(dragEnd[1], 0, p.height, 0, (samples.length)))
-          let _z = _.toInteger(p.map(dragEnd[1], h*_y, h*(_y+1), 0, samples[_y].n.length))
+  //         let _x = _.toInteger(p.map(dragEnd[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
+  //         let _y = _.toInteger(p.map(dragEnd[1], 0, p.height, 0, (samples.length)))
+  //         let _z = _.toInteger(p.map(dragEnd[1], h*_y, h*(_y+1), 0, samples[_y].n.length))
           
-          console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
+  //         console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
 
-          if (samples[y].n[z].time[x] !== undefined) {
-            samples[_y].n[_z].time[_x] = samples[y].n[z].time[x];
-            samples[_y].n[_z].time[_x].s = samples[_y].s;
-            samples[_y].n[_z].time[_x].n = samples[_y].n[_z].no;
+  //         if (samples[y].n[z].time[x] !== undefined) {
+  //           samples[_y].n[_z].time[_x] = samples[y].n[z].time[x];
+  //           samples[_y].n[_z].time[_x].s = samples[_y].s;
+  //           samples[_y].n[_z].time[_x].n = samples[_y].n[_z].no;
             
-            delete samples[y].n[z].time[x];
+  //           delete samples[y].n[z].time[x];
 
-            console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
-          }
-        }
-      }
-      if (!isInteract) {
-        time = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)));
+  //           console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
+  //         }
+  //       }
+  //     }
+  //     if (!isInteract) {
+  //       time = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)));
 
-        resetExecution(time)
-      }
-    }
-  }
+  //       resetExecution(time)
+  //     }
+  //   }
+  // }
 
-  p.mouseClicked = function () {
+  // p.mouseClicked = function () {
     
-    if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) < 5 && p.abs(dragEnd[0]-dragStart[0]) < 5)){
-      let h = p.height/(samples.length);
+  //   if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) < 5 && p.abs(dragEnd[0]-dragStart[0]) < 5)){
+  //     let h = p.height/(samples.length);
       
-      let x = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)))
-      let y = _.toInteger(p.map(p.mouseY, 0, p.height, 0, (samples.length)))
-      if(samples[y]) {
-        let z = _.toInteger(p.map(p.mouseY, h*y, h*(y+1), 0, samples[y].n.length))
+  //     let x = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)))
+  //     let y = _.toInteger(p.map(p.mouseY, 0, p.height, 0, (samples.length)))
+  //     if(samples[y]) {
+  //       let z = _.toInteger(p.map(p.mouseY, h*y, h*(y+1), 0, samples[y].n.length))
   
-        let obj = {};
-        if (samples[y].n[z].time[x] === undefined) {
-          obj = {
-            's': samples[y].s,
-            'n': samples[y].n[z].no,
-            'executed': false,
-            'cps' : 1,
-            'cycle': p.map(x%cycleResolution, 0, cycleResolution, 0, 1),
-            'speed': 1,
-            'delay': 0,
-            'delaytime' : 0,
-            'end': 1,
-            'gain': 1
-          };
-          samples[y].n[z].time[x] = obj;
-        }else{
-          console.log(samples[y].n[z].time[x]);
-          delete samples[y].n[z].time[x];
-        }
-      }
-    }
-  }
+  //       let obj = {};
+  //       if (samples[y].n[z].time[x] === undefined) {
+  //         obj = {
+  //           's': samples[y].s,
+  //           'n': samples[y].n[z].no,
+  //           'executed': false,
+  //           'cps' : 1,
+  //           'cycle': p.map(x%cycleResolution, 0, cycleResolution, 0, 1),
+  //           'speed': 1,
+  //           'delay': 0,
+  //           'delaytime' : 0,
+  //           'end': 1,
+  //           'gain': 1
+  //         };
+  //         samples[y].n[z].time[x] = obj;
+  //       }else{
+  //         console.log(samples[y].n[z].time[x]);
+  //         delete samples[y].n[z].time[x];
+  //       }
+  //     }
+  //   }
+  // }
 
   p.draw = function () {
 
@@ -459,7 +455,6 @@ export default function sketch (p) {
       p.background(30);
 
       p.fill(255, 0, 0)
-      p.text(_.toInteger(p.frameRate()), p.width-50, 10)
 
       // Grid lines
       if(true){
@@ -480,8 +475,8 @@ export default function sketch (p) {
       }
 
       p.stroke(150);
-      let _time = p.map(time, 0, totalCycleCount*cycleResolution, 0, p.width);
-      p.line(_time, 0, _time, p.height);
+    //  let _time = p.map(time, 0, totalCycleCount*cycleResolution, 0, p.width);
+    //  p.line(_time, 0, _time, p.height);
       // if (isPlay) {
       //   // console.log(isPlay, time);
       //   if(time > p.width) {
@@ -548,16 +543,16 @@ export default function sketch (p) {
       }
 
       // Selection indicator
-      if(true){
-        p.stroke(255, 0, 0);
-        if (isInteract) p.fill(255, 0, 0, 50) 
-        else            p.noFill();
+      // if(true){
+      //   p.stroke(255, 0, 0);
+      //   if (isInteract) p.fill(255, 0, 0, 50) 
+      //   else            p.noFill();
         
-        let pos = getObjectPosition(mouseX, mouseY);
-        if(pos) {
-          p.rect(pos[0], pos[1], pos[2], pos[3]);
-        }
-      }
+      //   let pos = getObjectPosition(mouseX, mouseY);
+      //   if(pos) {
+      //     p.rect(pos[0], pos[1], pos[2], pos[3]);
+      //   }
+      // }
 
     }
     catch(exception) {

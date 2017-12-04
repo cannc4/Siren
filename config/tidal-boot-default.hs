@@ -5,10 +5,12 @@ import Sound.Tidal.Utils
 import Sound.Tidal.Scales
 import Sound.Tidal.Chords
 import Data.Maybe
+import Control.Applicative
+
 import Sound.OSC.FD
 import Data.Char (digitToInt)
 
-import Sound.Tidal.MIDI.Machinedrum
+import Sound.Tidal.MIDI.CC
 import Sound.Tidal.MIDI.Context
 import Sound.Tidal.MIDI.Output
 
@@ -28,25 +30,24 @@ dx7 <- dxStream
 (d9,t9) <- superDirtSetters getNow
 devices <- midiDevices
 
-m1 <- midiStream devices "USB MIDI Device Port 1" 1 machinedrumController
-m2 <- midiStream devices "USB MIDI Device Port 1" 2 machinedrumController
-m3 <- midiStream devices "USB MIDI Device Port 1" 3 machinedrumController
-m4 <- midiStream devices "USB MIDI Device Port 1" 4 machinedrumController
-m5 <- midiStream devices "USB MIDI Device Port 2" 1 synthController
-m6 <- midiStream devices "USB MIDI Device Port 2" 2 synthController
-m7 <- midiStream devices "IAC Bus 1" 1 machinedrumController
-m8 <- midiStream devices "USB MIDI Device Port 2" 4 synthController
+m1 <- midiStream devices "USB MIDI Device Port 1" 1 ccallController
+m2 <- midiStream devices "USB MIDI Device Port 1" 2 ccallController
+m3 <- midiStream devices "USB MIDI Device Port 1" 3 ccallController
+m4 <- midiStream devices "USB MIDI Device Port 1" 4 ccallController
+m5 <- midiStream devices "USB MIDI Device Port 2" 1 ccallController
+m6 <- midiStream devices "USB MIDI Device Port 2" 2 ccallController
+m7 <- midiStream devices "IAC Bus 1" 1 ccallController
+m8 <- midiStream devices "USB MIDI Device Port 2" 4 ccallController
 
 let bps x = cps (x/2)
     hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4,m5,m6,m7,m8,m9,dx1,dx2,dx3]
     mjou = mapM_ ($ silence) [m1,m2,m3,m4,m5,m6,m7,m8,m9]
-    jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+    djou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+    jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4,m5,m6,m7,m8,m9]
     solo = (>>) hush
 
 
--- custom Tidal transform/effect functions
--- chordP p = unwrap $ fmap (\name -> stack $ (pure <$>) $ fromMaybe [] $ lookup name chordTable) p
-
+-- custom Tidal transforms/params
 
 let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     toggle t f p = if (1 == t) then f $ p else id $ p
@@ -272,9 +273,6 @@ let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     (thold, thold_p) = pF "thold" (Just 0)
     (tlen, tlen_p) = pF "tlen" (Just 1)
     (trate, trate_p) = pF "trate" (Just 12)
-    (binscr, binscr_p) = pF "binscr" (Just 0)
-    (binshf, binshf_p) = pF "binshf" (Just 0)
-    (binfrz, binfrz_p) = pF "binfrz" (Just 0)
     (conv, conv_p) = pF "conv" (Just 0)
     (decayCurve, decayCurve_p) = pF "decayCurve" (Just 0)
     (noiseDecay, noiseDecay_p) = pF "noiseDecay" (Just 0)
@@ -333,14 +331,29 @@ let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
     (comb, comb_p) = pF "comb" (Just 0)
     (smear, smear_p) = pF "smear" (Just 0)
     (scram, scram_p) = pF "scram" (Just 0)
+    (lbrick, lbrick_p) = pF "lbrick" (Just 0)
+    (hbrick, hbrick_p) = pF "hbrick" (Just 0)
     (binshift, binshift_p) = pF "binshift" (Just 0)
+    (binscr, binscr_p) = pF "binscr" (Just 0)
+    (binshf, binshf_p) = pF "binshf" (Just 0)
+    (binfrz, binfrz_p) = pF "binfrz" (Just 0)
     adsr = grp [attack_p, decay_p, sustain_p, release_p]
     del = grp [delay_p, delaytime_p, delayfeedback_p]
     lc = grp [cutoff_p, resonance_p]
     hc = grp [hcutoff_p, hresonance_p]
     bp = grp [bandf_p, bandq_p]
     io = grp [begin_p, end_p]
-    randArcs :: Int -> Pattern [Arc]
+
+let majork = ["major", "minor", "minor", "major", "major", "minor", "dim7"]
+    minork = ["minor", "minor", "major", "minor", "major", "major", "major"]
+    doriank = ["minor", "minor", "major", "major", "minor", "dim7", "major"]
+    phrygiank = ["minor", "major", "major", "minor", "dim7", "major", "minor"]
+    lydiank = ["major", "major", "minor", "dim7", "major", "minor", "minor"]
+    mixolydiank = ["major", "minor", "dim7", "major", "minor", "minor", "major"]
+    locriank = ["dim7", "major", "minor", "minor", "major", "major", "minor"]
+    keyTable = [("major", majork),("minor", minork),("dorian", doriank),("phrygian", phrygiank),("lydian", lydiank),("mixolydian", mixolydiank),("locrian", locriank),("ionian", majork),("aeolian", minork)]
+    keyL p = (\name -> fromMaybe [] $ lookup name keyTable) <$> p
+    harmonise ch p = scaleP ch p + chord (flip (!!!) <$> p <*> keyL ch)
     randArcs n = do rs <- mapM (\x -> (pure $ (toRational x)/(toRational n)) <~ rand) [0 .. (n-1)]
                     let rats = map toRational rs
                         total = sum rats
@@ -363,9 +376,26 @@ let cap a b p = within (0.25, 0.75) (slow 2 . rev . stut 8 a b) p
                                                n)
                              ) $ enumerate $ thd' $ head $ arc (randArcs n) (sam s, nextSam s)
     compressTo (s,e) p = compress (cyclePos s, e-(sam s)) p
-    substruct' :: Pattern Int -> Pattern a -> Pattern a
     substruct' s p = Pattern $ \a -> concatMap (\(a', _, i) -> arc (compressTo a' (inside (1/toRational(length (arc s (sam (fst a), nextSam (fst a))))) (rotR (toRational i)) p)) a') (arc s a)
-
+    fillIn p' p = struct (splitQueries $ Pattern (f p)) p'
+    f p (s,e) = removeTolerance (s,e) $ invert (s-tolerance, e+tolerance) $ arc p (s-tolerance, e+tolerance)
+    invert (s,e) es = map arcToEvent $ foldr remove [(s,e)] (map snd' es)
+    remove (s,e) xs = concatMap (remove' (s, e)) xs
+    remove' (s,e) (s',e') | s > s' && e < e' = [(s',s),(e,e')] -- inside
+                          | s > s' && s < e' = [(s',s)] -- cut off right
+                          | e > s' && e < e' = [(e,e')] -- cut off left
+                          | s <= s' && e >= e' = [] -- swallow
+                          | otherwise = [(s',e')] -- miss
+    arcToEvent a = (a,a,"x")
+    removeTolerance (s,e) es = concatMap (expand) $ mapSnds' f es
+      where f (a) = concatMap (remove' (e,e+tolerance)) $ remove' (s-tolerance,s) a
+            expand (a,xs,c) = map (\x -> (a,x,c)) xs
+    tolerance = 0.01
+    markovStep tp xs = (fromJust $ elemIndex True $ map (r <=) $ scanl1 (+) (tp!!(head xs))) : xs where
+      r = timeToRand $ fromIntegral $ length xs
+    markovn n xi tp = reverse $ (iterate (markovStep tp) [xi]) !! (n-1)
+    chordP p = unwrap $ fmap (\name -> stack $ (pure <$>) $ fromMaybe [] $ lookup name chordTable) p
+    
 :set prompt "tidal> "
 
 

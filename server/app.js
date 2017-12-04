@@ -293,11 +293,6 @@ const Siren = () => {
     const sc_message = TidalData.TidalConsole.sendSC(pattern);
     reply.status(200).json({ pattern, sc_message });
   }
-  const sendScNote = (notes, reply) => {
-    for (let i = 0; i < notes.length; i++) {
-      TidalData.TidalConsole.sendSC(notes[i]);
-    }
-  }
 
   //// Not working
   const generateConfig = (config,reply) => {
@@ -342,12 +337,6 @@ const Siren = () => {
     _.replace(pattern, "\\", '');
     console.log(' ## -->   SC Pattern inbound:', pattern);
     sendScPattern(pattern, reply);
-  })
-  app.post('/scnote', (req, reply) => {
-    const {notes} = req.body;
-    _.replace(notes, "\\", '');
-    console.log(' ## -->   SC Note inbound:', notes);
-    sendScNote(notes, reply);
   })
 
   app.get('*', errorHandler);

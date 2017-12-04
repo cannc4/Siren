@@ -26,6 +26,7 @@ class Patterns extends Component {
       uid: ''
     }
   }
+  
   //Pattern Dictionary
   addPattern() {
     let flag = false;

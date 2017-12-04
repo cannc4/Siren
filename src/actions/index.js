@@ -430,16 +430,6 @@ export const sendScPattern = (server, expression) => {
 		});
 	}
 }
-
-export const sendScNote = (server,note) => {
-	return dispatch => {
-		if (!note) return;
-		axios.post('http://' + server.replace('http:', '').replace('/', '').replace('https:', '') + '/scnote', { 'notes': note })
-		.then((response) => {
-		}).catch(function (error) {
-		});
-	}
-}
 export const saveScBootInfo = (message) => {
     //reducer
     return dispatch => {
@@ -458,7 +448,7 @@ export const consoleSubmit = (server, expression) => {
 	}
 }
 
-export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams) => {
+export const sendPatterns = (server, channel, stepValue, scenePatterns, click, globalparams, otoc) => {
 	return dispatch => {
 		const getFinalPattern = () => {
 			// console.log('INDEXJS ', server,channel,stepValue,scenePatterns,click,globalparams);
@@ -565,13 +555,30 @@ export const sendPatterns = (server, channel, stepValue, scenePatterns, click, g
 				}
 
 
-				 if( channel.type === "SuperCollider"){
+				if( channel.type === "SuperCollider"){
 					dispatch({ type: 'UPDATE_SCCOMMAND', payload: newCommand });
-					//this.sendScPattern('localhost:3001', newCommand);
-					//console.log(newCommand);
+					this.sendScPattern('localhost:3001', newCommand);
+					console.log(newCommand);
 				}
 				else {
-					pattern = transitionHolder + newCommand;
+					if(otoc === true){
+						if(channel.name === "d1"){
+							pattern = transitionHolder + newCommand + " #orbit 0 ";
+						}
+						else if(channel.name === "d2"){
+							pattern = transitionHolder + newCommand + " #orbit 1 ";
+						}
+						else if(channel.name === "d3"){
+							pattern = transitionHolder + newCommand + " #orbit 2 ";
+						}
+						else if(channel.name === "d4"){
+							pattern = transitionHolder + newCommand + " #orbit 3 ";
+						}
+					}
+					else{
+						pattern = transitionHolder + newCommand;
+					}
+					
 				}
 
 				// stored patterns
@@ -650,21 +657,7 @@ export const consoleSubmitHistory = (server, expression, storedPatterns,channels
 	return dispatch => {
 		let b = new RegExp("^[A-Za-z0-9]+", "g");
 		let chan = expression.match(b)[0];
-		if ( expression === 'jou'){
-			_.each(channels, function (ch, i) {
-				if(ch.type === 'Tidal' || ch.type === 'SCSynth' || ch.type === 'Audio'){
-				storedPatterns[ch.cid] = ch.name + ' $ silence';
-				}
-			})
-		}
-		else if ( expression === 'mjou'){
-			_.each(channels, function (ch, i) {
-				if(ch.type === 'Tidal-MIDI' || ch.type === 'MIDI'){
-					storedPatterns[ch.cid] = ch.name + ' $ silence';
-				}
-			})
-		}
-		else{
+		if(expression !== undefined){
 			_.each(channels, function (ch, i) {
 				if(chan === ch.name){
 					storedPatterns[ch.cid] = expression;

@@ -24,7 +24,7 @@ class Canvas extends Component {
       play: false
     }
   }
-
+  
   componentDidMount() {
     const ctx = this;
     const { socket_sc } = ctx.state;
@@ -69,17 +69,14 @@ class Canvas extends Component {
       store.dispatch(sendScPattern(ctx.props.serverLink, "OSCFunc.trace(false);"));
     }
     const handleClickPause = event => {
-      ctx.setState({play: false})
-      
+      ctx.setState({play: false})  
       store.dispatch(sendScPattern(ctx.props.serverLink, "OSCFunc.trace(true);"));
     }
 
     let dimensions = ctx.updateDimensions();
     return (<div className={"Canvas draggableCancel"}>
       <div className={'CanvasControls'}>
-        <button className={'Button'} onClick={handleClickPlay}> Play </button>
-        <button className={'Button'} onClick={handleClickPause}> Pause </button>
-        <button className={'Button'} onClick={undefined}> BUTTON </button>
+        <button className={'Button'} onClick={undefined}> Edit </button>
         <div>Cycles: <input className={'Input'} 
                             placeholder={8}
                             onChange={(e) => {ctx.setState({cycles: _.toInteger(e.target.value)})}}/></div>

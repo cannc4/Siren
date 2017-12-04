@@ -27,7 +27,7 @@ class MenuBar extends Component {
       username: 'vou',
       tidalServerLink: 'localhost:3001',
       times: 2,
-      serversListening: false,
+      serversListening: true,
       socket_tick: io('http://localhost:3003/')
     }
   }
@@ -53,8 +53,8 @@ class MenuBar extends Component {
     })
     socket_tick.on('disconnect', (reason) => {
       console.log("Port 3003 Disconnected: ", reason);
-      store.dispatch(saveScBootInfo({boot: 0, tidalMenu: false}));
-      ctx.setState({serversListening: false});
+      store.dispatch(saveScBootInfo({boot: 0, tidalMenu: true}));
+      ctx.setState({serversListening: true});
     });
     store.dispatch(saveScBootInfo({boot:0, tidalMenu:true}));
     
@@ -176,9 +176,8 @@ class MenuBar extends Component {
       </div>
       <div className={ctx.props.user.user.email ? 'enabledView' : 'disabledView'} style={{display: 'flex', flexDirection: 'row', height: 40}}>
         <div className={serverStatusClass}></div>
-        {(!tidalMenu && boot === 0) && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Boot Server</button>}
-        {(!tidalMenu && boot === 1) && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Start Server</button>}
-        {tidalMenu && <button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView') } onClick={ctx.stopTidal.bind(ctx)}>Stop Server</button>}
+        {<button className={'Button draggableCancel ' + (serversListening ? ' enabledView' : ' disabledView')} onClick={ctx.runTidal.bind(ctx)}>Boot Server</button>}
+
         <div className={"TimerControls"}>
           {!click.isActive && <img src={require('../assets/play@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
           {click.isActive && <img src={require('../assets/stop@3x.png')} className={(tidalMenu ? 'enabledView' : 'disabledView')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/>}

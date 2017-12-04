@@ -889,7 +889,7 @@ class Home extends Component {
     else if (layoutItem.i === 'scenes') {
       return layoutItem.isVisible && (<div key={"scenes"} className={layoutVisibility} data-grid={getGridParameters('scenes')}>
         <div>
-          <div className={"PanelHeader"}> ■ All Scenes
+          <div className={"PanelHeader"}> ■ Scenes
             <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
           </div>
           <div className={'Scenes PanelAdjuster'}>
@@ -931,7 +931,7 @@ class Home extends Component {
     }
     else if (layoutItem.i === 'channel_add') {
       return layoutItem.isVisible && (<div key={'channel_add'} className={layoutVisibility} data-grid={getGridParameters('channel_add')}>
-        <div className={"PanelHeader"}> ■ Add Channel
+        <div className={"PanelHeader"}> ■ Channel
           <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "channel_add")}>X</span>
         </div>
         <div className={ctx.enableDisableClassname('AddChannel PanelAdjuster')}>
