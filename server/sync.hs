@@ -6,7 +6,7 @@ set_udp_opt k v (UDP s) = N.setSocketOption s k v
 get_udp_opt k (UDP s) = N.getSocketOption s k
 
 main = do fd <- openUDP "127.0.0.1" 3002
-          set_udp_opt N.Broadcast 1 fd
+          Main.set_udp_opt N.Broadcast 1 fd
           clocked $ onTick fd
 
 tempo_n = 1

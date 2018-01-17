@@ -439,6 +439,10 @@ div.cm-s-_style.CodeMirror {
 .MIDI {
   background: rgba(172, 87, 60, 1)
 }
+.PatternRoll {
+  background: rgba(94, 12, 60, 1)
+}
+
 /*Individual Grid Cells*/
 .GridItem {
   display: flex;

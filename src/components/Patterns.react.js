@@ -26,7 +26,6 @@ class Patterns extends Component {
       uid: ''
     }
   }
-  
   //Pattern Dictionary
   addPattern() {
     let flag = false;
@@ -60,6 +59,21 @@ class Patterns extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
+    const nameChange = event => {
+      // console.log(event.target.value);
+
+      // write into database
+      const payload = { key: dbKey };
+      payload['name'] = event.target.value;
+      payload['pattern'] = item['pattern'];
+      payload['params'] = item['params'];
+      _.each(Object.values(ctx.props["matrices"]), function(d){
+        if(d.matName === ctx.props.active){
+          ctx.setState({sceneKey: d.key});
+          fbupdatepatterninscene('Matrices', payload, d.key)
+        }
+      })
+    }
     const handleChange = (editor, metadata, value) => {
       // parse pattern for parameters
       let re = /`([^`]+)`/g, match = re.exec(value), matches = [];
@@ -86,6 +100,7 @@ class Patterns extends Component {
         }
       })
     }
+
     // handle function to delete the object
     // gets the dbkey of to-be-deleted item and removes it from db
     const handleDelete = () => {
@@ -117,8 +132,8 @@ class Patterns extends Component {
         <div key={name} >
           <div key={name} className={'PatternItemInputs'}>
             <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
-            <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={nameChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} readOnly/>
             <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
           <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'}

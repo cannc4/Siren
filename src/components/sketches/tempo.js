@@ -33,7 +33,7 @@ export default function sketch (p) {
 
   let c, gl, program;
 
-  let canvasWorker;
+  // let canvasWorker;
 
   // Helper Functions
   const getObject = function(sample_name, sample_number, time) {
@@ -79,171 +79,20 @@ export default function sketch (p) {
       }
     }
   } 
-  const resetExecution = (x) => {
-    for(let a = 0; a < samples.length; a++) {
-      for(let b = 0; b < samples[a].n.length; b++) {
-        for(let c = 0; c < samples[a].n[b].time.length; c++){
-          if (samples[a].n[b].time[c] && c >= x) {
-            samples[a].n[b].time[c].executed = false;
-          }
-        }
-      }
-    }
-  } 
-
-  //
-  // Initialize a texture and load an image.
-  // When the image finished loading copy it into the texture.
-  //
-  // function loadTexture() {
-  //   function isPowerOf2(value) {
-  //     return (value & (value - 1)) === 0;
-  //   }
-
-  //   const texture = gl.createTexture();
-  //   gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  //   let _temp = [];
-  //   let _sum = 0;
+  // const resetExecution = (x) => {
   //   for(let a = 0; a < samples.length; a++) {
-  //     _sum += samples[a].n.length;
   //     for(let b = 0; b < samples[a].n.length; b++) {
   //       for(let c = 0; c < samples[a].n[b].time.length; c++){
-  //         if (samples[a].n[b].time[c]) {
-  //           _temp[b*samples[a].n.length+c] = 150;
-  //           _temp[b*samples[a].n.length+c+1] = 150;
-  //           _temp[b*samples[a].n.length+c+2] = 150;
-  //         }
-  //         else {
-  //           _temp[b*samples[a].n.length+c] = 0;
-  //           _temp[b*samples[a].n.length+c+1] = 0;
-  //           _temp[b*samples[a].n.length+c+2] = 0;
+  //         if (samples[a].n[b].time[c] && c >= x) {
+  //           samples[a].n[b].time[c].executed = false;
   //         }
   //       }
   //     }
   //   }
-
-  //   const level = 0;
-  //   const internalFormat = gl.RGB;
-  //   const width = totalCycleCount*cycleResolution;
-  //   const height = _sum;
-  //   const border = 0;
-  //   const srcFormat = gl.RGB;
-  //   const srcType = gl.UNSIGNED_BYTE;
-  //   const data = new Uint8Array(_temp);
-
-  //   gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-  //     width, height, border, srcFormat, srcType,
-  //     data);
-
-  //   if (isPowerOf2(width) && isPowerOf2(height)) {
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  //     gl.generateMipmap(gl.TEXTURE_2D);
-  //   } else {
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  //   }
-
-  //   return texture;
-  // }
-
-  // let vsSource = `
-  //   attribute vec4 position;
-  //   varying highp vec2 vTexCoord;
-
-  //   void main() {
-  //     vTexCoord = position.xy;
-  //     gl_Position = vec4(position.xy,0.,1.);
-  //   }`
-  
-  // let fsSource =  `
-  //   precision highp float;
-
-  //   varying highp vec2 vTexCoord;
-
-  //   uniform mediump sampler2D texture;
-  //   uniform float cycles;
-  //   uniform float resolution;
-  //   uniform float samples;
-
-  //   uniform float time;
-  //   uniform vec2 u_resolution;
-    
-  //   void main()
-  //   {
-  //     vec2 st = gl_FragCoord.xy/u_resolution.xy;
-      
-  //     float x = fract((st.x) * (cycles*resolution*0.5));
-  //     float y = fract((st.y) * samples*0.5);
-
-  //     if(x < 0.02 || x > 0.98) 
-  //     {
-  //       gl_FragColor = vec4(1.,1.,1.,0.1);
-  //     }
-  //     else if (y < 0.02 || y > 0.98) 
-  //     {
-  //       gl_FragColor = vec4(1.,0.,0.,0.2);
-  //     }
-  //     else
-  //     {
-  //       gl_FragColor = texture2D(texture, st);
-  //     }
-  //   }`
+  // } 
 
   p.setup = function () {
     p.createCanvas(1080, 95);
-    
-    // canvasWorker = new Worker("./src/components/sketches/tworker.js");
-    // canvasWorker.postMessage({type : "resetCanvasTimer"});
-    // canvasWorker.onmessage = function(e) {
-    //   if (e.data.type === "seq") {
-    //     time = e.data.time;
-    //   }
-    //   else if(e.data.type === "sendPattern") {
-    //     store.dispatch(sendScPattern(serverLink, e.data.pattern));        
-    //   }
-    // }
-
-    // p.createCanvas(1080, 95, p.WEBGL);
-
-    // c = document.getElementById("defaultCanvas0");
-    // c.width = p.width;
-    // c.height = p.height;
-
-    // gl = c.getContext("webgl");		
-
-    // program = gl.createProgram();
-
-    // //i leave the error-checking unminified
-    // let vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    // gl.shaderSource(vertexShader, vsSource);
-    // gl.compileShader(vertexShader);
-    // if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS))
-    //     console.error(gl.getShaderInfoLog(vertexShader));
-
-    // let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    // gl.shaderSource(fragmentShader, fsSource);
-    // gl.compileShader(fragmentShader);
-    // if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) 
-    //     console.error(gl.getShaderInfoLog(fragmentShader));
-
-    // gl.attachShader(program, vertexShader);
-    // gl.attachShader(program, fragmentShader);
-    // gl.linkProgram(program);
-    // if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
-    //     console.error(gl.getProgramInfoLog(program));
-    
-    // gl.useProgram(program);
-
-    // //https://github.com/xem/MiniShadertoy/blob/gh-pages/index.html	
-    // gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    // gl.enableVertexAttribArray(0);
-    // gl.vertexAttribPointer(0,2,gl.BYTE,0,0,0);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Int8Array([-3,1,1,-3,1,1]), gl.STATIC_DRAW);
-    
   };
 
   p.myCustomRedrawAccordingToNewPropsHandler = function (props) {
@@ -257,7 +106,7 @@ export default function sketch (p) {
 
     if (props.serverLink && serverLink !== props.serverLink) {
       serverLink = props.serverLink;
-      //store.dispatch(sendScPattern(serverLink, "~d1 = ~dirt.orbits[0];"));
+      store.dispatch(sendScPattern(serverLink, "~d1 = ~dirt.orbits[0];"));
     }
 
     // clear data on scene change
@@ -268,22 +117,6 @@ export default function sketch (p) {
         activeMatrix = props.activeMatrix;
       }
     }
-
-    // if (props.play !== undefined) {
-    //   if (isPlay !== props.play && props.play === true) {
-    //     console.log('P5 TWORKER -- start');        
-    //     canvasWorker.postMessage({type : "startCanvasTimer", 
-    //                               cycle: totalCycleCount, 
-    //                               resolution: cycleResolution,
-    //                               samples: samples});
-    //   }
-    //   else if (isPlay !== props.play && props.play === false) {
-    //     console.log('P5 TWORKER -- reset');
-    //     canvasWorker.postMessage({type : "resetCanvasTimer"});
-    //   }
-
-    //   isPlay = props.play;
-    // }
 
     // update resolution and number of total cycles displayed
     if (props.resolution && props.cycles) {
@@ -315,8 +148,6 @@ export default function sketch (p) {
         
         samples = [];
       }
-      
-      message['executed'] = false;
 
       cycleIndex = _.toInteger(_.toNumber(message.cycle) - startCycleNumber);
       subCycleIndex = _.toInteger(_.toNumber(message.cycle)%1.0 * cycleResolution);
@@ -326,7 +157,6 @@ export default function sketch (p) {
       
       let _index = _.findIndex(samples, ['s', message.s]);
       if(_index === -1){
-      
         samples[samples.length] = {s: message.s, n: [{no: _n, time: []}]};
         samples = _.sortBy(samples, 's');
       }
@@ -349,112 +179,17 @@ export default function sketch (p) {
   };
 
   // KEYBOARD INTERACTIONS
-  // p.keyPressed = function () {
-  //   if (p.keyCode === p.SHIFT)  isInteract = true;
-  // }
-  // p.keyReleased = function () {
-  //   if (p.keyCode === p.SHIFT)  isInteract = false;
-  // }
   p.keyTyped = function () {
     if (p.key === 'l')  isLabels = !isLabels;
   }
 
-  // MOUSE INTERACTIONS
-  p.mouseMoved = function () {
-    mouseX = p.mouseX;
-    mouseY = p.mouseY;
-  }
-
-  // p.mousePressed = function () {
-  //   dragStart = [mouseX, mouseY];
-  // }
-  // p.mouseReleased = function () {
-  //   dragEnd = [p.mouseX, p.mouseY];
-
-  //   if(dragEnd[0] >= 0 && dragEnd[0] < p.width && dragEnd[1] >= 0 && dragEnd[1] < p.height) { 
-  //     if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) > 5 || p.abs(dragEnd[0]-dragStart[0]) > 5)) {
-  //       let h = p.height/(samples.length);
-        
-  //       let x = _.toInteger(p.map(dragStart[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //       let y = _.toInteger(p.map(dragStart[1], 0, p.height, 0, (samples.length)))
-  //       if(samples[y]) {
-  //         let z = _.toInteger(p.map(dragStart[1], h*y, h*(y+1), 0, samples[y].n.length))
-          
-  //         let _x = _.toInteger(p.map(dragEnd[0], 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //         let _y = _.toInteger(p.map(dragEnd[1], 0, p.height, 0, (samples.length)))
-  //         let _z = _.toInteger(p.map(dragEnd[1], h*_y, h*(_y+1), 0, samples[_y].n.length))
-          
-  //         console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
-
-  //         if (samples[y].n[z].time[x] !== undefined) {
-  //           samples[_y].n[_z].time[_x] = samples[y].n[z].time[x];
-  //           samples[_y].n[_z].time[_x].s = samples[_y].s;
-  //           samples[_y].n[_z].time[_x].n = samples[_y].n[_z].no;
-            
-  //           delete samples[y].n[z].time[x];
-
-  //           console.log(_x,_y,_z, samples[y].n[z].time[x], samples[_y].n[_z].time[_x] );
-  //         }
-  //       }
-  //     }
-  //     if (!isInteract) {
-  //       time = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)));
-
-  //       resetExecution(time)
-  //     }
-  //   }
-  // }
-
-  // p.mouseClicked = function () {
-    
-  //   if(isInteract && (p.abs(dragEnd[1]-dragStart[1]) < 5 && p.abs(dragEnd[0]-dragStart[0]) < 5)){
-  //     let h = p.height/(samples.length);
-      
-  //     let x = _.toInteger(p.map(p.mouseX, 0, p.width, 0, (cycleResolution*totalCycleCount)))
-  //     let y = _.toInteger(p.map(p.mouseY, 0, p.height, 0, (samples.length)))
-  //     if(samples[y]) {
-  //       let z = _.toInteger(p.map(p.mouseY, h*y, h*(y+1), 0, samples[y].n.length))
-  
-  //       let obj = {};
-  //       if (samples[y].n[z].time[x] === undefined) {
-  //         obj = {
-  //           's': samples[y].s,
-  //           'n': samples[y].n[z].no,
-  //           'executed': false,
-  //           'cps' : 1,
-  //           'cycle': p.map(x%cycleResolution, 0, cycleResolution, 0, 1),
-  //           'speed': 1,
-  //           'delay': 0,
-  //           'delaytime' : 0,
-  //           'end': 1,
-  //           'gain': 1
-  //         };
-  //         samples[y].n[z].time[x] = obj;
-  //       }else{
-  //         console.log(samples[y].n[z].time[x]);
-  //         delete samples[y].n[z].time[x];
-  //       }
-  //     }
-  //   }
-  // }
-
   p.draw = function () {
-
-    // loadTexture();
-
-    // //bind your uniforms here
-    // gl.uniform1f(gl.getUniformLocation(program, "cycles"), totalCycleCount);
-    // gl.uniform1f(gl.getUniformLocation(program, "resolution"), cycleResolution);
-    // gl.uniform1f(gl.getUniformLocation(program, "samples"), samples.length);
-    // gl.uniform1f(gl.getUniformLocation(program, "time"), p.millis());
-    // gl.uniform2fv(gl.getUniformLocation(program, "u_resolution"), [p.width, p.height]);
-    
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, 3);
-    
     try {
       p.background(30);
 
+      // DEBUG FPS
       p.fill(255, 0, 0)
+//      p.text(_.toInteger(p.frameRate()), p.width-50, 10)
 
       // Grid lines
       if(true){
@@ -474,22 +209,9 @@ export default function sketch (p) {
         }
       }
 
-      p.stroke(150);
-    //  let _time = p.map(time, 0, totalCycleCount*cycleResolution, 0, p.width);
-    //  p.line(_time, 0, _time, p.height);
-      // if (isPlay) {
-      //   // console.log(isPlay, time);
-      //   if(time > p.width) {
-      //     time -= p.width;
-
-      //     resetExecution(0);        
-      //   }
-
-      //   time += p.width/(p.frameRate() * totalCycleCount)
-      // }
-
       // Draw
       if (isDraw){
+        // p.colorMode(p.HSB);
         // sample[i] = {s: 'bd', n: [{no: 0, time: [{}x96]]}
         for(let i = 0; i < samples.length; i++) {
           let _ns = samples[i].n;
@@ -506,12 +228,13 @@ export default function sketch (p) {
                 let x = k * w;
     
                 p.stroke(0);
-                p.fill(200);
+                p.fill(200);//p.map(i, 0,samples.length, 0, 255), 255, p.map(j, 0, _ns.length, 100, 255));
                 p.rect(x, y, w, _h);
               }
             }
           }
         }
+        // p.colorMode(p.RGB);
       }
 
       if (isLabels) {
@@ -541,19 +264,6 @@ export default function sketch (p) {
           }
         }
       }
-
-      // Selection indicator
-      // if(true){
-      //   p.stroke(255, 0, 0);
-      //   if (isInteract) p.fill(255, 0, 0, 50) 
-      //   else            p.noFill();
-        
-      //   let pos = getObjectPosition(mouseX, mouseY);
-      //   if(pos) {
-      //     p.rect(pos[0], pos[1], pos[2], pos[3]);
-      //   }
-      // }
-
     }
     catch(exception) {
       console.log("Exception thrown: ", exception)

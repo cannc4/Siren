@@ -12,9 +12,32 @@ const socketIo = require('socket.io');
 
 let exec = require('child_process').exec;
 let synchs = exec('cd ' + __dirname + ' && runhaskell sync.hs');
+let python = exec('cd ' + __dirname + ' && python3 trig_roll.py');
+// console.log(' ## -->   Python initialized @ ' + __dirname+'/trig_roll.py' );
 let jsonfile = require('jsonfile')
 
+let osc = require("osc");
+
 let dcon = socketIo.listen(3004);
+let dseq = socketIo.listen(4004);
+var chokidar = require('chokidar');
+var watcher = chokidar.watch('./server/processing/', {
+  ignored: /(^|[\/\\])\../,
+  persistent: true
+});
+
+watcher.on('change', (path, stats) => {
+  
+  dseq.sockets.emit('dseqo', ({fileseq: path}));
+});
+watcher.on('addDir', (path, stats) => {
+  
+  dseq.sockets.emit('dseqo', ({fileseq: path}));
+});
+watcher.on('add', (path, stats) => {
+  
+  dseq.sockets.emit('dseqo', ({fileseq: path}));
+});
 
 class REPL {
   hush() {
@@ -28,10 +51,19 @@ class REPL {
       dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
     });
     this.repl.stdout.on('data', data => {
-      console.error(data)
+      console.error(data.toString())
       dcon.sockets.emit('dcon', ({dcon: data.toString('utf8')}));
     });
     console.log(" ## -->   GHC Spawned");
+
+    // python print
+    python.stdout.on('data', function(data){
+      console.log(data.toString());
+    });
+    // error
+    python.stderr.on('data', (data) => {
+      console.error(`node-python stderr:\n${data}`);
+    });
   }
 
   initTidal(config) {
@@ -54,21 +86,12 @@ class REPL {
       supercolliderjs.lang.boot(options).then((sclang) => {
         self.sc = sclang;
 
-        // -- Message Stack --
-        // let cycleNumber = 0;
-        // let subCycleNumber = 0;
-        // let cycleOffset = 7;
-        // let cycleStack = [[]];
-
-
         let dconSC = socketIo.listen(3006);
 
-        let osc = require("osc");
         let udpPort = new osc.UDPPort({
-            // This is where sclang is listening for OSC messages.
-            remoteAddress: "127.0.0.1",
-            remotePort: 3007,
-            metadata: true
+          remoteAddress: "127.0.0.1",
+          remotePort: 3007,
+          metadata: true
         });
 
         // Open the socket.
@@ -94,7 +117,7 @@ class REPL {
               let cycleInfo = _.fromPairs(_.chunk(_.drop(msg), 2));
               cycleInfo['time'] = time;
 
-              /// Message to Unity
+              // Message to Unity
               let unityMessage = {
                 address: "/siren",
                 args: [
@@ -106,59 +129,8 @@ class REPL {
               };
               udpPort.send(unityMessage);
 
-              /// Message to React frontend
+              // Message to React frontend
               dconSC.sockets.emit('/sclog', {trigger: cycleInfo});
-                                              // number: cycleNumber,
-                                              // subCycleNumber: subCycleNumber,
-                                              // cycleOffset: cycleOffset,
-                                              // resolution: segmentCoefficient});
-              
-
-              // let segmentCoefficient = 12;
-              // cycleInfo['time'] = cycleTime
-              // let obj = cycleInfo;
-
-              // // TODO RECORD
-              // if(_.toInteger(cycleInfo.cycle) - cycleOffset > cycleNumber) {
-              //   cycleNumber = _.toInteger(cycleInfo.cycle);
-              //   console.log('RESET::before', cycleStack);
-              //   cycleStack = [];
-              //   console.log('RESET::after ', cycleStack);
-              // }
-
-              // // cycle beginning subcyclenumber = 0
-              // if (_.toInteger(cycleInfo.cycle) > subCycleNumber) {
-              //   subCycleNumber = _.toInteger(cycleInfo.cycle);
-
-              //   let t = _.times(segmentCoefficient, _.stubObject);
-              //   t[0] = obj;
-
-              //   cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber] = [];
-              //   cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber][0] = {
-              //     's': cycleInfo.s,
-              //     't': t
-              //   };
-              // }
-              // // subcyclenumber > 1
-              // else {
-              //   let index = _.toInteger((_.toNumber(cycleInfo.cycle)%1.0)*segmentCoefficient);
-
-              //   let object = _.find(cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber],
-              //                       ['s', cycleInfo.s]);
-              //   if (object !== undefined) {
-              //     if(object.t[object.t.length-1].time !== cycleTime)
-              //       object.t[index] = obj;
-              //   }
-              //   else {
-              //     let t = _.times(segmentCoefficient, _.stubObject);
-              //     t[index] = obj;
-              //     cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber]
-              //               [cycleStack[_.toInteger(cycleInfo.cycle)-cycleNumber].length] = {
-              //       's': cycleInfo.s,
-              //       't': t
-              //     };
-              //   }
-              // }
             }
           }
         });
@@ -229,6 +201,19 @@ const Siren = () => {
   let UDPserver = dgram.createSocket("udp4");
 
   let tick = socketIo.listen(3003);
+  let py = socketIo.listen(5005);
+
+  let oscPy = require('osc')
+  let udpPortPy = new oscPy.UDPPort({
+    localAddress: "127.0.0.1",
+    localPort: 5005,
+    remoteAddress: "127.0.0.1",
+    remotePort: 3009,
+    metadata: true
+  });
+
+  // Open the socket.
+  udpPortPy.open();
 
   //Get tick from sync.hs Port:3002
   UDPserver.on("listening", function () {
@@ -294,7 +279,7 @@ const Siren = () => {
     reply.status(200).json({ pattern, sc_message });
   }
 
-  //// Not working
+  // Not working
   const generateConfig = (config,reply) => {
     let configfile = path.join(__dirname, '..', 'config', 'config.json');
     console.log(' - configfile: ', configfile);
@@ -313,6 +298,29 @@ const Siren = () => {
     generateConfig(b_config,reply);
 
     startTidal(b_config, reply);
+  });
+
+  app.post('/processing', (req, reply) => {
+    exec('processing-java --sketch=' + __dirname + '/processing --run');
+
+    reply.status(200);
+  });
+
+  app.post('/sq', (req, reply) => {
+    const {sq} = req.body;
+
+    console.log(' ## -->   sq inbound:', sq);
+
+    let pythonMessage = {
+      address: "/roll",
+      args: [{
+        type: "s",
+        value: sq
+      }]
+    };
+    udpPortPy.send(pythonMessage);
+    
+    reply.status(200).json({'sq': sq});
   });
 
   app.post('/boot', (req, reply) => {

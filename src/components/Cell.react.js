@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import store from '../store';
 import _ from 'lodash';
 
-import {sendPatterns, setExecution, fbupdatechannelinscene, updateCell,sendScPattern} from '../actions';
+import {sendPatterns, setExecution, fbupdatechannelinscene, updateCell} from '../actions';
 
 class Cell extends Component {
   constructor(props) {
@@ -54,7 +54,7 @@ class Cell extends Component {
       else if (ctx.props.sccommand.scpat !== ""){
         ctx.sendScPattern(tidalServerLink,ctx.props.sccommand.scpat);
       }
-    } 
+    }
   }
 
   executionCss(event, duration = 500) {
@@ -78,7 +78,7 @@ class Cell extends Component {
     }
    
     const focusCell = ({ target: { value }}) => {
-      const ctx = this;  
+      const ctx = this;
       ctx.nameInput.focus();
     }
     var className = ctx.state.className;

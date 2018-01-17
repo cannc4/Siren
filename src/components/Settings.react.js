@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import store from '../store';
 // import _ from 'lodash';
 //import config from './../config/config.json'
-import { fbsaveconfig,bootSystem } from '../actions'
+import { fbsaveconfig, bootSystem } from '../actions'
+
 class Settings extends Component {
   constructor(props) {
     super(props)
@@ -17,6 +18,7 @@ class Settings extends Component {
       samples_path: props.user.user.config.samples_path,
       path: props.user.user.config.path,
       tidal_boot: props.user.user.config.tidal_boot,
+      tidal_sync: props.user.user.config.tidal_sync,
       scd_start: props.user.user.config.scd_start
     }
   }
@@ -28,8 +30,9 @@ class Settings extends Component {
     if(ctx.props.uid !== undefined){
       // online database save
       fbsaveconfig('Accounts', ctx.props.uid, ctx.state);
+
       // Config Generation
-      store.dispatch(bootSystem(tidalServerLink,ctx.props.user.user.config));
+      store.dispatch(bootSystem(tidalServerLink, ctx.props.user.user.config));
     }
   }
 
@@ -61,6 +64,9 @@ class Settings extends Component {
       </div>
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>Tidal Boot:</p>  <input className={'Input'} value={this.state.tidal_boot} onChange={ctx.updateValue.bind(ctx, 'tidal_boot')}/>
+      </div>
+      <div className={'SettingsItem'}>
+        <p className={'SettingsLabel'}>Tidal Sync:</p>  <input className={'Input'} value={this.state.tidal_sync} onChange={ctx.updateValue.bind(ctx, 'tidal_sync')}/>
       </div>
       <div className={'SettingsItem'}>
         <p className={'SettingsLabel'}>SC Boot:</p>  <input className={'Input'} value={this.state.scd_start} onChange={ctx.updateValue.bind(ctx, 'scd_start')}/>

@@ -8,6 +8,7 @@ import channel from './channel';
 import layout from './layout';
 import cell from './cell';
 import menu from './menu';
+import seq from './seq';
 import globalparams from './global';
 import usererror from './usererror';
 import { fetchModels } from '../actions';
@@ -32,6 +33,7 @@ _.each(models, (x,key) => {
 const rootReducer = combineReducers({
   sccommand,
   tidal,
+  seq,
   channel,
   user,
   usererror,

@@ -20,7 +20,6 @@ class Channels extends Component {
       type: '',
       vals: [],
       step: 8,
-      otoc: false,
       transition: '',
       selectedCells: [],
 			tolerance: 0,
@@ -54,7 +53,7 @@ class Channels extends Component {
   sendPatterns(){
     const ctx = this;
     const { click, solo, mute} = ctx.props;
-    const { loop, tidalServerLink,otoc } = ctx.state;
+    const { loop, tidalServerLink } = ctx.state;
     const channel = ctx.props.item;
 
     if (loop.isLoop || (!loop.isLoop && !loop.hasSilenced) )
@@ -89,7 +88,7 @@ class Channels extends Component {
           if (stepvalue !== ""){
             store.dispatch(setExecution());
             store.dispatch(sendPatterns(tidalServerLink, channel, stepvalue,
-              scenePatterns, click, ctx.props.globalparams,otoc));
+              scenePatterns, click, ctx.props.globalparams));
           }
           if (ctx.props.sccommand.scpat !== ""){
             ctx.sendScPattern(tidalServerLink,ctx.props.sccommand.scpat);
