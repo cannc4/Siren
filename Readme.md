@@ -6,7 +6,7 @@ Supported programming languages :
 SuperCollider
 Haskell/TidalCycles
 
- ![] (SOURCE TO GIF)
+
 
 **Note:** This is a beta release (*v0.5*), and it has not been tested comprehensively. If you come across a bug, please do [submit an `issue` ](https://github.com/cannc4/Siren/issues/new), and/or create a `pull request` of you feel like participating in its development.
 
@@ -67,11 +67,10 @@ Scenes are the core of `Siren` and a scene serves as a framework to the composit
 ### Sequencer (aka Matrix) 
 #### Channels
 
-Channels can be added using `Add Channel` layout and consists of `type`, `name`, `step` and `transition` parameters. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
+Channels can be added using the `Channel` module layout and consists of `type`, `name`, `step` and `transition` parameters. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
+The syntax to be used for encoding patterns in each entry in the pattern dictionary is determined by the channel definition, which determines the language in which the pattern will be written.
 
-You can add channels using next module:
-
-### Add Channel
+###Channel
 Please note that channels has to be defined appropriately in `tidal-boot-default.hs` or compiled using `console`.
 
 **Transitions:** Transition functions for TidalCycles
@@ -113,12 +112,12 @@ or
 ``` sq `"{3*4 4*2}%3"` `"bd"` ``` 
 
 ### Pattern History
-This module stores the successfully compiled patterns to keep track of the running sequences.
+This module stores the successfully compiled patterns to keep track of the running sequences and serves as a container for the global modifiers.
 
 ### Console
 This module serves as a CLI(Command-Line-Interface) to Haskell and SuperCollider 
 
-### Global Modulators
+### Global Modifiers
 
 This is an experimental module that can be toggled using right click menu. There are two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+ click` clears the desired slot and `alt+ click` overwrites it. These modifiers are applied to the patterns shown in the pattern history section. (i.e active patterns)Channels that you want to modify can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means that modifiers will be applied to all channels in the scene.
 
