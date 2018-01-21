@@ -3,19 +3,17 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fbcreatepatterninscene, fbupdatepatterninscene, fbdeletepatterninscene } from '../actions';
 
-import CodeMirror from 'react-codemirror';
+import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
-import '../assets/_style.css';
 import '../assets/_rule.js';
-// var Button = require('react-button')
-// var themeButton = {
-//     style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
-//     disabledStyle: { background: 'gray'},
-//     overStyle: { background: 'rgba(255,255,102,0.15)' },
-//     activeStyle: { background: 'rgba(255,255,102,0.15)' },
-//     pressedStyle: {background: 'green', fontWeight: 'bold'},
-//     overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
-// }
+import './style/_style.css'
+
+// Grid Layout
+let ReactGridLayout = require('react-grid-layout');
+let WidthProvider = ReactGridLayout.WidthProvider;
+let ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
 class Patterns extends Component {
   constructor(props) {
     super(props)
@@ -30,7 +28,7 @@ class Patterns extends Component {
   }
   //Pattern Dictionary
   addPattern() {
-    var flag = false;
+    let flag = false;
     const ctx = this
     _.each(Object.values(ctx.props["matrices"]), function(d){
       if(d.matName === ctx.props.active){
@@ -61,49 +59,63 @@ class Patterns extends Component {
 
   renderItem(item, dbKey) {
     const ctx = this;
-    const handleChange = (obj) => {
-      var value, name;
-      if(obj.target !== undefined){
-        value = obj.target.value;
-        name = obj.target.name;
-      } else {
-        value = obj;
-      }
-      var re = /`(\w+)`/g, match, matches = [];
-      while (match = re.exec(value)) {
-        if(_.indexOf(matches, match[1]) === -1)
-          matches.push(match[1]);
+    const nameChange = event => {
+      // console.log(event.target.value);
+
+      // write into database
+      const payload = { key: dbKey };
+      payload['name'] = event.target.value;
+      payload['pattern'] = item['pattern'];
+      payload['params'] = item['params'];
+      _.each(Object.values(ctx.props["matrices"]), function(d){
+        if(d.matName === ctx.props.active){
+          ctx.setState({sceneKey: d.key});
+          fbupdatepatterninscene('Matrices', payload, d.key)
+        }
+      })
+    }
+    const handleChange = (editor, metadata, value) => {
+      // parse pattern for parameters
+      let re = /`([^`]+)`/g, match = re.exec(value), matches = [];
+      while (match) {
+        const param_default = _.split(match[1], '?');
+        if(_.indexOf(matches, param_default[0]) === -1){
+          matches.push(param_default[0]);
+        }
+        match = re.exec(value);
       }
       _.remove(matches, function(n) {
         return n === 't';
       });
       ctx.setState({ params: matches.toString()});
-      const payload = { key: dbKey };
-      payload[name === undefined ? 'pattern' : name] = value;
-      payload['params'] = this.state.params;
 
+      // write into database
+      const payload = { key: dbKey };
+      payload['pattern'] = value;
+      payload['params'] = ctx.state.params;
       _.each(Object.values(ctx.props["matrices"]), function(d){
         if(d.matName === ctx.props.active){
           ctx.setState({sceneKey: d.key});
-            fbupdatepatterninscene('Matrices', payload, d.key)
+          fbupdatepatterninscene('Matrices', payload, d.key)
         }
       })
     }
+
     // handle function to delete the object
     // gets the dbkey of to-be-deleted item and removes it from db
     const handleDelete = () => {
       const payload = { key: item.key };
 
-      if(confirm("This pattern will be deleted from " + ctx.props.active + "scene "))
+      if(confirm("This pattern will be deleted from the scene '" + ctx.props.active + "'"))
         _.each(Object.values(ctx.props["matrices"]), function(d){
           if(d.matName === ctx.props.active){
             ctx.setState({sceneKey: d.key});
-              fbdeletepatterninscene('Matrices', payload, d.key)
+            fbdeletepatterninscene('Matrices', payload, d.key)
           }
         })
     }
 
-    var options = {
+    let options = {
         mode: '_rule',
         theme: '_style',
         fixedGutter: true,
@@ -113,24 +125,27 @@ class Patterns extends Component {
         lineWrapping: true,
         showCursorWhenSelecting: true
     };
-
     // if Item is legit by key, it will be shown
     // parameters can be added
     return item.key && (
-      <li key={item.key} className="easter" >
-        <div key={name} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-          <div key={name} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
-            <div key={name} style={{ display: 'flex', flexDirection: 'column', flex: 3}}>
-              <input type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={handleChange.bind(ctx)} />
-              <input type="String" placeholder={"params (auto-generated)"} name={"params"} value={item["params"]} onChange={handleChange.bind(ctx)} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-              <button onClick={handleDelete}>{'Delete'} </button>
-            </div>
+      <div key={item.key} className={"PatternItem draggableCancel"} data-grid={{i: item.key, x:0, y: item.index*2, w: Infinity, h: 3, minH: 2}} >
+        <div key={name} >
+          <div key={name} className={'PatternItemInputs'}>
+            <div className={"PatternPanelHeader draggableCancel"}> ■ </div>
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"pattern title"} name={"name"} value={item["name"]} onChange={nameChange.bind(ctx)} />
+            <input className={'Input draggableCancelNested'} type="String" placeholder={"parameters"} name={"params"} value={item["params"]} readOnly/>
+            <button className={'Button draggableCancelNested'} onClick={handleDelete}>{'Delete'} </button>
           </div>
-          <CodeMirror className={'patternDiv'} name={"pattern"} value={item["pattern"]} onChange={handleChange.bind(ctx)} options={options}/>
+          <CodeMirror className={'PatternItemCodeMirror draggableCancelNested'}
+                      name={"pattern"}
+                      value={item["pattern"]}
+                      options={options}
+                      onBeforeChange={handleChange.bind(ctx)}
+                      onChange={(editor, metadata, value) => {
+                      }}
+                    />
         </div>
-      </li>
+      </div>
     )
   }
 
@@ -140,9 +155,9 @@ class Patterns extends Component {
   }
 
   render() {
-    const ctx = this
+    const ctx = this;
     const { modelName, name } = ctx.state;
-    var items = ctx.props[modelName.toLowerCase()];
+    let items = ctx.props[modelName.toLowerCase()];
     const scenes = Object.values(ctx.props["matrices"]);
     _.each(scenes, function(d){
       if(d.matName === ctx.props.active){
@@ -152,26 +167,47 @@ class Patterns extends Component {
         }
       }
     })
+    let iterator = 0;
+    _.each(items, function(d){
+      d.index = iterator++;
+    })
 
+    const handleSubmitAddPattern = event => {
+      const body = event.target.value
+      const ctx = this;
+      if(event.keyCode === 13 && event.ctrlKey && body){
+        event.persist();
+        event.target.className += ' Executed';
+        _.delay(function(){ _.replace(event.target.className, ' Executed', ''); },
+                500);
+        ctx.addPattern();
+      }
+    }
     const changeName = ctx.changeName.bind(ctx);
     const renderItems = ctx.renderItems.bind(ctx);
 
-    const viewPortWidth = '100%'
-
     return (
       <div>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '10px'}}>
-          <input className={'newPatternInput'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName}/>
-          <button className={'newPatternButton'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
+        <div className={'PatternItem PatternItemInputs'}>
+          <input className={'Input draggableCancel'} type="text" placeholder={'New Pattern Name'} value={name} onChange={changeName} onKeyUp={handleSubmitAddPattern}/>
+          <button className={'Button draggableCancel'} onClick={ctx.addPattern.bind(ctx)}>Add</button>
         </div>
-        <div style={{ width: viewPortWidth }}>
-          <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-            {renderItems(items)}
-          </ul>
-        </div>
+
+        <ResponsiveReactGridLayout
+            className={"layout_patterns"}
+            breakpoints={{lg: 1200, md: 996, sm: 768, xs: 360}}
+            cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+            rowHeight={30}
+            margin={[2,10]}
+            draggableCancel={'.draggableCancelNested'}
+          >
+          {renderItems(items)}
+        </ResponsiveReactGridLayout>
       </div>
     );
   }
 }
 
+// import debugRender from 'react-render-debugger';
+// export default connect(state => state)(debugRender(Patterns));
 export default connect(state => state)(Patterns);

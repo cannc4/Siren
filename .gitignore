@@ -1,8 +1,11 @@
 node_modules/
-node_modules/rx/ts/core/observable.ts
 deps/
-config/
 dist/
 build/
-.DS_Store
+config/
+server/public/
+vis/
 vis/media/
+package-lock.json
+asd
+.DS_Store

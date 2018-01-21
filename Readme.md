@@ -1,151 +1,135 @@
-# Updates
-### Global controls and Pattern History (Experimental)
-There are now two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. `shift+click` overwrites the presets and pressing `rec` creates a new one.
-These parameters directly access to the patterns in the history. (i.e active patterns)
-There is now a dedicated channel called `G` to sequence the channels you want to include within global controls. You can specify the index of global and channels like : "1 `1 2 4`" where first `1` is the index of global and `1 2 4` are the channel numbers.
-
-
 # Siren
+*Siren*, is a tracker interface that embodies abstractions where programming is realized as the medium for pattern sequencing in a modular fashion. It is based on a hierarchical structure that consists of scenes and channels. Separate channels have independent patterns; a complete song consists of a master list of repeated patterns. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns. 
 
-*Siren*, a software environment that fills the gap between live coding performance and algorithmic composition. It is based on a hierarchical structure and a tracker-inspired user interface on top of the [TidalCycles](https://github.com/tidalcycles/Tidal/) language for pattern programming. In addition to pattern composition, *Siren* supports programming variations of and transitions between patterns.
 
-**Note:** This is a beta release (*v0.3*). If you come across a bug, please do submit an `issue` on this page, and/or create a `pull request` of you feel like participating in its development.
+Supported programming languages : 
+SuperCollider
+Haskell/TidalCycles
+
+
+
+**Note:** This is a beta release (*v0.5*), and it has not been tested comprehensively. If you come across a bug, please do [submit an `issue` ](https://github.com/cannc4/Siren/issues/new), and/or create a `pull request` of you feel like participating in its development.
 
 ## Download
+You can get *Siren* either by downloading repository `as a ZIP file` at [https://github.com/cannc4/siren](github.com/cannc4/siren), or by using the command line to `clone` the repository.
 
-In order to download a copy of the repository, either download repository `as a ZIP file` at [https://github.com/cannc4/sq](github.com/cannc4/sq), or use command line to `clone` repository.
-
-```
+```shell
 git clone https://github.com/cannc4/Siren.git
 ```
 
 ## Build and Run
-
-### Dependencies:
+#### Dependencies:
 Make sure the latest versions of following software are installed for your system user
-
 - [SuperCollider](http://supercollider.github.io/download.html)
-- [NodeJS](https://nodejs.org/en/download/)
+- [NodeJS](https://nodejs.org/en/download/) 
++ Make sure `npm` is globally installed with `NodeJS`
 - [TidalCycles](https://tidalcycles.org/getting_started.html)
 
 Then follow these lines to install package dependencies:
-
-```
-cd path/to/siren
+```shell
+cd path/to/downloaded/repo
 npm i
 ```
 
-In order to bind software dependencies, edit full paths in `config/config.json` according to your file system formatting and save the file.
 
-Copy paste your startup files to `scd-start-default.scd` and `tidal-boot-default.hs` into config folder or set the appropriate paths in `config.json`
+```
+In order to bind software dependencies, edit full paths in config/config.json according to your file system formatting and save the file. Copy paste your startup files to scd-start-default.scd and tidal-boot-default.hs into config folder or set the appropriate paths in config.json
 
-**## Note:** Make sure SuperCollider is either idle or closed before moving on.
+Note that it's possible to target required paths using the `Settings` module in the interface.
+```
+
+
+
+**Note:** Make sure SuperCollider is either idle or closed before moving on.
 
 Now you can start the interface
-```
+```shell
 npm start
 ```
-
 and initialize the backend
-```
+
+```shell
 npm run siren
 ```
-then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser (tested on Chrome)
 
-*Tested on Windows 10 and MacOSX El Capitan*
+then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser
+*Tested with Chrome on Windows 10 and MacOSX El Capitan*
 
-## Usage
+## Modules
 
-![](src/assets/readme_images/panel.png)
-- Login / Logout to the system using Github authentication
-- Boot `SuperCollider` by pressing the square button
-  + The button will turn into a circle once it successfully boots (check console for possible errors)
-- Start all timers with `play` button
+### Scenes
 
-## Scenes
-| ![](src/assets/readme_images/scenes.png) | ![](src/assets/readme_images/channel.png) | ![](src/assets/readme_images/patterns.png) |   
-|---|---|---|
-| **Figure (a)** | **Figure (b)** | **Figure (c)** |
+Scenes are the core of `Siren` and a scene serves as a framework to the composition. Each scene comprises of unique channels, global modifiers and patterns. 
 
-### Duration and Timer
-
-Duration of each channel can be specified using the textarea next to channel number on top of the grid. Duration is the time it takes to reach the last step in seconds.
-
-`ctrl + enter` starts selected timer and `shift + enter` stops it.
-
-Alternatively, `ctrl + channel number` starts the desired channel and `shift + channel number` stops it.
-
-*examples in Figure (b)*
-- Channel number (i.e. `2`)
-- Channel duration (i.e. `20` seconds)
-
-### Dictionary
-
-Tidal patterns are stored in the `dictionary` on the right hand side of the interface. Please omit the channel number and dollar sign on Tidal commands (instead of `d1 $ sound "bd"` just write `sound "bd"`).
-
-*example in Figure (c)*
-- Patterns named `bt2`, `jvv`, `jvbass`, and `lax` with corresponding Tidal commands and 2, 1, 0 and 1 parameters, respectively.
-
-### Pattern Functions
-
-Patterns can be looked up from the dictionary with their names and parameters. See `parameters` for various types.
-
-*example in Figure (b)*
-- Pattern functions in cells (i.e. ```bt2 `every 2(#coarse 12)` `c` ```)
+*example in Figure (a)*- Textbox for scene name - `Update`/`Add` button- `Clear Matrix` button
 
 
-### Transitions
-Transitions are stored in the bottom row of the grid and are unique for each scene.
+### Sequencer (aka Matrix) 
+#### Channels
 
-*example in Figure (b)*
-- Transition function (i.e. `(clutchIn 4)`)
+Channels can be added using the `Channel` module layout and consists of `type`, `name`, `step` and `transition` parameters. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
+The syntax to be used for encoding patterns in each entry in the pattern dictionary is determined by the channel definition, which determines the language in which the pattern will be written.
 
-### Song mode
-If toggled, scenes are iterated top-down fashion based on their ordering. It updates the active scene by writing its grid and dictionary once all timers reach to the last step of the scene.
+###Channel
+Please note that channels has to be defined appropriately in `tidal-boot-default.hs` or compiled using `console`.
 
-- To save a new scene, input a name and click on `Add` button. It'll create a new item in the list below.
-- Update your saved grid and dictionary by inputting the active scene's name to the textbox and clicking on `Update` button.
-- Use `arrow keys` next to the item to reorder.
-- Press ` x ` button if you want to delete the scene all together.
+**Transitions:** Transition functions for TidalCycles
+*example in Figure (b)*- Transition function (i.e. `(clutchIn 4)`)
+**Steps:** Initial step number of channel
+**Type:** Channel type, possible types; SCSynth, MIDI, Visual
 
-*example in Figure (a)*
-- Textbox for scene name (i.e. `docs`)
-- `Update`/`Add` button
-- `Clear Matrix` button
-- `Start`/`Stop Songmode` to enable above feature
-- Scenes are itemized with `delete` and `reorder` functionalities  
+#### Cells
+Cells of the channels serve as a canvas for pattern names and pattern parameters.
 
-## Parameters
-### Mathematical expressions
-Mathematical expressions can be used in the patterns in the dictionary, parser evaluates the expressions when enclosed with `&` symbol.
+### Pattern Parameters
 
-*example in Figure (c)*
-- Math expression enclosed by `& ... &` (i.e. in the body of `jvv`: ```... [~ f3 &`t`%3 &] ~ ...```)
-
-### Value Parameters
-Any character sequence inside Tidal command can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want.
-
-```n `x` # s `y` ```
-
-This can be called with any ``` `x` ``` or ``` `y` ``` value such as (assume it's named as `sq`):
-``` sq `"{3*4}%3"` `"bd"` ``` or
-``` sq `"{3*4 4*2}%3"` `"bd"` ``` or
-``` sq `"{3*4 4*2}%3"` `"bd"` ```
+Siren allows patterns to be parameterized and can be called with different parameters from different cells in the channel. 
 
 ### Random Parameters
-``` `[x,y]` ``` returns a random value within the `x` and `y` boundaries `[x,y)`.
+`|x,y|` returns a random value within the `x` and `y` 
 
-### Temporal Parameter
-``` `t` ``` represents the temporal parameter for each timer and it can be used in expressions to create complex values, especially with math expressions.
+## Patterns
+Disclaimer: Please omit the channel number and dollar sign on Tidal commands (instead of `d1 $ sound "bd"` just write `sound "bd"`)
 
-## Notes
-- Pause timers for a few seconds if you see too much flood in GHC terminal. (stack gets full)
-- `npm run siren` starts up the server - it's not required if you want to refresh the interface however you need to manually close node and restart it if `scsynth` crashes
-- As each cell contains a pattern, having a timer duration like 4 seconds doesn't really makes sense if you have 8 steps (i.e. 4/8 seconds per step)
+Tidal patterns are stored in the `dictionary` on the right hand side of the interface. This dictionary is unique for each scene and interacts with the sequencer in terms of parameters and calls.
+
+#### Temporal parameter 
+ `t`  represents the temporal parameter for each timer and it can be used in expressions to create complex values, especially with math expressions.
+
+#### Mathematical expressions 
+Mathematical expressions can be used in the patterns in the dictionary, parser evaluates the expressions when enclosed with `&` symbol.*example in Figure (c)*- Math expression enclosed by `& ... &` (i.e. in the body of `jvv`: ```... [~ f3 &`t`%3 &] ~ ...```)
+
+
+#### Value Parameters
+Any character sequence inside Siren pattern can be parameterized by surrounding desired spot with \` symbol (like surrounding a phrase for Markdown code block). Using this feature, you can not only pass well-tuned values dynamically, but also pass anything you want.
+
+```haskell
+n `x` # s `y` 
+```
+This can be called with any `x`or  `y` value such as (assume it's named as `sq`):
+``` sq `"{3*4}%3"` `"bd"` ``` 
+or
+``` sq `"{3*4 4*2}%3"` `"bd"` ``` 
+
+### Pattern History
+This module stores the successfully compiled patterns to keep track of the running sequences and serves as a container for the global modifiers.
+
+### Console
+This module serves as a CLI(Command-Line-Interface) to Haskell and SuperCollider 
+
+### Global Modifiers
+
+This is an experimental module that can be toggled using right click menu. There are two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+ click` clears the desired slot and `alt+ click` overwrites it. These modifiers are applied to the patterns shown in the pattern history section. (i.e active patterns)Channels that you want to modify can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means that modifiers will be applied to all channels in the scene.
+
+### Settings
+In this module, it’s possible to set various settings of Siren such as startup configs or various paths.
+
+### Debug Console
+This module serves as a debug console for GHC. 
+
+##Notes
 
 ## Known Bugs
-- Editing parameters in the patterns fails when timer is active
 
-## TODO
-- Config generator
-- boot/shut down server from the interface
+
+

@@ -1,50 +1,75 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import './Home.css';
-import DropdownMenu from 'react-dd-menu';
 
-// const version = JSON.parse(require('fs').readFileSync('../../package.json', 'utf8')).version
+import {sendGlobals,
+        fbcreateMatrix,
+        fbdelete,
+        fborder,
+        fbcreatechannelinscene,
+        fbupdatechannelinscene,
+        fbupdateglobalsinscene,
+        fbupdatelayout,
+        fbsavelayout,
+        fbdeletecustomlayout,
+        updateMatrix,
+        globalUpdate,
+        globalStore,
+        createChannel,
+        deleteChannel,
+        createCell,
+        selectCell,
+        pasteCell,
+        bootCells,
+        seekTimer,
+        updateLayout,
+        forceUpdateLayout,
+        stepChannel,
+        consoleSubmit,
+        consoleSubmitHistory} from '../actions';
 
-import { initMyTidal,sendScPattern, sendSCMatrix, sendPatterns,createTimer,timerThread,
-      sendGlobals,startTimer, pauseTimer, stopTimer,updateTimerduration,startIndividualTimer,stopIndividualTimer,pauseIndividualTimer,
-      consoleSubmitHistory,consoleSubmit, fbcreateMatrix, fbdelete,fborder, fetchModel, updateMatrix,assignTimer,globalUpdate,
-      startClick,stopClick,globalStore, changeUsername,continousPattern, fbfetchscenes, GitHubLogin, logout,fbupdateglobalsinscene} from '../actions'
-
-import {Layout, LayoutSplitter} from 'react-flex-layout';
-
-import NumberEditor from 'react-number-editor';
-import Simple from './Simple.react';
-import Patterns from './Patterns.react';
+import _ from 'lodash';
 import Firebase from 'firebase';
 import store from '../store';
-import _ from 'lodash';
+import Patterns from './Patterns.react';
+import PatternRoll from './PatternRoll.react';
+import Channels from './Channels.react';
+import Settings from './Settings.react';
+import PatternHistory from './PatternHistory.react';
+import Console from './Console.react';
+import Canvas from './Canvas.react';
+import DebugConsole from './DebugConsole.react';
 
-import CodeMirror from 'react-codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/dialog/dialog.js';
-import 'codemirror/addon/dialog/dialog.css';
-import '../assets/_style.css';
-import '../assets/_rule.js';
-var Button = require('react-button')
-var themeButton = {
-    style : {borderWidth: 0.8, borderColor: 'rgba(255,255,102,0.15)'} ,
-    disabledStyle: { background: 'gray'},
-    overStyle: { background: 'rgba(255,255,102,0.15)' },
-    activeStyle: { background: 'rgba(255,255,102,0.15)' },
-    pressedStyle: {background: 'green', fontWeight: 'bold'},
-    overPressedStyle: {background: 'rgba(255,255,102,1)', fontWeight: 'bold'}
-}
-var options = {
-    mode: '_rule',
-    theme: '_style',
-    fixedGutter: false,
-    scroll: true,
-    styleSelectedText:true,
-    showToken:true,
-    lineWrapping: true,
-    showCursorWhenSelecting: true
-};
+import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import { SelectableGroup } from 'react-selectable';
+import Dropdown from 'react-dropdown'
+import Draggable from 'react-draggable'
 
+// CSS Imports
+import './style/Layout.css';
+import './style/Home.css';
+import './style/Menu.css';
+import './style/Dropdown.css';
+import './style/ContextMenu.css';
+
+// Key binding
+let keymaster = require('keymaster');
+
+// Input system
+let MaskedInput = require('react-maskedinput')
+
+// Layouting
+let ReactGridLayout = require('react-grid-layout');
+let WidthProvider = ReactGridLayout.WidthProvider;
+let ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
+// React Performance measurement
+// import ReactPerfTool from 'react-perf-tool';
+// import Perf from 'react-addons-perf';
+// import 'react-perf-tool/lib/styles.css';
+
+// Channel Types
+const channelOptions = ['Tidal', 'Visual', 'Tidal-MIDI', 'SuperCollider', 'PatternRoll']
 
 class Home extends Component {
   constructor(props) {
@@ -53,1077 +78,1260 @@ class Home extends Component {
       matName: "",
       modelName : "Matrices",
       tidalServerLink: 'localhost:3001',
-      steps: 8,
-      channels: ['d1','d2','d3','d4', 'm1','m2','m3', 'm4', 'G'],
-      timer: [],
-      values: {},
-      scPattern: '',
-      click : {current:null,
+      click : {flag:0,
+              times:0,
+              current:null,
               isActive:false},
       activeMatrix: '',
-      songmodeActive: false,
       sceneIndex: '',
-      transition: [],
-      channelEnd :[],
-      play : false,
-      solo : [],
-      soloSentinel: false,
-      sceneSentinel: false,
       parvalues: '',
       globalCommands: '',
       globalTransformations: '',
       globalChannels: '',
+      globalsq:'',
+      sqActive:false,
+      sqActive_UI:false,
+      helperindex:0,
+      global_helperindex:0,
       username: '',
       storedPatterns: [],
-      storedGlobals: [{transform:'', command: ''}],
-      tempDur : [],
-      isCollapsed:[],
-      tidalOnClickClass:  ' ',
-      pressed : false,
+      selectedCellMain: [],
+      storedGlobals: [{transform:'', command: '', selectedChannels: ''}],
+      pressed : [],
+      c_type: '',
+      c_name: '',
+      c_step: '',
+      c_id: 0,
+      copyCell: false,
+      c_transition: '',
+      csize: 1,
+      ukey:1,
+      controlledPosition: {x: 0, y: 40},
+      soloArray: _.times(8, _.stubFalse),
+      muteArray: _.times(8, _.stubFalse),
+      manual_layout_trig: true,
+      default_layout: [{i: "scenes", x: 0, y: 0, w: 3, h: 20, minW: 3, isVisible: true},
+                       {i: 'matrix', x: 3, y: 0, w: 13, h: 13, minW: 5, isVisible: true},
+                       {i: 'patterns', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
+                       {i: 'patternroll', x: 16, y: 0, w: 8, h: 20, minW: 3, isVisible: true},
+                       {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, minW: 3, isVisible: true},
+                       {i: 'channel_add', x: 3, y: 16, w: 3, h: 4, minW: 2, isVisible: true},
+                       {i: 'globals', x: 6, y: 16, w: 5, h: 4, minW: 4, isVisible: false},
+                       {i: 'console', x: 11, y: 16, w: 5, h: 4, minW: 2, isVisible: true},
+                       {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
+                       {i: 'setting', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true},
+                       {i: 'canvas', x: 0, y: 21, w: 7, h: 13, minW: 7, isVisible: true}]
     }
   }
-//Clock for Haskell
-// componentDidMount(props,state){
-//   const ctx = this;
-//   CodeMirror.fromTextArea(document.getElementByClass('defaultPatternArea'), {options: options}).on("keyup", function (cm, event) {
-//     console.log('deneme');
-//     if (!cm.state.completionActive && /*Enables keyboard navigation in autocomplete list*/
-//         event.keyCode != 13) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
-//         CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
-//     }
-//   });
-// }
-  //
-  // var socket = io('http://localhost:3003/'); // TIP: io() with no args does auto-discovery
-  // socket.on("osc", data => {
-  //   this.startClick();
-  // })
-  // socket.on("dc", data => {
-  //   this.stopClick();
-  // })
-//   var socket = io('http://localhost:3001/'); // TIP: io() with no args does auto-discovery
-//   socket.on("/pattern", data => {
-//     console.log(data);
-//     //this.startClick();
-//   })
-// }
-// shouldComponentUpdate(nextProps, nextState) {
-//   const {timer} = nextProps;
-//   const {channels} = nextState;
-//   for (var i = 0; i < channels.length; i++) {
-//     if (nextProps.timer.timer[i].isActive) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
 
-// componentDidMount(){
-//   cm.ref.on('keyUp', function(instance, event) {
-//     console.log(instance, event);
-// });
-// }
+  // Component functions
+  componentDidMount(props,state){
+    const ctx = this;
 
-componentWillReceiveProps(nextProps) {
-  const ctx = this;
-  if(nextProps.user !== undefined &&
-     nextProps.user.user !== undefined &&
-     nextProps.user.user.name !== undefined &&
-     ctx.state.username === '')
-  {
-    ctx.setState({username: nextProps.user.user.name});
-    var obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
-    Firebase.database().ref("/matrices").child(obj.key).remove();
+    keymaster('shift+r', ctx.resetLayout.bind(ctx));
+    keymaster('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
+
+    keymaster('shift+1', ctx.onLoadCustomLayout.bind(ctx, 'c_1'));
+    keymaster('shift+2', ctx.onLoadCustomLayout.bind(ctx, 'c_2'));
+    keymaster('shift+3', ctx.onLoadCustomLayout.bind(ctx, 'c_3'));
+    keymaster('shift+4', ctx.onLoadCustomLayout.bind(ctx, 'c_4'));
   }
-}
+  componentWillUnmount(props, state) {
+    const ctx = this;
+    keymaster.unbind('shift+r', ctx.resetLayout.bind(ctx));
+    keymaster.unbind('shift+f', ctx.makeMatrixFullscreen.bind(ctx));
 
-componentWillMount(props,state){
-  document.addEventListener("keydown", this.handleglobalKeys.bind(this));
-  const ctx=this;
-  var tempEnd = [];
-  const { channelEnd, channels , steps , timer, solo, storedGlobals,storedPatterns, isCollapsed}=ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-    isCollapsed[i] = false;
-    storedPatterns[i] = '';
-   if (timer[i] === undefined) timer[i]={ id: i, duration: 48,  isActive: false,  current: 0};
-   ctx.createTimer(i, 48, steps);
+    keymaster.unbind('shift+1', ctx.onLoadCustomLayout.bind(ctx, 'c_1'));
+    keymaster.unbind('shift+2', ctx.onLoadCustomLayout.bind(ctx, 'c_2'));
+    keymaster.unbind('shift+3', ctx.onLoadCustomLayout.bind(ctx, 'c_3'));
+    keymaster.unbind('shift+4', ctx.onLoadCustomLayout.bind(ctx, 'c_4'));
+  }
+  componentWillReceiveProps(nextProps) {
+    const ctx = this;
+    if(nextProps.user !== undefined &&
+       nextProps.user.user !== undefined &&
+       nextProps.user.user.name !== undefined &&
+       ctx.state.username === '')
+    {
+      ctx.setState({username: nextProps.user.user.name});
+      let obj = Firebase.database().ref("/matrices").push({itemToRemove2: nextProps.user.user.name});
+      Firebase.database().ref("/matrices").child(obj.key).remove();
+    }
+  }
+  componentDidUpdate(prevProps, prevState) {
+    const ctx = this;
 
-   tempEnd[i] = false
-   solo[i] = false;
+    if(prevProps !== ctx.props){
+      ctx.setState({storedPatterns:ctx.props.globalparams.storedPatterns});
+    }
+  }
 
-   storedGlobals[0] = {transform: '', command: ''}
-   ctx.setState({storedGlobals : storedGlobals})
 
- }
- ctx.setState({channelEnd : tempEnd});
- ctx.setState({storedPatterns : storedPatterns});
-}
+  ////////////////////////////// UTILITIES ////////////////////////////
+  enableDisableClassname(defaultClass) {
+    const ctx = this;
+    const { activeMatrix } = ctx.state
+    if ( activeMatrix !== undefined && activeMatrix !== '' ) {
+      return defaultClass + ' enabledView';
+    }
+    else {
+      return defaultClass + ' disabledView';
+    }
+  }
+  executionCss(event, duration = 500) {
+    event.persist();
+    event.target.className += ' Executed';
+    _.delay(function(){ _.replace(event.target.className, ' Executed', ''); },
+            duration);
+  }
+  ////////////////////////////// UTILITIES ///////////////////////////
 
-createTimer(i,duration, steps){
-  store.dispatch(createTimer(i,duration,steps));
-}
+  ////////////////////////////// HANDLERS ////////////////////////////
+  // Add Channel Inputs
+  handleChannelName = event => {
+    this.setState({c_name: event.target.value});
+  }
+  handleChannelType = (option) => {
+    this.setState( {c_type: option.label} );
+  }
+  handleChannelStep = event => {
+    this.setState({c_step: event.target.value});
+  }
+  handleChannelTransition = event => {
+    this.setState({c_transition: event.target.value});
+  }
+  handleSubmitAddChannel = event => {
+    const body = event.target.value
+    const ctx = this;
+    if(event.keyCode === 13 && event.ctrlKey && body){
+      ctx.executionCss(event);
+      ctx.addChannel();
+    }
+  }
 
-componentDidUpdate(props, state) {
-  console.log();
-  var runNo = [];
-  const ctx=this;
-  const { patterns, timer, click}=props;
-  const {channelEnd, steps, tidalServerLink, values, channels, activeMatrix, songmodeActive, sceneEnd, solo, transition, storedPatterns,storedGlobals }=state;
+  // Scenes
+  handleSceneNameChange({target: { value }}) {
+    const ctx = this;
+    ctx.setState({ matName: value , sceneSentinel: false});
+  }
 
-  for (var i = 0; i < channels.length; i++) {
-    if (ctx.props.timer.timer[i].isActive) {
-      runNo[i] = (ctx.props.timer.timer[i].current % steps) + 1;
-      if(values[runNo[i]]!== undefined){
-        const vals = values[runNo[i]][i];
-        const channel = channels[i];
-        if (vals !== undefined) {
-          if (channel !== 'G') {
-            const obj = {[channel]: vals};
-            var scenePatterns = [];
-            const items = this.props[this.state.modelName.toLowerCase()]
-            _.each(items, function(d){
-              if(d.matName === activeMatrix)
-              scenePatterns = d.patterns;
+  // Selection
+  handleSelection (selectedKeys) {
+    store.dispatch(selectCell(selectedKeys));
+  }
+  handleUnselection() {
+    //store.dispatch(selectCell([]))
+  }
+
+  copyCells(){
+    const ctx = this;
+    const {selectedCellMain, copyCell} = ctx.state;
+    let selectedCells =  ctx.props.cell.selectedCells;
+    let channels = ctx.props.channel;
+
+    let temparrb = [];
+    for (var a = 0 ; a < selectedCells.length; a++){
+      let selch = selectedCells[a].split('_')
+      _.each(Object.values(channels), function(ch) {
+          if (ch.cid === parseInt(selch[0])) {
+            let obj = {
+              name: ch.name,
+              val: ch.vals[parseInt(selch[1])],
+              index:parseInt(selch[1]),
+              selIndex:a,
+              cid: ch.cid,
+              key: ch.key
+            }
+            temparrb[a] = obj;
+          }
+        })
+      }
+      console.log(temparrb, "ON SELECTION");
+    ctx.setState({selectedCellMain: temparrb, copyCell: true});
+  }
+
+  reOrderCells(){
+    const ctx = this;
+    const {selectedCellMain,copyCell} = ctx.state;
+    let channels = ctx.props.channel;
+    let selectedCells =  ctx.props.cell.selectedCells;
+    let vals = ctx.props.cell.vals;
+    const { activeMatrix, ukey } = ctx.state;
+    const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
+
+
+    console.log(selectedCells, "TARGETS");
+    console.log(vals, "VALS");
+    console.log(selectedCellMain, "MAIN");
+
+    let temparr = vals;
+
+    for (var a = 0 ; a < selectedCells.length; a++){
+      let selch = selectedCells[a].split('_')
+      if(vals[parseInt(selch[0])][parseInt(selch[1])]!== undefined){
+        if(selectedCellMain[a]['val'] !== undefined){
+            //temparr[parseInt(selch[0])][parseInt(selch[1])] = selectedCellMain[a].val;
+            _.each(Object.values(channels), function(ch) {
+              if (ch.cid === parseInt(selch[0])) {
+                let ncell = {
+                  name: ch.name,
+                  val: selectedCellMain[a]['val'],
+                  index:parseInt(selch[1]),
+                  sChan: parseInt(selch[0]),
+                  cid: ch.cid,
+                  key: ch.key
+
+                }
+                console.log("FINAL OBJECT", ncell);
+                temparr[ncell['sChan']][ncell['index']] = ncell['val'];
+                //const c_cell = { cell_value: ncell.val, cid: ncell.cid, c_key: ncell.key, cell_index: ncell.index};
+
+                const nc = { vals: temparr[ncell['sChan']], key: ncell['key'] };
+                fbupdatechannelinscene('Matrices', nc, sceneKey);
+                store.dispatch(pasteCell(temparr));
+               // this.setState({ ukey: Math.random() });
+                //store.dispatch(bootCells(c_cell));
+
+
+              }
             })
-            ctx.sendPatterns(tidalServerLink, obj , scenePatterns,solo, transition, channels,timer.timer[i]);
+
+          }
+
+
+      }
+
+
+    }
+
+    ctx.setState({copyCell:false})
+  }
+
+
+
+
+
+    // const sceneKey = _.findKey(ctx.props.matrices, ['matName', ctx.props.active]);
+
+
+
+
+
+
+
+
+  // Global Parameters
+  handleGlobalTransformations = event => {
+    const body=event.target.value
+    const ctx=this;
+
+    let temp = body;
+    ctx.setState({globalTransformations:temp});
+  }
+  handleGlobalCommands = event => {
+    const ctx=this;
+    ctx.setState({ globalCommands: event.target.value });
+  }
+  handleGlobalChannels = event => {
+    const body=event.target.value
+    const ctx=this;
+
+    ctx.setState({globalChannels:body});
+  }
+  handleUpdatePatterns = event => {
+    const ctx = this;
+    const {tidalServerLink,globalCommands,
+          globalTransformations,storedPatterns} = ctx.state;
+    const channels = ctx.props.channel;
+
+
+    if(event.keyCode === 13 && event.ctrlKey){
+      ctx.executionCss(event);
+      ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
+                        globalCommands,channels);
+    }
+  }
+  handleGlobalsq = event => {
+    const ctx = this;
+    if(event.keyCode === 13 && event.altKey){
+      ctx.setState({sqActive: false, sqActive_UI:false});
+      event.target.className = '';
+
+      ctx.executionCss(event);
+
+      ctx.setState({sqActive_UI:true});
+      ctx.updateGlobalSq();
+    }
+    else if(event.keyCode === 13 && event.shiftKey){
+      ctx.setState({sqActive: false, sqActive_UI:false});
+      event.target.className = '';
+    }
+  }
+  handleGlobalsqDuration = event => {
+    const ctx=this;
+
+    ctx.setState({globalsq: event.target.value});
+  }
+  ////////////////////////////// HANDLERS ////////////////////////////
+
+
+  ////////////////////////////// SCENES ////////////////////////////
+  addScene() {
+    const ctx = this;
+    let patterns = [],
+        globals = [],
+        channels = []
+    const checkSceneName = function(newName, items) {
+      if (newName.length < 1) {
+        return false;
+      }
+
+      _.each(Object.values(items), function(m, i) {
+        if (m.matName === newName) {
+          return false;
+        }
+      })
+      return true;
+    }
+
+    const { matName, storedGlobals,storedPatterns } = ctx.state;
+    const { uid } =ctx.props.user.user;
+    const items =ctx.props[ctx.state.modelName.toLowerCase()];
+    // const propstoredGlobals = ctx.props.globalparams.storedGlobals;
+
+    globals = storedGlobals;
+    if(uid !== null && uid !== undefined){
+      // Get active patterns and channels
+      // _.each(items, function(d){
+      //   if(d.uid === uid && d.matName === activeMatrix){
+      //     patterns = d.patterns;
+      //     globals = d.storedGlobals;
+      //     channels = d.channels;
+      //   }
+      // })
+      // _.each(channels,function(ch){
+      //   ch.scene = matName;
+      // })
+
+      if ( checkSceneName(matName, items) ) {
+        let snd = Object.values(items).length;
+        store.dispatch(globalStore(globals, storedPatterns));
+        console.log(matName, patterns, channels, uid, storedGlobals);
+        fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
+        ctx.setState({sceneIndex: snd, storedGlobals: globals});
+        ctx.setState({activeMatrix: matName});
+      }
+      else {
+        alert("Scene title should be unique and longer than 1 character");
+      }
+    }
+  }
+
+  duplicateScene() {
+    const ctx = this;
+    let patterns = [],
+        globals = [],
+        channels = []
+    const checkSceneName = function(newName, items) {
+      if (newName.length < 1) {
+        return false;
+      }
+
+      _.each(Object.values(items), function(m, i) {
+        if (m.matName === newName) {
+          return false;
+        }
+      })
+      return true;
+    }
+
+    const { matName, storedGlobals,storedPatterns,activeMatrix } = ctx.state;
+    const { uid } =ctx.props.user.user;
+    const items =ctx.props[ctx.state.modelName.toLowerCase()];
+    // const propstoredGlobals = ctx.props.globalparams.storedGlobals;
+
+    globals = storedGlobals;
+    if(uid !== null && uid !== undefined){
+    //  Get active patterns and channels
+      _.each(items, function(d){
+        if(d.uid === uid && d.matName === activeMatrix){
+          patterns = d.patterns;
+          globals = d.storedGlobals;
+          channels = d.channels;
+        }
+      })
+
+      let nc;
+      _.each(channels,function(ch){
+        nc = { scene: matName,
+          cid: ch.cid,
+          type: ch.type,
+          name: ch.name,
+          transition: ch.transition,
+          step: ch.step,
+          vals: ch.vals
+        };
+      })
+
+      if ( checkSceneName(matName, items) ) {
+        let snd = Object.values(items).length;
+
+
+        let skey = fbcreateMatrix(ctx.state.modelName, { matName, patterns, channels, sceneIndex: snd, uid, storedGlobals });
+        store.dispatch(globalStore(globals, storedPatterns));
+
+        let obj = fbcreatechannelinscene('Matrices', nc, skey)
+        nc['key'] = obj;
+        //store.dispatch(createChannel(nc));
+
+        ctx.setState({sceneIndex: snd, storedGlobals: globals});
+        ctx.setState({activeMatrix: matName});
+      }
+      else {
+        alert("Scene title should be unique and longer than 1 character");
+      }
+    }
+  }
+
+  renderScene(item, dbKey, i) {
+    const ctx = this;
+    const { activeMatrix } = ctx.state;
+    let sglobals = [];
+    _.forEach(item.storedGlobals, function(d, i){
+      sglobals.push(d);
+    });
+
+    const updateMatrix = () => {
+      let gpressed = [];
+      _.forEach(item.storedGlobals, function(d, i){
+        gpressed[i] = false;
+      });
+
+      if(sglobals === undefined){
+        sglobals = [];
+      }
+      ctx.setState({ activeMatrix: item.matName,
+        matName: item.matName, sceneSentinel: true,  storedGlobals: sglobals,
+        globalTransformations: '', globalCommands:'', globalChannels: '',
+        pressed:gpressed, sceneIndex:item.key, muteArray: _.times(item.channels.length, _.stubFalse),soloArray: _.times(item.channels.length, _.stubFalse)});
+        ctx.updateMatrix(item);
+
+        store.dispatch(globalStore(sglobals));
+        store.dispatch(globalUpdate('', '', ''));
+        _.forEach(item.channels, function(ch, i){
+          const c_cell = { propedcell: ch.vals, cid: ch.cid ,c_key: ch.key, cstep: ch.step};
+          store.dispatch(bootCells(c_cell));
+          store.dispatch(stepChannel(ch));
+        });
+      }
+
+      const handleDelete = ({ target: { value }}) => {
+        if (confirm('Are you sure you want to delete this?')) {
+          const payload = { key: dbKey };
+          fbdelete(ctx.state.modelName, payload);
+
+          // re-order all items after deleting successfull
+          Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
+            const items = ctx.props[ctx.state.modelName.toLowerCase()];
+            ctx.setState({sceneIndex: (Object.values(items).length)});
+            _.forEach(Object.values(items), function(d, i){
+              fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, channels: d.channels, sceneIndex: i}, d.key);
+            });
+          }, function(error) {
+            console.error(error);
+          });
+
+          ctx.setState({activeMatrix: ''})
+          _.each(item.channels, function( ch, key ) {
+            store.dispatch(deleteChannel(key));
+          })
+        }
+      }
+
+      const className = activeMatrix === item.matName ? "SceneItem-active" : "SceneItem";
+      return item.key && (
+        <div key={item.key} className={className+ " draggableCancel"}>
+          <div>
+            <button onClick={handleDelete}>{'X'}</button>
+            <button onClick={updateMatrix}>{item.matName}</button>
+          </div>
+        </div>
+      )
+    }
+  renderScenes(items) {
+      const ctx = this;
+      return _.map(items, ctx.renderScene.bind(ctx));
+    }
+  ////////////////////////////// SCENES ////////////////////////////
+
+
+  ////////////////////////////// MATRIX ////////////////////////////
+  addChannel() {
+    const ctx = this
+    const { activeMatrix, c_type, c_name, c_step, c_transition } = ctx.state;
+    let flag = false;
+
+    _.each(Object.values(ctx.props["matrices"]), function(d){
+      if(d.matName === activeMatrix) {
+        _.each(d.channels, function(c) {
+          if(c.name === c_name) {
+            alert('"' + c_name + '" already exists in "' + d.matName + '"');
+            flag = true;
+          }
+        })
+
+        if (flag === false){
+          if (c_name === undefined || c_name === '') {
+            alert('Invalid name for channel');
+          }
+          else if (c_step === undefined || c_step === '' || _.toInteger(c_step) <= 0) {
+            alert('Invalid step, use numbers only');
+          }
+          else if (c_type === '' || c_type === undefined ) {
+            alert('Invalid type');
           }
           else{
+            let _index=0;
+            _.each(d.channels, function(chan,i){
+              _index++;
+            })
+            ctx.setState({ c_id : _index });
 
-            console.log('here');
-            ctx.sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels);
+            let values = {}
+            for(let i = 0; i < c_step; i++){
+              values[i] = '';
             }
+
+            let nc = { scene: activeMatrix,
+              cid: _index,
+              type: c_type,
+              name: c_name,
+              transition: c_transition,
+              step: c_step,
+              vals: values
+            };
+
+            let obj = fbcreatechannelinscene('Matrices', nc, d.key);
+            nc['key'] = obj;
+            store.dispatch(createChannel(nc));
+            const newCell = {cstep: c_step, cid: _index };
+            store.dispatch(createCell(newCell));
+            ctx.setState({ activeMatrix: d.matName, matName: d.matName });
           }
-
-
-      }
-
-      if(ctx.props.timer.timer[i].current % steps === steps-1){
-        if(songmodeActive){
-          channelEnd[i] = true;
-          ctx.setState({channelEnd : channelEnd});
-          store.dispatch(pauseIndividualTimer(i))
-
-          if(ctx.identical(channelEnd ) === true)
-          {
-            ctx.progressMatrices( ctx.props[ctx.state.modelName.toLowerCase()]);
-            ctx.stopTimer();
-            ctx.startTimer();
-          }
-        }
-      }
-    }
-  }
-}
-
-identical(array) {
-  for(var i = 0; i < array.length ; i++) {
-      if(array[i] === false ) {
-          return false;
-      }
-  }
-  return true;
-}
-
-progressMatrices(items){
-  const ctx = this;
-  const { timer } = ctx.props;
-  const { channelEnd, values, activeMatrix, steps, songmodeActive, transition, tempDur, channels,storedGlobals} = ctx.state;
-  var patterns = [];
-  const { uid } = ctx.props.user.user;
-  if(ctx.identical(channelEnd))
-  {
-    var duration = [];
-    var transition_next = []
-    var i_save = -1;
-    for (var j = 0; j < channelEnd.length; j++) {
-      channelEnd[j] = false;
-
-    }
-    _.each(items, function(d, i, j){
-      if(d.uid === uid && d.matName === activeMatrix)
-      {
-        i_save = _.indexOf(Object.values(items), d);
-        patterns = d.patterns;
-
-      }
-    })
-
-    const nextObj = Object.values(items)[(i_save+1)%Object.values(items).length];
-    const model = fetchModel(ctx.state.modelName);
-    _.forEach(nextObj.durations, function(d, i){
-      duration.push(d);
-
-    });
-
-    updateMatrix(patterns, values, nextObj, transition, duration,storedGlobals);
-    store.dispatch(globalStore(storedGlobals));
-    ctx.setState({ activeMatrix : nextObj.matName, channelEnd : channelEnd, transition: nextObj.transitions, storedGlobals: nextObj.globals});
-
-    for (var i = 0; i < channelEnd.length; i++) {
-      channelEnd[i] = false;
-    }
-  }
-}
-
-enableSongmode(){
-  this.setState({ songmodeActive : true});
-}
-disableSongmode(){
-  this.setState({ songmodeActive : false});
-}
-
-////////////////////////////// TIMER STARTS ////////////////////////////
-
-startTimer() {
-  const ctx = this;
-  const {channels, steps, play} = ctx.state;
-
-  var temp = [];
-  for (var i = 0; i < channels.length; i++) {
-    if(isNaN(parseFloat(ctx.props.timer.timer[i].duration)))
-      temp.push(channels[i]);
-  }
-  if(temp.length === 0){
-    for (var i = 0; i < channels.length; i++) {
-      if(!isNaN(parseFloat(ctx.props.timer.timer[i].duration)) && parseFloat(ctx.props.timer.timer[i].duration) >= 1.) {
-        startIndividualTimer(i, ctx.props.timer.timer[i].duration,steps);
-        ctx.setState({play:true});
-      }
-    }
-    setTimeout(function() {
-      ctx.setState({play: true});
-      console.log('button press timeout -- start');
-    },600);
-  }
-  else {
-    alert("Invalid duration values for: " + temp.toString())
-  }
-}
-
-stopTimer() {
-  const ctx = this;
-  const {channels, play} = ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-    store.dispatch(stopIndividualTimer(i));
-    ctx.setState({play:false});
-  }
-  setTimeout(function() {
-    ctx.setState({play: false});
-    console.log('button press timeout -- stop');
-  },600);
-}
-
-pauseTimer() {
-  const ctx = this;
-  const {channels, play} = ctx.state;
-  for (var i = 0; i < channels.length; i++) {
-    store.dispatch(pauseIndividualTimer(i));
-    ctx.setState({play:false});
-  }
-  setTimeout(function() {
-    ctx.setState({play: false});
-    console.log('button press timeout -- pause');
-  },600);
-}
-////////////////////////////// TIMER ENDS ////////////////////////////
-
-
-
-////////////////////////////// HANDLERS ////////////////////////////
-//SuperCollider
-handleSubmit = event => {
-  const body=event.target.value
-  const ctx=this;
-  const {scPattern, tidalServerLink, tidalOnClickClass }=ctx.state;
-  if(event.keyCode === 13 && event.ctrlKey && body){
-    ctx.setState({tidalOnClickClass: ' Executed'});
-    setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
-    ctx.sendScPattern(tidalServerLink, scPattern);
-  }
-}
-
-//GHC
-handleConsoleSubmit = event => {
-  const body = event.target.value;
-  const ctx = this;
-  const {tidalServerLink, tidalOnClickClass, storedPatterns,channels} = ctx.state;
-  if(event.keyCode === 13 && event.ctrlKey && body){
-    ctx.setState({tidalOnClickClass: ' Executed'});
-    setTimeout(function(){ ctx.setState({tidalOnClickClass: ' '}); }, 500);
-    console.log();
-    ctx.consoleSubmitHistory(tidalServerLink, body,storedPatterns,channels);
-  }
-}
-
-handleGlobalTransformations = event => {
-  const body=event.target.value
-  const ctx=this;
-  const {globalTransformations}=ctx.state;
-  var temp = body;
-  ctx.setState({globalTransformations:temp});
-}
-
-
-handleGlobalChannels = event => {
-  const body=event.target.value
-  const ctx=this;
-  const {globalChannels}=ctx.state;
-  var temp = body;
-  ctx.setState({globalChannels:temp});
-}
-
-handleGlobalCommands = event => {
-  const body=event.target.value;
-  const ctx=this;
-  const {globalCommands}=ctx.state;
-  var temp = body;
-  ctx.setState({globalCommands:temp});
-}
-
-updateDur = ({target : {value, id}}) => {
-  const ctx = this;
-  const {channels,steps} = ctx.state;
-  const {timer} = ctx.props;
-  var _index = _.indexOf(channels,id);
-
-  if(!isNaN(parseFloat(value)) && parseFloat(value) >= 2.) {
-    store.dispatch(updateTimerduration(_index,value,steps));
-  } else {
-    console.error("Please input numbers only.");
-  }
-}
-
-_handleKeyPress = event => {
-
-  const ctx=this;
-  const {steps, channels, timer, play} = ctx.state;
-  console.log(timer);
-  console.log(ctx.props.timer.timer);
-  const _key = event.target.id;
-  var value = event.target.value;
-  var _index = _.indexOf(channels, _key);
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-      startIndividualTimer(_index, value,steps);
-      ctx.setState({play:true});
-    }
-  }
-  else if (event.keyCode === 13 && event.shiftKey){
-    store.dispatch(stopIndividualTimer(_index));
-  }
-}
-
-
-updateT = ({target : {value, id}}) => {
-  const ctx = this;
-  const {transition, channels} = ctx.state;
-  var _index = _.indexOf(channels, id);
-  var temp = transition;
-  if(temp){
-    temp[_index] = value;
-  }
-  else {
-    temp = [];
-  }
-  ctx.setState({transition: temp});
-}
-
-
-_handleKeyPressT = event => {
-  const ctx=this;
-  const {transition, channels} = ctx.state;
-  const _key = event.target.id;
-  var value = event.target.value;
-  var _index = _.indexOf(channels, _key);
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    var temp = transition;
-    temp[_index] = value;
-   ctx.setState({transition:temp});
-  }
-}
-
-
-handleSubmitCell = event => {
-  const ctx=this;
-  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, patterns }=ctx.props;
-
-  var body = event.target.id;
-  var c = _.split(body,',')[0]-1;
-  var i = _.split(body,',')[1];
-  var text = event.target.value;
-  const getScenePatterns = () => {
-    var scenePatterns = [];
-    const items = this.props[this.state.modelName.toLowerCase()]
-    _.each(items, function(d){
-      if(d.matName === activeMatrix)
-        scenePatterns = d.patterns;
-    })
-    return scenePatterns;
-  }
-
-  if(event.keyCode === 13 && event.ctrlKey){
-    store.dispatch(assignTimer(timer.timer[c], steps, i))
-    ctx.sendPatterns(tidalServerLink,{[c]: text}, getScenePatterns(),solo, transition, channels,timer.timer[c]);
-  }
-}
-////////////////////////////// HANDLERS ////////////////////////////
-updateMatrix(patterns, values, item, transition, duration, storedGlobals) {
-
-  const ctx = this;
-  const { steps, channels } = ctx.state;
-  const items = this.props[this.state.modelName.toLowerCase()]
-  store.dispatch(updateMatrix(patterns, values, item, transition, duration, steps, channels,storedGlobals));
-
-}
-
-soloChannel =  ({target : {id}}) => {
-  const ctx = this;
-  const {channels,solo,soloSentinel,storedPatterns,tidalServerLink} = ctx.state;
-  var _index = _.indexOf(channels,id);
-  var solopattr = "solo $" + storedPatterns[_index];
-  if(_index !== -1 ){
-    for (var i = 0; i < solo.length; i++) {
-      if(_index !== i)
-        solo[i] = false;
-    }
-    if (solo[_index] === false){
-      ctx.consoleSubmit(tidalServerLink, solopattr);
-    }
-    else {
-      _.forEach(storedPatterns, function(pat, i){
-        if (i !== _index){
-          ctx.consoleSubmit(tidalServerLink, storedPatterns[i]);
-        }
-      });
-    }
-    solo[_index] = !solo[_index];
-    ctx.setState({solo: solo, soloSentinel : solo[_index]});
-  }
-}
-
-runTidal() {
-  const ctx=this;
-  const { tidalServerLink } = ctx.state;
-  store.dispatch(initMyTidal(tidalServerLink));
-}
-//
-// closeSC() {
-//   const ctx=this;
-//   const { tidalServerLink } = ctx.state;
-//   store.dispatch(initMyTidal(tidalServerLink));
-// }
-
-sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo,transition, channels) {
-  const ctx = this;
-  const {globalCommands,globalTransformations, storedPatterns} = ctx.state;
-  store.dispatch(sendPatterns(tidalServerLink, vals, channelcommands, patterns,solo, transition, channels,globalTransformations,globalCommands,storedPatterns));
-}
-sendSCMatrix(tidalServerLink, vals, patterns) {
-  store.dispatch(sendSCMatrix(tidalServerLink, vals, patterns));
-}
-
-sendScPattern(tidalServerLink, pattern) {
-  store.dispatch(sendScPattern(tidalServerLink, pattern));
-}
-
-consoleSubmit(tidalServerLink, value){
-  store.dispatch(consoleSubmit(tidalServerLink, value));
-}
-consoleSubmitHistory(tidalServerLink, value,storedPatterns,channels){
-  store.dispatch(consoleSubmitHistory(tidalServerLink, value, storedPatterns,channels));
-}
-changeCollapse(k){
-  const ctx = this;
-  const {isCollapsed} = ctx.state;
-  isCollapsed[k]= !isCollapsed[k]
-  ctx.setState({isCollapsed : isCollapsed});
-}
-//  <img src={isCollapsed[k]? require('../assets/stop_fill@3x.png') : require('../assets/stop@3x.png')}  id = {k}  onClick={ctx.changeCollapse.bind(ctx,k)} height={20} width={20}/>f
-renderPlayer() {
-  const ctx=this;
-  const { channels, steps , timer, solo, soloSentinel,transition,isCollapsed}=ctx.state;
-  const playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-  var count = 1;
-  const transitionValue = function(c){
-    if(ctx.state.transition){
-      return ctx.state.transition[_.indexOf(channels, c)];
-    }
-    else {
-      return '(clutchIn 2)'
-    }
-  };
-  return (<div className="Player-holder">
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"15%"}}></div>
-      {_.map(channels, (c,k) => {
-        return <div className= {"playbox playbox-cycle" + (isCollapsed[k]? " collapsed": "")} key={c}>{c}<input className = "durInput" style = {{margin: 3}} id = {c} value={ctx.props.timer.timer[_.indexOf(channels, c)].duration}
-        onChange = {ctx.updateDur.bind(ctx)} onKeyDown={ctx._handleKeyPress.bind(ctx)}/>
-
-        {!solo[_.indexOf(channels, c)] && <img src={require('../assets/stop@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-        {solo[_.indexOf(channels, c)] && <img src={require('../assets/stop_fill@3x.png')}  id = {c}  onClick={ctx.soloChannel.bind(ctx)} height={20} width={20}/>}
-         </div>
-      })}
-    </div>
-    {_.map(Array.apply(null, Array(steps)), ctx.renderStep.bind(ctx))}
-    <div className={playerClass}>
-      <div className="playbox playbox-cycle" style={{width:"7.5%"}}>T</div>
-      {_.map(channels, c => {
-        return <input className = "playbox" id = {c} key = {c}
-        placeholder={" - "}
-        value = {transitionValue(c)}
-        style = {{margin: 5}}
-        onChange = {ctx.updateT.bind(ctx)}
-        onKeyUp={ctx._handleKeyPressT.bind(ctx)}/>
-      })}
-    </div>
-  </div>)
-}
-
-renderStep(x, i) {
-  const ctx=this;
-  const { channels, steps, tidalServerLink, solo, transition, activeMatrix}=ctx.state;
-  const { timer, click, patterns }=ctx.props;
-
-  var playerClass="Player Player--" + (channels.length + 1.0) + "cols";
-
-  var colCount=0;
-
-  return <div key={i} className={playerClass}>
-    <div className="playbox playbox-cycle" style={{width:"15%"}}>{i+1}</div>
-    {_.map(channels, c => {
-      const setText=({ target: { value }}) => {
-          const {values}=ctx.state;
-          if (values[i+1] === undefined) values[i+1]={}
-          values[i+1][_.indexOf(channels,c)] = value;
-          ctx.setState({values});
-      }
-
-      const getValue=() => {
-        const values=ctx.state.values;
-        if (values[i+1] === undefined || values[i+1][_.indexOf(channels,c)] === undefined) return ''
-        return values[i+1][_.indexOf(channels,c)];
-      }
-
-      const textval=getValue();
-
-      const index=channels.length*i+colCount++;
-
-      const mapNumbers =(value, istart, istop, ostart, ostop) => {
-        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
-      }
-
-      const cellHeight = 75/steps;
-      //Timer Check
-      var _index = _.indexOf(channels,c);
-      const currentStep = ctx.props.timer.timer[_index].current % steps;
-      var individualClass = "playbox";
-      var translateAmount = 0;
-      var ctrans = 'translate(0px, '+translateAmount+'px)';
-      var durstr = ctx.props.timer.timer[_index].duration + 's ease-in-out';
-      var css = {
-          height: cellHeight+'vh',
-          webkittransition: durstr,
-          moztransition: durstr,
-          otransition: durstr,
-          transform: ctrans
-      }
-      if (i === currentStep) {
-        individualClass += " playbox-active";
-        translateAmount = cellHeight;
-      }
-      if (ctx.props.timer.timer[_index].isActive === true) {
-        individualClass += " playbox-highlight";
-      }
-      // dynamic text size
-      // const textSize = textval.length > 10 ? Math.max( 1, mapNumbers(textval.length, 10, 30, 1, 0.65)) : 1;
-      return <div className={individualClass} style={css} key={c+'_'+i}>
-        <textarea type="text" style={{fontSize: '1vw'}}value={textval} onChange={setText} id = {c+','+i} onKeyUp = { ctx.handleSubmitCell.bind(ctx)}/>
-      </div>
-    })}
-  </div>;
-}
-
-
-changeName({target: { value }}) {
-  const ctx = this;
-  ctx.setState({ matName: value , sceneSentinel: false});
-}
-
-addItem() {
-  const ctx = this;
-  var patterns = [],
-      duration = [],
-      globals = [];
-  const { matName, activeMatrix, values, sceneIndex, transition,storedGlobals  } = ctx.state;
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  const { uid } = ctx.props.user.user;
-  const propstoredGlobals = ctx.props.globalparams.storedGlobals;
-  // gets the duration array
-  _.map(ctx.props.timer.timer, (obj, i) => {duration.push(obj.duration)})
-  globals = storedGlobals;
-  if(uid !== null && uid !== undefined){
-    _.each(items, function(d){
-      if(d.uid === uid && d.matName === activeMatrix){
-        patterns = d.patterns;
-      //  globals = d.globals;
-      }
-    })
-    if ( matName.length >= 1) {
-      var snd = Object.values(items).length;
-      //console.log(storedGlobals);
-      fbcreateMatrix(ctx.state.modelName, { matName, patterns, values, sceneIndex: snd, uid, transitions: transition, durations: duration, storedGlobals});
-      ctx.setState({sceneIndex: snd});
-    }
-    else {
-      alert("Scene title should be longer than 1 characters");
-    }
-
-    ctx.setState({activeMatrix: matName});
-  }
-}
-
-reorder (index,flag){
-  const ctx = this;
-  const { matName, values, sceneIndex } = ctx.state;
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  if(ctx.props.user !== null && ctx.props.user !== undefined){
-    const vals = _.takeWhile(Object.values(items), function (d) { return d.uid === ctx.props.user.user.uid });
-    if(vals !== undefined){
-      const len = vals.length;
-      if(flag === "up" && index === 0)
-        return;
-      else if(flag === "down" && len-1 === index)
-        return;
-      else{
-        if(flag === "up"){
-          if (vals[index].sceneIndex === index){
-            var upIndex = index - 1;
-            var upMatName = vals[upIndex].matName;
-            var upValues = vals[upIndex].values;
-            var upPatterns = vals[upIndex].patterns;
-            var upUID = vals[upIndex].uid;
-            var downMatName = vals[index].matName;
-            var downValues = vals[index].values;
-            var downPatterns = vals[index].patterns;
-            var downUID = vals[index].uid;
-
-            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: index, uid: upUID}, vals[upIndex].key);
-            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: upIndex, uid: downUID}, vals[index].key);
-          }
-        }
-        else if (flag === "down") {
-          if (vals[index].sceneIndex === index){
-            var downIndex = index + 1;
-            var downMatName = vals[downIndex].matName;
-            var downPatterns = vals[downIndex].patterns;
-            var downValues = vals[downIndex].values;
-            var downUID = vals[downIndex].uid;
-            var upMatName = vals[index].matName;
-            var upPatterns = vals[index].patterns;
-            var upValues =  vals[index].values;
-            var upUID = vals[index].uid;
-
-            console.log(downMatName ,': ', downPatterns);
-            console.log(upMatName, ': ', upPatterns);
-
-            fborder(ctx.state.modelName, {matName: downMatName, patterns: downPatterns, values: downValues, sceneIndex: index, uid: downUID}, vals[downIndex].key);
-            fborder(ctx.state.modelName, {matName: upMatName,   patterns: upPatterns, values: upValues, sceneIndex: downIndex, uid: upUID}, vals[index].key);
-          }
-        }
-      }
-    }
-  }
-}
-
-
-renderItem(item, dbKey, i) {
-  const ctx = this;
-  const { values, activeMatrix, transition,storedGlobals} = ctx.state;
-  const { patterns } = ctx.props;
-
-  // gets the duration array
-  var duration = [];
-  var sglobals = [];
-  const model = fetchModel(ctx.state.modelName);
-  _.forEach(item.durations, function(d, i){
-    duration.push(d);
-  });
-  _.forEach(item.storedGlobals, function(d, i){
-    sglobals.push(d);
-  });
-  const updateMatrix = () => {
-    if(sglobals === undefined){
-      sglobals = [];
-    }
-    ctx.setState({ activeMatrix: item.matName, matName: item.matName, sceneSentinel: true, transition: item.transitions, storedGlobals: sglobals, globalTransformations: ' ', globalCommands:' '});
-    //console.log(item.storedGlobals);
-    ctx.updateMatrix(patterns, values, item, transition, duration,sglobals);
-    store.dispatch(globalStore(sglobals));
-    //console.log(storedGlobals);
-  }
-
-  const handleDelete = ({ target: { value }}) => {
-    if (confirm('Are you sure you want to delete this?')) {
-      const payload = { key: dbKey };
-      fbdelete(ctx.state.modelName, payload);
-
-      // re-order all items after delete successfull
-      Firebase.database().ref("/matrices").once('child_removed').then(function(oldChildSnapshot) {
-        const items = ctx.props[ctx.state.modelName.toLowerCase()];
-        ctx.setState({sceneIndex: (Object.values(items).length)});
-        _.forEach(Object.values(items), function(d, i){
-          fborder(ctx.state.modelName, {matName: d.matName, patterns: d.patterns, values: d.values, sceneIndex: i}, d.key);
-        });
-      }, function(error) {
-        console.error(error);
-      });
-    }
-  }
-
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
-  return item.key && (
-      <div key={item.key} className="matrices" >
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', margin: '1px'}}>
-          <button onClick={handleDelete}>{'x'}</button>
-          {activeMatrix === item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton} style={{ color: 'rgba(255,255,102,0.75)'}}>{item.matName}</Button>}
-          {activeMatrix !== item.matName && <Button className={'buttonSentinel'} onClick={updateMatrix} theme = {themeButton}  style={{ color: '#ddd'}}>{item.matName}</Button>}
-          {item.sceneIndex !== 0 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'up')}>{'↑'} </button>}
-          {item.sceneIndex !== Object.values(items).length-1 && <button onClick={ctx.reorder.bind(ctx,item.sceneIndex, 'down')}>{'↓'}</button>}
-        </div>
-      </div>
-    )
-}
-
-renderItems(items) {
-  const ctx = this;
-  return _.map(items, ctx.renderItem.bind(ctx));
-}
-
-renderMetro(){
-  const ctx=this;
-  const { click }=ctx.props;
-  const currentStep=click.current;
-  var metro="metro metro--" ;
-  if (currentStep % 2 == 0 ) {
-    metro += " metro-active";
-  }
-  else {
-    metro = "metro metro--"
-  }
-  return <div className={metro}>{}
-    <input type="text" placeholder= "Metro"/>
-  </div>
-}
-
-clearMatrix(){
-  const ctx = this;
-  const { values, channels, steps} = ctx.state;
-  for (var i = 0; i < channels.length*steps; i++) {
-      values [i] = [];
-  }
-  ctx.setState({values});
-
-}
-
-toggleCanvas(){
-  const ctx = this;
-  ctx.setState({isCanvasOn: !ctx.state.isCanvasOn});
-}
-
-renderMenu(){
-  const ctx=this;
-  const { tidal, timer, click, patterns }=ctx.props;
-  const { play, values, steps, channels}=ctx.state;
-
-  const loginGG = () => {
-    store.dispatch(GitHubLogin())
-  }
-  const fblogout = () => {
-    this.setState({username: ''});
-    store.dispatch(logout())
-  }
-
-  return   <div className="Tidal" style={{margin: '5px'}}>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-      User
-      {ctx.props.user.user.email && <button className={'buttonSentinel'} id={'logout'} onClick={fblogout}>Logout | {ctx.props.user.user.name}</button>}
-      {!ctx.props.user.user.email && <button className={'buttonSentinel'} id={'login'} onClick={loginGG}>Login</button>}
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-     {!tidal.isActive && <img src={require('../assets/sc@2x.png')} onClick={ctx.runTidal.bind(ctx)} role="presentation" height={32} width={32}/>}
-     {tidal.isActive && <img src={require('../assets/sc_running@2x.png')} role="presentation" height={32} width={32}/>}
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    {!play && <img src={require('../assets/play@3x.png')} onClick={ctx.startTimer.bind(ctx)} role="presentation" height={32} width={32}/>}
-    {play && <div> <img src={require('../assets/pause@3x.png')} onClick={ctx.pauseTimer.bind(ctx)} role="presentation" height={32} width={32}/>
-                   <img src={require('../assets/stop@3x.png')} onClick={ctx.stopTimer.bind(ctx)} role="presentation" height={32} width={32}/> </div>}
-
-    </div>
-
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center'}}>
-    <a href="https://github.com/cannc4/Siren">0.3</a>
-    </div>
-
-  </div>
-}
-
-//onClick={ctx.closeSC.bind(ctx)}
-
-handleglobalKeys = event => {
-  // const ctx = this;
-  // const {steps, channels, timer, play} = ctx.state;
-  // if(event.keyCode > 48 && event.keyCode < 58 && event.ctrlKey){
-  //   var _index = event.keyCode - 49;
-  //   if(_index < channels.length){
-  //     if(!isNaN(parseFloat(ctx.props.timer.timer[_index].duration)) && parseFloat(ctx.props.timer.timer[_index].duration) >= 1.) {
-  //       startIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-  //       ctx.setState({play: true});
-  //     }
-  //   }
-  // }
-  // else if(event.keyCode > 48 && event.keyCode < 58 && event.shiftKey){
-  //   var _index = event.keyCode - 49;
-  //   if(_index < channels.length) {
-  //     stopIndividualTimer(_index, ctx.props.timer.timer[_index].duration, steps);
-  //   }
-  // }
-  // // Start/stop all timers with ctrl/shift + space
-  // else if (event.keyCode === 32 && event.ctrlKey){
-  //   ctx.startTimer();
-  // }
-  // else if (event.keyCode === 32 && event.shiftKey){
-  //   ctx.stopTimer();
-  // }
-  //
-  // //Scene bindings
-  // else if (event.keyCode === 32 && event.shiftKey){
-  //   ctx.stopTimer();
-  // }
-}
-
-
-clicked = event => {
-  const ctx=this;
-  const {pressed,globalTransformations,globalCommands,storedGlobals}=ctx.state;
-  var temp = {transform: globalTransformations, command: globalCommands};
-  var ns,tempgb, tempgbtwo;
-  if (event.target.id === 0){
-    ctx.SetState({globalTransformations:'', globalCommands: ''});
-  }
-  else if (event.shiftKey){
-    if(storedGlobals[event.target.id]!== undefined){
-      ns = storedGlobals;
-      ns[event.target.id] = temp;
-    }
-  }
-  else {
-    console.log(storedGlobals);
-    var ttm = Object.values(storedGlobals[event.target.id]);
-    if(ttm[0][0] === '#' && ttm[0] !== undefined ){
-      tempgb = ttm[0];
-      tempgbtwo = ttm[1];
-    }
-    else{
-      tempgb = ttm[1];
-      tempgbtwo = ttm[0];
-    }
-    ctx.setState({globalTransformations:tempgbtwo, globalCommands: tempgb})
-  }
-}
-
-record = event => {
-  const ctx=this;
-  const {pressed,globalTransformations,globalCommands,storedGlobals, sceneIndex}=ctx.state;
-  var ns;
-  var temp = {transform: globalTransformations, command: globalCommands};
-  if (storedGlobals === undefined){
-    ns = [];
-    ns.push(temp);
-  }
-  else {
-    ns = storedGlobals;
-    ns.push(temp);
-  }
-
-  store.dispatch(globalStore(ns));
-  ctx.setState({storedGlobals:ns})
-}
-
-handleUpdatePatterns = event => {
-  const body = event.target.value;
-  const ctx = this;
-  const {tidalServerLink,storedPatterns,globalCommands, globalTransformations,channels, transition}=ctx.state;
-  if(event.keyCode === 13 && event.ctrlKey){
-
-  ctx.updatePatterns(tidalServerLink,storedPatterns,globalTransformations,globalCommands,channels, transition);
-    }
-}
-
-sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels){
-  const ctx = this;
-  store.dispatch(sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels));
-}
-
-
-updatePatterns(tidalServerLink,storedPatterns,globalTransformations, globalCommands,channels, transition) {
-  const ctx = this;
-  const {globalChannels} = ctx.state;
-  var tempAr = [] ;
-  var gbchan = globalChannels.split(" ");
-
-  if (gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='a' ){
-    for (var i = 0; i < storedPatterns.length; i++) {
-      if(i !== channels.length){
-        if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-          tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-          if(transition[i] !== '' && transition[i] !== undefined){
-            tempAr[i] = channels[i]+ '$' + globalTransformations + tempAr[i] + globalCommands;
-            ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          }
-          else {
-            tempAr[i] = channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
-            ctx.consoleSubmit(tidalServerLink, tempAr[i]);
-          }
-        }
-      }
-    }
-  }
-
-  else {
-  _.forEach( gbchan, function(chan, j){
-      var i = parseInt(chan) - 1;
-      if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
-        tempAr[i] = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
-        if(transition[i] !== '' && transition[i] !== undefined){
-          tempAr[i] = channels[i]+ '$' + globalTransformations + tempAr[i] + globalCommands;
-          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
         }
         else {
-          tempAr[i] = channels[i] + '$' + globalTransformations + tempAr[i] + globalCommands;
-          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+          console.log('"' + c_name + '" already exists in "' + d.matName + '"');
         }
+      }
+    })
+  }
+  clearMatrix(){
+    const ctx = this;
+    let { channel, matrices, user} = ctx.props;
+    const { activeMatrix } = ctx.state;
+
+    // Get scene key
+    let s_key;
+    _.each(matrices, function(scene, i){
+      if(scene.uid === user.user.uid && scene.matName === activeMatrix)
+      {
+        s_key = scene.key;
+      }
+    })
+    _.each(channel, function(ch) {
+      _.each(ch.vals, function(d, i){
+        ch.vals[i] = '';
+      })
+      ch.transition = ''
+      fbupdatechannelinscene('Matrices', ch, s_key);
+    })
+  }
+  updateMatrix(item) {
+    store.dispatch(updateMatrix(item));
+  }
+
+  onLayoutChangeChannel(items, layout, x) {
+    const ctx = this;
+    _.each(items, function(j) {
+      if(j.key === x.i){
+        j.step = x.h - 1;
+        let newVals = [];
+        for(let a = 0 ; a < j.step; a++){
+          if(j.vals[a]!==undefined)  newVals[a] = j.vals[a];
+          else                       newVals[a] = ''
+        }
+        j.vals = newVals;
+        const sceneKey = _.findKey(ctx.props.matrices, ['matName', j.scene]);
+        fbupdatechannelinscene('Matrices', j, sceneKey);
+        store.dispatch(stepChannel(j));
       }
     });
   }
-}
 
-toggle = () => {
-  this.setState({ isMenuOpen: !this.state.isMenuOpen });
-};
+  renderChannel(scene_key, channelLen, item){
+    const ctx = this;
+    const { activeMatrix,copyCell } = ctx.state;
 
-close = () => {
-  this.setState({ isMenuOpen: false });
-};
+    return <div key={item.key} data-grid={{i: item.key, x:item.cid*3, y:0, w:3, h: _.toInteger(item.step)+1}}>
+      <Channels key={item.key}
+        active={activeMatrix}
+        scene_key={scene_key}
+        item={item}
+        paste = {copyCell}
+        solo={{isSolo: _.indexOf(ctx.state.soloArray, true) !== -1, soloValue: ctx.state.soloArray[item.cid]}}
+        mute={{isMute: _.indexOf(ctx.state.muteArray, true) !== -1, muteValue: ctx.state.muteArray[item.cid]}}
+        soloOnClick={function(cid) {
+          let temp = _.times(channelLen, _.stubFalse)
+          temp[cid] = !ctx.state.soloArray[cid];
+          ctx.setState({soloArray: temp});
+        }}
+        muteOnClick={function(cid) {
+          let temp = ctx.state.muteArray;
+          temp[cid] = !ctx.state.muteArray[cid];
+          ctx.setState({muteArray: temp});
+        }}/>
+      </div>
+    }
+  renderPlayer() {
+      const ctx = this;
+      const { activeMatrix } = ctx.state;
+      const sceneKey = _.findKey(ctx.props.matrices, ['matName', activeMatrix]);
+      const scene = _.find(ctx.props.matrices, ['key', sceneKey]);
+      const onClick = event => {
+        const ctx = this;
+        // let posX = event.nativeEvent.offsetX,
+        let posY = event.nativeEvent.offsetY;
 
-click = () => {
-  console.log('You clicked an item');
-};
+        ctx.setState({controlledPosition: {x: 0, y: _.toInteger(posY/40)*40}});
+
+        store.dispatch(seekTimer(_.toInteger(posY/40)));
+      };
+      const onDragStop = (event, position) => {
+        const ctx = this;
+        const {y} = position;
+        ctx.setState({controlledPosition: {x: 0 , y: _.toInteger(y/40)*40}});
+
+        store.dispatch(seekTimer(_.toInteger(y/40)));
+      }
+
+      let items;
+      if (!_.isUndefined(scene)) {
+        items = scene.channels;
+      }
+      const items_length = _.isUndefined(items) ? 0 : items.length;
+
+      let max_step = 0;
+      _.each(ctx.props.channel, function(ch,k){
+        if(ch.scene === activeMatrix)
+          max_step = _.max([ch.step, max_step]);
+      });
+
+      return (<div className={"AllChannels draggableCancel"}>
+      {activeMatrix && <div className={'MatrixScroll'} style={{height: (max_step)*40}} onDoubleClick={onClick}>
+        <Draggable position={ctx.state.controlledPosition} axis="y" bounds="parent" grid={[40, 40]} onStop={onDragStop}>
+          <div className="Timeline">
+          </div>
+        </Draggable>
+      </div>}
+      <ReactGridLayout
+        className={"layout_matrix"}
+        cols={36}
+        width={2000}
+        rowHeight={40}
+        margin={[2,0]}
+        draggableCancel={'.draggableCancel'}
+        verticalCompact={true}
+        onResizeStart={ctx.onLayoutChangeChannel.bind(ctx, items)}
+        >
+        {_.map(items, ctx.renderChannel.bind(ctx, sceneKey, items_length))}
+      </ReactGridLayout>
+    </div>)
+  }
+  ////////////////////////////// MATRIX ////////////////////////////
 
 
-render() {
-  const ctx=this;
-  const { timer}=ctx.props;
-  const { scPattern, channels, songmodeActive, activeMatrix,storedPatterns,pressed, storedGlobals,globalTransformations,globalCommands, globalChannels}=ctx.state
-
-  const updateScPattern = event  => {
-    ctx.setState({scPattern: event.target.value})
+  ////////////////////////////// LAYOUTS ////////////////////////////
+  saveLayouttoCustom = (id, e, data) => {
+    fbsavelayout("Accounts", this.props.layout.windows, this.props.user.user.uid, data.item);
   }
 
-  const items = ctx.props[ctx.state.modelName.toLowerCase()];
+  onAddlayoutItem(specifier){
+    let layouts = this.props.layout.windows;
+    store.dispatch(forceUpdateLayout(_.concat(layouts, _.find(this.state.default_layout, ['i', specifier])), layouts.length));
+  }
+  onRemovelayoutItem(specifier){
+    let layouts = this.props.layout.windows;
+    if(layouts !== undefined) {
+      _.forEach(layouts, function(item, i) {
+        if (item.i === specifier) {
+          layouts[i].isVisible = false;
+        }
+      });
+      fbupdatelayout("Accounts", layouts, this.props.user.user.uid);
+      store.dispatch(forceUpdateLayout(layouts, layouts.length));
+    }
+  }
+  onLayoutChange(layout) {
+    const ctx = this;
+    let temp_layouts = []
+    _.forEach(layout, function(l) {
+      const propItem = _.find(ctx.props.layout.windows, ['i', l.i]);
+      l.isVisible = propItem.isVisible;
+      if(l.isVisible === undefined)
+        l.isVisible = true;
 
-  var historyOptions = {
-      mode: '_rule',
-      theme: '_style',
-      fixedGutter: false,
-      scroll: true,
-      styleSelectedText:true,
-      showToken:true,
-      lineWrapping: true,
-      showCursorWhenSelecting: true,
-      readOnly: true
-  };
+      if (ctx.state.manual_layout_trig){
+        l.x = propItem.x;
+        l.y = propItem.y;
+        l.w = propItem.w;
+        l.h = propItem.h;
+        l.minW = propItem.minW;
+      }
+      temp_layouts = _.concat(temp_layouts, _.omitBy(l, _.isUndefined));
+    })
 
-  return <div >
-  <div className={"Home cont"}>
-  {ctx.state.isCanvasOn && <Simple width={window.innerWidth} height={window.innerHeight} timer={timer}/>}
-  <Layout fill='window'>
-      <Layout layoutWidth={120}>
-        <div id="matrices" style={{width: '100%', height: '1500px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginLeft: '10px'}}>
+    ctx.setState({manual_layout_trig: false});
+    fbupdatelayout("Accounts", temp_layouts, ctx.props.user.user.uid);
+    store.dispatch(updateLayout(temp_layouts));
+  }
+  onLoadCustomLayout = (layout_id, event) => {
+    const layout = Object.values(this.props.user.user.layouts.customs[[layout_id]]);
+    if (event.altKey) {
+      fbdeletecustomlayout("Accounts", this.props.user.user.uid, layout_id);
+    }
+    else {
+      this.setState({manual_layout_trig: true});
+      if (layout !== undefined) {
+        store.dispatch(forceUpdateLayout(layout, this.props.layout.windows.length));
+      }
+    }
+  }
 
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '10px', paddingBottom: '15px'}}>
-            <input className={'newPatternInput'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.changeName.bind(ctx)}/>
-            {this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Update</button>}
-            {!this.state.sceneSentinel && <button onClick={ctx.addItem.bind(ctx)}>Add</button>}
-            <button onClick={ctx.clearMatrix.bind(ctx)}>Clear Matrix</button>
-          </div>
-          <div>
-            {!songmodeActive && <button className={'buttonSentinel'} onClick={ctx.enableSongmode.bind(ctx)}>Start Songmode</button>}
-            {songmodeActive && <button className={'buttonSentinel'} onClick={ctx.disableSongmode.bind(ctx)}>Stop Songmode</button>}
-          </div>
-          <div className={'sceneList'} style={{ width: '100%'}}>
-            <ul style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', padding: '0', margin: '0'}}>
-              {this.props.user.user.name && ctx.renderItems(items)}
-              {!this.props.user.user.name && <div className={'buttonSentinel'} style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
-            </ul>
-          </div>
+  makeMatrixFullscreen() {
+    this.setState({manual_layout_trig: true});
+    let layouts = this.props.layout.windows
+    if(layouts !== undefined) {
+      let found = false;
+      _.forEach(layouts, function(item, i) {
+        if (item.i === 'matrix') {
+          layouts[i].y = 0;
+          layouts[i].x = 0;
+          layouts[i].w = 24;
+          layouts[i].h = 20;
+          layouts[i].isVisible = true;
+          found = true;
+        }
+        else {
+          layouts[i].isVisible = false;
+        }
+      });
+
+      if (!found) {
+        layouts = _.concat(layouts, {i: 'matrix', x: 0, y: 0, w: 24, h: 20, minW: 5, isVisible: true});
+      }
+
+      store.dispatch(forceUpdateLayout(layouts, layouts.length));
+    }
+  }
+  resetLayout() {
+    this.setState({manual_layout_trig: true});
+    store.dispatch(forceUpdateLayout(this.state.default_layout, this.props.layout.windows.length));
+  }
+
+  renderLayouts(layoutItem, k) {
+    const ctx = this;
+
+    const { activeMatrix, storedPatterns,
+            pressed, storedGlobals, globalTransformations, globalCommands,
+            globalChannels,c_type, c_name, c_step,
+            c_transition,globalsq } = ctx.state
+
+    const layoutVisibility = (ctx.props.user.user.email ? ' enabledView' : ' disabledView')
+
+    const items = ctx.props[ctx.state.modelName.toLowerCase()];
+    const maskedInputDurations=  _.repeat("1.1  ", 4);
+    const maskedInputPatterns = "1 | " + _.repeat("1  ", 10);
+    const getGridParameters = (specifier) => {
+      const itemToCopy = _.find(ctx.props.layout.windows, ['i', specifier]);
+      let newGridParameters = {x: 0, y:100, h:1, w:1, minW:0, isVisible: false};
+      if(itemToCopy){
+        newGridParameters.x = itemToCopy.x;
+        newGridParameters.y = itemToCopy.y;
+        newGridParameters.w = itemToCopy.w;
+        newGridParameters.h = itemToCopy.h;
+        newGridParameters.minW = itemToCopy.minW;
+        newGridParameters.isVisible = itemToCopy.isVisible;
+      }
+      return newGridParameters;
+    }
+
+    if (layoutItem.i === 'matrix') {
+      return layoutItem.isVisible && (<div key={'matrix'} className={layoutVisibility} data-grid={getGridParameters('matrix')} >
+        <div className={"PanelHeader"}> ■ {'"'+activeMatrix+'"'}
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "matrix")}>X</span>
         </div>
-      </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth='flex'>
-        <Layout layoutHeight={'flex'}>
+        <SelectableGroup className={'PanelAdjuster'}
+          onSelection={ctx.handleSelection.bind(ctx)}
+          onNonItemClick={ctx.handleUnselection.bind(ctx)}
+          tolerance={5}
+          enabled={false}>
           {ctx.renderPlayer()}
-        </Layout>
-        <LayoutSplitter />
-        <Layout layoutHeight={300}>
-          <Layout layoutWidth={150}>
-            {ctx.renderMenu()}
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={250}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Globals</p>
-              <input className="newChannelInput" key={'globalchannel'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalChannels.bind(ctx)} value = {globalChannels} placeholder="Channels "/>
-              <input className="defaultPatternHistoryArea" key={'globaltransform'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value = {globalTransformations} placeholder="Global Transformation "/>
-              <input className="defaultPatternHistoryArea" key={'globalcommand'} onKeyUp = {ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value = {globalCommands} placeholder="Global Command " />
-              {_.map(storedGlobals, (c, i) => {
-                 return <Button id={i}  pressed={pressed} onClick={ctx.clicked.bind(ctx)}   theme = {themeButton} activeStyle={{position:'relative', top: 1}} >{i}</Button>
-               })}
-               <Button theme = {themeButton}  onClick={ctx.record.bind(ctx)} activeStyle={{position:'relative', top: 2}} >Rec< /Button>
+        </SelectableGroup>
+      </div>);
+    }
+    else if (layoutItem.i === 'canvas') {
+      return layoutItem.isVisible && (<div key={'canvas'} className={layoutVisibility} id={'canvasLayout'} data-grid={getGridParameters('canvas')} >
+        <div className={"PanelHeader"}> ■ Canvas
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "canvas")}>X</span>
+        </div>
+
+        <Canvas activeMatrix={ctx.state.activeMatrix} serverLink={ctx.state.tidalServerLink}/>
+      </div>);
+    }
+    else if (layoutItem.i === 'scenes') {
+      return layoutItem.isVisible && (<div key={"scenes"} className={layoutVisibility} data-grid={getGridParameters('scenes')}>
+        <div>
+          <div className={"PanelHeader"}> ■ All Scenes
+            <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "scenes")}>X</span>
+          </div>
+          <div className={'Scenes PanelAdjuster'}>
+            <input className={'Input draggableCancel'} placeholder={'New Scene Name'} value={ctx.state.matName} onChange={ctx.handleSceneNameChange.bind(ctx)}/>
+            <div style={{display: 'inline-flex', justifyContent: 'space-between'}}>
+              { <button className={'Button draggableCancel'} onClick={ctx.addScene.bind(ctx)}>Add</button>}
+              {<button className={'Button draggableCancel'} onClick={ctx.duplicateScene.bind(ctx)}>Duplicate</button>}
+              <button className={'Button draggableCancel'} onClick={ctx.clearMatrix.bind(ctx)}>Clear Grid</button>
             </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={250}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-              <p>> Console</p>
-              <textarea className={"defaultPatternArea" + ctx.state.tidalOnClickClass} key={'tidalsubmit'} onKeyUp={ctx.handleConsoleSubmit.bind(ctx)} placeholder="Tidal (Ctrl + Enter)"/>
-              <textarea className="defaultPatternHistoryArea" key={'scsubmit'} onKeyUp={ctx.handleSubmit.bind(ctx)} onChange={updateScPattern} value={scPattern}  placeholder={'SuperCollider (Ctrl + Enter) '} />
+            <div className={'AllScenes'}>
+              <div>
+                {ctx.props.user.user.name && ctx.renderScenes(items)}
+                {!ctx.props.user.user.name && <div style={{ color: 'rgba(255,255,102,0.75)'}}>Please login to see saved scenes.</div>}
+              </div>
             </div>
-          </Layout>
-          <LayoutSplitter />
-          <Layout layoutWidth={'flex'}>
-            <div id="Execution" style={{width: '100%', flexDirection: 'column'}}>
-             <p>> Pattern History</p>
-             {_.map(channels, (c, i) => {
-                return <CodeMirror key={i} className={'defaultPatternHistoryArea'} onKeyUp={null} name={"defaultPatternArea"} value={storedPatterns[_.indexOf(channels, c)]} options={historyOptions}/>
-              })}
-            </div>
-          </Layout>
-        </Layout>
-      </Layout>
-      <LayoutSplitter />
-      <Layout layoutWidth={250}>
-        <div className="Patterns" >
-          <div className="PatternsColumn" >
-            <Patterns active={activeMatrix}/>
           </div>
         </div>
-        </Layout>
-      </Layout>
+      </div>);
+    }
+    else if (layoutItem.i === 'patterns') {
+      return layoutItem.isVisible && (<div key={'patterns'} className={layoutVisibility} data-grid={getGridParameters('patterns')}>
+        <div className={"PanelHeader"}> ■ Patterns in <span style={{fontWeight: 'bold'}}>{'"'+activeMatrix+'"'}</span>
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "patterns")}>X</span>
+        </div>
+        <div className={ctx.enableDisableClassname("AllPatterns PanelAdjuster")} >
+          <Patterns active={activeMatrix}/>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'patternroll') {
+      return layoutItem.isVisible && (<div key={'patternroll'} className={layoutVisibility} data-grid={getGridParameters('patternroll')}>
+        <div className={"PanelHeader"}> ■ Pattern Rolls in <span style={{fontWeight: 'bold'}}>{'"'+activeMatrix+'"'}</span>
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "patternroll")}>X</span>
+        </div>
+        <div className={ctx.enableDisableClassname("AllPatterns PanelAdjuster")} >
+          <PatternRoll uid ={ctx.props.user.user.name}/>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'pattern_history') {
+      return layoutItem.isVisible && (<div key={'pattern_history'} className={layoutVisibility} data-grid={getGridParameters('pattern_history')}>
+        <div className={"PanelHeader"}> ■ Pattern History
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "pattern_history")}>X</span>
+        </div>
+        <div className={"PanelAdjuster"}>
+          <PatternHistory patterns={storedPatterns}/>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'channel_add') {
+      return layoutItem.isVisible && (<div key={'channel_add'} className={layoutVisibility} data-grid={getGridParameters('channel_add')}>
+        <div className={"PanelHeader"}> ■ Add Channel
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "channel_add")}>X</span>
+        </div>
+        <div className={ctx.enableDisableClassname('AddChannel PanelAdjuster')}>
+          <div>
+            <Dropdown className={"draggableCancel"} options={channelOptions} onChange={ctx.handleChannelType.bind(ctx)} value={c_type} placeholder="Type" />
+            <input className={"Input draggableCancel"} onChange={ctx.handleChannelName.bind(ctx)} onKeyUp={ctx.handleSubmitAddChannel.bind(ctx)} value={c_name} placeholder="Name " />
+            <input className={"Input draggableCancel"} onChange={ctx.handleChannelStep.bind(ctx)} onKeyUp={ctx.handleSubmitAddChannel.bind(ctx)} value={c_step} placeholder="Step "/>
+            <input className={"Input draggableCancel"} onChange={ctx.handleChannelTransition.bind(ctx)} onKeyUp={ctx.handleSubmitAddChannel.bind(ctx)} value={c_transition} placeholder="Transition (optional)"/>
+          </div>
+          <button className={"Button draggableCancel"} onClick={ctx.addChannel.bind(ctx)}>Add</button>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'globals') {
+      return layoutItem.isVisible && (<div key={'globals'} className={layoutVisibility} data-grid={getGridParameters('globals')}>
+        <div className={"PanelHeader"}> ■ Global Parameters
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "globals")}>X</span>
+        </div>
+        <div className={ctx.enableDisableClassname("GlobalParams PanelAdjuster")}>
+          <p>Sequencer: ⌥ + Enter, ⇧ + Enter</p>
+          <div className={'GlobalParamsInputs'}>
+            <div className={'GlobalSequencer'}>
+              <MaskedInput mask={maskedInputDurations}
+                className={"Input draggableCancel"}
+                key={'globalsq'}
+                onKeyUp={ctx.handleGlobalsq.bind(ctx)}
+                onChange={ctx.handleGlobalsqDuration.bind(ctx)}
+                value={globalsq}
+                placeholder={"Sequencer ( "+maskedInputDurations+")"}/>
+            </div>
+          </div>
+
+          <p>Execute: ⌃ + Enter</p>
+          <div className={"GlobalParamsInputsII"}>
+            <div className={"GlobalParamsInputs"}>
+              <div>
+                <MaskedInput mask={maskedInputPatterns}
+                  className={"Input draggableCancel"}
+                  key={'globalchannel'}
+                  onKeyUp={ctx.handleUpdatePatterns.bind(ctx)}
+                  onChange={ctx.handleGlobalChannels.bind(ctx)}
+                  value={globalChannels}
+                  placeholder={"Channels ( "+maskedInputPatterns+")"}/>
+                <input className={"Input draggableCancel"} key={'globaltransform'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalTransformations.bind(ctx)} value={globalTransformations} placeholder={"Transformation"}/>
+                <input className={"Input draggableCancel"} key={'globalcommand'} onKeyUp={ctx.handleUpdatePatterns.bind(ctx)} onChange={ctx.handleGlobalCommands.bind(ctx)} value={globalCommands} placeholder={"Commands"} />
+              </div>
+              <button className={"Button draggableCancel"} onClick={ctx.record.bind(ctx)}>Rec</button>
+            </div>
+          </div>
+          <p>{"(Select) click,  (save) ⇧ + click, (delete) ⌥ + click"}</p>
+          <div className={'StoredGlobalParams'}>
+            {_.map(storedGlobals, (c, i) => {
+              return <button key={i} id={i} className={"Button " + pressed[i] + " draggableCancel"} onClick={ctx.clicked.bind(ctx)}>{i}</button>
+            })}
+          </div>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'console') {
+      return layoutItem.isVisible && (<div key={'console'} className={layoutVisibility} data-grid={getGridParameters('console')}>
+        <div className={"PanelHeader"}> ■ Console
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "console")}>X</span>
+        </div>
+        <div className={'Console PanelAdjuster'}>
+          <Console tidalServerLink={ctx.state.tidalServerLink}/>
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'debugconsole') {
+      return layoutItem.isVisible && (<div key={'debugconsole'} className={layoutVisibility} data-grid={getGridParameters('debugconsole')}>
+        <div className={"PanelHeader"}> ■ Debug Console
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "debugconsole")}>X</span>
+        </div>
+        <div className={'DebugConsole PanelAdjuster'}>
+          <DebugConsole />
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'setting') {
+      return layoutItem.isVisible && (<div key={'setting'} className={layoutVisibility} data-grid={getGridParameters('setting')}>
+        <div className={"PanelHeader"}> ■ Config Settings
+          <span className={"PanelClose draggableCancel"} onClick={ctx.onRemovelayoutItem.bind(ctx, "setting")}>X</span>
+        </div>
+        <Settings className={'PanelAdjuster'} uid={ctx.props.user.user.uid}/>
+      </div>);
+    }
+    else {
+      return layoutItem.isVisible && (<div key={layoutItem.i} data-grid={getGridParameters(layoutItem.i)}>
+        </div>)
+    }
+  }
+  ////////////////////////////// LAYOUTS ////////////////////////////
+
+
+  ////////////////////////////// GLOBALS ////////////////////////////
+
+
+  consoleSubmit(tidalServerLink, value){
+    store.dispatch(consoleSubmit(tidalServerLink, value));
+  }
+  consoleSubmitHistory(tidalServerLink, value, storedPatterns, channels){
+    store.dispatch(consoleSubmitHistory(tidalServerLink, value, storedPatterns,channels));
+  }
+
+  clicked = event => {
+    const ctx=this;
+    const {pressed, storedGlobals, globalChannels,
+          globalCommands,globalTransformations,sceneIndex,storedPatterns} =ctx.state;
+    const globalparams = ctx.props.globalparams;
+    const scenes = ctx.props.matrices;
+
+    let pr = pressed;
+    for(let sp = 0; sp < pr.length; sp++){
+      if(parseInt(event.target.id, 10) === sp){
+        pr[sp] = true;
+      }
+      else {
+        pr[sp] = false;
+      }
+    }
+    ctx.setState({ pressed: pr });
+
+    let matkey;
+    _.each(scenes , function (sc, i) {
+      if(sc.key === sceneIndex){
+        ctx.setState({storedGlobals: sc.storedGlobals})
+        matkey = sc.key;
+      }
+    })
+
+    let ttm;
+    if (event.altKey) {
+      // Delete content of the item
+      ttm = storedGlobals;
+      ttm[event.target.id] = {transform:'', command:'', selectedChannels:''};
+
+      fbupdateglobalsinscene('Matrices', ttm, matkey);
+      store.dispatch(globalUpdate('', '', ''));
+      ctx.setState({globalTransformations: '', globalCommands: '', globalChannels: ''})
+      ctx.setState({storedGlobals: ttm});
+    }
+    else if (event.shiftKey) {
+      ttm = storedGlobals;
+      ttm[event.target.id] = {transform: globalTransformations,
+                              command: globalCommands,
+                              selectedChannels: globalChannels};
+      fbupdateglobalsinscene('Matrices', ttm, matkey);
+      store.dispatch(globalStore(ttm, storedPatterns));
+      store.dispatch(globalUpdate(globalTransformations, globalCommands, globalChannels));
+      ctx.setState({storedGlobals: ttm});
+    }
+    else {
+      ttm = storedGlobals[event.target.id];
+      store.dispatch(globalStore(globalparams.storedGlobals,storedPatterns));
+      store.dispatch(globalUpdate(ttm.command, ttm.transform, ttm.selectedChannels));
+      ctx.setState({globalTransformations:ttm.transform, globalCommands:ttm.command,
+                    globalChannels: ttm.selectedChannels, storedGlobals: storedGlobals})
+    }
+  }
+  record = event => {
+    const ctx=this;
+    const {pressed,globalChannels,globalTransformations,globalCommands,storedGlobals,
+          sceneIndex, storedPatterns}=ctx.state;
+
+    let ns;
+    let temp = {transform: globalTransformations,
+                command: globalCommands,
+                selectedChannels:globalChannels};
+
+    if (storedGlobals === undefined){
+      ns = [];
+      ns[0]  = {transform: '',
+                command: '',
+                selectedChannels:''};
+
+      ns.push(temp);
+    }
+    else {
+      ns = storedGlobals;
+      ns[0]  = {transform: '',
+                command: '',
+                selectedChannels:''};
+      ns.push(temp);
+    }
+
+    let pr = pressed;
+    for(let pk = 0; pk <= storedGlobals.lenght; pk++){
+      if(storedGlobals.lenght-1 === pk){
+        pr[pk] = true;
+      }
+      else {
+        pr[pk] = false;
+      }
+    }
+
+    fbupdateglobalsinscene('Matrices', ns, sceneIndex);
+    store.dispatch(globalStore(ns, storedPatterns));
+    ctx.setState({storedGlobals: ns, pressed: pr})
+  }
+  updateGlobalSq(){
+    const ctx = this;
+    const {globalsq,storedGlobals,sqActive_UI,
+           sqActive,helperindex,global_helperindex} = ctx.state;
+
+    // let gbchan = globalChannels.split(" ");
+    let gbdur = globalsq.split(" ");
+
+    if(gbdur.length >= helperindex)
+      ctx.setState({sqActive:false});
+
+    if(Object.values(storedGlobals).length >= helperindex)
+      ctx.setState({global_helperindex:0});
+
+    let compileDuration, selGlobalPair;
+    if(sqActive_UI === true){
+      if(sqActive === false){
+        ctx.setState({helperindex:0});
+        compileDuration = gbdur[helperindex] * 1000;
+        selGlobalPair = global_helperindex ;
+        setTimeout(() => ctx.sequenceGlobals(selGlobalPair),compileDuration);
+        ctx.setState({sqActive :true});
+      }
+      else if (sqActive === true){
+        let k = helperindex+1;
+        let gk = global_helperindex+1;
+        ctx.setState({helperindex:k, global_helperindex:gk});
+        compileDuration = gbdur[helperindex] * 1000;
+        selGlobalPair = _.random(Object.values(storedGlobals).length-1);
+        // if(gk < Object.values(storedGlobals).length){
+        //   selGlobalPair = gk;
+        // }
+        // setTimeout(() => ctx.sequenceGlobals(k),compileDuration);
+        setTimeout(() => ctx.sequenceGlobals(selGlobalPair),compileDuration);
+      }
+    }
+  }
+  updatePatterns(tidalServerLink,storedPatterns,globalTransformations,
+                  globalCommands,channels) {
+
+    const ctx = this;
+    const { globalChannels} = ctx.state;
+    let tempAr = [] ;
+    let gbchan = globalChannels.split(" ");
+
+    if (gbchan === undefined ||gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] ==='0' ){
+      for (let i = 0; i < storedPatterns.length; i++) {
+          if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
+            let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+            let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+            tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
+            ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+          }
+        }
+      }
+    else {
+    _.forEach( gbchan, function(chan, j){
+        let i = parseInt(chan, 10) - 1;
+        if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
+          let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+          let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+          tempAr[i] = patname + globalTransformations + patternbody + globalCommands;
+          ctx.consoleSubmit(tidalServerLink, tempAr[i]);
+        }
+      });
+    }
+  }
+  sequenceGlobals = (selected_global_index) => {
+    const ctx = this;
+    const {tidalServerLink, storedGlobals, pressed,storedPatterns} = ctx.state;
+
+    for (let i = 0; i < storedPatterns.length; i++) {
+    if(storedPatterns[i] !== undefined && storedPatterns[i] !== ''){
+      let pr = pressed;
+      for(let sp = 0; sp < pr.length; sp++){
+        if(selected_global_index === sp){
+          pr[sp] = true;
+        }
+        else {
+          pr[sp] = false;
+        }
+      }
+
+      let patternbody = storedPatterns[i].substring(_.indexOf(storedPatterns[i], "$")+1);
+      let patname = storedPatterns[i].substring(0,_.indexOf(storedPatterns[i], "$")+1 );
+      let tr,cm,slc;
+      if (storedGlobals[selected_global_index].transform === undefined)
+        tr = '';
+      else
+        tr = storedGlobals[selected_global_index].transform;
+
+      if (storedGlobals[selected_global_index].command === undefined)
+        cm = '';
+      else
+        cm = storedGlobals[selected_global_index].command;
+
+      if (storedGlobals[selected_global_index].selectedChannels=== undefined)
+        slc = '';
+      else
+        slc = storedGlobals[selected_global_index].selectedChannels;
+
+
+      let pattern = patname + tr + patternbody +cm;
+      ctx.consoleSubmit(tidalServerLink, pattern);
+      ctx.setState({globalCommands: cm,
+                    globalTransformations: tr,
+                    globalChannels:slc ,
+                    pressed: pr});
+
+      }
+    }
+   ctx.updateGlobalSq();
+  }
+  sendGlobals(tidalServerLink,storedPatterns,storedGlobals, vals,channels){
+
+    store.dispatch(sendGlobals(tidalServerLink,storedPatterns,storedGlobals,
+                              vals,channels));
+  }
+  ////////////////////////////// GLOBALS ////////////////////////////
+
+  // Main render method
+  render() {
+    const ctx=this;
+    const copyCell = ctx.state;
+    // console.log('Homereact render');
+    // console.log(ctx.props.sccommand.commands);
+
+    // Layout height params for fullscreen
+    let vertical_n = 20,
+        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 62, // the menubar height
+        margin = 7,
+        row_height = (h-(vertical_n+1)*margin)/vertical_n;
+
+    let layouts = _.filter(ctx.props.layout.windows, ['isVisible', true, 'i', 'dummy']);
+    return <div>
+    <ContextMenuTrigger id="global_context" holdToDisplay={-1}>
+      <div className={"Home cont"}>
+        <ResponsiveReactGridLayout
+            className={"layout"}
+            layout={layouts}
+            breakpoints={{lg: 1200, md: 996, sm: 768, xs: 360}}
+            cols={{lg: 24, md: 20, sm: 12, xs: 8}}
+            draggableCancel={'.draggableCancel'}
+            margin={[margin, margin]}
+            rowHeight={row_height}
+            onLayoutChange={ctx.onLayoutChange.bind(ctx)}
+            verticalCompact={true}
+          >
+          {_.map(layouts, ctx.renderLayouts.bind(ctx))}
+        </ResponsiveReactGridLayout>
+      </div>
+    </ContextMenuTrigger>
+
+    <ContextMenu id="global_context" className={"draggableCancel"}>
+      <MenuItem data={{value: 1}} onClick = {ctx.copyCells.bind(ctx)}>
+        Copy Steps
+      </MenuItem>
+      <MenuItem data={{value: 2}} onClick = {ctx.reOrderCells.bind(ctx)}>
+        Paste Steps
+    </MenuItem>
+      <MenuItem divider />
+      <SubMenu title={'Modules'}>
+        {_.map(ctx.state.default_layout, function(layoutItem, key) {
+          if(_.find(layouts, { 'i': layoutItem.i, 'isVisible': true }) )
+            return <MenuItem key={key} onClick={ctx.onRemovelayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}<span style={{float: 'right'}}>√</span></MenuItem>;
+          else
+            return <MenuItem key={key} onClick={ctx.onAddlayoutItem.bind(ctx, layoutItem.i)} data={{ item: layoutItem.i }}>{layoutItem.i}</MenuItem>;
+        })}
+      </SubMenu>
+      <SubMenu title={'Layouts'}>
+        <MenuItem onClick={ctx.resetLayout.bind(ctx)} data={{ item: 'reset' }}>Reset<span style={{float: 'right'}}>⇧ + R</span></MenuItem>
+        <MenuItem onClick={ctx.makeMatrixFullscreen.bind(ctx)} data={{ item: 'reset' }}>Max. Grid<span style={{float: 'right'}}>⇧ + F</span></MenuItem>
+        <MenuItem divider />
+        <MenuItem disabled> alt-click to remove </MenuItem>
+        {_.map({a:1, b:2, c:3, d:4}, function(i, key) {
+          if(ctx.props.user.user.layouts !== undefined && ctx.props.user.user.layouts.customs !== undefined) {
+            if(ctx.props.user.user.layouts.customs[["c_"+i]] !== undefined)
+              return <MenuItem key={key} onClick={ctx.onLoadCustomLayout.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>Cust. {i}<span style={{float: 'right'}}>⇧ + {i}</span></MenuItem>
+            else
+              return <MenuItem key={key} onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
+          }
+          else
+            return <MenuItem key={key} onClick={ctx.saveLayouttoCustom.bind(ctx, "c_"+i)} data={{ item: 'c_'+i }}>click to save here</MenuItem>
+        })}
+      </SubMenu>
+    </ContextMenu>
+
     </div>
-  </div>
   }
 }
+
 export default connect(state => state)(Home);

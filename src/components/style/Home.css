@@ -1,0 +1,531 @@
+.Home {
+  background: rgba(27, 27, 27, 1);
+  overflow: auto;
+}
+
+/*Disable views in specific cases*/
+.disabledView {
+  pointer-events: none;
+  filter: opacity(30%);
+}
+.enabledView {
+  pointer-events: auto;
+  filter: opacity(100%);
+}
+
+/*Render Debuggin*/
+.renderLog {
+  background: #0a0 !important;
+}
+
+
+/*Log-in Button Animation*/
+@keyframes flusa {
+  from {background-color: rgba(255,255,102,0.2);}
+  to {background-color: rgba(0,0,0, 0);}
+}
+.Executed {
+  animation-name: flusa;
+  animation-duration: 1s;
+}
+
+.PanelAdjuster {
+  margin: 5px;
+  max-height: calc(100% - 34px);
+  max-width: calc(100% - 10px);
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+/*Panel Headers*/
+.PanelHeader {
+  background: rgba(30,30,30, 0.52);
+  padding: 3px 5px 3px 5px;
+  height: 20px;
+  border-style: double;
+  border-width: 1px;
+  border-color: rgba(180,180,180, 1);
+  border-radius: 1px;
+  font-weight: bold;
+  color: #ddd;
+}
+/*Panel Close Button */
+.PanelClose {
+  float: right;
+  cursor: pointer;
+}
+
+
+
+
+/*------------INPUTS AND BUTTONS------------*/
+.Input {
+  font-size: 12px;
+  border: 1px solid rgba(125,125,125, 0.8);
+  cursor: text;
+  width: 100%;
+}
+.Button {
+  font-size: 12px;
+  color: #aaa;
+  border: 1px solid rgba(125,125,125, 0.8);
+  cursor: pointer;
+  padding: 0.30vh 0.24vw 0.30vh 0.24vw;
+}
+.Button:hover {
+  border: 1px solid rgba(200,200,200, 0.8);
+  box-shadow: inset  0px 0px 5px rgba(200,200,200, 0.8);
+  background: rgba(255,255,102,0.15);
+}
+.Button:active {
+  background: rgba(255,255,102,0.75);
+}
+.Button:disabled {
+  background: #f00;
+  border: 1px dashed rgba(200,200,200, 0.9);
+}
+.Button.true {
+  background: #ccc;
+  color: #333;
+  font-weight: bold;
+}
+
+
+
+/*------------SETTINGS------------*/
+.Settings {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 5px);
+  align-items: center;
+}
+.SettingsItem {
+  display: inline-flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 50px;
+  width: 100%;
+}
+.SettingsLabel {
+  margin-top: 15px;
+  padding-right: 5px;
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 150px;
+}
+
+
+
+
+/*------------GLOBAL PARAMETERS------------*/
+.GlobalParams {
+  align-items: center;
+}
+.GlobalParams p {
+  font-size: 11px;
+  color: #888;
+  line-height: 12px;
+  padding: 0 0 0 2px;
+  margin: 0px;
+  font-weight: bold;
+}
+.GlobalSequencer {
+  width: 100%;
+}
+.GlobalParamsInputs {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - 5px);
+  padding: 1px;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+.GlobalParamsInputsII {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 5px);
+  padding: 1px;
+  margin-bottom: 8px;
+}
+.StoredGlobalParams {
+  background: rgba(200, 200, 200, 0.05);
+  border: 1px solid #000;
+  min-height: 35px;
+  height: auto;
+}
+.StoredGlobalParams button {
+  margin: 5px;
+  padding: 4px 7px 4px 7px;
+  min-width: 30px;
+}
+
+
+
+
+/*------------CODEMIRROR------------*/
+.CodeMirror {
+  background-color: rgba(255,255,255, 0.05) !important;
+}
+/*height*/
+div.cm-s-_style.CodeMirror {
+  height: 100px;
+}
+
+
+
+
+/*------------SCENES PANEL------------*/
+.Scenes {
+}
+/*All Scene Items together*/
+.AllScenes {
+  margin-top: 10px;
+  padding: 1px;
+  border: 1px solid #000;
+
+}
+/*Scene Items on Scene Panel*/
+.SceneItem {
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  width: 98%;
+  background: none;
+  margin: 1px;
+}
+/*Active Scene Items on Scene Panel*/
+.SceneItem-active {
+  border: 1px solid rgba(200, 200, 200, 0.75);
+  width: 98%;
+  background: rgba(255,255,102,0.25);
+  margin: 1px;
+}
+
+
+
+
+/*------------PATTERNS PANEL------------*/
+/*All patterns*/
+.AllPatterns {
+  /*      top | right | bottom | left */
+}
+/*Individual Pattern*/
+.PatternItem {
+  width: calc(100% - 5px);
+  margin-top: 8px;
+  padding: 1px;
+  border: 1px solid #000;
+}
+.PatternPanelHeader {
+  background: rgba(200,200,200, 0.1);
+  font-size: 10px;
+  padding: 0 0 5px 5px;
+  height: 15px;
+  width: 30px;
+  border-style: double;
+  border-width: 1px;
+  border-radius: 5px;
+  border-color: rgba(180,180,180, 1);
+  color: #ddd;
+}
+.PatternItemInputs {
+  display: flex;
+  flex-direction: row;
+  width: calc(100%);
+}
+.PatternItemInputs button{
+  padding: 0 10px 0 10px;
+}
+/*CodeMirror window of each pattern*/
+.PatternItemCodeMirror {
+  resize:both;
+  overflow-y: auto;
+  width: 100%;
+  border: 1px rgba(125,100,100, 0.8);
+}
+
+
+
+
+/*------------CONSOLE PANEL------------*/
+/*Tidal and SC Console textboxes*/
+.Console {
+  display: flex;
+  flex-direction: column;
+}
+.Console p {
+  font-size: 11px;
+  color: #888;
+  line-height: 12px;
+  padding: 0 0 0 2px;
+  margin: 0px;
+  font-weight: bold;
+}
+.ConsoleTextBox {
+  border: 1px solid rgba(120, 120, 120, 0.75);
+  font-size: 14px;
+  margin: 2.5px;
+  height: calc(50% - 45px);
+  cursor: text;
+}
+
+
+
+/*------------DEBUG CONSOLE PANEL------------*/
+.DebugConsole {
+  color: #ccc;
+  /*display: flex;
+  flex-direction: column;*/
+}
+
+
+
+
+/*------------PATTERN HISTORY PANEL------------*/
+/*Pattern History Fields (???)*/
+.defaultPatternHistoryArea {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  margin: 2.5px;
+  width: 100%;
+  height: 30px;
+}
+
+
+
+
+/*------------ADD CHANNEL PANEL------------*/
+.AddChannel {
+  display: flex;
+  flex-direction: row;
+  padding: 1px;
+  border: 1px solid #000;
+}
+
+
+
+
+/*------------ADD CHANNEL PANEL------------*/
+.Canvas {
+}
+.CanvasControls {
+  background: rgba(27, 27, 27, 1);
+  position: fixed;
+  display: inline-flex;
+  height: 25px;
+  width: calc(100% - 32px);
+  vertical-align: middle; 
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 1px solid rgb(180, 180, 180);
+  border-right: 1px solid rgb(180, 180, 180);
+  padding: 0 15px 0 15px;
+  font-size: 10px;
+}
+.CanvasControls input {
+  margin-top: 2.5px;
+  height: 20px;
+  width: 40px;
+}
+.CanvasControls button {
+  margin-top: 2.5px;
+  height: 20px;
+}
+.CanvasSketch {
+  transform: translate(0, 26px);
+}
+
+
+
+/*------------MATRIX PANEL------------*/
+/*All Channels Together*/
+.AllChannels {
+  display: flex;
+  flex-direction: row;
+  cursor: crosshair;
+  overflow-x: auto;
+}
+
+.layout_matrix {
+  margin: 0 0 0 2px;
+}
+
+.MatrixScroll {
+  width: 40px;
+  border: 1px solid rgba(200, 200, 200, 0.35);
+  border-radius: 5px;
+  margin: 0 0 5px 5px;
+
+  opacity: 0.65;
+
+  transform: translate(0px, 40px);
+  box-shadow: inset 0px 0px 50px rgba(0,0,0, 1);
+}
+.Timeline {
+  width: 100vw;
+  background: rgba(200, 200, 200, 0.15);
+  height: 40px;
+  cursor: ns-resize;
+  z-index: 500;
+  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.25);
+}
+
+/*Individual Channels*/
+.ChannelItem {
+  padding-left: 2px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  line-height: 20px;
+  min-height: 35px;
+  min-width: 100px;
+  padding: 0;
+  z-index: 2;
+  transition: opacity 100ms ease-in-out;
+}
+
+/*Individual Channels -- disabled style*/
+.ChannelItem.disabled {
+  opacity: 0.4;
+}
+
+/* Matrix header styling*/
+.ChannelItemHeader {
+  display: inline-flex;
+  height: 40px;
+  justify-content:space-between;
+  background: rgba(200,200,200,0.1);
+  /*border: 0.5px solid rgba(200, 200, 200, 0.75);*/
+  font-size: 14px;
+  line-height: 40px;
+  font-weight: bold;
+}
+
+.ChannelItemHeader button {
+  color: #ddd;
+  border: 1px solid rgba(30, 30, 30, 0.5);
+  box-shadow:   0px 0px 5px rgba(0,0,0, 0.3);
+}
+
+.ChannelItemHeaderButtons {
+  display: flex;
+  flex-direction: column;
+}
+.ChannelItemHeader p {
+  font-family: 'Inconsolata';
+  font-weight: bolder;
+  justify-content: center;
+  vertical-align:middle;
+  color: #ccc;
+  margin: 0 10px 0 10px;
+}
+.Audio {
+  background: rgba(42, 85, 110, 1);
+}
+.SCSynth {
+  background: rgba(42, 85, 110, 1);
+}
+.Tidal {
+  background: rgba(42, 85, 110, 1);
+}
+.Visual {
+  background: rgba(152, 122, 40, 1);
+}
+.SuperCollider {
+  background: rgba(200,200,200,0.4);
+}
+.Tidal-MIDI {
+  background: rgba(172, 87, 60, 1)
+}
+.MIDI {
+  background: rgba(172, 87, 60, 1)
+}
+.PatternRoll {
+  background: rgba(94, 12, 60, 1)
+}
+
+/*Individual Grid Cells*/
+.GridItem {
+  display: flex;
+  flex-grow: 1;
+  resize: none;
+  width: 100%;
+  line-height: 20px;
+  font-size: 1.5vh;
+  text-rendering: optimizeSpeed;
+  text-align: left;
+  vertical-align: center;
+  border: none;
+  background: rgba(0,0,0,0.3);
+  padding: 0 5px 0 5px;
+  z-index: 50;
+}
+.GridItem.even {
+  background: rgba(0,0,0,0.45);
+}
+.GridItem.odd::-webkit-input-placeholder { /* Chrome */
+  color: #777;
+  text-align: right;
+  vertical-align:bottom;
+  opacity: 0.8;
+  font-size: 1vh;
+  transition: opacity 250ms ease-in-out;
+}
+.GridItem.odd:focus::-webkit-input-placeholder {
+  opacity: 0.5;
+}
+
+/*Active Individual Grid Cells*/
+.GridItem.active {
+  background-color: rgba(200,200,90, 0.2);
+
+  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
+}
+
+/*Selected Grid Items*/
+.GridItem-active.selected {
+  border: 1px solid rgba(250,250,250, 0.65);
+  background: rgba(250,250,100,0.35);
+  font-weight: bolder;
+}
+
+/*Selected Grid Items*/
+.GridItem.selected {
+  border-color: rgba(250,250,250, 0.65);
+  background: rgba(250,250,100,0.15);
+  font-weight: bold;
+}
+
+/*Individual Transition Cells*/
+.GridItem-transition {
+  width: calc(80% - 40px);
+  height: 40px;
+  font-size: 1.3vh;
+  text-align: center;
+  vertical-align: center;
+  overflow-y: auto;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: inset  0px 0px 5px #333;
+}
+.GridItem-transition::-webkit-input-placeholder { /* Chrome */
+  color: #ccc;
+  opacity: 0.8;
+  font-size: 1vh;
+  transition: opacity 250ms ease-in-out;
+}
+.GridItem-transition:focus::-webkit-input-placeholder {
+  opacity: 0.5;
+}
+
+/* Table column sizing
+================================== */
+.Channel--2cols > .GridItem  { width: 50%; }
+.Channel--3cols > .GridItem  { width: 33.33%; }
+.Channel--4cols > .GridItem  { width: 25%; }
+.Channel--5cols > .GridItem  { width: 20%; }
+.Channel--6cols > .GridItem  { width: 16.6%; }
+.Channel--7cols > .GridItem  { width: 14.27%; }
+.Channel--8cols > .GridItem  { width: 12.5%; }
+.Channel--13cols > .GridItem  { width: 7.5%; }
+.Channel--16cols > .GridItem  { width: 6.25%; }
+.Channel--17cols > .GridItem  { width: 5.88%; }
