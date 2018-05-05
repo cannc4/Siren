@@ -12,11 +12,15 @@ s.waitForBoot {
   ~dirt = SuperDirt.start;
   "SUPERDIRT LOADED".postln;
   0.5.wait;
+
+
+
+  //Siren Functions - don't remove///
 	~dirt.orbits.do { |orbit, i|
 		{SendPeakRMS.kr(
 			InFeedback.ar(orbit.dryBus, ~dirt.numChannels),
-				4, // refresh rate
-				3, // peak lag
+				4,
+				3,
 				"/orbit" ++ i);
 		}.play;
 	};
@@ -30,7 +34,6 @@ s.waitForBoot {
 			}
 		};
 		thisProcess.addOSCRecvFunc(f);
-
 		g = { |msg, time, addr|
 			if(msg[0] == '/orbit0') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
@@ -42,13 +45,15 @@ s.waitForBoot {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
-
-
 		thisProcess.addOSCRecvFunc(h);
 	);
+
   1.wait;
+
   "SIREN LOADED".postln;
-//  SuperDirt.default = ~dirt;
+  //Siren Functions - end///
+
+  
   s.volume = -12;
   s.latency = 0.3;
   s.makeGui;

@@ -342,6 +342,7 @@ class REPL {
   }
   sendFutureExprs() {
     // DONOT MODIFY FORMATTING
+    this.tidalSendExpression('let (sirenChan, sirenChan_p) = pF \"sirenChan\" (Nothing)');
     this.tidalSendExpression("import Sound.OSC.FD");
     this.tidalSendExpression("import Sound.Tidal.Utils");
     this.tidalSendExpression("import qualified Data.Aeson as A");
