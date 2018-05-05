@@ -2,3 +2,4 @@
 dir=$(dirname $0)
 cd $dir
 npm run sirenc
+

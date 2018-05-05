@@ -39,7 +39,6 @@ class PathStore
     };
     
     save() {
-      console.log(this.paths);
       request.post('http://localhost:3001/paths', { 'paths': this.paths })
             .then((response) => {
               if (response.status === 200) console.log(" ## Paths saved.");

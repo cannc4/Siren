@@ -17,14 +17,15 @@
 
 
 
-/*Log-in Button Animation*/
-@keyframes flusa {
-  from {background-color: rgba(255,255,102,0.2);}
-  to {background-color: rgba(0,0,0, 0);}
+/* Animation for input submission */
+@keyframes submission_anim {
+  from {background-color: rgb(255, 255, 255, 0.1)}
+  to {background-color: rgba(255,255,102,0.55)}
 }
 .Executed {
-  animation-name: flusa;
+  animation-name: submission_anim;
   animation-duration: 1s;
+  animation-timing-function: ease-out;
 }
 
 
