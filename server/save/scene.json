@@ -8,43 +8,13 @@
    "scene": "default",
    "name": "def",
    "params": "y,x",
-   "text": "`y` $ n (run 5) #s \"gen0\" #end \"0.`x`\""
+   "text": "`y` $ n (run 5) #s \"perc\" #end \"0.`x`\""
   },
   {
    "scene": "default",
    "name": "s",
    "params": "",
    "text": "silence"
-  },
-  {
-   "scene": "asd",
-   "name": "pek",
-   "params": "y",
-   "text": "sound \"gen0 ~ ~\" # end 0.`y`"
-  },
-  {
-   "scene": "3m18",
-   "name": "s",
-   "params": "",
-   "text": "silence"
-  },
-  {
-   "scene": "3m18",
-   "name": "pat",
-   "params": "x",
-   "text": "nToOrbit $ n \"{0 ~ 1 [<~ 0 ~ 0>  ~] <0 ~ 0 > 1 <~ ~ ~ 1>}%5\" #s \"gen`x`\" #comp 0.5 "
-  },
-  {
-   "scene": "3m18",
-   "name": "hats",
-   "params": "",
-   "text": "( 0.2 ~>) $ nToOrbit $ n \"{0 ~ 1 [<~ 0 ~ 0>  ~] <0 ~ 0 > 1 <~ ~ ~ 1>}%5\" #s \"gen2\" #comp 0.5 |+|n \"2\" "
-  },
-  {
-   "scene": "3m18",
-   "name": "foilbass",
-   "params": "",
-   "text": "jux rev $ slow 2 $ n (foldl (append) \"0 3\" [\"0 3\", \"0 4\", \"0 5\", \"0 [3 6]\"]) # sound \"foil3\" # speed 2 # crush 3 # room 0.2 # size 0.1 #orbit 4"
   },
   {
    "scene": "default",
@@ -68,11 +38,11 @@
    "cells": [
     "",
     "",
-    "def `off 0.5 (#speed 2) ` `4`",
+    "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
     "s",
-    "def `slow 8 $ juxBy 0.5 (#s \"gen3\") ` `2`",
+    "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
     "",
-    "def `juxBy 0.5 (#begin 0.2) ` `1`",
+    "def `juxBy 0.5 (#coarse 4) ` `1`",
     "s",
     ""
    ],
@@ -85,76 +55,6 @@
    "selected": false,
    "time": 0,
    "cid": 0
-  },
-  {
-   "scene": "asd",
-   "name": "d2",
-   "type": "Tidal",
-   "steps": "4",
-   "rate": 8,
-   "time": 0,
-   "transition": "",
-   "cells": [
-    "",
-    "pek `5`",
-    "",
-    ""
-   ],
-   "gate": false,
-   "solo": false,
-   "mute": false,
-   "loop": true,
-   "selected": false,
-   "cid": 1
-  },
-  {
-   "scene": "asd",
-   "name": "d",
-   "type": "Tidal",
-   "steps": 6,
-   "rate": 8,
-   "time": 0,
-   "cells": [
-    "",
-    "",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "gate": false,
-   "solo": false,
-   "mute": false,
-   "loop": true,
-   "executed": false,
-   "selected": false,
-   "cid": 6
-  },
-  {
-   "scene": "3m18",
-   "name": "d1",
-   "type": "Tidal",
-   "steps": 8,
-   "rate": 8,
-   "time": 0,
-   "transition": "",
-   "cells": [
-    "pat `1`",
-    "pat",
-    "pat `1`",
-    "",
-    "pat `1`",
-    "pat `1`",
-    "",
-    ""
-   ],
-   "gate": true,
-   "solo": false,
-   "mute": false,
-   "loop": true,
-   "executed": false,
-   "selected": false,
-   "cid": 12
   },
   {
    "scene": "default",

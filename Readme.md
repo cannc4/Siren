@@ -50,11 +50,10 @@ or run the electron app with
 npm run sirenc
 ```
 
-or alternatively on MacOS,
+alternatively on MacOS,
 ```shell
 ./siren.sh
 ```
-
 
 *Tested with Chrome on Windows 10 and MacOS High Sierra*
 
