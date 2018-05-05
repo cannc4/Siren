@@ -1,0 +1,9 @@
+{
+ "userpath": "C:\\Users\\Mert",
+ "ghcipath": "C:\\Program Files\\Haskell Platform\\8.2.2\\bin\\ghci.exe",
+ "sclang": "C:\\Program Files\\SuperCollider-3.9.3\\sclang.exe",
+ "scsynth": "C:\\Program Files\\SuperCollider-3.9.3\\scsynth.exe",
+ "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
+ "tidal_boot": "C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\tidal-boot-default.hs",
+ "scd_start": "C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\scd-start-default.scd"
+}
