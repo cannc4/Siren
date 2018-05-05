@@ -4,6 +4,9 @@ dist/
 build/
 config/
 server/public/
+server/save/
+server/build/
+config/
 vis/
 vis/media/
 package-lock.json
