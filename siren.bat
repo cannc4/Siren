@@ -5,6 +5,6 @@ cd %DIR%
 
 start npm start
 
-start npm run siren
+start npm run sirenc
 
 endlocal

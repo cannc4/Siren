@@ -11,10 +11,10 @@ function createWindow() {
         show: true,
         icon: __dirname + './favicon.icns', 
     })
-    app.setAboutPanelOptions({
-        applicationName: "Siren",
-        applicationVersion: "0.6.0"
-      })
+    // app.setAboutPanelOptions({
+    //     applicationName: "Siren",
+    //     applicationVersion: "0.6.0"
+    //   })
     
     //mainWindow.setMenu(null);
     
