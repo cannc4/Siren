@@ -31,8 +31,6 @@
    "isVisible": true
   },
   {
-<<<<<<< HEAD
-=======
    "w": 14,
    "h": 13,
    "x": 0,
@@ -43,7 +41,6 @@
    "isVisible": true
   },
   {
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
    "w": 10,
    "h": 20,
    "x": 14,
@@ -54,34 +51,17 @@
    "isVisible": true
   },
   {
-<<<<<<< HEAD
-   "w": 7,
-   "h": 6,
-   "x": 3,
-   "y": 12,
-   "i": "globals",
-=======
    "w": 24,
    "h": 6,
    "x": 0,
    "y": 32,
    "i": "paths",
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
    "w": 14,
-<<<<<<< HEAD
-   "h": 12,
-   "x": 0,
-   "y": 12,
-   "i": "debugconsole",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-=======
    "h": 7,
    "x": 0,
    "y": 12,
@@ -89,7 +69,6 @@
    "moved": false,
    "static": false,
    "isVisible": true
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
   },
   {
    "w": 14,
@@ -112,31 +91,11 @@
    "isVisible": false
   },
   {
-<<<<<<< HEAD
-   "w": 14,
-   "h": 5,
-   "x": 0,
-   "y": 20,
-   "i": "pattern_history",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 7,
-   "h": 13,
-   "x": 0,
-   "y": 29,
-   "i": "paths",
-   "moved": false,
-   "static": false,
-=======
    "i": "globals",
    "x": 6,
    "y": 16,
    "w": 5,
    "h": 4,
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
    "isVisible": false
   }
  ],

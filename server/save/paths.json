@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
  "userpath": "C:\\Users\\Mert",
  "ghcipath": "C:\\Program Files\\Haskell Platform\\8.2.2\\bin\\ghci.exe",
  "sclang": "C:\\Program Files\\SuperCollider-3.9.3\\sclang.exe",
@@ -7,13 +6,4 @@
  "sclang_conf": "C:\\Users\\Mert\\AppData\\Local\\SuperCollider\\sclang_conf.yaml",
  "tidal_boot": "C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\tidal-boot-default.hs",
  "scd_start": "C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\scd-start-default.scd"
-=======
- "userpath": "/Users/canince/",
- "ghcipath": "/Library/Frameworks/GHC.framework/Versions/8.2.1-x86_64/usr/bin/ghci-8.2.1",
- "sclang": "/Applications/SuperCollider/SuperCollider.app/Contents/MacOS/sclang",
- "scsynth": "/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth",
- "sclang_conf": "/Users/canince/Library/Application Support/SuperCollider/sclang_conf.yaml",
- "tidal_boot": "/Users/canince/Documents/Git/Siren/config/tidal-boot-default.hs",
- "scd_start": "/Users/canince/Documents/Git/Siren/config/scd-start-default.scd"
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
 }

@@ -80,16 +80,10 @@ class PulseStore
             });
     }
     @action stopPulseStop() {
-<<<<<<< HEAD
         channelStore.resetAll();
         
         // actually stop the pulse
         this.stopPulse();
-=======
-        console.log("pulseStore");
-        channelStore.resetAll();
-        this.setActive(false);
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
     }
 
 

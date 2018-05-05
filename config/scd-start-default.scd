@@ -1,21 +1,19 @@
 (
-//s.options.device = "SuperCollider";
-s.options.numInputBusChannels = 0;
-s.options.numOutputBusChannels = 16;
-s.options.numBuffers = 2048 * 64;
-s.options.maxNodes = 1024 * 32;
-s.options.memSize = 131072 * 16;
+s.options.numBuffers = 2048 * 8;
+s.options.maxNodes = 1024 * 4;
+s.options.memSize = 13000 * 16;
 s.quit;
 
+
 s.waitForBoot {
+	// Initalize SuperDirt
+	~dirt = SuperDirt(2, s);
+	~dirt.loadSoundFiles;
+	0.2.wait;
+	~dirt.start(57120, [0, 1]);
+	"SUPERDIRT LOADED".postln;
 
-  ~dirt = SuperDirt.start;
-  "SUPERDIRT LOADED".postln;
-  0.5.wait;
-
-
-
-  //Siren Functions - don't remove///
+	//Siren Functions - don't remove///
 	~dirt.orbits.do { |orbit, i|
 		{SendPeakRMS.kr(
 			InFeedback.ar(orbit.dryBus, ~dirt.numChannels),
@@ -24,8 +22,6 @@ s.waitForBoot {
 				"/orbit" ++ i);
 		}.play;
 	};
-	OSCFunc.trace(true);
-	s.sendMsg("/notify", 1);
 
 	(
 		f = { |msg, time, addr|
@@ -39,16 +35,16 @@ s.waitForBoot {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
-		thisProcess.addOSCRecvFunc(g);
 		h = { |msg, time, addr|
 			if(msg[0] == '/orbit1') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
+		thisProcess.addOSCRecvFunc(g);
 		thisProcess.addOSCRecvFunc(h);
 	);
 
-  1.wait;
+  0.2.wait;
 
   "SIREN LOADED".postln;
   //Siren Functions - end///
@@ -56,8 +52,8 @@ s.waitForBoot {
   
   s.volume = -12;
   s.latency = 0.3;
-  s.makeGui;
-  s.meter;
+  //s.makeGui;
+  //s.meter;
 
   };
 

@@ -507,7 +507,7 @@ const Siren = () => {
       let newCommand;
 
       // CPS channel handling
-      console.log("TIDAL COMMAND: " , newCommand);
+      // console.log("TIDAL COMMAND: " , newCommand);
       if( channel.type === 'CPS'){
         newCommand = cellName;
         console.log(newCommand);

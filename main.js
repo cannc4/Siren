@@ -1,15 +1,7 @@
-<<<<<<< HEAD
 const {app, BrowserWindow, ipcMain } = require('electron')
 var path = require('path')
 let mainWindow = null
 const url = require('url');
-=======
-const {app, BrowserWindow} = require('electron')
-var path = require('path')
-let mainWindow = null
-const url = require('url');
-const { ipcMain } = require('electron');
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
 
 function createWindow() {
     // Initialize the window to our specified dimensions
@@ -21,11 +13,7 @@ function createWindow() {
     })
     app.setAboutPanelOptions({
         applicationName: "Siren",
-<<<<<<< HEAD
         applicationVersion: "0.6.0"
-=======
-        applicationVersion: "6.0.0"
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
       })
     
     //mainWindow.setMenu(null);

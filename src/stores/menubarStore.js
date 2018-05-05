@@ -47,11 +47,7 @@ class MenubarStore
         let rms = this.rmsArray.length > orbit ? this.rmsArray[orbit].rms : 0;
 
         let shape = "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀";
-<<<<<<< HEAD
-        for (var i = 0; i < _.toInteger(rms * 20); i++) { 
-=======
-        for (var i = 0; i < _.toInteger(rms * 15); i++) { 
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
+        for(let i = 0; i < _.toInteger(rms * 20); i++) { 
             let mod = rms * 20.0 - i;
             if (mod < 0.33)
                 shape = setCharAt(shape, i, '\\');
@@ -60,27 +56,7 @@ class MenubarStore
             else if (mod < 1.0) 
                 shape = setCharAt(shape, i, '/');
             else
-<<<<<<< HEAD
                 shape = setCharAt(shape, i, '⣿');
-=======
-                shape = setCharAt(shape, i, '|');
-        }
-        return shape;
-    }
-
-
-    createRMSShape() { 
-        function setCharAt(str,index,chr) {
-            if(index > str.length-1) return str;
-            return str.substr(0,index) + chr + str.substr(index+1);
-        }
-
-        let rms = this.rmsArray.length > 0 ? this.rmsArray[0].rms : 0;
-
-        let shape = "_________";
-        for (var i = 0; i < _.toInteger(rms * 20); i++) { 
-            shape = setCharAt(shape, i, '|');
->>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
         }
         return shape;
     }
