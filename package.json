@@ -59,7 +59,6 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
-    "test": "react-app-rewired test --env=jsdom",
     "eject": "react-app-rewired eject",
     "sirenc": "concurrently \"node server/start.js\" \"BROWSER=none react-app-rewired start\" \"wait-on http://localhost:3000 && electron main.js \"",
     "electron": "electron main.js ",
