@@ -1,4 +1,4 @@
-# Siren
+# Siren ![](https://travis-ci.org/merttoka/Siren.svg?branch=master)
 *Siren*, is a tracker interface that embodies abstractions where programming is realized as the medium for pattern sequencing in a modular fashion. It is based on a hierarchical structure that consists of scenes and channels. Separate channels have independent patterns; a complete song consists of a master list of repeated patterns.
 
 Supported programming languages : 
