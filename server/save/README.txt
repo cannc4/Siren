@@ -2,5 +2,9 @@ IMPORTANT: This folder contains savefile for the system. Unless you don't want t
 
 Save structure:
 ---------------
+scene.json
 layouts.json
+globals.json
+console.json
+paths.json
 	
