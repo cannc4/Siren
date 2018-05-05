@@ -4,6 +4,8 @@ body {
 }
 
 * {
+  font-family: monospace;
+  font-weight: 40;
   background: none;
   color: #ddd;
 }

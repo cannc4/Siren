@@ -1,11 +1,11 @@
 :set prompt ""
 :module Sound.Tidal.Context
-import Sound.Tidal.Utils
-import Sound.Tidal.Scales
+
 import Sound.Tidal.Chords
-import Data.Maybe
+import Sound.Tidal.Scales
+import Sound.Tidal.Utils
+import Data.Maybe (fromMaybe, maybe, isJust, fromJust)
 import Control.Applicative
-import Data.Char (digitToInt)
 
 (cps, getNow) <- bpsUtils
 
@@ -18,12 +18,16 @@ import Data.Char (digitToInt)
 (d7,t7) <- superDirtSetters getNow
 (d8,t8) <- superDirtSetters getNow
 (d9,t9) <- superDirtSetters getNow
-devices <- midiDevices
 
 let bps x = cps (x/2)
-    hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,m1,m2,m3,m4,m5,m6,m7,m8]
+    hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
+    jou = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
     solo = (>>) hush
 
+
+-- custom Tidal transforms/params
+:script /Users/canince/Documents/git/Siren/deps/patterns/tidalfuncs.hs
+:script /Users/canince/Documents/git/Siren/deps/patterns/tidalparams.hs
 :set prompt "tidal> "
 
 
