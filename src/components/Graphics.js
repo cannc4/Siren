@@ -10,7 +10,6 @@ import '../styles/Home.css';
 
 import { shaders } from './shaders/simple'
 
-// const ReactDOM = require("react-dom");
 const { Surface } = require("gl-react-dom");
 const GL = require("gl-react");
 
