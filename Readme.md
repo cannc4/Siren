@@ -6,7 +6,7 @@ Supported programming languages :
 - SuperCollider
 - Haskell/TidalCycles
 
-![](C:\Users\Mert\Dropbox\~siren\code\win\Siren\src\assets\readme_images\main_ss.jpg)
+![](.\src\assets\readme_images\main_ss.jpg)
 
 
 **Note:** This is a beta release (*v0.6), and it has not been tested comprehensively. If you come across a bug, please do [submit an issue](https://github.com/cannc4/siren/issues/new), and/or create a `pull request` of you feel like participating in its development.
