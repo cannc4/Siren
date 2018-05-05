@@ -38,14 +38,16 @@ Note that it's possible to target required paths using the `Settings` module in 
 
 **Note:** Make sure SuperCollider is either idle or closed before moving on.
 
-Now you can start the interface
-```shell
-npm start
-```
-and initialize the backend
-
+Now you can start the server and interface seperately
 ```shell
 npm run siren
+npm start
+```
+then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser
+
+or run the electron app with
+```shell
+npm run sirenc
 ```
 
 or alternatively on MacOS,
@@ -53,7 +55,7 @@ or alternatively on MacOS,
 ./siren.sh
 ```
 
-then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser
+
 *Tested with Chrome on Windows 10 and MacOS High Sierra*
 
 ## Modules
@@ -65,7 +67,7 @@ Scenes are the core of `Siren` and a scene serves as a framework to the composit
 *example in Figure (a)*- Textbox for scene name - `Add` `Duplicate` button- `Clear` button
 
 
-### Sequencer (aka Matrix) 
+### Sequencer (aka Grid) 
 #### Channels
 
 Channels can be added with navigating to the `Context Menu` by `right-click`. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
