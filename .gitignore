@@ -2,10 +2,7 @@ node_modules/
 deps/
 dist/
 build/
-config/
-server/public/
 vis/
 vis/media/
 package-lock.json
-asd
 .DS_Store

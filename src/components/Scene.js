@@ -8,7 +8,7 @@ export default class Scene extends React.Component {
     executionCss = (event, duration = 500) => {
         event.persist();
         event.target.className += ' Executed';
-        _.delay( () => (_.replace(event.target.className, ' Executed', '') ),
+        _.delay( () => (event.target.className = _.replace(event.target.className, ' Executed', '') ),
                 duration);
     }
 

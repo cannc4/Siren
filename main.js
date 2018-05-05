@@ -1,8 +1,7 @@
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, ipcMain } = require('electron')
 var path = require('path')
 let mainWindow = null
 const url = require('url');
-const { ipcMain } = require('electron');
 
 function createWindow() {
     // Initialize the window to our specified dimensions
@@ -12,10 +11,10 @@ function createWindow() {
         show: true,
         icon: __dirname + './favicon.icns', 
     })
-    app.setAboutPanelOptions({
-        applicationName: "Siren",
-        applicationVersion: "6.0.0"
-      })
+    // app.setAboutPanelOptions({
+    //     applicationName: "Siren",
+    //     applicationVersion: "0.6.0"
+    //   })
     
     //mainWindow.setMenu(null);
     

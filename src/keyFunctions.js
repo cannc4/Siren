@@ -5,11 +5,10 @@ import consoleStore from '../src/stores/consoleStore'
 import globalStore from '../src/stores/globalStore'
 import pathStore from '../src/stores/pathStore'
 
-
 const executionCss = (duration = 750) => {
     let logo = document.getElementById('logo_disp');
-    logo.className += ' Executed';
-    _.delay(() => {logo.className = _.replace(logo.className, ' Executed', '')}, duration);
+    logo.className += ' SaveExecuted';
+    _.delay(() => {logo.className = _.replace(logo.className, ' SaveExecuted', '')}, duration);
 }
 
 export const save = () => {

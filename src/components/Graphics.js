@@ -67,7 +67,7 @@ export default class Graphics extends React.Component {
     return (
       <Surface width={width} height={height} ref="graphicsGL">
         <GL.Node
-          shader={shaders.marchGL2}
+          shader={shaders.helloGL}
           uniforms={{
             resolution, iTime,
             nameAscii, note,

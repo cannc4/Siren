@@ -1,6 +1,6 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
-import _ from 'lodash'
+// import _ from 'lodash'
 
 
 // CSS Imports
@@ -38,16 +38,12 @@ export default class MenuBar extends React.Component {
         <div className={'Logo'} id={'logo_disp'}>
           {<img alt="" src={require('../assets/logo.svg')}  height={35} width={35}/> }
         </div>
-        <div>
-          {_.map([0, 1], (i) => { 
-            return <p>
-              {this.props.menubarStore.createRMSShape(i)}
-            </p>;
-          })}
-        </div>
       </div>
 
       <div className= 'enabledView'  style={{display: 'flex', flexDirection: 'row', height: 45}}>
+        <p className={'RMSVis'}>
+          {this.props.menubarStore.createRMSShape(0).split("").reverse().join("")}
+        </p>
         <div className={"TimerControls"}>  
           {!this.props.pulseStore.isActive && 
             <img src={require('../assets/play@3x.png')} title={'Start Pulse'}
@@ -60,6 +56,9 @@ export default class MenuBar extends React.Component {
           <img src={require('../assets/stop@3x.png')} title={'Stop Pulse'}
               onClick={() => (this.props.pulseStore.stopPulseStop())} alt="" height={45} width={45}/>
         </div>
+        <p className={'RMSVis'}>
+          {this.props.menubarStore.createRMSShape(1)}
+        </p>
       </div>
 
       <div className= 'OtherControls'>
