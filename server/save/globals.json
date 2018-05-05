@@ -10,6 +10,7 @@
   "transformer": "slow 2 $",
   "modifier": "#coarse 4",
   "param": "let gx = 0"
+<<<<<<< HEAD
  },
  {
   "channels": "1 2",
@@ -112,5 +113,7 @@
   "transformer": "slow 16 $ modNote 0 (spaceOut[0.15,0.2,0.6])$ modNote 1 (spaceOut[0.1,0.2,0.06])$",
   "modifier": "#lpf 4900",
   "param": ""
+=======
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
  }
 ]

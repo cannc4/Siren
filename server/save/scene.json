@@ -1,5 +1,6 @@
 {
  "scenes": [
+<<<<<<< HEAD
   "default",
   "8_9_10m18",
   "lea",
@@ -35,12 +36,21 @@
   "lex2"
  ],
  "active_s": "1650",
+=======
+  "default"
+ ],
+ "active_s": "default",
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
  "patterns": [
   {
    "scene": "default",
    "name": "def",
    "params": "y,x",
+<<<<<<< HEAD
    "text": "`y` $ n (run 5) #s \"gen0\" #end \"0.`x`\""
+=======
+   "text": "`y` $ n (run 5) #s \"perc\" #end \"0.`x`\""
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
   },
   {
    "scene": "default",
@@ -49,6 +59,7 @@
    "text": "silence"
   },
   {
+<<<<<<< HEAD
    "scene": "asd",
    "name": "pek",
    "params": "y",
@@ -10753,15 +10764,70 @@
    "type": "Tidal",
    "steps": 8,
    "rate": 8,
+=======
+   "scene": "default",
+   "name": "scpat",
+   "params": "",
+   "text": "(\na = play{t=Impulse.ar(6)+Dust.ar(1);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,400),f/4,9),9,0.5))};\n)"
+  },
+  {
+   "scene": "default",
+   "name": "scfree",
+   "params": "",
+   "text": "a.free;"
+  }
+ ],
+ "channels": [
+  {
+   "scene": "default",
+   "name": "d1",
+   "type": "Tidal",
+   "steps": 9,
+   "cells": [
+    "",
+    "",
+    "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
+    "s",
+    "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
+    "",
+    "def `juxBy 0.5 (#coarse 4) ` `1`",
+    "s",
+    ""
+   ],
+   "transition": "(clutchIn 2)",
+   "rate": 7,
+   "gate": true,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "selected": false,
+   "time": 0,
+   "cid": 0
+  },
+  {
+   "scene": "default",
+   "name": "s1",
+   "type": "SuperCollider",
+   "steps": 8,
+   "rate": 5,
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
    "time": 0,
    "transition": "",
    "cells": [
     "",
+<<<<<<< HEAD
     "",
     "amen `12` `hallfb`",
     "",
     "",
     "",
+=======
+    "scpat",
+    "",
+    "",
+    "",
+    "scfree",
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
     "",
     ""
    ],
@@ -10771,8 +10837,12 @@
    "loop": true,
    "executed": false,
    "selected": false,
+<<<<<<< HEAD
    "cid": 200,
    "activeSceneIndex": 1
+=======
+   "cid": 4
+>>>>>>> c2d69e2fbe3a4638434652e70bff28edf8c5d029
   }
  ]
 }
