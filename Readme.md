@@ -30,13 +30,10 @@ cd path/to/downloaded/repo
 npm i
 ```
 
-
-```
 In order to bind software dependencies, edit full paths in the `Paths` modules in the software according to your file system formatting and save the file (Alternatively, this can be done directly in `./server/save/paths.json`. 
 Copy paste your startup code to scd-start-default.scd and tidal-boot-default.hs into config folder, please make sure that you don't overwrite the required code for various modules in `Siren`
 
 Note that it's possible to target required paths using the `Settings` module in the interface
-
 
 
 **Note:** Make sure SuperCollider is either idle or closed before moving on.
@@ -51,13 +48,13 @@ and initialize the backend
 npm run siren
 ```
 
-or alternatively on Mac,
+or alternatively on MacOS,
 ```shell
 ./siren.sh
 ```
 
 then go to `http://localhost:3000/` or `http://127.0.0.1:3000/` in your browser
-*Tested with Chrome on Windows 10 and MacOSX El Capitan*
+*Tested with Chrome on Windows 10 and MacOS High Sierra*
 
 ## Modules
 
@@ -73,14 +70,9 @@ Scenes are the core of `Siren` and a scene serves as a framework to the composit
 
 Channels can be added with navigating to the `Context Menu` by `right-click`. Once a channel is added to the sequencer, the parameters and layout can be adjusted dynamically.  Each cell is a textbox allowing any type of text input. Patterns can be looked up from the dictionary with their names and parameters. When a cell is active, it triggers the pattern with appropriate name and applies parameters in an ordered fashion.  See `parameters` for various types.
 
-You can add channels using next module:
-
-### Add Channel
 Please note that Tidal channel names has to be defined appropriately in `tidal-boot-default.hs` or compiled using `console`.
-
 **Transitions:** Transition functions for TidalCycles
 *example in Figure (b)*- Transition function (i.e. `(clutchIn 4)`)
-**Steps:** Initial step number of channel
 **Type:** Channel type, possible types; Tidal, SuperCollider
 
 #### Cells
@@ -124,20 +116,28 @@ This module stores the successfully compiled Tidal patterns to keep track of the
 ### Console
 This module serves as a CLI(Command-Line-Interface) to Haskell and SuperCollider 
 
-### Global Modulators
+### Globals
 
 This is an experimental module that can be toggled using right click menu. There are two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+ click` clears the desired slot and `alt+ click` overwrites it. These modifiers are applied to the patterns shown in the pattern history section. (i.e active patterns)Channels that you want to modify can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means that modifiers will be applied to all channels in the scene. Last row is the global parameter that can be dynamically added to the ecosystem.
 
-### Settings
+### Pattern Roll & Future Patterns
+
+
+Inspired by the piano-roll in traditional DAWs, operates as the playback visualization tool. A series of pre-compiliation are included within the boot function to support the visualisation of the `future` Tidal patterns. 
+To be able to use this tool, pattern names needs to be written with `x` prefix instead of the usual `d` such as `x1`.
+The horizontal axis denotes quantized time bins, and vertical lists the names of unique samples and notes. The visibility of labeling on the vertical axis can be toggled to reduce clutter. Default sequence length is 8 sec- onds and each second is quantized into 12 bins. Both parameters can be edited using the dedicated fields on the interface.
+
+
+### Paths
 In this module, it’s possible to set various settings of Siren such as startup configs or various paths.
 
 ### Debug Console
 This module serves as a debug console for GHC. 
 
-##Notes
+## Notes
 
 
-##TODO
+## TODO
 
 ## Known Bugs
 
