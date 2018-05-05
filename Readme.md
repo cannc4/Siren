@@ -175,10 +175,3 @@ The horizontal axis denotes quantized time bins, and vertical lists the names of
 
 
 
-
-## Notes
-
-## Known Bugs
-
-
-
