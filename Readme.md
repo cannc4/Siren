@@ -93,9 +93,9 @@ and on Windows, double click on:
 siren.bat
 ```
 
+After initializing the interface and setting the paths, press `Start Server` button at the menubar.
+
 *Tested with Chrome on Windows 10 and MacOS High Sierra*
-
-
 
 ## Modules
 
@@ -114,7 +114,7 @@ Different channel types can be added with right mouse click. Once a channel is a
 Please note that Tidal channel names has to be defined appropriately in `tidal-boot-default.hs` or compiled using `console`.
 
 #### Cells
-The cells of the channels serve as a canvas for pattern names and pattern parameters. Pressing `Enter` on the cells selects the cell. Once in selection mode, you can navigate the cells with arrow keys. The selected cell can be compiled with `Alt + Enter `. Multiple cells can be selected using the `Shift` + arrow keys which then can be copied and pasted to other parts of the grid.
+The cells of the channels serve as a canvas for pattern names and pattern parameters. Pressing `enter` on the cells selects the cell. Once in selection mode, you can navigate the cells with arrow keys. The selected cell can be compiled with `alt+enter`. Multiple cells can be selected using the `shift` + arrow keys which then can be copied and pasted to other parts of the grid.
 
 #### Cell Parameters
 
@@ -145,15 +145,17 @@ n `x` # s `y`
 
 ### 4. Pattern History
 
-This module stores the successfully compiled Tidal patterns to keep track of the running sequences.
+This module stores the successfully compiled Tidal patterns to keep track of the running sequences. 
+If you compile a pattern via CLI, you have to add `#sirenChan` parameter to the pattern to indicate it's slot in the module.
+(e.g `#sirenChan 1`)
 
 ### 5. Console
 
-This module serves as a CLI (Command-Line-Interface) to Haskell and SuperCollider. 
+This module serves as a CLI (Command-Line-Interface) to Haskell and SuperCollider. Compiles the selected text with `ctrl+enter`. 
 
 ### 6. Globals
 
-There are two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+ click` clears the desired slot and `alt+ click` overwrites it. These modifiers are applied to the patterns shown in the pattern history section (i.e. active patterns). Channels that you want to target can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means modifiers will be applied to all channels in the scene. Last row is the global parameter that can be dynamically added to the system.
+There are two sections dedicated to appending and prepending to the running code. `ctrl+enter` activates the code and sections can be recalled by creating presets. Pressing `Rec` button saves the active modifiers. `shift+click` clears the desired slot and `alt+click` overwrites it. These modifiers are applied to the patterns shown in the pattern history section (i.e. active patterns). Channels that you want to target can also be specified using the `channel` section in the submenu. Writing `1 2` will make the modifiers only affect the first two channels, `0` is a special case and means modifiers will be applied to all channels in the scene. Last row is the global parameter that can be dynamically added to the system.
 
 ### 7. Config Paths
 
