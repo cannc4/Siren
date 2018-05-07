@@ -8,7 +8,7 @@
 /*Disable views in specific cases*/
 .disabledView {
   pointer-events: none;
-  filter: opacity(30%);
+  filter: opacity(80%);
 }
 .enabledView {
   pointer-events: auto;

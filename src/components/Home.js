@@ -21,8 +21,8 @@ import '../styles/App.css';
 import '../styles/Home.css';
 import '../styles/ContextMenu.css';
 
-import {SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import { save, timer, tidalCps } from '../keyFunctions'
+import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import { save, timer } from '../keyFunctions'
 
 // Grid Layout Initialization
 let ReactGridLayout = require('react-grid-layout');
@@ -38,12 +38,12 @@ export default class Home extends React.Component {
   componentDidMount(){
     keymaster('⌘+s, ctrl+s', save); 
     keymaster('ctrl+enter', timer); 
-    keymaster('alt+space', tidalCps); 
+    // keymaster('alt+space', tidalCps); 
   }
   componentWillUnmount() {
     keymaster.unbind('ctrl+s', save);
-    keymaster.unbind('alt+space', tidalCps); 
     keymaster.unbind('ctrl+enter', timer); 
+    // keymaster.unbind('alt+space', tidalCps); 
   }
 
   handleChangeLayout = (layout, layouts) => {

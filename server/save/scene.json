@@ -39,22 +39,23 @@
     "",
     "",
     "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
-    "s",
+    "",
     "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
     "",
     "def `juxBy 0.5 (#coarse 4) ` `1`",
-    "s",
+    "",
     ""
    ],
    "transition": "(clutchIn 2)",
-   "rate": 7,
+   "rate": 2,
    "gate": true,
    "solo": false,
    "mute": false,
    "loop": true,
    "selected": false,
-   "time": 0,
-   "cid": 0
+   "time": 90,
+   "cid": 0,
+   "activeSceneIndex": 0
   },
   {
    "scene": "default",

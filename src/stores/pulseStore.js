@@ -87,18 +87,18 @@ class PulseStore
     }
 
 
-    submitGHC() {
-        let pat;
-        // this.cps_info = !this.cps_info;
-        // if(this.cps_info) pat = 'cps 1';
-        // else if(!this.cps_info) pat = ' cps 0'
-        request.post('http://localhost:3001/console_ghc', { 'pattern': pat })
-          .then((response) => { 
-            console.log("RESPONSE GHC");
-          }).catch(function (error) {
-            console.error("ERROR", error);
-          });
-    }
+    // submitGHC() {
+    //     let pat;
+    //     // this.cps_info = !this.cps_info;
+    //     // if(this.cps_info) pat = 'cps 1';
+    //     // else if(!this.cps_info) pat = ' cps 0'
+    //     request.post('http://localhost:3001/console_ghc', { 'pattern': pat })
+    //       .then((response) => { 
+    //         console.log("RESPONSE GHC");
+    //       }).catch(function (error) {
+    //         console.error("ERROR", error);
+    //       });
+    // }
 
 
     
