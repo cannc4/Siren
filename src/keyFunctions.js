@@ -21,10 +21,6 @@ export const save = () => {
     return false;
 }
 
-export const tidalCps = () => {
-    pulseStore.submitGHC(); 
-    return false;
-}
 export const timer = () => {
     if (pulseStore.isActive) 
         pulseStore.stopPulse();
@@ -32,4 +28,8 @@ export const timer = () => {
         pulseStore.startPulse();
 }
 
+// export const tidalCps = () => {
+//     pulseStore.submitGHC(); 
+//     return false;
+// }
 

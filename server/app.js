@@ -38,7 +38,6 @@ class REPL {
     });
     console.log(" ## -->   GHC Spawned");
 
-
     /*KORG 
     let nano_socket = socketIo.listen(4003);
     nanoKONTROL.connect('nanoKONTROL2').then((device) => {
@@ -257,7 +256,6 @@ class REPL {
           catch (e) { 
             console.error(e.toString()); 
           }
-           
         }); 
 
         // On SC Message
@@ -317,8 +315,6 @@ class REPL {
       });
     });
   }
-    
-
     
   start(config, reply) {
     this.doSpawn(config);
@@ -388,10 +384,12 @@ class REPL {
     this.sc.interpret(message)
       .then(function(result) {
         console.log(" ### sendSC: " , result);
-        reply.status(200).json({sc_result: result});
+        reply.sendStatus(200);
+        // reply.status(200).json({sc_result: result});
       }, function(error) {
-        console.error("### sendSC ERROR:" , error);
-        reply.status(500).json({sc_result: undefined});
+        console.error("### sendSC ERROR:", error);
+        reply.sendStatus(500);
+        // reply.status(500).json({sc_result: undefined});
       });
   }
 }
@@ -428,11 +426,15 @@ const Siren = () => {
       }
     };
   
+    // TODO: Server Doesnt Stop Properly
     const stopSiren = (req, reply) => {
-      sendScPattern("s.quit;", null);
-      stopPulse(null);
       SirenComm.siren_console = null;
+      stopPulse(null);
+      sendScPattern("s.quit;", reply);
       this.repl.exit();
+
+      // send succesfull exit msg
+      reply.sendStatus(200);
     };
 
     const sendScPattern = (pattern, reply) => {
@@ -510,9 +512,9 @@ const Siren = () => {
       // console.log("TIDAL COMMAND: " , newCommand);
       if( channel.type === 'CPS'){
         newCommand = cellName;
-        console.log(newCommand);
         
-        return "cps " + newCommand;
+        tidalPatternQueue.push("cps " + newCommand);
+        reply.status(200).json({pattern: "cps " + newCommand, cid: channel.cid, timestamp: new Date().getMilliseconds()});
       }
       // other channels
       else if(pat !== undefined && pat !== null && pat !== "" && v !== ""){

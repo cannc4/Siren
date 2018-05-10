@@ -2,7 +2,6 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 // import _ from 'lodash'
 
-
 // CSS Imports
 import '../styles/_comp.css';
 import '../styles/Layout.css';

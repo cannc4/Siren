@@ -10,6 +10,8 @@ function createWindow() {
         backgroundColor: '#000',
         show: true,
         icon: __dirname + './favicon.icns', 
+		fullscreenable: true,
+		title: "Siren"
     })
     // app.setAboutPanelOptions({
     //     applicationName: "Siren",
