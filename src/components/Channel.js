@@ -82,7 +82,7 @@ class Channel extends React.Component {
     console.log('RENDER CHANNEL', item);
 
     let channelClass = "ChannelItem";
-    if ((!item.loop) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
+    if ((!item.loop && item.executed) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
       channelClass += " disabled";
     }
     return (<div className={channelClass}>

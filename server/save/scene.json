@@ -48,7 +48,7 @@
    ],
    "transition": "(clutchIn 2)",
    "rate": 2,
-   "gate": true,
+   "gate": false,
    "solo": false,
    "mute": false,
    "loop": true,
@@ -82,33 +82,6 @@
    "executed": false,
    "selected": false,
    "cid": 4
-  },
-  {
-   "scene": "default",
-   "name": "d2",
-   "type": "Tidal",
-   "steps": 9,
-   "rate": 8,
-   "time": 0,
-   "transition": "",
-   "cells": [
-    "",
-    "",
-    "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
-    "",
-    "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
-    "",
-    "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
-    "",
-    ""
-   ],
-   "gate": false,
-   "solo": false,
-   "mute": false,
-   "loop": true,
-   "executed": false,
-   "selected": false,
-   "cid": 2
   }
  ]
 }

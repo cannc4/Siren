@@ -6,6 +6,7 @@ import sceneStore from './sceneStore';
 import patternStore from './patternStore';  
 import historyStore from './historyStore';  
 import globalStore from './globalStore';
+import consoleStore from './consoleStore';
 
 import request from '../utils/request'
 
@@ -78,16 +79,26 @@ class ChannelStore
     @action updateAll() {
         _.forEach(_.filter(this.channels, ['scene', sceneStore.active_scene]), (channel, i) => {
             if (channel.gate && pulseStore.pulse.beat % channel.rate === 0) {
-                // if(channel.loop && channel.time === channel.steps) {
-                //     //no loop
-                // }
-                // else 
                 channel['activeSceneIndex'] = i;
-                channel.time += 1;
-                let current_step = channel.time % channel.steps;
-                if(channel.cells[current_step] !== undefined && channel.cells[current_step] !== ''){
-                    if((!this.soloEnabled || (this.soloEnabled && channel.solo)) && !channel.mute)
-                        this.sendPattern(channel, channel.cells[current_step]);
+
+                // if not still looping
+                if (!channel.executed) { 
+                    channel.time += 1;
+    
+                    let current_step = channel.time % channel.steps;
+                    // if cell is not empty
+                    if (channel.cells[current_step] !== undefined && channel.cells[current_step] !== '') {
+                        // check if solo or mute enabled
+                        if ((!this.soloEnabled || (this.soloEnabled && channel.solo)) && !channel.mute) { 
+                            this.sendPattern(channel, channel.cells[current_step]);
+                            
+                            if(!channel.loop && current_step === channel.steps-1) {
+                                if (!channel.executed) { 
+                                    channel.executed = true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -235,6 +246,11 @@ class ChannelStore
         let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
         if(ch !== undefined) {
             ch.mute = !ch.mute;
+            
+            // actually stop audio
+            // TODO: SC
+            if (ch.mute === true && ch.type === 'Tidal')
+                consoleStore.submitGHC(ch.name + ' $ silence');
         }
     }
     @action toggleSolo(name) {
@@ -244,7 +260,14 @@ class ChannelStore
             if(ch.solo) {
                 this.soloEnabled = true;
                 _.forEach(this.getActiveChannels, (other) => {
-                    if(other.name !== ch.name) other.solo = false;
+                    if (other.name !== ch.name) { 
+                        other.solo = false;
+                        
+                        // actually stop audio on other channels
+                        // TODO: SC
+                        if (other.type === 'Tidal')
+                            consoleStore.submitGHC(other.name + ' $ silence');
+                    }
                 });
             }
             else    this.soloEnabled = false;
@@ -254,6 +277,7 @@ class ChannelStore
         let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
         if(ch !== undefined) {
             ch.loop = !ch.loop;
+            ch.executed = false;
         }
     }
 
