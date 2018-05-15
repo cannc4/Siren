@@ -54,5 +54,8 @@ s.waitForBoot
   	"SIREN LOADED".postln;
 	// ------------------------------- //
 	// SIREN FUNCTIONS -- END 		   //
+
+	s.meter;
+	s.makeGui;
   };
 )

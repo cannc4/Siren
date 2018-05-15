@@ -482,7 +482,6 @@ div.cm-s-_style.CodeMirror-wrap {
   padding-left: 7px;
   font-size: 12px;
   border: none;
-  width: 30%;
   color: rgb(0, 0, 0);
   transition: all 500ms ease;
   font-weight: bolder;
@@ -580,32 +579,15 @@ div.cm-s-_style.CodeMirror-wrap {
 /*Selected Grid Items*/
 .GridItem.selected {
   background: rgba(103, 230, 220, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  /* box-shadow: inset 0px 0px 15px rgba(255,255,255, 0.15); */
-  margin: -1px;
-  font-weight: bold;
+  outline: 1px solid rgba(255, 255, 255, 0.35);
 }
 /*Highlighted Grid Items*/
 .GridItem.highlighted {
   background: rgba(103, 230, 220, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  /* box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.35); */
-  margin: -1px;
-  font-weight: bold;
+  outline: 1px solid rgba(255, 255, 255, 0.45);
 }
 /*Active Individual Grid Cells*/
 .GridItem.active {
   background-color: rgba(223, 219, 35, 0.2);
   box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
 }
-
-/* .GridItem-transition::-webkit-input-placeholder {
-  color: #ccc;
-  opacity: 0.8;
-  font-size: 12px;
-  transition: opacity 250ms ease-in-out;
-} 
-.GridItem-transition:focus::-webkit-input-placeholder {
-  opacity: 0.5;
-} */

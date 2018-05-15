@@ -19,8 +19,8 @@
   {
    "scene": "default",
    "name": "scpat",
-   "params": "",
-   "text": "(\na = play{t=Impulse.ar(6)+Dust.ar(1);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,400),f/4,9),9,0.5))};\n)"
+   "params": "x",
+   "text": "(\na = play{t=Impulse.ar(6)+Dust.ar(&`x`%2&);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,`x`),f/4,9),9,0.5))};\n)"
   },
   {
    "scene": "default",
@@ -34,15 +34,16 @@
    "scene": "default",
    "name": "d1",
    "type": "Tidal",
-   "steps": 9,
+   "steps": 8,
    "cells": [
     "",
-    "",
+    "def `trunc 0.5 $ off 0.5 (#speed \"<2 0.5>\") ` `4`",
     "def `off 0.5 (#speed \"<2 0.5>\") ` `4`",
     "",
     "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
     "",
     "def `juxBy 0.5 (#coarse 4) ` `1`",
+
     "",
     ""
    ],
@@ -53,7 +54,7 @@
    "mute": false,
    "loop": true,
    "selected": false,
-   "time": 90,
+   "time": 0,
    "cid": 0,
    "activeSceneIndex": 0
   },
@@ -67,21 +68,22 @@
    "transition": "",
    "cells": [
     "",
-    "scpat",
-    "",
-    "",
+    "scpat `400`",
+    "scfree",
+    "scpat `600`",
     "",
     "scfree",
-    "",
+    "scpat `100`",
     ""
    ],
-   "gate": false,
+   "gate": true,
    "solo": false,
    "mute": false,
    "loop": true,
    "executed": false,
    "selected": false,
-   "cid": 4
+   "cid": 4,
+   "activeSceneIndex": 1
   }
  ]
 }
