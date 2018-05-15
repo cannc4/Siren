@@ -10,16 +10,34 @@ export default class Cell extends React.Component {
     
     handleKeys = (event, channel_index, cell_index) => {
 
+        // console.log(event.keyCode);
+        // 8 -> backspace
+        // 46 -> del
+        // 27 esc
+
+        // start timer
         if((event.metaKey || event.ctrlKey) && event.keyCode === 13) {
-            event.preventDefault();
             timer();
+            event.preventDefault();
         }
 
         //compile pattern with the parsed parameters + channel props cmd + enter
         else if(event.altKey && event.keyCode === 13) {
             this.props.cellStore.compileCell();
+            event.preventDefault();            
         }
 
+        // deselect with esc    
+        else if (event.keyCode === 27) {
+            this.props.cellStore.updateSelectState(false);
+            document.getElementById('cell'+this.props.cellStore.current_cell[0]+
+                                            this.props.cellStore.current_cell[1]).focus();
+            this.props.cellStore.selectCell(channel_index, cell_index);
+            this.nameInput.readOnly = false;
+
+            event.preventDefault();            
+        }
+        
         //select with enter
         else if(event.keyCode === 13) {
             if(!this.props.cellStore.isSelected) {
@@ -50,15 +68,15 @@ export default class Cell extends React.Component {
                 this.props.cellStore.pasteCells();
             }
         }
-        //cut Cells
-        else if( (event.metaKey || event.ctrlKey)&& event.keyCode === 88 ) {
+        // cut Cells
+        else if( (event.metaKey || event.ctrlKey)&& event.key === 'x' ) {
             if(this.props.cellStore.isSelected) {
                 this.props.cellStore.cutCells();
                 event.preventDefault();
             }
         }
-        //delete selected cells
-        else if(event.keyCode === 8 && (event.metaKey || event.ctrlKey) ) {
+        //delete selected cells (backspace or del)
+        else if((this.props.cellStore.isSelected && (event.keyCode === 8 || event.keyCode === 46) )) {
             this.props.cellStore.deleteSelectedCells();
             event.preventDefault();
         }

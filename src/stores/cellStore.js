@@ -48,13 +48,11 @@ class CellStore
     }
 
     @action cutCells(){
-        console.log("Cut2");
         this.copyCells();
         this.deleteSelectedCells();
 
     }
     copyCells() {
-        console.log("Cut3");
         if(this.select_state) {
             this.clipboard = [];
 
@@ -89,9 +87,9 @@ class CellStore
 
             for (let i = 0; i <= max_channel-min_channel; i++)
                 for (let j = 0; j <= max_cell-min_cell; j++)
-                channelStore.getActiveChannels[i+min_channel].cells[j+min_cell] = '';
+                    channelStore.getActiveChannels[i+min_channel].cells[j+min_cell] = '';
             
-            }
+        }
     }
 
 
