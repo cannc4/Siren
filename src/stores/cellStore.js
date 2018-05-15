@@ -66,7 +66,7 @@ class CellStore
                     this.clipboard.push({channel: i, cell: j, 
                             value: channelStore.getActiveChannels[i+min_channel].cells[j+min_cell]});
         }
-        console.log(this.clipboard);
+        // console.log(this.clipboard);
     }
 
     pasteCells() {

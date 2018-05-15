@@ -9,8 +9,7 @@ import _ from 'lodash';
 class ChannelHeader extends React.Component {
 
     handleControlEnter = (event) => {
-        if(event.ctrlKey && event.keyCode === 13){
-            // this.executionCss(event);
+        if(event.keyCode === 13){
             this.props.channelStore.changeChannelName(this.props.value.name, this.nameInputName.value);
         }
     }
@@ -22,7 +21,7 @@ class ChannelHeader extends React.Component {
         return (<div>
             <div className={"ChannelItemHeader " + item.type }>
                 <input ref={(input_name) => { this.nameInputName = input_name; }}
-                    title={"Channel Name (" + item.name + ") [ctrl+enter to submit changes]"}
+                    title={"Channel Name (" + item.name + ") [enter to submit changes]"}
                     className={"ChannelItemHeader-NameText draggableCancel"}
                     placeholder={item.name}
                     onKeyUp={this.handleControlEnter.bind(this)}
