@@ -60,6 +60,25 @@ export default class MenuBar extends React.Component {
         </p>
       </div>
 
+      <div className={'OtherControls'}>
+        {!this.props.menubarStore.isRecording && <button className={'Button '}
+          onClick={() => this.props.menubarStore.toggleRecording()}>
+          REC.
+        </button>}
+        {this.props.menubarStore.isRecording && <button className={'Button '}
+          onClick={() => this.props.menubarStore.toggleRecording()}>
+          S. REC.
+        </button>}
+        {!this.props.menubarStore.isPlaying && <button className={'Button '}
+          onClick={() => this.props.menubarStore.togglePlay()}>
+          >
+        </button>}
+        {this.props.menubarStore.isPlaying && <button className={'Button '}
+          onClick={() => this.props.menubarStore.togglePlay()}>
+          ||
+        </button>}
+      </div>
+
       <div className= 'OtherControls'>
         <div className={serverStatusClass} title={"Server Status"} ></div>
 

@@ -19,6 +19,13 @@ let nano = new NanoTimer();
 
 let link_pulse = socketIo.listen(4001);
 
+let isRecording = false;
+let isPlaying = false;
+let recordFilename = '';
+
+let historyArray = [];
+let history_index = 0;
+let commandobj;
 class REPL {
   hush() {
     this.tidalSendExpression('hush');
@@ -111,7 +118,7 @@ class REPL {
 
   initSCSynth(config, reply) {
     const self = this;
-    
+    if (!nano)   nano = new NanoTimer();
     supercolliderjs.resolveOptions(config.path).then((options) => {
       // replace options
       options.sclang = config.sclang;
@@ -400,230 +407,324 @@ const SirenComm = {
 
 const Siren = () => {
 
-    const app = express();
-    app.use(bodyParser.json({limit:'50mb'}))
-    app.use(function(req, res, next) {
-      res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      next();
-    });
+  const app = express();
+  app.use(bodyParser.json({ limit: '50mb' }))
+  app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
     
-    const tidalPatternQueue = new Queue((pat, cb) => {
-      SirenComm.siren_console.tidalSendExpression(pat);
-      cb(null, result);
-    },{ });
+  const tidalPatternQueue = new Queue((pat, cb) => {
+    SirenComm.siren_console.tidalSendExpression(pat);
+    
+    if (isRecording) { 
+      let tidalobj = {pattern: pat, timestamp: Date.now(), type: 'Tidal'};
+      historyArray.push(tidalobj);
+    }
+    cb(null, result);
+  }, {});
 
-    const sendPattern = (expr) => {
-      SirenComm.siren_console.tidalSendExpression(expr);
-    };
+  const sendPattern = (expr) => {
+    SirenComm.siren_console.tidalSendExpression(expr);
+  };
 
-    const startSiren = (b_config, reply) => {
-      try{
-        SirenComm.siren_console = new REPL();
-        SirenComm.siren_console.start(b_config, reply);
-      }catch(e) { 
-        reply.sendStatus(500);
-      }
-    };
+  const startSiren = (b_config, reply) => {
+    try {
+      SirenComm.siren_console = new REPL();
+      SirenComm.siren_console.start(b_config, reply);
+    } catch (e) {
+      reply.sendStatus(500);
+    }
+  };
   
-    // TODO: Server Doesnt Stop Properly
-    const stopSiren = (req, reply) => {
-      SirenComm.siren_console = null;
-      stopPulse(null);
-      sendScPattern("s.quit;", reply);
-      this.repl.exit();
+  // TODO: Server Doesnt Stop Properly
+  const stopSiren = (req, reply) => {
+    SirenComm.siren_console = null;
+    stopPulse(null);
+    sendSCpattern("s.quit;", reply);
+    this.repl.exit();
 
-      // send succesfull exit msg
-      reply.sendStatus(200);
-    };
+    // send succesfull exit msg
+    reply.sendStatus(200);
+  };
 
-    const sendScPattern = (pattern, reply) => {
-      SirenComm.siren_console.sendSC(pattern, reply);
-    };
+  const sendSCpattern = (pattern, reply) => {
+    SirenComm.siren_console.sendSC(pattern, reply);
+
+    if (isRecording) { 
+    
+      let scobj = {pattern: pattern, timestamp: Date.now(), type: 'SuperCollider'};
+      historyArray.push(scobj);
+    
+    }
+  };
   
-    //Pattern Stream <->
-    app.post('/patternstream', (req, reply) => {
-      const { step, channel, patterns, global_mod } = req.body;
-      let k = channel.name, v = step;
+  //Pattern Stream <->
+  app.post('/patternstream', (req, reply) => {
+    const { step, channel, patterns, global_mod } = req.body;
+    let k = channel.name, v = step;
       
-      const getParameters = (v) => {
-        let param = [];
-        _.map(_.split(v, /[`]+/g), (p1, p2) => {
-          p1 = _.trim(p1);
+    const getParameters = (v) => {
+      let param = [];
+      _.map(_.split(v, /[`]+/g), (p1, p2) => {
+        p1 = _.trim(p1);
     
-          if(p1 !== "") param.push(p1);
-        });
-        return param;
-      }
-      const processParameters = (parameters, newCommand, cellItem) => {
-        // For each parameter in parameter list
-        _.forEach(parameters, function(value, i) {
-          // Temporal parameter
-          if(value === 't') {
-            newCommand = _.replace(newCommand, new RegExp("`t`", "g"), channel.time);
-          }
-          // Random parameter
-          else if(_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length-1)
-          {
-            cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
-            let bounds = _.split(cellItem[i], ',');
-            if(bounds[0] !== undefined && bounds[0] !== "" &&
-                bounds[1] !== undefined && bounds[1] !== ""){
-                  bounds[0] = parseFloat(bounds[0]);
-                  bounds[1] = parseFloat(bounds[1]);
-                  newCommand = _.replace(newCommand, new RegExp("`"+value+"`", "g"), _.random(_.min(bounds), _.max(bounds)));
-            }
-          }
-          // Value parameter
-          else {
-            // Value is NOT provided in the gridcell
-            if (cellItem[i] === '' || cellItem[i] === undefined) 	{
-              // Look for the default value (e.g. "`x?slow 3`")
-              // eslint-disable-next-line
-              let re = new RegExp("`(("+value+"\?)[^`]+)`", "g"), match = re.exec(newCommand);
-    
-              // We have a default parameter ready
-              if (match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
-                const defaultValue = match[1].substring(_.indexOf(match[1], '?')+1);
-                newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), defaultValue);
-              }
-              // We have nothing, using most general parameter i.e. 1
-              else {
-                newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), 1);
-              }
-            }
-            // Value IS provided in the gridcell
-            else {
-              newCommand = _.replace(newCommand, new RegExp("`("+value+")[^`]*`", "g"), cellItem[i]);
-            }
-          }
-        });
-        return newCommand
-      }
-
-      // pattern name
-      const cellName = getParameters(v)[0];
-      
-      // command of the pattern
-      const pat = _.find(patterns, c => c.name === cellName);
-      let newCommand;
-
-      // CPS channel handling
-      // console.log("TIDAL COMMAND: " , newCommand);
-      if( channel.type === 'CPS'){
-        newCommand = cellName;
-        
-        tidalPatternQueue.push("cps " + newCommand);
-        reply.status(200).json({pattern: "cps " + newCommand, cid: channel.cid, timestamp: new Date().getMilliseconds()});
-      }
-      // other channels
-      else if(pat !== undefined && pat !== null && pat !== "" && v !== ""){
-        let cellItem = _.slice(getParameters(v), 1);
-        newCommand = pat.text;
-        
-        // Applies parameters
-        if(pat.params !== '')
-          newCommand = processParameters(_.concat( _.split(pat.params, ','),'t'), newCommand, cellItem);
-        else
-          newCommand = processParameters(['t'], newCommand, cellItem);
-
-        // Math Parser
-        // eslint-disable-next-line
-        _.forEach(_.words(newCommand, /\&(.*?)\&/g), function(val, i){
-          newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val,"&")),"[]"));
-        })
-
-        // Prepare transition, solo & globals
-        let	transitionHolder, pattern;
-        
-        if( channel.type === "SuperCollider"){
-          pattern = newCommand;
-          
-          console.log("Send SuperCollider: ", pattern);
-          
-          sendScPattern(pattern, reply);
-          // reply.status(200);
-        }
-        else if(channel.type === "FoxDot"){
-          pattern = newCommand;
-          //sendPythonPattern(pattern);
-          reply.status(200).json({pattern: pattern, cid: channel.cid});
-        }
-        else if(channel.type === "Tidal"){
-          if (channel.transition !== "" && channel.transition !== undefined ){
-            let na = channel.name.substring(1,channel.name.length);
-            transitionHolder = "t"+ na + " " + channel.transition + " $ ";
-          }
-          else {
-            transitionHolder = k + " $ ";
-          }
-          if (global_mod.channels.includes(channel.cid.toString()) || global_mod.channels.includes(0)){
-            if (global_mod.transform === undefined) global_mod.transform = '';
-            if (global_mod.modifier === undefined) global_mod.modifier = '';
-            newCommand = global_mod.transform + newCommand + global_mod.modifier;
-          }
-          pattern = transitionHolder + newCommand + " # sirenChan " + channel.activeSceneIndex.toString();
-          tidalPatternQueue.push(pattern);
-          reply.status(200).json({pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds()});
-        }
-        else if(channel.type === "TidalV"){
-          let chn = channel.name.substring(1,channel.name.length);
-          transitionHolder = "x"+ chn + " $ ";
-          pattern = transitionHolder + newCommand;
-          tidalPatternQueue.push(pattern);
-          reply.status(200).json({pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds()});
-        }
-        else if(channel.type === ''){
-          pattern = newCommand;
-          tidalPatternQueue.push(pattern);
-          reply.status(200).json({pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds()});
-        }
-        else{
-          reply.sendStatus(400); 
-        }
-      }
-    });
-
-    const startPulse = (reply) => {
-      if(!nano) 
-        nano = new NanoTimer();
-
-      let count = 0;
-      // const callback = (nano) => {
-      //   link_pulse.sockets.emit('pulse', {beat: 60,
-      //                                     phase: count++,
-      //                                     bpm: 120 });
-      // };
-      // nano.setInterval(callback, [nano], '125m');
-
-      let lastBeat = 0.0;
-      if(!link){
-        const link = new abletonlink();
-      }
-      link.startUpdate(60, (beat, phase, bpm) => {
-        beat = 0 ^ beat;
-        if(0 < beat - lastBeat) {
-          link_pulse.sockets.emit('pulse', {beat: beat,
-                                            phase:beat,
-                                            bpm: bpm });
-            lastBeat = beat;
-        }
-        //console.log("updated: ", beat, phase, bpm);
+        if (p1 !== "") param.push(p1);
       });
+      return param;
+    }
+    const processParameters = (parameters, newCommand, cellItem) => {
+      // For each parameter in parameter list
+      _.forEach(parameters, function (value, i) {
+        // Temporal parameter
+        if (value === 't') {
+          newCommand = _.replace(newCommand, new RegExp("`t`", "g"), channel.time);
+        }
+        // Random parameter
+        else if (_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length - 1) {
+          cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
+          let bounds = _.split(cellItem[i], ',');
+          if (bounds[0] !== undefined && bounds[0] !== "" &&
+            bounds[1] !== undefined && bounds[1] !== "") {
+            bounds[0] = parseFloat(bounds[0]);
+            bounds[1] = parseFloat(bounds[1]);
+            newCommand = _.replace(newCommand, new RegExp("`" + value + "`", "g"), _.random(_.min(bounds), _.max(bounds)));
+          }
+        }
+        // Value parameter
+        else {
+          // Value is NOT provided in the gridcell
+          if (cellItem[i] === '' || cellItem[i] === undefined) {
+            // Look for the default value (e.g. "`x?slow 3`")
+            // eslint-disable-next-line
+            let re = new RegExp("`((" + value + "\?)[^`]+)`", "g"), match = re.exec(newCommand);
+    
+            // We have a default parameter ready
+            if (match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
+              const defaultValue = match[1].substring(_.indexOf(match[1], '?') + 1);
+              newCommand = _.replace(newCommand, new RegExp("`(" + value + ")[^`]*`", "g"), defaultValue);
+            }
+            // We have nothing, using most general parameter i.e. 1
+            else {
+              newCommand = _.replace(newCommand, new RegExp("`(" + value + ")[^`]*`", "g"), 1);
+            }
+          }
+          // Value IS provided in the gridcell
+          else {
+            newCommand = _.replace(newCommand, new RegExp("`(" + value + ")[^`]*`", "g"), cellItem[i]);
+          }
+        }
+      });
+      return newCommand
+    }
+
+    // pattern name
+    const cellName = getParameters(v)[0];
+      
+    // command of the pattern
+    const pat = _.find(patterns, c => c.name === cellName);
+    let newCommand;
+
+    // CPS channel handling
+
+    if (channel.type === 'CPS') {
+      newCommand = cellName;
+        
+      tidalPatternQueue.push("cps " + newCommand);
+      reply.status(200).json({ pattern: "cps " + newCommand, cid: channel.cid, timestamp: new Date().getMilliseconds() });
+    }
+    // other channels
+    else if (pat !== undefined && pat !== null && pat !== "" && v !== "") {
+      let cellItem = _.slice(getParameters(v), 1);
+      newCommand = pat.text;
+        
+      // Applies parameters
+      if (pat.params !== '')
+        newCommand = processParameters(_.concat(_.split(pat.params, ','), 't'), newCommand, cellItem);
+      else
+        newCommand = processParameters(['t'], newCommand, cellItem);
+
+      // Math Parser
+      // eslint-disable-next-line
+      _.forEach(_.words(newCommand, /\&(.*?)\&/g), function (val, i) {
+        newCommand = _.replace(newCommand, val, _.trim(math.eval(_.trim(val, "&")), "[]"));
+      })
+
+      // Prepare transition, solo & globals
+      let transitionHolder, pattern;
+        
+      if (channel.type === "SuperCollider") {
+        pattern = newCommand;
+        sendSCpattern(pattern, reply);
+        // reply.status(200);
+      }
+      else if (channel.type === "FoxDot") {
+        pattern = newCommand;
+        //sendPythonPattern(pattern);
+        reply.status(200).json({ pattern: pattern, cid: channel.cid });
+      }
+      else if (channel.type === "Tidal") {
+        if (channel.transition !== "" && channel.transition !== undefined) {
+          let na = channel.name.substring(1, channel.name.length);
+          transitionHolder = "t" + na + " " + channel.transition + " $ ";
+        }
+        else {
+          transitionHolder = k + " $ ";
+        }
+        if (global_mod.channels.includes(channel.cid.toString()) || global_mod.channels.includes(0)) {
+          if (global_mod.transform === undefined) global_mod.transform = '';
+          if (global_mod.modifier === undefined) global_mod.modifier = '';
+          newCommand = global_mod.transform + newCommand + global_mod.modifier;
+        }
+        pattern = transitionHolder + newCommand + " # sirenChan " + channel.activeSceneIndex.toString();
+        tidalPatternQueue.push(pattern);
+        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
+      }
+      else if (channel.type === "TidalV") {
+        let chn = channel.name.substring(1, channel.name.length);
+        transitionHolder = "x" + chn + " $ ";
+        pattern = transitionHolder + newCommand;
+        tidalPatternQueue.push(pattern);
+        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
+      }
+      else if (channel.type === '') {
+        pattern = newCommand;
+        tidalPatternQueue.push(pattern);
+        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
+      }
+      else {
+        reply.sendStatus(400);
+      }
+    }
+  });
+
+  const startPulse = (reply) => {
+    if (!nano)
+      nano = new NanoTimer();
+
+    let count = 0;
+    // const callback = (nano) => {
+    //   link_pulse.sockets.emit('pulse', {beat: 60,
+    //                                     phase: count++,
+    //                                     bpm: 120 });
+    // };
+    // nano.setInterval(callback, [nano], '125m');
+
+    let lastBeat = 0.0;
+    if (!link) {
+      const link = new abletonlink();
+    }
+    link.startUpdate(60, (beat, phase, bpm) => {
+      beat = 0 ^ beat;
+      if (0 < beat - lastBeat) {
+        link_pulse.sockets.emit('pulse', {
+          beat: beat,
+          phase: beat,
+          bpm: bpm
+        });
+        lastBeat = beat;
+      }
+    });
+    reply.sendStatus(200);
+  }
+    
+  const stopPulse = (reply) => {
+    if (nano) {
+      link.stopUpdate();
       reply.sendStatus(200);
     }
+    else {
+      reply.sendStatus(400);
+    }
+  }
+  
+
+
+  //Record compiled patterns with timestamps
+  const startRecording = () => { 
+    isRecording = true;
+  }
+      
+  const stopHistory = () => { 
+    isPlaying = false;
+  }
+  
+  const playHistory = () => { 
+    let history_json = [];
+    isPlaying = true;
+    fs.readdirSync('./server/save/recordings/').forEach(file => {
+      history_json.push(file);
+    });
+    let selectedFile = './server/save/recordings/' + history_json[1].toString();
+    console.log(selectedFile);
+    commandobj = jsonfile.readFileSync(selectedFile);
+    sendHistoryPatternPrepare(); //start recursive loop
+  }
+
+  const sendHistoryPatternPrepare = () => {
+    if (history_index === 0) { 
+      sendHistoryPatterns();
+      return;
+    }
     
-    const stopPulse = (reply) => {
-      if(nano){
-        //nano.clearInterval();
-        link.stopUpdate();
-        reply.sendStatus(200);  
+    let interval = parseInt(commandobj[history_index].timestamp - commandobj[history_index - 1].timestamp);
+    
+    if(isPlaying){
+      nano.setTimeout(sendHistoryPatterns, [], (interval + "m").toString(), function(err) {
+        if(err) {
+          console.log("ERROR History Patterns");
+        }
+      });
+    }
+  }
+  const sendHistoryPatterns =() => {
+    if(commandobj[history_index]) {
+
+      console.log(history_index);
+
+      // Execute commands
+      if(commandobj[history_index].type === 'SuperCollider') 
+        SirenComm.siren_console.sendSCLang(commandobj[history_index].pattern); 
+      else
+        tidalPatternQueue.push(commandobj[history_index].pattern);
+
+      
+      nano.clearTimeout();
+      if (commandobj[history_index + 1] !== undefined) {
+        history_index++;
+        sendHistoryPatternPrepare();
       }
       else{
-        reply.sendStatus(400);  
+        history_index = 0;
+        isPlaying = false;
       }
-      
     }
+    else{
+      history_index = 0;
+      isPlaying = false;
+      nano.clearTimeout();
+    }
+  }
+
+  const stopRecording = (reply) => { 
+    let history_json = [];
+    if (isRecording) { 
+      recordFilename = Date.now().toString() + ".json";   
+      jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 
+                                _.sortBy(historyArray, ['timestamp']), 
+                                {spaces: 1, flag: 'w'});
+      isRecording = false;
+    }
+    historyArray = [];
+    fs.readdirSync('./server/save/recordings/').forEach(file => {
+      history_json.push(file);
+    });
+    reply.status(200).json({history_folders: history_json}); //send the folder names back to front-end for dropdown
+  }
+
+
+
     app.post('/pulse', (req, reply) => {
       startPulse(reply);
     });
@@ -653,7 +754,7 @@ const Siren = () => {
     app.post('/console_sc', (req, reply) => {
       const { pattern } = req.body;
       console.log(' ## -->   SC Pattern inbound:', pattern);
-      sendScPattern(pattern, reply);
+      sendSCpattern(pattern, reply);
     })
     // Save Paths
     app.post('/paths', (req, reply) => {
@@ -786,6 +887,40 @@ const Siren = () => {
         reply.sendStatus(400);
     });
 
+    // recording 
+    app.post('/record', (req, reply) => {
+      try {
+        const { isRecord } = req.body;
+        console.log("app.post /recording", isRecord);
+
+        if (isRecord)
+          startRecording();
+        else
+          stopRecording(reply);  
+        
+        // reply.sendStatus(200);
+      } catch(error) {
+        reply.sendStatus(500);
+      }
+    });
+      // recording 
+    app.post('/playhistory', (req, reply) => {
+      try {
+        const { isPlay } = req.body;
+        console.log("app.post /playing", isPlay);
+
+        if (isPlay)
+          playHistory();
+        else
+          stopHistory();  
+        
+        // reply.sendStatus(200);
+      } catch(error) {
+        reply.sendStatus(500);
+      }
+    });
+  
+    // TODO: FIX 
     app.get('/quit', (req, reply) => {
       try{
         stopSiren(req, reply);

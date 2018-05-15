@@ -1,0 +1,47 @@
+[
+ {
+  "pattern": "t1 (clutchIn 2) $ juxBy 0.5 (#coarse 4) $ n (run 5) #s \"perc\" #end \"0.1\" # sirenChan 0",
+  "timestamp": 1526337882116,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "(\na = play{t=Impulse.ar(6)+Dust.ar(1);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,400),f/4,9),9,0.5))};\n)",
+  "timestamp": 1526337887276,
+  "type": "SuperCollider"
+ },
+ {
+  "pattern": "a.free;",
+  "timestamp": 1526337889200,
+  "type": "SuperCollider"
+ },
+ {
+  "pattern": "d3 $ every 6 (slow 4) $ n \"0 3? ~ 4?\" # s \"bd\" # gain 1 # orbit 0",
+  "timestamp": 1526337892769,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d3 $ silence",
+  "timestamp": 1526337897645,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ n \"0\" # s \"bd\" ",
+  "timestamp": 1526337902831,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ silence ",
+  "timestamp": 1526337913820,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "(\na = play{t=Impulse.ar(6)+Dust.ar(1);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,400),f/4,9),9,0.5))};\n)",
+  "timestamp": 1526337925159,
+  "type": "SuperCollider"
+ },
+ {
+  "pattern": "a.free;",
+  "timestamp": 1526337927108,
+  "type": "SuperCollider"
+ }
+]

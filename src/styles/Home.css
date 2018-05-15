@@ -1,5 +1,5 @@
 .Home {
-  background: black;
+  background:black;
   overflow: auto;
   height: calc(100% - 58px);
   margin-top: 3px;
@@ -41,14 +41,13 @@
 }
 /*Panel Headers*/
 .PanelHeader {
-  background: rgba(30,30,30, 0.52);
+  background: rgba(30,30,30, 0.8);
   padding: 0 5px 0 5px;
-  height: 20px;
+  height: auto;
   line-height: 20px;
-  border-style: double;
+  border-style: solid;
   border-width: 1px;
-  border-color: rgba(180,180,180, 0.6);
-  /* border-radius: 1px; */
+  border-color: rgba(180,180,180, 0.2);
   font-weight: bold;
   color: #ddd;
 }
@@ -101,25 +100,36 @@
 
 /*------------PATHS------------*/
 .Paths {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: row;
+  margin: 15px 5px 0 5px;
+  /* width: calc(100% - 40px); */
+  height: 100%;
+}
+.PathItems {
   display: flex;
   flex-direction: column;
-  width: calc(100% - 5px);
-  align-items: center;
+  width: calc(100% - 40px);
+  
+}
+.PathsSave {
+  display: flex;
+  flex-direction: row;
+  height: 210px;
+  justify-content: space-around;
 }
 .PathsItem {
-  display: inline-flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 50px;
-  width: 100%;
+  display: flex;
+  min-height: 30px;
+  width: calc(100% - 10px);
 }
 .PathsLabel {
-  margin-top: 15px;
-  padding-right: 5px;
+  padding-right: 10px;
   display: inline-flex;
   justify-content: flex-end;
   align-items: center;
-  width: 150px;
+  min-width: 150px;
 }
 
 
@@ -184,6 +194,10 @@ div.cm-s-_style.CodeMirror-wrap {
 
 
 /*------------SCENES PANEL------------*/
+.Scenes {
+  overflow-y: auto;
+  height: calc(100% - 4px);
+}
 .ScenesButtons {
   display: inline-flex;
   justify-content: space-around;
@@ -197,8 +211,6 @@ div.cm-s-_style.CodeMirror-wrap {
 /*All Scene Items together*/
 .AllScenes {
   margin-top: 10px;
-  max-height: 400px;
-  overflow-y: scroll;
   padding: 1px;
   border: 1px solid #000;
 }
@@ -206,7 +218,7 @@ div.cm-s-_style.CodeMirror-wrap {
 .SceneItem {
   justify-content: space-around;
   border: 1px solid rgba(120, 120, 120, 0.75);
-  line-height: 15px;
+  line-height: 12px;
   width: 98%;
   background: none;
   margin: 1px;
@@ -215,12 +227,13 @@ div.cm-s-_style.CodeMirror-wrap {
 .SceneItem-active {
   border: 1px solid rgba(200, 200, 200, 0.75);
   width: 98%;
+  line-height: 12px;
   background: rgba(255,255,102,0.25);
   margin: 1px;
 }
 .SceneName {
   font-size: 12px;
-  width: 90%;  
+  width: calc(100% - 20px);  
 }
 
 
@@ -314,15 +327,14 @@ div.cm-s-_style.CodeMirror-wrap {
 
 
 /*------------PATTERN HISTORY PANEL------------*/
-/*Pattern History Fields (???)*/
+/*Pattern History Fields*/
 .defaultPatternHistoryArea {
-  display: inline-table;
+  overflow-y: auto;
   font-size: 12px;
-  margin: 2.5px;
-  padding: 5px;
+  /* margin: 2.5px; */
+  /* padding: 5px; */
   width: 100%;
-  height: 30px;
-  overflow: scroll;
+  height: 100%;
 }
 
 
@@ -378,7 +390,6 @@ div.cm-s-_style.CodeMirror-wrap {
 .AllChannels {
   display: flex;
   flex-direction: row;
-  cursor: crosshair;
   overflow-y: auto;
 }
 
@@ -463,11 +474,35 @@ div.cm-s-_style.CodeMirror-wrap {
   padding-left: 7px;
   font-size: 12px;
   border: none;
+  width: 30%;
 }
+
+/* Channel Header Name Input */
+.ChannelItemHeader-NameText {
+  padding-left: 7px;
+  font-size: 12px;
+  border: none;
+  width: 30%;
+  color: rgb(0, 0, 0);
+  transition: all 500ms ease;
+  font-weight: bolder;
+}
+.ChannelItemHeader-NameText:focus {
+  background: rgba(180,180,180, 0.6);
+}
+.ChannelItemHeader-NameText::-webkit-input-placeholder {
+  color: #ddd;
+  font-weight: bold;
+}
+
+
 .ChannelItemHeader-Transition {
+  display: flex;
+  justify-content: flex-end;
   padding-left: 2px;
   font-size: 10px;
   border: none;
+  width: 100%;
 }
 .ChannelItemHeader-time {
   display: inline-flex;
@@ -476,7 +511,7 @@ div.cm-s-_style.CodeMirror-wrap {
   height: 25px;
 }
 .ChannelItemHeader-time button {
-  width: 35%;
+  width: 26px;
 }
 
 
@@ -496,6 +531,7 @@ div.cm-s-_style.CodeMirror-wrap {
 .ChannelItemHeaderButtons {
   display: flex;
   justify-content: flex-end;
+  /* align-items: flex-end; */
   flex-direction: row;
   height: 100%;
   width: 100%;
@@ -505,10 +541,10 @@ div.cm-s-_style.CodeMirror-wrap {
   background: rgba(42, 85, 110, 1);
 }
 .CPS {
-  background: rgba(152, 122, 40, 1);
+  background: rgb(70, 117, 60);
 } 
 .SuperCollider {
-  background: rgba(172, 87, 60, 1)
+  background: rgb(131, 57, 34)
 }
 
 /*Individual Grid Cells*/

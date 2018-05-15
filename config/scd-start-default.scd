@@ -37,7 +37,7 @@ s.waitForBoot
 		};
 		thisProcess.addOSCRecvFunc(f);
 
-		g = { |msg, time, addr|
+		/*g = { |msg, time, addr|
 			if(msg[0] == '/orbit0') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
@@ -48,7 +48,7 @@ s.waitForBoot
 			}
 		};
 		thisProcess.addOSCRecvFunc(g);
-		thisProcess.addOSCRecvFunc(h);
+		thisProcess.addOSCRecvFunc(h);*/
 	);
   	0.2.wait;
   	"SIREN LOADED".postln;

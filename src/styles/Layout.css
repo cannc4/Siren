@@ -12,9 +12,9 @@
   transition: height 200ms ease;
 }
 .react-grid-item {
-  background: rgba(45, 45, 45, 1);
+  background: rgb(40, 40, 40);
   border-color: black;
-  transition: all 200ms ease;
+  transition: all 50ms ease;
   transition-property: left, top;
   cursor: grab;
 }
@@ -30,14 +30,15 @@
   transition: none;
   z-index: 3;
   will-change: transform;
-  background: rgba(80, 80, 80, 0.75);
+  /* background: rgba(255, 0, 0, 0.75); */
+  filter: invert(1);
   cursor: grabbing;
 }
 
 .react-grid-item.react-grid-placeholder {
   background: rgba(200,200,90, 0.2);
-  transition-duration: 100ms;
-  box-shadow: inset  0px 0px 10px #000;
+  transition-duration: 10ms;
+  /* box-shadow: inset  0px 0px 10px #000; */
   z-index: 2;
   -webkit-user-select: none;
   -moz-user-select: none;

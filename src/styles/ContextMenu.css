@@ -1,16 +1,12 @@
 .react-contextmenu {
   font-family: 'Inconsolata';
-  font-weight: 40;
-  min-width: 140px;
+  font-weight: bold;
+  min-width: 150px;
   padding: 5px 0;
-  margin: 2px 0 0;
   font-size: 12px;
   text-align: left;
-  background-color: rgba(125,125,125, 0.85);
+  background-color: rgb(73, 73, 73);
   background-clip: padding-box;
-  /*border: 1px solid rgba(200,200,200, 0.85);*/
-  border: 1px solid #000;
-  border-radius: .25rem;
   opacity: 0;
   pointer-events: none;
   transition: opacity 250ms ease !important;
@@ -35,15 +31,15 @@
 .react-contextmenu-item.react-contextmenu-item--active,
 .react-contextmenu-item.react-contextmenu-item--selected {
   color: #fff;
-  background-color: rgba(140,140,140, 0.4);
+  background-color: rgba(196, 196, 196, 0.4);
   border-color: #20a0ff;
   text-decoration: none;
 }
 
 .react-contextmenu-item.react-contextmenu-item--disabled,
 .react-contextmenu-item.react-contextmenu-item--disabled:hover {
-  color: #222;
-  background-color: none;
+  color:#000;
+  background-color: #ddd;
   text-decoration: underline;
   font-weight: bold;
 }
@@ -68,7 +64,7 @@
 }
 
 .react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item:after {
-  content: "\25B6";
+  content: "➤";
   display: inline-block;
   position: absolute;
   right: 7px;

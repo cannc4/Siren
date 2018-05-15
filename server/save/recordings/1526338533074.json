@@ -1,0 +1,27 @@
+[
+ {
+  "pattern": "d1 $ every 2 (slow 2) $ n \"2 0 \" # s \"bd\" ",
+  "timestamp": 1526338506017,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ silence ",
+  "timestamp": 1526338510663,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "(\n a = { SinOsc.ar(MouseX.kr(60, 1600), 0, 0.5) }.play;\n)",
+  "timestamp": 1526338516809,
+  "type": "SuperCollider"
+ },
+ {
+  "pattern": "a.free",
+  "timestamp": 1526338525171,
+  "type": "SuperCollider"
+ },
+ {
+  "pattern": "d1 $ n \"0 1\" # s \"bd*2\" ",
+  "timestamp": 1526338506017,
+  "type": "Tidal"
+ }
+]
