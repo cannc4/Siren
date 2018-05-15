@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import layoutStore from '../src/stores/layoutStore'
 import sceneStore from '../src/stores/sceneStore'
 import pulseStore from '../src/stores/pulseStore'
 import consoleStore from '../src/stores/consoleStore'
@@ -21,10 +22,6 @@ export const save = () => {
     return false;
 }
 
-export const tidalCps = () => {
-    pulseStore.submitGHC(); 
-    return false;
-}
 export const timer = () => {
     if (pulseStore.isActive) 
         pulseStore.stopPulse();
@@ -32,4 +29,21 @@ export const timer = () => {
         pulseStore.startPulse();
 }
 
-
+export const resetLayout = () => { 
+    layoutStore.reset();
+}
+export const fullscreenLayout = () => { 
+    layoutStore.matrixFullscreen();
+}
+export const loadCustomLayout_0 = () => { 
+    layoutStore.loadCustom(0);
+}
+export const loadCustomLayout_1 = () => { 
+    layoutStore.loadCustom(1);
+}
+export const loadCustomLayout_2 = () => { 
+    layoutStore.loadCustom(2);
+}
+export const loadCustomLayout_3 = () => { 
+    layoutStore.loadCustom(3);
+}

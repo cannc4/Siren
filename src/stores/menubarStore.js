@@ -12,6 +12,9 @@ class MenubarStore
     // 1 = ready
     // 2 = running
     @observable server_info = 0;
+    @observable history_folders = [];
+    @observable recording = false;
+    @observable playing = false;
 
     @observable rmsArray = [];
 
@@ -37,7 +40,26 @@ class MenubarStore
         return this.server_info;  
     }
 
+    @computed get isRecording() { 
+        return this.recording;
+    }
 
+    @action toggleRecording() { 
+        this.recording = !this.recording;
+        this.record(this.recording);
+    }
+    @computed get isPlaying() { 
+        return this.playing;
+    }
+
+    @action togglePlay() { 
+        this.playing = !this.playing;
+        this.play(this.playing);
+    }
+    @action updateHistoryFolders(hf){
+        this.history_folders = hf;
+        console.log(this.history_folders);
+    }
     createRMSShape(orbit) { 
         const setCharAt = (str, index, chr) => {
             if (index > str.length - 1) return str;
@@ -99,6 +121,34 @@ class MenubarStore
             }));
     }
 
+    @action record() {
+        request.post('http://localhost:3001/record', { 'isRecord' : this.recording } )
+            .then(action((response) => {
+                if (response.status === 200) {
+                    this.updateHistoryFolders(response.data.history_folders);
+                 }  
+            })).catch(action((error) => {
+                //this.recording = false;
+                console.error(" ## Server errors: ", error);
+            }));
+    }
+    
+    @action play() {
+        request.post('http://localhost:3001/playhistory', { 'isPlay' : this.playing } )
+            .then(action((response) => {
+                
+                // if (response.status === 200) {
+                //     console.log(" ## Recording.");
+                // }
+                // else {
+                //     this.recording = false;
+                //     console.log(" ## Record failed.");
+                // }                        
+            })).catch(action((error) => {
+                this.playing = false;
+                console.error(" ## Server errors: ", error);
+            }));
+    }
 
     
 }

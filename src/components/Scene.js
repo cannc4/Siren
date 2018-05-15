@@ -34,7 +34,7 @@ export default class Scene extends React.Component {
     render() {
         console.log("RENDER SCENE.JS");
         
-        return (<div>
+        return (<div className={'Scenes PanelAdjuster'}>
             <input className={'Input draggableCancel'} id={"new_scene_input"}
                 placeholder={'New Scene Name'}
                 onKeyUp={this.handleControlEnter.bind(this)}/>

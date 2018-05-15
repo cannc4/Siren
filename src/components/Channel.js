@@ -8,62 +8,28 @@ import _ from 'lodash';
 @observer
 class ChannelHeader extends React.Component {
 
-// <input ref={(input_type) => { this.nameInputType = input_type; }}
-//     title={"Type ("+item.type+")"}
-//     className={"ChannelItemHeader-Text draggableCancel"}
-//     placeholder={" type "}  
-//     value={item.type}
-//     onChange={() => 
-//         (this.props.channelStore.changeChannelType(item.name, this.nameInputType.value))}
-//     onClick={() => 
-//             this.nameInputType.focus()} />
-    
-executionCss = (event, duration = 500) => {
-    event.persist();
-    event.target.className += ' Executed';
-    _.delay( () => (_.replace(event.target.className, ' Executed', '') ),
-            duration);
-}
-
-handleControlEnter = (event) => {
-    if(event.ctrlKey && event.keyCode === 13){
-        this.executionCss(event);
-        this.props.sceneStore.addScene(document.getElementById('new_scene_input').value)
+    handleControlEnter = (event) => {
+        if(event.keyCode === 13){
+            this.props.channelStore.changeChannelName(this.props.value.name, this.nameInputName.value);
+        }
     }
-}
     
-render() {
-    console.log('RENDER CHANNEL HEADER');
-    const item = this.props.value;
+    render() {
+        console.log('RENDER CHANNEL HEADER');
+        const item = this.props.value;
 
-      return (<div>
+        return (<div>
             <div className={"ChannelItemHeader " + item.type }>
                 <input ref={(input_name) => { this.nameInputName = input_name; }}
-                    title={"Channel Name (" + item.name + ")"}
-                    className={"ChannelItemHeader-Text draggableCancel"}
-                    placeholder={"name"}   
-                    style={{ width: '30%' }}  
-                    value={item.name}
-                    onChange={() => {
-                        this.props.channelStore.changeChannelName(item.name, this.nameInputName.value);
-                        this.nameInputName.focus();
-                    }}
+                    title={"Channel Name (" + item.name + ") [enter to submit changes]"}
+                    className={"ChannelItemHeader-NameText draggableCancel"}
+                    placeholder={item.name}
                     onKeyUp={this.handleControlEnter.bind(this)}
-                    onClick={() => 
-                        this.nameInputName.focus()} />
-                {this.props.channelStore.getChannelType(item.name) === "Tidal" && 
-                <input ref={(input_transition) => { this.nameInputTrans = input_transition; }}
-                    title={"Tidal Transition " + (item.transition === '' ? "NONE": "("+item.transition+")")}
-                    className={"ChannelItemHeader-Transition draggableCancel"}
-                    placeholder={"  ___"}  
-                    value={item.transition}
-                    onChange={() => 
-                        (this.props.channelStore.changeChannelTransition(item.name, this.nameInputTrans.value))}
-                    onClick={() => 
-                        this.nameInputTrans.focus()}/>}
+                    onClick={() => this.nameInputName.focus()}
+                    onBlur = {() => this.nameInputName.value = ''}/>
                 <div className={"ChannelItemHeaderButtons"}>
                     <button className={"Button "+ item.loop} title={'Loop'} onClick={() => 
-                        this.props.channelStore.toggleLoop(item.name)}>⭯</button>
+                        this.props.channelStore.toggleLoop(item.name)}>L</button>
                     <button className={"Button "+ item.solo} title={'Solo'} onClick={() => 
                         this.props.channelStore.toggleSolo(item.name)}>S</button>
                     <button className={"Button "+ item.mute} title={'Mute'}
@@ -84,15 +50,26 @@ render() {
                         onChange={() => (this.props.channelStore.changeChannelRate(item.name, this.nameInputRate.value))}
                         onClick={() => this.nameInputRate.focus()}/>
                     
-                    <button className={"Button "+ item.gate} title={item.gate ? 'Pause': 'Play'}
-                        onClick={() => (this.props.channelStore.toggleGate(item.name))}>{item.gate ? '●': '○'}</button>
-                    <button className={"Button"} title={'Reset Timer'}
-                      onClick={() => (this.props.channelStore.resetTime(item.name))}>🡅</button>
-                </div>
+                    {this.props.channelStore.getChannelType(item.name) === "Tidal" && 
+                    <input ref={(input_transition) => { this.nameInputTrans = input_transition; }}
+                        title={"Tidal Transition " + (item.transition === '' ? "NONE": "("+item.transition+")")}
+                        className={"ChannelItemHeader-Transition draggableCancel"}
+                        placeholder={"  ___"}  
+                        value={item.transition}
+                        onChange={() => 
+                            (this.props.channelStore.changeChannelTransition(item.name, this.nameInputTrans.value))}
+                        onClick={() => 
+                            this.nameInputTrans.focus()}/>}
+                    <div className={"ChannelItemHeaderButtons"}>
+                        <button className={"Button "+ item.gate} title={item.gate ? 'Pause': 'Play'}
+                            onClick={() => (this.props.channelStore.toggleGate(item.name))}>{item.gate ? '●': '○'}</button>
+                        <button className={"Button"} title={'Reset Timer'}
+                        onClick={() => (this.props.channelStore.resetTime(item.name))}>🡅</button>
+                    </div>
+            </div>
           </div>
-        </div>
-    );
-  }
+        </div>);
+    }
 }
 
 @inject('channelStore')
@@ -104,7 +81,7 @@ class Channel extends React.Component {
     console.log('RENDER CHANNEL', item);
 
     let channelClass = "ChannelItem";
-    if ((!item.loop) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
+    if ((!item.loop && item.executed) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
       channelClass += " disabled";
     }
     return (<div className={channelClass}>

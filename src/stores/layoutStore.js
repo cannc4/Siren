@@ -29,13 +29,13 @@ class LayoutStore
     return this.customs[i] !== undefined && this.customs[i].length === 0;
   }
   @action loadCustom(i) {
-    if (this.customs[i]) { 
+    if (this.customs[i].length > 0) { 
       this.layouts = this.customs[i];
     }
   };
   @action saveCustom(i) {
     this.customs[i] = this.layouts;
-    this.save();
+    // this.save();
   };
   @action deleteCustom(i) {
     if (this.customs[i])
@@ -51,7 +51,7 @@ class LayoutStore
 
   @action gridParameters(specifier) {
     let item = this.layouts.filter(l => l.i === specifier)[0];
-    return {x: item.x, y: item.y, h: item.h, w: item.w, isVisible: item.isVisible}
+    return {i: item.i, x: item.x, y: item.y, h: item.h, w: item.w, isVisible: item.isVisible}
   };
 
   @action onLayoutChange(layout, layouts) {
@@ -108,9 +108,9 @@ class LayoutStore
                     {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, isVisible: true},
                     {i: 'globals', x: 6, y: 16, w: 5, h: 4, isVisible: false},
                     {i: 'console', x: 11, y: 16, w: 5, h: 4, isVisible: true},
-                    {i: 'debugconsole', x: 8, y: 21, w: 7, h: 13, isVisible: true},
+                    {i: 'debug_console', x: 8, y: 21, w: 7, h: 13, isVisible: true},
                     {i: 'paths', x: 0, y: 21, w: 7, h: 13, isVisible: true},
-                    {i: 'canvas', x: 0, y: 21, w: 7, h: 13, isVisible: true},
+                    {i: 'pattern_roll', x: 0, y: 21, w: 7, h: 13, isVisible: true},
                     {i: 'graphics', x: 0, y: 21, w: 7, h: 13, isVisible: true}
     ];
   };

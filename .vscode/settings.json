@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "*.tidal": "haskell"
+        "*.scd": "c",
+        "*.tidal": "haskell",
+        "__locale": "c",
+        "ios": "c",
+        "random": "c"
     }
 }

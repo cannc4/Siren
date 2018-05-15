@@ -2,7 +2,6 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 // import _ from 'lodash'
 
-
 // CSS Imports
 import '../styles/_comp.css';
 import '../styles/Layout.css';
@@ -59,6 +58,25 @@ export default class MenuBar extends React.Component {
         <p className={'RMSVis'}>
           {this.props.menubarStore.createRMSShape(1)}
         </p>
+      </div>
+
+      <div className={'OtherControls'}>
+        {!this.props.menubarStore.isRecording && <button className={'Button '}
+          onClick={() => this.props.menubarStore.toggleRecording()}>
+          REC.
+        </button>}
+        {this.props.menubarStore.isRecording && <button className={'Button '}
+          onClick={() => this.props.menubarStore.toggleRecording()}>
+          S. REC.
+        </button>}
+        {!this.props.menubarStore.isPlaying && <button className={'Button '}
+          onClick={() => this.props.menubarStore.togglePlay()}>
+          >
+        </button>}
+        {this.props.menubarStore.isPlaying && <button className={'Button '}
+          onClick={() => this.props.menubarStore.togglePlay()}>
+          ||
+        </button>}
       </div>
 
       <div className= 'OtherControls'>

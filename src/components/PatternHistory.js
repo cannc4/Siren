@@ -30,7 +30,7 @@ export default class PatternHistory extends React.Component {
           showCursorWhenSelecting: true, 
           readOnly: true
     };
-    return (<div>
+    return (<div className={'defaultPatternHistoryArea PanelAdjuster'}>
       {_.map(this.props.historyStore.latestPatterns, (c, i) => {
         return <CodeMirror key={i}
                            className={'draggableCancel'}

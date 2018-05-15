@@ -20,13 +20,13 @@
    "scene": "default",
    "name": "scpat",
    "params": "x",
-   "text": "(\na = play{t=Impulse.ar(6)+Dust.ar(&`x`%2&);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,`x`),f/4,9),9,0.5))};\n)"
+   "text": "(\n~sctest = play{t=Impulse.ar(6)+Dust.ar(&`x`%2&);x=(TExpRand.ar(_,_,t));Limiter.ar(GVerb.ar(GrainFM.ar(2,t,x.(1e-4,0.01),f=x.(80,`x`),f/4,9),9,0.5))};\n)"
   },
   {
    "scene": "default",
    "name": "scfree",
    "params": "",
-   "text": "a.free;"
+   "text": "~sctest.free;"
   }
  ],
  "channels": [
