@@ -11,16 +11,16 @@
 })(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("_rule", function() {
+  CodeMirror.defineMode("_rule_haskell", function() {
 
     function switchState(source, setState, f) {
       setState(f);
       return f(source, setState);
     }
 
-    // These should all be Unicode extended, as per the Haskell 2010 report
-    var variableRE = /(`)(.+)(`)/;
-    var mathRE = /(&)(.+)(&)/;
+    // These should all be Unicode extended
+    // var variableRE = /(`)(.+)(`)/;
+    // var mathRE = /(&)(.+)(&)/;
     var smallRE = /[a-z_]/;
     var largeRE = /[A-Z]/;
     var digitRE = /[0-9]/;
@@ -47,6 +47,19 @@
           return null;
         }
 
+        if (ch === '"') {
+          return switchState(source, setState, stringLiteral);
+        }
+
+        if (ch === '&') {
+          return switchState(source, setState, mathExpression);
+        }
+
+        if (ch === '`') {
+          return switchState(source, setState, variableExpression);
+        }
+
+
         if (ch === '\'') {
           if (source.eat('\\'))
             source.next();  // should handle other escapes here
@@ -56,24 +69,6 @@
           if (source.eat('\''))
             return "string";
           return "error";
-        }
-
-        // console.log(ch);
-        if (ch === '&') {
-          // console.log("mathState");
-          return switchState(source, setState, mathExpression);
-        }
-
-        if (ch === '`') {
-
-            // console.log("varState");
-          return switchState(source, setState, variableExpression);
-        }
-
-        if (ch === '"') {
-
-            // console.log("stringState");
-          return switchState(source, setState, stringLiteral);
         }
 
         if (largeRE.test(ch)) {
@@ -240,5 +235,5 @@
 
   });
 
-  CodeMirror.defineMIME("text/x-_rule", "_rule");
+  CodeMirror.defineMIME("text/x-_rule_haskell", "_rule_haskell");
 });

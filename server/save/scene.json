@@ -43,7 +43,6 @@
     "def `slow 8 $ juxBy 0.5 (#s \"perc\") ` `2`",
     "",
     "def `juxBy 0.5 (#coarse 4) ` `1`",
-
     "",
     ""
    ],

@@ -103,11 +103,12 @@ class LayoutStore
 
   @action reset() {
     this.layouts = [{i: "scenes", x: 0, y: 0, w: 3, h: 20, isVisible: true},
-                    {i: 'matrix', x: 3, y: 0, w: 13, h: 13, isVisible: true},
+                    {i: 'tracker', x: 3, y: 0, w: 13, h: 13, isVisible: true},
                     {i: 'patterns', x: 16, y: 0, w: 8, h: 20, isVisible: true},
                     {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, isVisible: true},
                     {i: 'globals', x: 6, y: 16, w: 5, h: 4, isVisible: false},
-                    {i: 'console', x: 11, y: 16, w: 5, h: 4, isVisible: true},
+                    {i: 'sc_console', x: 11, y: 16, w: 5, h: 4, isVisible: true },
+                    {i: 'tidal_console', x: 11, y: 16, w: 5, h: 4, isVisible: true},
                     {i: 'debug_console', x: 8, y: 21, w: 7, h: 13, isVisible: true},
                     {i: 'paths', x: 0, y: 21, w: 7, h: 13, isVisible: true},
                     {i: 'canvas', x: 0, y: 21, w: 7, h: 13, isVisible: true},
@@ -119,7 +120,7 @@ class LayoutStore
     if(this.layouts !== undefined) {
       let found = false;
       _.forEach(this.layouts, (item, i) => {
-        if (item.i === 'matrix') {
+        if (item.i === 'tracker') {
           item.x = 0;
           item.y = 0;
           item.w = 24;
@@ -133,7 +134,7 @@ class LayoutStore
       });
 
       if (!found) {
-        this.layouts = _.concat(this.layouts, {i: 'matrix', x: 0, y: 0, w: 24, h: 20, isVisible: true});
+        this.layouts = _.concat(this.layouts, {i: 'tracker', x: 0, y: 0, w: 24, h: 20, isVisible: true});
       }
     }
   }

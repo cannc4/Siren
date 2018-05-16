@@ -7,7 +7,8 @@ import Grid from './Channel';
 import Scene from './Scene';
 import Paths from './Paths';
 import Canvas from './Canvas';
-import Console from './Console';
+import ConsoleSC from './ConsoleSC';
+import ConsoleTidal from './ConsoleTidal';
 import Pattern from './Pattern';
 import Globals from './Globals';
 import Graphics from './Graphics';
@@ -15,9 +16,8 @@ import DebugConsole from './DebugConsole'
 import PatternHistory from './PatternHistory';
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 import '../styles/ContextMenu.css';
 
@@ -69,10 +69,12 @@ export default class Home extends React.Component {
   renderLayouts(layoutItem) {
     console.log("RENDER LAYOUTS @ HOME.JS");
 
-    let {layoutStore} = this.props;
-    if (layoutItem.i === 'matrix') {
+    let { layoutStore } = this.props;
+
+    /// ----- GLOBAL LAYOUTS ------
+    if (layoutItem.i === 'tracker') {
       return layoutItem.isVisible && (<div key={layoutItem.i} >
-        <div className={"PanelHeader"}> ● {this.props.sceneStore.activeScene}
+        <div className={"PanelHeader"}> ● "{this.props.sceneStore.activeScene}"
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <div className={'PanelAdjuster'}>
@@ -98,42 +100,6 @@ export default class Home extends React.Component {
         </div>
       </div>);
     }
-    else if (layoutItem.i === 'pattern_history') {
-      return layoutItem.isVisible && (<div key={layoutItem.i}  >
-        <div className={"PanelHeader"}> ● Pattern History
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
-        </div>
-        <PatternHistory />
-      </div>);
-    }
-    else if (layoutItem.i === 'globals') {
-      return layoutItem.isVisible && (<div key={layoutItem.i}  >
-        <div className={"PanelHeader"}> ● Global Parameters
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
-        </div>
-        <div className={'XXX PanelAdjuster'}>
-          <Globals/>
-        </div>
-      </div>);
-    }
-    else if (layoutItem.i === 'console') {
-      return layoutItem.isVisible && (<div key={layoutItem.i}  >
-        <div className={"PanelHeader"}> ● Console
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
-        </div>
-        <div className={'Console PanelAdjuster'}>
-          <Console />
-        </div>
-      </div>);
-    }
-    else if (layoutItem.i === 'debug_console') {
-      return layoutItem.isVisible && (<div key={layoutItem.i} >
-        <div className={"PanelHeader"}> ● Debug Console
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
-        </div>
-        <DebugConsole/>
-      </div>);
-    }
     else if (layoutItem.i === 'paths') {
       return layoutItem.isVisible && (<div key={layoutItem.i} >
         <div className={"PanelHeader"}> ● Config Paths
@@ -142,28 +108,75 @@ export default class Home extends React.Component {
         <Paths/>
       </div>);
     }
-    else if (layoutItem.i === 'canvas') {
-      return layoutItem.isVisible && (<div key={layoutItem.i}  id={'canvasLayout'} >
-        <div className={"PanelHeader"}> ● Pattern Roll
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
-        </div>
-        <div className={'Canvas'}>
-          <Canvas/>
-        </div>
-      </div>);
-    }
     else if (layoutItem.i === 'graphics') {
       return layoutItem.isVisible && (<div key={layoutItem.i} id={'graphicsLayout'} >
         <div className={"PanelHeader"}> ● Graphics
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <div className={'Graphics PanelAdjuster'}>
-          <div>
-            <Graphics />
-          </div>
+          <Graphics />
+        </div>
+      </div>);
+    }  
+      
+    /// ----- TIDAL LAYOUTS ------  
+    else if (layoutItem.i === 'globals') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader Tidal"}> ● Tidal Global Controls
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <div className={'PanelAdjuster'}>
+          <Globals/>
         </div>
       </div>);
     }
+    else if (layoutItem.i === 'pattern_history') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader Tidal"}> ● Pattern History
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <PatternHistory />
+      </div>);
+    }  
+    else if (layoutItem.i === 'tidal_console') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader Tidal"}> ● Tidal Console
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <div className={'Console PanelAdjuster'}>
+          <ConsoleTidal />
+        </div>
+      </div>);
+    }
+    else if (layoutItem.i === 'debug_console') {
+      return layoutItem.isVisible && (<div key={layoutItem.i} >
+        <div className={"PanelHeader Tidal"}> ● Tidal Logs
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <DebugConsole/>
+      </div>);
+    }  
+    else if (layoutItem.i === 'canvas') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  id={'canvasLayout'} >
+        <div className={"PanelHeader Tidal"}> ● Pattern Roll
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <div className={'Canvas'}>
+          <Canvas/>
+        </div>
+      </div>);
+    }  
+    /// ----- SUPERCOLLIDER LAYOUTS ------  
+    else if (layoutItem.i === 'sc_console') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader SuperCollider"}> ● SuperCollider Console
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <div className={'Console PanelAdjuster'}>
+          <ConsoleSC />
+        </div>
+      </div>);
+    }  
     else {
       return layoutItem.isVisible && (<div key={"unknown_layout"} >
         unknown_layout
@@ -208,9 +221,7 @@ export default class Home extends React.Component {
               rowHeight={h_}
               draggableCancel={'.draggableCancel'}
               onLayoutChange={this.handleChangeLayout.bind(this)}
-              
               useCSSTransforms={true}
-              preventCollision={true}
             >
             {this.props.layoutStore.visibleLayouts.map(this.renderLayouts.bind(this))}
             </ResponsiveReactGridLayout> 

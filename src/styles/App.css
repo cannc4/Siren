@@ -8,17 +8,10 @@ body, .fill, .cont {
   z-index: 0;
   font-size: 14px;
 }
+
 * {
   font-family: 'Inconsolata';
   font-weight: 40;
-}
-
-.logo {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 100px;
-  height: 100%;
 }
 
 *:focus {
@@ -31,20 +24,13 @@ body, .fill, .cont {
   border: none;
 }
 
-.buttonSentinel {
-  padding: 6px;
-  font-size: 12px;
-  border: none;
-}
-
- input {
+input {
   background: none;
   color: #ddd;
   border-bottom: 1px solid rgba(125,125,125, 0.8);
   font-size: 10px;
   width: 95%;
 }
-
 
 * > input .light {
   border-bottom: 2px solid #fff;
@@ -55,57 +41,50 @@ button:hover {
   color: rgba(255,255,102, 0.75);
 }
 
-.action {
-  background: none;
-  border-bottom: 2px solid rgb(25,77,110);
-  color: rgb(25,77,110);
-}
-
-.action:hover {
-  background: rgb(25,77,110);
-  color: #eee;
-}
-
-
-.view {
-  background: none;
-  border-bottom: 2px solid #a00;
-  color: #a00;
-}
-
-.view:hover {
-  background: #a00;
-  color: #eee;
-}
-
-pre {
-  color: #ddd;
-  background: none;
-}
-
 b, p {
   padding: 0;
   margin: 0;
 }
 
-.text-center {
+.fg {
+  flex-grow: 1;
+  -webkit-flex-grow: 1;
+}
+
+.font-motto {
+  font-family: Inconsolata, Monaco, Consolas, 'Courier New', Courier;
+}
+
+.comp-title {
+  width: 98%;
+  margin: 25px 0;
   text-align: center;
+  font-size: 20px;
+  line-height: 36px;
+  font-weight: 100;
 }
 
-.boxshadow {
-  -webkit-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
-  -moz-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3), 0 4px 2px 0 rgba(0, 0, 0, 0.09);
+*::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 5px rgba(25,77,110,0.5);
+	background-color: #ddd;
 }
 
-.boxshadowr {
-  -webkit-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
-  -moz-box-shadow: 2px 0 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
-  box-shadow: 2px 0px 1px 0 rgba(0, 0, 0, 0.2), 2px 0 4px 0 rgba(0, 0, 0, 0.19);
+*::-webkit-scrollbar
+{
+  width: 0px;
+  height: 0px;
+	background-color: #EEEEEE;
+  z-index: 1;
 }
 
-.boxshadown {
-  -webkit-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
-  -moz-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 3px 0 rgba(0, 0, 0, 0.19);
+::-webkit-scrollbar:hover
+{
+	width: 3px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-thumb
+{
+	background-color: #aaa;
 }

@@ -3,9 +3,8 @@ import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 
 import { shaders } from './shaders/simple'

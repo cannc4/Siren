@@ -13,7 +13,6 @@
 }
 .react-grid-item {
   background: rgb(40, 40, 40);
-  border-color: black;
   transition: all 50ms ease;
   transition-property: left, top;
   cursor: grab;

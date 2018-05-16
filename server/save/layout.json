@@ -11,19 +11,19 @@
    "isVisible": true
   },
   {
-   "w": 12,
+   "w": 8,
    "h": 12,
    "x": 3,
    "y": 0,
-   "i": "matrix",
+   "i": "tracker",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 9,
+   "w": 7,
    "h": 12,
-   "x": 15,
+   "x": 11,
    "y": 0,
    "i": "patterns",
    "moved": false,
@@ -31,8 +31,8 @@
    "isVisible": true
   },
   {
-   "w": 14,
-   "h": 5,
+   "w": 10,
+   "h": 6,
    "x": 0,
    "y": 12,
    "i": "pattern_history",
@@ -41,62 +41,74 @@
    "isVisible": true
   },
   {
-   "w": 10,
-   "h": 18,
-   "x": 14,
+   "w": 9,
+   "h": 12,
+   "x": 15,
    "y": 12,
-   "i": "console",
+   "i": "sc_console",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 24,
+   "w": 9,
+   "h": 11,
+   "x": 15,
+   "y": 24,
+   "i": "tidal_console",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 15,
    "h": 6,
    "x": 0,
-   "y": 30,
+   "y": 29,
    "i": "paths",
    "moved": false,
    "static": false,
-   "isVisible": false
+   "isVisible": true
   },
   {
-   "w": 14,
+   "w": 6,
    "h": 12,
-   "x": 0,
-   "y": 15,
+   "x": 18,
+   "y": 0,
    "i": "debug_console",
    "moved": false,
    "static": false,
-   "isVisible": false
+   "isVisible": true
   },
   {
-   "w": 21,
-   "h": 6,
-   "x": 3,
-   "y": 32,
+   "w": 15,
+   "h": 5,
+   "x": 0,
+   "y": 24,
    "i": "graphics",
    "moved": false,
    "static": false,
-   "isVisible": false
+   "isVisible": true
   },
   {
-   "w": 14,
-   "h": 8,
+   "w": 15,
+   "h": 6,
    "x": 0,
-   "y": 12,
+   "y": 18,
    "i": "canvas",
    "moved": false,
    "static": false,
-   "isVisible": false
+   "isVisible": true
   },
   {
-   "i": "globals",
-   "x": 6,
-   "y": 16,
    "w": 5,
-   "h": 4,
-   "isVisible": false
+   "h": 6,
+   "x": 10,
+   "y": 12,
+   "i": "globals",
+   "moved": false,
+   "static": false,
+   "isVisible": true
   }
  ],
  "customs": [
@@ -116,7 +128,7 @@
     "h": 12,
     "x": 3,
     "y": 0,
-    "i": "matrix",
+    "i": "tracker",
     "moved": false,
     "static": false,
     "isVisible": true
@@ -166,10 +178,20 @@
     "h": 18,
     "x": 14,
     "y": 12,
-    "i": "console",
+    "i": "sc_console",
     "moved": false,
     "static": false,
-    "isVisible": false
+    "isVisible": true
+   },
+   {
+    "w": 10,
+    "h": 18,
+    "x": 14,
+    "y": 12,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
    },
    {
     "w": 21,

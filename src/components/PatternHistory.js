@@ -4,13 +4,12 @@ import _ from 'lodash';
 
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
-import '../assets/CodeMirrorRules.js';
-import '../styles/_style.css'
+import '../utils/lexers/haskell.js';
+import '../utils/lexers/haskell.css';
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 
 @inject('historyStore')
@@ -20,7 +19,7 @@ export default class PatternHistory extends React.Component {
   render() {
     console.log("RENDER PATTERN HISTORY");
     const options = {
-          mode: '_rule',
+          mode: '_rule_haskell',
           theme: '_style',
           fixedGutter: true,
           scroll: false,

@@ -3,11 +3,11 @@ import { inject, observer } from 'mobx-react';
 // import _ from 'lodash'
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/MenuBar.css';
 import '../styles/Help.css';
+
 import Popup from "reactjs-popup";
 
 @inject('menubarStore', 'pulseStore', 'pathStore')

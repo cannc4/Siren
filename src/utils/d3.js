@@ -1,6 +1,4 @@
-// import _ from 'lodash';
 import * as d3 from 'd3';
-import '../styles/d3.css';
 
 export default class D3 {
     constructor(size, min, max, res, cyc, drag) {

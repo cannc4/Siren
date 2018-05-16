@@ -1,8 +1,21 @@
+
+/* CSS Variables */
+:root {
+  --tidal-color: rgb(42, 85, 110);
+  --cps-color: rgb(70, 117, 60);
+  --sc-color: rgb(131, 57, 34);
+  --global-color: rgba(255,255,255,0.4);
+
+
+  --global-white: rgb(200, 200, 200);
+  --accent-color: rgba(255,255,102,0.25);
+}
+
 .Home {
   background:black;
   overflow: auto;
   height: calc(100% - 58px);
-  margin-top: 3px;
+  padding-top: 5px;
 }
 
 /*Disable views in specific cases*/
@@ -20,7 +33,7 @@
 /* Animation for input submission */
 @keyframes submission_anim {
   from {background-color: rgb(255, 255, 255, 0.1)}
-  to {background-color: rgba(255,255,102,0.55)}
+  to {background-color: var(--accent-color)}
 }
 .Executed {
   animation-name: submission_anim;
@@ -41,18 +54,23 @@
 }
 /*Panel Headers*/
 .PanelHeader {
-  background: rgba(30,30,30, 0.8);
-  padding: 0 5px 0 5px;
-  height: auto;
+  background: rgba(45, 45, 45, 0.9);
+  padding: 2px 5px 2px 5px;
   line-height: 20px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: rgba(180,180,180, 0.2);
+  border: solid 1px rgba(180,180,180, 0.1);
+  border-bottom: solid 3px var(--global-color);
   font-weight: bold;
-  color: #ddd;
+  color: var(--global-white);
+}
+.PanelHeader.Tidal {
+  border-bottom: solid 3px var(--tidal-color);
+}
+.PanelHeader.SuperCollider {
+  border-bottom: solid 3px var(--sc-color);
 }
 /*Panel Close Button */
 .PanelClose {
+  color: var(--global-white);
   float: right;
   cursor: pointer;
 }
@@ -74,21 +92,16 @@
   padding: 3px 3x 3px 3px;
 }
 .Button:hover {
-  /* border: 1px solid rgba(200,200,200, 0.8); */
   background: rgba(255, 255, 158, 0.15);
   color: white;
 }
 .Button:active {
-  background: rgba(255,255,102,0.55);
+  background: var(--accent-color);
 }
 .Button.active {
-  background: rgba(255,255,102,0.55);
+  background: var(--accent-color);
   color: #333;  
   font-weight: bold;
-}
-.Button:disabled {
-  background: #f00;
-  border: 1px dashed rgba(200,200,200, 0.9);
 }
 .Button.true {
   background: #ccc;
@@ -103,15 +116,13 @@
   overflow-y: auto;
   display: flex;
   flex-direction: row;
-  margin: 15px 5px 0 5px;
-  /* width: calc(100% - 40px); */
-  height: 100%;
+  margin: 5px 5px 10px 5px;
+  height: calc(100% - 30px);
 }
 .PathItems {
   display: flex;
   flex-direction: column;
   width: calc(100% - 40px);
-  
 }
 .PathsSave {
   display: flex;
@@ -188,6 +199,9 @@
 div.cm-s-_style.CodeMirror-wrap {
   height: 100%;
 }
+div.cm-s-_style_sc.CodeMirror-wrap {
+  height: 100%;
+}
 
 
 
@@ -204,7 +218,6 @@ div.cm-s-_style.CodeMirror-wrap {
   width: 100%;
   line-height: 15px;
 }
-
 .ScenesButtons button {
   width: 100%;
 }
@@ -213,6 +226,10 @@ div.cm-s-_style.CodeMirror-wrap {
   margin-top: 10px;
   padding: 1px;
   border: 1px solid #000;
+}
+.SceneName {
+  font-size: 12px;
+  width: calc(100% - 20px);  
 }
 /*Scene Items on Scene Panel*/
 .SceneItem {
@@ -228,12 +245,8 @@ div.cm-s-_style.CodeMirror-wrap {
   border: 1px solid rgba(200, 200, 200, 0.75);
   width: 98%;
   line-height: 12px;
-  background: rgba(255,255,102,0.25);
+  background: var(--accent-color);
   margin: 1px;
-}
-.SceneName {
-  font-size: 12px;
-  width: calc(100% - 20px);  
 }
 
 
@@ -243,7 +256,6 @@ div.cm-s-_style.CodeMirror-wrap {
 /*All patterns*/
 .AllPatterns {
   overflow-y: auto;
-
 }
 /*Individual Pattern*/
 .PatternItem {
@@ -302,8 +314,7 @@ div.cm-s-_style.CodeMirror-wrap {
   font-weight: bold;
 }
 .ConsoleTextBox {
-  height: calc(50% - 12px);
-  /* height:50%; */
+  height: calc(100% - 12px);
   /* border: 1px solid rgba(120, 120, 120, 0.75); */
   font-size: 14px;
   margin: 2.5px;
@@ -313,14 +324,15 @@ div.cm-s-_style.CodeMirror-wrap {
   height: calc(100% - 10px);
 }
 
+
+
+
 /*------------DEBUG CONSOLE PANEL------------*/
 .DebugConsole {
   color: #ccc;
   overflow: scroll;
   overflow-y: auto;
   height: 100%;
-  /*display: flex;
-  flex-direction: column;*/
 }
 
 
@@ -331,21 +343,8 @@ div.cm-s-_style.CodeMirror-wrap {
 .defaultPatternHistoryArea {
   overflow-y: auto;
   font-size: 12px;
-  /* margin: 2.5px; */
-  /* padding: 5px; */
   width: 100%;
   height: 100%;
-}
-
-
-
-
-/*------------ADD CHANNEL PANEL------------*/
-.AddChannel {
-  display: flex;
-  flex-direction: row;
-  padding: 1px;
-  border: 1px solid #000;
 }
 
 
@@ -364,8 +363,6 @@ div.cm-s-_style.CodeMirror-wrap {
   vertical-align: middle; 
   justify-content: space-between;
   border-bottom: 1px solid rgb(180, 180, 180);
-  /* border-left: 1px solid rgb(180, 180, 180);
-  border-right: 1px solid rgb(180, 180, 180); */
   padding: 0 15px 0 15px;
   font-size: 10px;
 }
@@ -392,11 +389,6 @@ div.cm-s-_style.CodeMirror-wrap {
   flex-direction: row;
   overflow-y: auto;
 }
-
-.layout_matrix {
-  margin: 0 0 0 2px;
-}
-
 .MatrixScroll {
   width: 40px;
   border: 1px solid rgba(200, 200, 200, 0.35);
@@ -407,18 +399,14 @@ div.cm-s-_style.CodeMirror-wrap {
   box-shadow: inset 0px 0px 50px rgba(0,0,0, 1);
 }
 .Timeline {
-  
   border: 1px solid rgba(200, 200, 200, 0.4);
-  /* border-radius: 2px; */
   opacity: 0.65;
   transform: translate(0px, 40px);
-  /* box-shadow: inset 0px 0px 50px rgba(0,0,0, 1); */
   width: 20px;
   background: rgba(200, 200, 200, 0.15);
   height: 38px;
   cursor: ns-resize;
   z-index: 500;
-  /* box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.25); */
 }
 
 /*Individual Channels*/
@@ -434,7 +422,6 @@ div.cm-s-_style.CodeMirror-wrap {
   z-index: 2;
   transition: opacity 100ms ease-in-out;
 }
-
 .ChannelItemSteps {
   display: inline-flex;
   justify-content: center;
@@ -452,8 +439,7 @@ div.cm-s-_style.CodeMirror-wrap {
 
 /*Individual Channels -- disabled style*/
 .ChannelItem.disabled {
-  /* border: 2px solid rgba(0,0,0, 0.75); */
-  opacity: 0.5;
+  opacity: 0.7;
   filter: grayscale(1);
 }
 
@@ -469,7 +455,6 @@ div.cm-s-_style.CodeMirror-wrap {
 
   transition: background-color 100ms ease-in-out;
 }
-
 .ChannelItemHeader-Text {
   padding-left: 7px;
   font-size: 12px;
@@ -493,8 +478,6 @@ div.cm-s-_style.CodeMirror-wrap {
   color: #ddd;
   font-weight: bold;
 }
-
-
 .ChannelItemHeader-Transition {
   display: flex;
   justify-content: flex-end;
@@ -512,21 +495,15 @@ div.cm-s-_style.CodeMirror-wrap {
 .ChannelItemHeader-time button {
   width: 26px;
 }
-
-
 /*Individual Transition Cells*/
 .ChannelItemHeader-Transition::-webkit-input-placeholder {
   color: rgba(200,200,200,0.5);
-  /* box-shadow:  0px 0px 5px rgba(0,0,0, 0.3); */
 }
-
 .ChannelItemHeader button {
   color: #ddd;
   border: 0px solid rgba(30, 30, 30, 0.5);
   line-height: 15px;
-  /* box-shadow:  0px 0px 5px rgba(0,0,0, 0.3); */
 }
-
 .ChannelItemHeaderButtons {
   display: flex;
   justify-content: flex-end;
@@ -535,15 +512,14 @@ div.cm-s-_style.CodeMirror-wrap {
   height: 100%;
   width: 100%;
 }
-
-.Tidal {
-  background: rgba(42, 85, 110, 1);
+.ChannelItemHeader.Tidal {
+  background: var(--tidal-color);
 }
-.CPS {
-  background: rgb(70, 117, 60);
+.ChannelItemHeader.CPS {
+  background: var(--cps-color);
 } 
-.SuperCollider {
-  background: rgb(131, 57, 34)
+.ChannelItemHeader.SuperCollider {
+  background: var(--sc-color);
 }
 
 /*Individual Grid Cells*/
@@ -576,6 +552,11 @@ div.cm-s-_style.CodeMirror-wrap {
   opacity: 0.4;
 }
 
+/*Active Individual Grid Cells*/
+.GridItem.active {
+  background-color: var(--accent-color);
+  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
+}
 /*Selected Grid Items*/
 .GridItem.selected {
   background: rgba(103, 230, 220, 0.05);
@@ -583,11 +564,6 @@ div.cm-s-_style.CodeMirror-wrap {
 }
 /*Highlighted Grid Items*/
 .GridItem.highlighted {
-  background: rgba(103, 230, 220, 0.1);
+  background: rgba(103, 230, 220, 0.15);
   outline: 1px solid rgba(255, 255, 255, 0.45);
-}
-/*Active Individual Grid Cells*/
-.GridItem.active {
-  background-color: rgba(223, 219, 35, 0.2);
-  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
 }

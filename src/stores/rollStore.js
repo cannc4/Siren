@@ -2,7 +2,7 @@ import { observable, action } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
 
-import D3 from '../components/d3'
+import D3 from '../utils/d3'
 
 import menubarStore from './menubarStore'
 

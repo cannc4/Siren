@@ -7,17 +7,16 @@
   left: 0;
   right: 0;
   z-index: 1;
-  border-bottom: 1px solid #333;
-  padding: 10px 10px 6px 15px;
+  border-bottom: solid 1px var(--global-color);
+  padding: 10px 10px 5px 15px;
 }
 
 .Logo {
   margin-bottom: 0px !important;
-  color: #0bb;
   margin-right: 10px !important;
 }
 
-/*Animation*/
+/* Save Animation */
 @keyframes flusa {
   0% {filter: blur(0px);
       transform: scale(1);}
@@ -30,24 +29,6 @@
   animation-name: flusa;
   animation-duration: 1s;
   animation-timing-function: ease-out;
-}
-
-.Version {
-  margin-top: 30px;
-  background: rgba(200,200,90, 0.75);
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.User{
-  display: flex;
-  padding: 5px;
-
-  justify-content: center;
-  align-items:center;
-  color: #ddd;
-  font-weight: bold;
 }
 
 .TimerControls{
@@ -76,23 +57,12 @@
   padding: 0 5px 0 5px;
 }
 
-
-.TimesInput {
-  font-size: 12px;
-  text-align: center;
-  vertical-align: center;
-  width: 30px;
-}
-
 .ServerStatus {
   width: 5px;
   height: 75%;
-
   margin-right: 0px;
-
   background: #fff;
   opacity: 0.6;
-
   transition: all 100ms ease;
 }
 .ServerStatus.inactive {
