@@ -1,6 +1,7 @@
 {
  "scenes": [
-  "default"
+  "default",
+  "asd"
  ],
  "active_s": "default",
  "patterns": [

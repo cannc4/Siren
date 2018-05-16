@@ -6,15 +6,15 @@
   --sc-color: rgb(131, 57, 34);
   --global-color: rgba(255,255,255,0.4);
 
-
   --global-white: rgb(200, 200, 200);
   --accent-color: rgba(255,255,102,0.25);
+  --accent-color-opaque: rgb(202, 202, 80);
 }
 
 .Home {
   background:black;
   overflow: auto;
-  height: calc(100% - 58px);
+  height: calc(100% - 40px);
   padding-top: 5px;
 }
 
@@ -32,13 +32,11 @@
 
 /* Animation for input submission */
 @keyframes submission_anim {
-  from {background-color: rgb(255, 255, 255, 0.1)}
   to {background-color: var(--accent-color)}
 }
 .Executed {
   animation-name: submission_anim;
-  animation-duration: 1s;
-  animation-timing-function: ease-out;
+  animation-duration: 0.5s;
 }
 
 

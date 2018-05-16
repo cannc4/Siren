@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import channelStore from './channelStore'
 
 // nodejs connections
-import request from '../utils/request'
+import request from '../utils/request';
 
 class PulseStore 
 {
@@ -24,7 +24,6 @@ class PulseStore
         });
         this.link_pulse.on('disconnect', action((reason) => {
             console.log("Port 4001 Disconnected: ", reason);
-            
             ctx.setActive(false);
         }));
         this.link_pulse.on("pulse", data => {

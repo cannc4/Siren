@@ -21,10 +21,10 @@ class MenubarStore
     sc_log_socket = io('http://localhost:4002/');        
     constructor() {
         this.sc_log_socket.on('connect', (reason) => {
-            
+            this.server_info = 2;
         });
         this.sc_log_socket.on('disconnect', action((reason) => {
-            
+            this.server_info = 0;
         }));
         this.sc_log_socket.on("/rms", action((data) => {
             const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
@@ -46,7 +46,7 @@ class MenubarStore
 
     @action toggleRecording() { 
         this.recording = !this.recording;
-        this.record(this.recording);
+        // this.record(this.recording);
     }
     @computed get isPlaying() { 
         return this.playing;

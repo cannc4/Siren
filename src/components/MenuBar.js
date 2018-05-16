@@ -18,7 +18,7 @@ export default class MenuBar extends React.Component {
     console.log("RENDER MENUBAR.JS");
 
     let serverStatusClass = 'ServerStatus';
-    if (this.props.menubarStore.getActive === 0) 
+    if (this.props.menubarStore.getActive <= 0) 
       serverStatusClass += ' inactive';
     else if (this.props.menubarStore.getActive === 1) 
       serverStatusClass += ' ready';
@@ -33,42 +33,39 @@ export default class MenuBar extends React.Component {
     }
 
     return (<div className='MenuBar boxshadow'>
-      <div style={{display: 'flex', displayDirection: 'row'}}>
-        <div className={'Logo'} id={'logo_disp'}>
-          {<img alt="" src={require('../assets/logo.svg')}  height={35} width={35}/> }
-        </div>
+      <div className={'Logo'} id={'logo_disp'}>
+        {<img alt="" src={require('../assets/logo.svg')}  height={30} width={30}/> }
       </div>
 
-      <div className= 'enabledView'  style={{display: 'flex', flexDirection: 'row', height: 45}}>
-        <p className={'RMSVis'}>
+      <div className={'TimerControls'}>
+        {/* <p className={'RMSVis'}>
           {this.props.menubarStore.createRMSShape(0).split("").reverse().join("")}
-        </p>
-        <div className={"TimerControls"}>  
-          {!this.props.pulseStore.isActive && 
-            <img src={require('../assets/play@3x.png')} title={'Start Pulse'}
-                onClick={() => (this.props.pulseStore.startPulse())} alt="" height={45} width={45}/>}
-          {this.props.pulseStore.isActive && 
-            <img src={require('../assets/pause@3x.png')} title={'Pause Pulse'}
-                onClick={() => (this.props.pulseStore.stopPulse())} alt="" height={45} width={45}/>}
-        </div>
-        <div className={"TimerControls"}>
-          <img src={require('../assets/stop@3x.png')} title={'Stop Pulse'}
-              onClick={() => (this.props.pulseStore.stopPulseStop())} alt="" height={45} width={45}/>
-        </div>
-        <p className={'RMSVis'}>
+        </p> */}
+      
+        {!this.props.pulseStore.isActive && 
+          <button className={'Button'} title={'Start Pulse'}
+              onClick={() => (this.props.pulseStore.startPulse())}>▶</button>}
+        {this.props.pulseStore.isActive && 
+          <button className={'Button'} title={'Pause Pulse'}
+              onClick={() => (this.props.pulseStore.stopPulse())}>⏸</button>}
+        {<button className={'Button'} title={'Stop Pulse'}
+            onClick={() => (this.props.pulseStore.stopPulseStop())}>◼</button>}
+    
+        <div style={{borderLeft: "1px solid var(--global-color)", height: "90%", marginLeft: "5px", marginRight: "10px"}}></div>
+
+        {<button className={'Button ' + (this.props.menubarStore.isRecording ? 'Record' : '')}
+          title={(this.props.menubarStore.isRecording ? 'Recording...' : 'Start recording')}
+          onClick={() => {this.props.menubarStore.toggleRecording()}}>
+          ⏺
+        </button>}
+
+        {/* <p className={'RMSVis'}>
           {this.props.menubarStore.createRMSShape(1)}
-        </p>
+        </p> */}
       </div>
 
-      <div className={'OtherControls'}>
-        {!this.props.menubarStore.isRecording && <button className={'Button '}
-          onClick={() => this.props.menubarStore.toggleRecording()}>
-          REC.
-        </button>}
-        {this.props.menubarStore.isRecording && <button className={'Button '}
-          onClick={() => this.props.menubarStore.toggleRecording()}>
-          S. REC.
-        </button>}
+      {/* <div className={'OtherControls'}>
+        
         {!this.props.menubarStore.isPlaying && <button className={'Button '}
           onClick={() => this.props.menubarStore.togglePlay()}>
           >
@@ -77,31 +74,31 @@ export default class MenuBar extends React.Component {
           onClick={() => this.props.menubarStore.togglePlay()}>
           ||
         </button>}
-      </div>
+      </div> */}
 
       <div className= 'OtherControls'>
         <div className={serverStatusClass} title={"Server Status"} ></div>
-
+        
         {this.props.menubarStore.getActive === 0 && 
           <button className={'Button draggableCancel ' } 
-            onClick={startServer} title={"Initalize Server"}> Start Server</button>}  
+            onClick={startServer} title={"Initalize Server"}> Start </button>}  
         {this.props.menubarStore.getActive === 1 && 
           <button className={'Button draggableCancel disabledView' } 
-            onClick={startServer} title={"Booting Server"}> Loading </button>}  
+            title={"Booting Server"}> Loading </button>}  
         {this.props.menubarStore.getActive === 2 && 
           <button className={'Button draggableCancel ' } 
-            onClick={stopServer} title={"Terminate Server"} >Stop Server</button>}
+            onClick={stopServer} title={"Terminate Server"}> Stop </button>}
        
         
-        <button className={"OtherControls Button"} title={"Refresh Page"} 
+        <button className={"Button Refresh"} title={"Refresh Page"} 
           onClick={() => {if(window.confirm('Do you want to refresh page? Unsaved changes will be destroyed.')) {
-            window.location.reload(false)}}}>Refresh</button>
+            window.location.reload(false)}}}>↻</button>
 
-        <Popup trigger={<button className={'Button draggableCancel'} title={"Help"} > Help</button>} position={'bottom right'}>
+        {/* <Popup trigger={<button className={'Button draggableCancel'} title={"Help"} > Help</button>} position={'bottom right'}>
           <div className={'helpContainer'}>
             TODO 
           </div>
-        </Popup>
+        </Popup> */}
        
       </div>
     </div>)
