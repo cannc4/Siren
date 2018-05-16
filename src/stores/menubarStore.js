@@ -46,7 +46,7 @@ class MenubarStore
 
     @action toggleRecording() { 
         this.recording = !this.recording;
-        // this.record(this.recording);
+        this.record(this.recording);
     }
     @computed get isPlaying() { 
         return this.playing;
@@ -124,7 +124,7 @@ class MenubarStore
     @action record() {
         request.post('http://localhost:3001/record', { 'isRecord' : this.recording } )
             .then(action((response) => {
-                if (response.status === 200) {
+                if (response.status === 200 && response.data !== undefined) {
                     this.updateHistoryFolders(response.data.history_folders);
                  }  
             })).catch(action((error) => {
