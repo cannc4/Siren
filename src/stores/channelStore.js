@@ -79,6 +79,7 @@ class ChannelStore
     @action updateAll() {
         _.forEach(_.filter(this.channels, ['scene', sceneStore.active_scene]), (channel, i) => {
             if (channel.gate && pulseStore.pulse.beat % channel.rate === 0) {
+                // TODO: FIX
                 channel['activeSceneIndex'] = i;
 
                 // if not still looping
@@ -249,8 +250,10 @@ class ChannelStore
             
             // actually stop audio
             // TODO: SC
-            if (ch.mute === true && ch.type === 'Tidal')
+            if (ch.mute === true && ch.type === 'Tidal') { 
                 consoleStore.submitGHC(ch.name + ' $ silence');
+                ch.gate = false;
+            }
         }
     }
     @action toggleSolo(name) {
@@ -265,8 +268,10 @@ class ChannelStore
                         
                         // actually stop audio on other channels
                         // TODO: SC
-                        if (other.type === 'Tidal')
+                        if (other.type === 'Tidal') { 
                             consoleStore.submitGHC(other.name + ' $ silence');
+                            ch.gate = false;
+                        }
                     }
                 });
             }

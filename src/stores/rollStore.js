@@ -2,9 +2,7 @@ import { observable, action } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
 
-import D3 from '../components/d3'
-
-import menubarStore from './menubarStore'
+import D3 from '../utils/d3'
 
 class RollStore {
     sc_log_socket = io('http://localhost:4002/');
@@ -36,15 +34,7 @@ class RollStore {
 
     constructor() {
         const ctx = this;
-        // Sample value on trigger
-        this.sc_log_socket.on('connect', (reason) => {
-            console.log("Port 4002 Connected: ", reason);
-            menubarStore.server_info = 2;
-        });
-        this.sc_log_socket.on('disconnect', action((reason) => {
-            console.log("Port 4002 Disconnected: ", reason);
-            menubarStore.server_info = 0;
-        }));
+        // Sample value on trigger;
         this.sc_log_socket.on("/sclog", action((data) => {
             ctx.value = data.trigger;
             this.renderCanvas();

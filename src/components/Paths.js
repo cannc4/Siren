@@ -1,9 +1,9 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
+
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 
 @inject('pathStore')

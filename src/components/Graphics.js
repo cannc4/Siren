@@ -3,15 +3,14 @@ import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 
-import { shaders } from './shaders/simple'
+import { shaders } from './shaders/simple';
 
-const { Surface } = require("gl-react-dom");
-const GL = require("gl-react");
+import { Surface } from "gl-react-dom";
+import { Shaders, Node, GLSL, Bus, Uniform } from "gl-react";
 
 @inject('rollStore')
 @observer
@@ -63,21 +62,37 @@ export default class Graphics extends React.Component {
     let gain = this.getParameterSafe('gain', 1);
     let channel = this.getParameterSafe('sirenChan', 0);
 
+    const dim = [2, 2];
+    const Blur1D = ({ dim, dir, children: t }) => (
+      <Node shader={shaders.blur1d} uniforms={{ dim, dir, t }} />
+    );
+
     return (
-      <Surface width={width} height={height} ref="graphicsGL">
-        <GL.Node
-          shader={shaders.helloGL}
-          uniforms={{
-            resolution, iTime,
-            nameAscii, note,
-            cps, delta, cycle,
-            begin, end,
-            room, 
-            gain, 
-            channel
-          }}
-          width={width}
-          height={height}
+      <Surface
+        width={width} height={height}
+        webglContextAttributes={{ preserveDrawingBuffer: true }}>
+      
+
+        <Bus ref="marchGL">{/* we use a Bus to have a ref for capture */}
+          <Node
+            shader={shaders.marchGL2}
+            uniforms={{
+              resolution, iTime,
+              nameAscii, note,
+              cps, delta, cycle,
+              begin, end,
+              room, 
+              gain, 
+              channel
+            }}
+          />
+        </Bus>
+
+        <Node
+          shader={shaders.blur1d}  
+          dim={[2, 2]}
+          dir={[-1, 2]}
+          t={() => this.refs.marchGL}
         />
       </Surface>     
     );

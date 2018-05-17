@@ -1,9 +1,8 @@
-const GL = require("gl-react");
+import { GLSL, Shaders } from "gl-react";
 
-
-export const shaders = GL.Shaders.create({
+export const shaders = Shaders.create({
     helloGL: {
-        frag: GL.GLSL`
+        frag: GLSL`
         precision highp float;
         uniform float blue;
         varying vec2 uv; // This variable vary in all pixel position (normalized from vec2(0.0,0.0) to vec2(1.0,1.0))
@@ -13,7 +12,7 @@ export const shaders = GL.Shaders.create({
       `
     },
     marchGL: {
-        frag: GL.GLSL`
+        frag: GLSL`
         precision highp float;
 
         uniform vec2 resolution;
@@ -69,8 +68,28 @@ export const shaders = GL.Shaders.create({
         }
         `
     },
+    blur1d: {
+        frag: GLSL`
+            precision highp float;
+            varying vec2 uv;
+            uniform sampler2D t;
+            uniform vec2 dim;
+            uniform vec2 dir;
+            void main() {
+                vec4 color = vec4(0.0);
+                vec2 off1 = vec2(1.3846153846) * dir;
+                vec2 off2 = vec2(3.2307692308) * dir;
+                color += texture2D(t, uv) * 0.2270270270;
+                color += texture2D(t, uv + (off1 / dim)) * 0.3162162162;
+                color += texture2D(t, uv - (off1 / dim)) * 0.3162162162;
+                color += texture2D(t, uv + (off2 / dim)) * 0.0702702703;
+                color += texture2D(t, uv - (off2 / dim)) * 0.0702702703;
+                gl_FragColor = color;
+            }
+            `
+    },
     marchGL2: {
-        frag: GL.GLSL`
+        frag: GLSL`
         precision highp float;
 
         uniform vec2 resolution;
@@ -185,6 +204,8 @@ export const shaders = GL.Shaders.create({
             // Slowly spin the whole scene
             // samplePoint = rotateY(iTime / 2.0) * samplePoint;
             
+            samplePoint = mod(samplePoint, 7.0) - 0.5 * 2.0;
+
             float cylinderRadius = 0.4 + (1.0 - 0.4) * (1.0 + sin(1.7 * iTime)) / 2.0;
             float cylinder1 = cylinderSDF(samplePoint, 2.0, cylinderRadius);
             float cylinder2 = cylinderSDF(rotateX(radians(90.0)) * samplePoint, 2.0, cylinderRadius);
@@ -331,6 +352,9 @@ export const shaders = GL.Shaders.create({
             
             vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
             
+            float fogFactor = smoothstep(10.0, 50.0, dist);
+            gl_FragColor = vec4(mix(color, vec3(0.1), fogFactor), 1.0);
+
             gl_FragColor = vec4(color, 1.0);
         }
         `

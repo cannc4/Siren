@@ -642,8 +642,14 @@ const Siren = () => {
 
 
   //Record compiled patterns with timestamps
-  const startRecording = () => { 
+  const startRecording = (reply) => { 
+    if (isRecording) {
+      isRecording = false;
+      reply.sendStatus(500);
+      return;
+    }
     isRecording = true;
+    reply.sendStatus(200);
   }
       
   const stopHistory = () => { 
@@ -656,7 +662,7 @@ const Siren = () => {
     fs.readdirSync('./server/save/recordings/').forEach(file => {
       history_json.push(file);
     });
-    let selectedFile = './server/save/recordings/' + history_json[history_json.length-1].toString();
+    let selectedFile = './server/save/recordings/' + history_json[history_json.length - 1].toString();
     console.log(selectedFile);
     commandobj = jsonfile.readFileSync(selectedFile);
     sendHistoryPatternPrepare(); //start recursive loop
@@ -708,19 +714,24 @@ const Siren = () => {
   }
 
   const stopRecording = (reply) => { 
-    let history_json = [];
-    if (isRecording) { 
-      recordFilename = Date.now().toString() + ".json";   
-      jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 
-                                _.sortBy(historyArray, ['timestamp']), 
-                                {spaces: 1, flag: 'w'});
-      isRecording = false;
+    try {
+      let history_json = [];
+      if (isRecording) { 
+        let time = new Date();
+        recordFilename = time.getHours()+"-"+time.getMinutes()+"-"+time.getSeconds()+"-"+time.getMilliseconds()+ ".json";   
+        jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 
+                                  _.sortBy(historyArray, ['timestamp']), 
+                                  {spaces: 1, flag: 'w'});
+        isRecording = false;
+      }
+      historyArray = [];
+      fs.readdirSync('./server/save/recordings/').forEach(file => {
+        history_json.push(file);
+      });
+      reply.status(200).json({history_folders: history_json}); //send the folder names back to front-end for dropdown
+    } catch (e) { 
+      reply.status(500).json({history_folders: undefined});
     }
-    historyArray = [];
-    fs.readdirSync('./server/save/recordings/').forEach(file => {
-      history_json.push(file);
-    });
-    reply.status(200).json({history_folders: history_json}); //send the folder names back to front-end for dropdown
   }
 
 
@@ -894,11 +905,9 @@ const Siren = () => {
         console.log("app.post /recording", isRecord);
 
         if (isRecord)
-          startRecording();
+          startRecording(reply);
         else
           stopRecording(reply);  
-        
-        // reply.sendStatus(200);
       } catch(error) {
         reply.sendStatus(500);
       }

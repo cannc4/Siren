@@ -26,7 +26,7 @@ export default class Scene extends React.Component {
             <div key={"s_"+i} className={ class_name+ " draggableCancel"}>
                 {<button className={'SceneName'}
                     onClick={() => (this.props.sceneStore.changeActiveScene(item))}>{item}</button>}
-                {item !== 'default' && <button onClick={() => (this.props.sceneStore.deleteScene(item))}>{'X'}</button>}
+                {item !== 'default' && <button onClick={() => (this.props.sceneStore.deleteScene(item))}>☓</button>}
             </div>
         )
     }

@@ -1,68 +1,75 @@
 .MenuBar {
   background: rgba(27, 27, 27, 1);
   position: fixed;
-  display: inline-flex;
+  display: flex;
   justify-content: space-between;
+  flex-direction: row;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1;
-  border-bottom: 1px solid #333;
-  padding: 10px 10px 6px 15px;
+  border-bottom: solid 1px var(--global-color);
+  padding: 5px 10px 5px 15px;
 }
 
 .Logo {
   margin-bottom: 0px !important;
-  color: #0bb;
   margin-right: 10px !important;
+  opacity: 0.9;
+  cursor: pointer;
+}
+.Logo:hover {
+  opacity: 0.7;
 }
 
-/*Animation*/
+/* Radiation Animation */
+@keyframes radiate {
+  to {
+    transform: scale(1.5);
+    opacity: 0.0;
+  }
+}
+/* Save Animation */
 @keyframes flusa {
-  0% {filter: blur(0px);
-      transform: scale(1);}
-  20% {filter: blur(2px);
-       transform: scale(1.1);}
-  100% {filter: blur(0px);
-        transform: scale(1);}
+  0% {transform: scale(1);}
+  20% {transform: scale(0.9);}
+  100% {transform: scale(1);}
 }
 .SaveExecuted {
   animation-name: flusa;
   animation-duration: 1s;
-  animation-timing-function: ease-out;
 }
 
-.Version {
-  margin-top: 30px;
-  background: rgba(200,200,90, 0.75);
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.User{
-  display: flex;
-  padding: 5px;
-
-  justify-content: center;
-  align-items:center;
-  color: #ddd;
-  font-weight: bold;
-}
 
 .TimerControls{
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+.TimerControls > .Button.Record {
+  color: #bf2618;
+  animation: radiate 2s infinite; 
+}
 
-  border: 0.5px solid rgba(125,125,125, 0.8);
-  margin-right: 3px;
-  opacity: 0.8;
+.TimerControls > .Button {
+  font-size: 16px;
+  vertical-align: middle;
+  border: none;
+  margin-right: 5px;
 }
-.TimerControls:hover{
-  background: rgba(255, 255, 158, 0.15);
+.TimerControls > .Button:hover{
+  background-color: transparent;
+  color: var(--accent-color-opaque);
 }
+.RMSVis {
+  display: flex;
+  margin: 25px 10px 5px 5px;
+  flex-direction: column;
+  justify-content: baseline;
+  opacity: 0.7;
+}
+
 
 .OtherControls {
   display: flex;
@@ -72,27 +79,16 @@
 }
 .OtherControls > button {
   height: 75%;
-  margin-right: 3px;
-  padding: 0 5px 0 5px;
-}
-
-
-.TimesInput {
-  font-size: 12px;
-  text-align: center;
-  vertical-align: center;
-  width: 30px;
+  width: 50px;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .ServerStatus {
-  width: 5px;
+  width: 4px;
   height: 75%;
-
-  margin-right: 0px;
-
+  margin-right: -1px;
   background: #fff;
   opacity: 0.6;
-
   transition: all 100ms ease;
 }
 .ServerStatus.inactive {
@@ -101,12 +97,4 @@
   background: #ffc005;
 }.ServerStatus.running {
   background: #1fc60f;
-}
-
-.RMSVis {
-  display: flex;
-  margin: 25px 10px 5px 5px;
-  flex-direction: column;
-  justify-content: baseline;
-  opacity: 0.7;
 }

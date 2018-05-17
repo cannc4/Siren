@@ -3,9 +3,8 @@ import { inject, observer } from 'mobx-react';
 // import _ from 'lodash';
 
 // CSS Imports
-import '../styles/_comp.css';
-import '../styles/Layout.css';
 import '../styles/App.css';
+import '../styles/Layout.css';
 import '../styles/Home.css';
 import '../styles/ContextMenu.css';
 
@@ -14,16 +13,7 @@ import '../styles/ContextMenu.css';
 export default class DebugConsole extends React.Component {
   render() {
     const ctx = this;
-
-    // let message = ctx.props.debugStore.debugLogMessage;
-    // console.log(message);
-    // if(_.isObject(message)) {
-    //   message = JSON.stringify(message);
-    // }
-    // else {
-    //   message = _.toString(message);
-    // }
-    return (<div className={'DebugConsole'}>
+    return (<div className={'DebugConsole PanelAdjuster'}>
       {ctx.props.debugStore.debugLogMessage}
     </div>)
   }  

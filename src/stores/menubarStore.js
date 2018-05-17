@@ -21,10 +21,10 @@ class MenubarStore
     sc_log_socket = io('http://localhost:4002/');        
     constructor() {
         this.sc_log_socket.on('connect', (reason) => {
-            
+            this.server_info = 2;
         });
         this.sc_log_socket.on('disconnect', action((reason) => {
-            
+            this.server_info = 0;
         }));
         this.sc_log_socket.on("/rms", action((data) => {
             const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
@@ -124,9 +124,9 @@ class MenubarStore
     @action record() {
         request.post('http://localhost:3001/record', { 'isRecord' : this.recording } )
             .then(action((response) => {
-                if (response.status === 200) {
+                if (response.status === 200 && response.data !== undefined) {
                     this.updateHistoryFolders(response.data.history_folders);
-                 }  
+                }  
             })).catch(action((error) => {
                 //this.recording = false;
                 console.error(" ## Server errors: ", error);
