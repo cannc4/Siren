@@ -241,7 +241,7 @@ export default class Home extends React.Component {
               let isVisible = _.find(ctx.props.layoutStore.allLayouts, { 'i': layoutItem.i, 'isVisible': true });
               return <MenuItem key={key}
                 onClick={ctx.handleRightClick.bind(ctx,
-                  { type: (isVisible ? 'modulesRemove' : 'moduleAdd'), val: layoutItem.i })}
+                  { type: (isVisible ? 'modulesRemove' : 'modulesAdd'), val: layoutItem.i })}
                 data={{ item: layoutItem.i }}>
                 <span style={{
                   borderLeft: "2px solid " + (layoutItem.i.includes('tidal_') ? 'var(--tidal-color)' :

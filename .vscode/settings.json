@@ -4,6 +4,7 @@
         "*.tidal": "haskell",
         "__locale": "c",
         "ios": "c",
-        "random": "c"
+        "random": "c",
+        "future": "c"
     }
 }
