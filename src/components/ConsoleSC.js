@@ -31,7 +31,7 @@ export default class ConsoleSC extends React.Component {
     console.log("RENDER CONSOLESC.JS");
      
     const options = {
-      mode: 'clike',
+      mode: 'smalltalk',
       theme: '_style_sc',
       fixedGutter: true,
       scroll: false,

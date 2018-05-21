@@ -21,6 +21,8 @@ class RollStore {
     // d3 main object
     @observable d3_object; 
 
+    @observable dimensions = [200, 200];
+
     // data organization
     @observable canvas_data = [];
     @observable canvas_min_cycle = 0;
@@ -63,11 +65,24 @@ class RollStore {
     @action updateResolution(r) {
         this.resolution = r;
     }
+    @action updateGraphicsDimensions() {
+        const element = document.getElementById('graphicsLayout');
+        if(element && element !== null){
+            const w = element.clientWidth;
+            const h = element.clientHeight;
+    
+            this.dimensions = [ w, h - 40 ];
+            return;
+        }
+        this.dimensions = [ 1000, 200 ];
+    }
     @action reloadRoll() {
         if (this.d3_object !== undefined) { 
             this.d3_object.resize();
             this.d3_object.render();
         }
+
+        this.updateGraphicsDimensions();
     }
 
     // mouse functions

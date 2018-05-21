@@ -16,6 +16,10 @@
   margin-bottom: 0px !important;
   margin-right: 10px !important;
   opacity: 0.9;
+  cursor: pointer;
+}
+.Logo:hover {
+  opacity: 0.7;
 }
 
 /* Radiation Animation */
@@ -75,11 +79,8 @@
 }
 .OtherControls > button {
   height: 75%;
-  width: 40px;
-  border-color: var(--global-color);
-}
-.Refresh {
-  width: 20px !important;
+  width: 50px;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .ServerStatus {

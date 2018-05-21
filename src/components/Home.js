@@ -23,7 +23,7 @@ import '../styles/ContextMenu.css';
 
 import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {
-  save, timer,
+  save, saveLayout, timer,
   loadCustomLayout_0, loadCustomLayout_1, loadCustomLayout_2, loadCustomLayout_3,
   resetLayout, fullscreenLayout
 } from '../keyFunctions'
@@ -40,7 +40,8 @@ let keymaster = require('keymaster');
 @observer
 export default class Home extends React.Component {  
   componentDidMount() {
-    keymaster('⌘+s, ctrl+s', save); 
+    keymaster('⌘+s, ctrl+s', save);
+    keymaster('⌘+shift+s, ctrl+shift+s', saveLayout);
     keymaster('ctrl+enter', timer);
 
     keymaster('shift+r', resetLayout);
@@ -52,6 +53,7 @@ export default class Home extends React.Component {
   }
   componentWillUnmount() {
     keymaster.unbind('ctrl+s', save);
+    keymaster.unbind('⌘+shift+s, ctrl+shift+s', saveLayout);
     keymaster.unbind('ctrl+enter', timer); 
 
     keymaster.unbind('shift+r', resetLayout);
@@ -100,7 +102,7 @@ export default class Home extends React.Component {
         </div>
       </div>);
     }
-    else if (layoutItem.i === 'paths') {
+    else if (layoutItem.i === 'config_paths') {
       return layoutItem.isVisible && (<div key={layoutItem.i} >
         <div className={"PanelHeader"}> ● Config Paths
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
@@ -120,7 +122,7 @@ export default class Home extends React.Component {
     }  
       
     /// ----- TIDAL LAYOUTS ------  
-    else if (layoutItem.i === 'globals') {
+    else if (layoutItem.i === 'tidal_globals') {
       return layoutItem.isVisible && (<div key={layoutItem.i}  >
         <div className={"PanelHeader Tidal"}> ● Tidal Global Controls
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
@@ -130,9 +132,9 @@ export default class Home extends React.Component {
         </div>
       </div>);
     }
-    else if (layoutItem.i === 'pattern_history') {
+    else if (layoutItem.i === 'tidal_history') {
       return layoutItem.isVisible && (<div key={layoutItem.i}  >
-        <div className={"PanelHeader Tidal"}> ● Pattern History
+        <div className={"PanelHeader Tidal"}> ● Tidal History
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <PatternHistory />
@@ -148,15 +150,15 @@ export default class Home extends React.Component {
         </div>
       </div>);
     }
-    else if (layoutItem.i === 'debug_console') {
+    else if (layoutItem.i === 'tidal_log') {
       return layoutItem.isVisible && (<div key={layoutItem.i} >
-        <div className={"PanelHeader Tidal"}> ● Tidal Logs
+        <div className={"PanelHeader Tidal"}> ● Tidal Log
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <DebugConsole/>
       </div>);
     }  
-    else if (layoutItem.i === 'canvas') {
+    else if (layoutItem.i === 'tidal_roll') {
       return layoutItem.isVisible && (<div key={layoutItem.i}  id={'canvasLayout'} >
         <div className={"PanelHeader Tidal"}> ● Pattern Roll
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
@@ -185,17 +187,23 @@ export default class Home extends React.Component {
   }
   handleRightClick = (param, event) => {
     if (param.type === 'channelAddTidal') this.props.channelStore.addChannel('', 'Tidal', 8, '');
-    else if (param.type === 'channelAddSC') this.props.channelStore.addChannel('s', 'SuperCollider', 8, '');  
-    else if (param.type === 'channelAddCPS') this.props.channelStore.addChannel('cps', 'CPS', 8, '');  
+    else if (param.type === 'channelAddSC') this.props.channelStore.addChannel('s', 'SuperCollider', 8, '');
+    else if (param.type === 'channelAddCPS') this.props.channelStore.addChannel('cps', 'CPS', 8, '');
     else if (param.type === 'modulesRemove') this.props.layoutStore.hideLayout(param.val);
     else if (param.type === 'modulesAdd') this.props.layoutStore.showLayout(param.val);
     else if (param.type === 'layoutSave') this.props.layoutStore.save();
     else if (param.type === 'layoutReset') this.props.layoutStore.reset();
     else if (param.type === 'matrixFull') this.props.layoutStore.matrixFullscreen();
-    else if (param.type === 'layoutSaveCustom') this.props.layoutStore.saveCustom(param.val);
+    else if (param.type === 'layoutSaveCustom') { 
+      this.props.layoutStore.saveCustom(param.val);
+      this.props.layoutStore.save();
+    }
     else if (param.type === 'layoutLoadCustom') { 
-      if (event.altKey) this.props.layoutStore.deleteCustom(param.val);
-      else              this.props.layoutStore.loadCustom(param.val);
+      if (event.altKey) { 
+        this.props.layoutStore.deleteCustom(param.val);
+        this.props.layoutStore.save();
+      }
+      else this.props.layoutStore.loadCustom(param.val);
     }
   };
 
@@ -233,15 +241,25 @@ export default class Home extends React.Component {
           <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddCPS', val: true })}>Add CPS Channel</MenuItem>
           <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddSC', val: true })}>Add SuperCollider Channel</MenuItem>
           <MenuItem divider />
-          <MenuItem onClick={save} data={{ item: 'reset' }}>Save Scene</MenuItem>
-          <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'layoutSave'})} data={{ item: 'reset' }}>Save Layout</MenuItem>
+          <MenuItem onClick={save} data={{ item: 'reset' }}>Save Scene<span style={{float: 'right'}}>⌥ + S</span></MenuItem>
+          <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'layoutSave'})} data={{ item: 'reset' }}>Save Layout<span style={{float: 'right'}}>⇧ + ⌥ + S</span></MenuItem>
           <MenuItem divider />
           <SubMenu title={'Modules'} onClick={(event) => { event.preventDefault();}}>
             {_.map(ctx.props.layoutStore.allLayouts, (layoutItem, key) => {
-              if(_.find(ctx.props.layoutStore.allLayouts, { 'i': layoutItem.i, 'isVisible': true }) )
-                return <MenuItem key={key} onClick={ctx.handleRightClick.bind(ctx,{type:'modulesRemove', val:layoutItem.i})} data={{ item: layoutItem.i }}>{_.startCase(layoutItem.i)}<span style={{float: 'right'}}>⏺</span></MenuItem>;
-              else
-                return <MenuItem key={key} onClick={ctx.handleRightClick.bind(ctx,{type:'modulesAdd', val:layoutItem.i})} data={{ item: layoutItem.i }}>{_.startCase(layoutItem.i)}</MenuItem>;
+              let isVisible = _.find(ctx.props.layoutStore.allLayouts, { 'i': layoutItem.i, 'isVisible': true });
+              return <MenuItem key={key}
+                onClick={ctx.handleRightClick.bind(ctx,
+                  { type: (isVisible ? 'modulesRemove' : 'modulesAdd'), val: layoutItem.i })}
+                data={{ item: layoutItem.i }}>
+                <span style={{
+                  borderLeft: "2px solid " + (layoutItem.i.includes('tidal_') ? 'var(--tidal-color)' :
+                                                (layoutItem.i.includes('sc_') ? 'var(--sc-color)' : 'var(--global-color)')),
+                  height: "90%",
+                  marginRight: "10px"
+                }}></span>
+                {_.startCase(layoutItem.i)}
+                <span style={{ float: 'right' }}>{(isVisible ? '⏺' : ' ')}</span>
+              </MenuItem>;
             })}
           </SubMenu>
           <SubMenu title={'Layouts'} onClick={(event) => { event.preventDefault();}}>
@@ -253,7 +271,7 @@ export default class Home extends React.Component {
               if(!ctx.props.layoutStore.isSlotEmpty(i))
                 return <MenuItem key={key}
                   onClick={ctx.handleRightClick.bind(ctx, { type: 'layoutLoadCustom', val: i })}
-                  data={{ item: 'c_' + i }}>Cust. {i}<span style={{ float: 'right' }}>⇧ + {i}</span>
+                  data={{ item: 'c_' + i }}>Cust. {i+1}<span style={{ float: 'right' }}>⇧ + {i+1}</span>
                 </MenuItem>
               else
                 return <MenuItem key={key}

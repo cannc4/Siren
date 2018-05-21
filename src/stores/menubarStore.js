@@ -126,7 +126,7 @@ class MenubarStore
             .then(action((response) => {
                 if (response.status === 200 && response.data !== undefined) {
                     this.updateHistoryFolders(response.data.history_folders);
-                 }  
+                }  
             })).catch(action((error) => {
                 //this.recording = false;
                 console.error(" ## Server errors: ", error);

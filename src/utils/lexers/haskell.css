@@ -11,14 +11,14 @@
 .cm-s-_style span.cm-atom { color: #aa759f; }
 .cm-s-_style span.cm-number { color: #f4bf75; }
 .cm-s-_style span.cm-integer { color: #f4bf75; }
-.cm-s-_style span.cm-builtin { color: #ac4142; }
+.cm-s-_style span.cm-builtin { color: #6a9fb5; }
 
 /* Custom selectors for Siren */
 .cm-s-_style span.cm-variableexpression { color: #fffb9b; border: solid 1px rgba(255, 255, 255, 0.4);  }
 .cm-s-_style span.cm-mathexpression { color: #46b6b9; border: solid 1px rgba(255, 255, 255, 0.4); }
 
 .cm-s-_style span.cm-property, .cm-s-_style span.cm-attribute { color: #90a959; }
-.cm-s-_style span.cm-keyword { color: #ac418c; } /*ac4142*/
+.cm-s-_style span.cm-keyword { color: #ac4142; } /*ac4142*/
 .cm-s-_style span.cm-string { color: #94c365; }
 
 .cm-s-_style span.cm-variable { color: #ddd; } /*#478ba7;*/

@@ -30,6 +30,7 @@ s.waitForBoot
 	};
 
 	(
+		// Tidal playback information
 		f = { |msg, time, addr|
 			if(msg[0] == '/play2') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
@@ -37,18 +38,13 @@ s.waitForBoot
 		};
 		thisProcess.addOSCRecvFunc(f);
 
-		/*g = { |msg, time, addr|
-			if(msg[0] == '/orbit0') {
-				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
-			}
-		};
-		h = { |msg, time, addr|
-			if(msg[0] == '/orbit1') {
+		g = { |msg, time, addr|
+			if(msg[0].asString.includesAll("/orbit")) {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
 		thisProcess.addOSCRecvFunc(g);
-		thisProcess.addOSCRecvFunc(h);*/
+		
 	);
   	0.2.wait;
   	"SIREN LOADED".postln;
@@ -56,6 +52,6 @@ s.waitForBoot
 	// SIREN FUNCTIONS -- END 		   //
 
 	s.meter;
-	s.makeGui;
+	//s.makeGui;
   };
 )

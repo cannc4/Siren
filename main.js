@@ -11,6 +11,7 @@ function createWindow() {
         show: true,
         icon: __dirname + './favicon.icns', 
 		fullscreenable: true,
+		fullscreen: true,
 		title: "Siren"
     })
     // app.setAboutPanelOptions({

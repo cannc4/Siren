@@ -8,7 +8,7 @@ import '../styles/Layout.css';
 import '../styles/MenuBar.css';
 import '../styles/Help.css';
 
-import Popup from "reactjs-popup";
+// import Popup from "reactjs-popup";
 
 @inject('menubarStore', 'pulseStore', 'pathStore')
 @observer
@@ -33,8 +33,13 @@ export default class MenuBar extends React.Component {
     }
 
     return (<div className='MenuBar boxshadow'>
-      <div className={'Logo'} id={'logo_disp'}>
-        {<img alt="" src={require('../assets/logo.svg')}  height={30} width={30}/> }
+      <div className={'Logo'} id={'logo_disp'} title={"Refresh"}>
+        {<img
+          onClick={() => {if(window.confirm('Do you want to refresh page? Unsaved changes will be destroyed.')) {
+            window.location.reload(false)}}}
+          alt=""
+          src={require('../assets/logo.svg')}
+          height={30} width={30} />}
       </div>
 
       <div className={'TimerControls'}>
@@ -88,12 +93,7 @@ export default class MenuBar extends React.Component {
         {this.props.menubarStore.getActive === 2 && 
           <button className={'Button draggableCancel ' } 
             onClick={stopServer} title={"Terminate Server"}> Stop </button>}
-       
-        
-        <button className={"Button Refresh"} title={"Refresh Page"} 
-          onClick={() => {if(window.confirm('Do you want to refresh page? Unsaved changes will be destroyed.')) {
-            window.location.reload(false)}}}>↻</button>
-
+  
         {/* <Popup trigger={<button className={'Button draggableCancel'} title={"Help"} > Help</button>} position={'bottom right'}>
           <div className={'helpContainer'}>
             TODO 

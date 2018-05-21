@@ -662,7 +662,7 @@ const Siren = () => {
     fs.readdirSync('./server/save/recordings/').forEach(file => {
       history_json.push(file);
     });
-    let selectedFile = './server/save/recordings/' + history_json[1].toString();
+    let selectedFile = './server/save/recordings/' + history_json[history_json.length - 1].toString();
     console.log(selectedFile);
     commandobj = jsonfile.readFileSync(selectedFile);
     sendHistoryPatternPrepare(); //start recursive loop
@@ -715,14 +715,9 @@ const Siren = () => {
 
   const stopRecording = (reply) => { 
     try {
-      let history_json reply= [];
-      if (isRecording) {
-        if (isRecording) false 
-        reply.sendStatus(500);
-      }
+      let history_json = [];
       if (isRecording) { 
-        ply.status(sendS02).jso;
-        let time = new Date();//.now();
+        let time = new Date();
         recordFilename = time.getHours()+"-"+time.getMinutes()+"-"+time.getSeconds()+"-"+time.getMilliseconds()+ ".json";   
         jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 
                                   _.sortBy(historyArray, ['timestamp']), 

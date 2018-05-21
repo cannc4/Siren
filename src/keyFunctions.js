@@ -22,6 +22,12 @@ export const save = () => {
     return false;
 }
 
+export const saveLayout = () => { 
+    layoutStore.save();
+    executionCss();
+    return false;
+}
+
 export const timer = () => {
     if (pulseStore.isActive) 
         pulseStore.stopPulse();

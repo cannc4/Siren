@@ -12,6 +12,7 @@
 .cm-s-_style_sc span.cm-number { color: #f4bf75; }
 .cm-s-_style_sc span.cm-integer { color: #f4bf75; }
 .cm-s-_style_sc span.cm-builtin { color: #ac4142; }
+.cm-s-_style_sc span.cm-meta { color: #0f0; }
 
 /* Custom selectors for Siren */
 .cm-s-_style_sc span.cm-variableexpression { color: #fffb9b; border: solid 1px rgba(255, 255, 255, 0.4);  }
@@ -20,13 +21,15 @@
 .cm-s-_style_sc span.cm-property, .cm-s-_style_sc span.cm-attribute { color: #90a959; }
 .cm-s-_style_sc span.cm-keyword { color: #ac418c; } /*ac4142*/
 .cm-s-_style_sc span.cm-string { color: #94c365; }
+.cm-s-_style_sc span.cm-string-2 { color: #f00; }
 
 .cm-s-_style_sc span.cm-variable { color: #ddd; } /*#478ba7;*/
 .cm-s-_style_sc span.cm-variable-2 { color: #ddd; }  /*#6a9fb5;*/
 .cm-s-_style_sc span.cm-variable-3 { color: #6a9fb5; }  /*#6a9fb5;*/
 .cm-s-_style_sc span.cm-qualifier { color: #f4bf75; }  /*#6a9fb5;*/
 .cm-s-_style_sc span.cm-def { color: #d28445; }
-.cm-s-_style_sc span.cm-bracket { color: #202020; }
+.cm-s-_style_sc span.cm-bracket { color: #cacaca; }
+.cm-s-_style_sc span.cm-operator { color: #ddd; }
 .cm-s-_style_sc span.cm-tag { color: #ac4142; }
 .cm-s-_style_sc span.cm-link { color: #aa759f; }
 .cm-s-_style_sc span.cm-error { background: #ac4142; color: #505050; }

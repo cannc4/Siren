@@ -28,6 +28,18 @@
    "name": "scfree",
    "params": "",
    "text": "a.free;"
+  },
+  {
+   "scene": "default",
+   "name": "bd",
+   "params": "",
+   "text": "every 4 ((slow 2).(#s \"808\")) $ n \"0 2\" # sound \"bd\""
+  },
+  {
+   "scene": "default",
+   "name": "bd2",
+   "params": "",
+   "text": "d5 $ sometimes (rev) $ every 2  ((# s \"md0\").(# speed 2)) $ n \"{{0 3} {~ 4}} % 2\" # s \"808\" # gain 1 # orbit 1"
   }
  ],
  "channels": [
@@ -54,7 +66,7 @@
    "mute": false,
    "loop": true,
    "selected": false,
-   "time": 0,
+   "time": 25,
    "cid": 0,
    "activeSceneIndex": 0
   },
@@ -76,7 +88,7 @@
     "scpat `100`",
     ""
    ],
-   "gate": true,
+   "gate": false,
    "solo": false,
    "mute": false,
    "loop": true,
@@ -84,6 +96,58 @@
    "selected": false,
    "cid": 4,
    "activeSceneIndex": 1
+  },
+  {
+   "scene": "default",
+   "name": "d2",
+   "type": "Tidal",
+   "steps": 8,
+   "rate": 8,
+   "time": 0,
+   "transition": "",
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "gate": false,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "executed": false,
+   "selected": false,
+   "cid": 2
+  },
+  {
+   "scene": "default",
+   "name": "d3",
+   "type": "Tidal",
+   "steps": 8,
+   "rate": 8,
+   "time": 0,
+   "transition": "",
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "gate": false,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "executed": false,
+   "selected": false,
+   "cid": 3
   }
  ]
 }

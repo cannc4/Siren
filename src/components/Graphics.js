@@ -7,80 +7,106 @@ import '../styles/App.css';
 import '../styles/Layout.css';
 import '../styles/Home.css';
 
-import { shaders } from './shaders/simple'
+import { shaders } from './shaders/simple';
 
-const { Surface } = require("gl-react-dom");
-const GL = require("gl-react");
+import { Surface } from "gl-react-dom";
+import { Shaders, Node, GLSL, Bus, Uniform } from "gl-react";
 
-@inject('rollStore')
-@observer
-export default class Graphics extends React.Component {
-    
-  updateDimensions() {
-      const element = document.getElementById('graphicsLayout');
-      if(element && element !== null){
-          const w = element.clientWidth;
-          const h = element.clientHeight;
+import timeLoop from "../utils/timeLoop";
+import menubarStore from '../stores/menubarStore';
 
-          // -25 (header) -3 (borders) -24 (controls) -1 border
-          return {w: w, h: h-29};
-      }
-      return { w: 1100, h: 190 };
-  }
-
-  getParameterSafe(parameterName, defaultValue) {
-    return (this.props.rollStore.value !== undefined ?
-      (this.props.rollStore.value[parameterName] !== undefined ?
-        this.props.rollStore.value[parameterName]
+class Canvas extends React.Component {
+  getParameterSafe(parameterName, defaultValue, store) {
+    return (store.value !== undefined ?
+      (store.value[parameterName] !== undefined ?
+        store.value[parameterName]
         :
         defaultValue)
       : (defaultValue));
   }
-
+  
   render() {
-    console.log("RENDER GRAPHICS");
-      
-    let rollStore = this.props.rollStore;
+    const { time, res, rollStore} = this.props;
 
-    let dimensions = this.updateDimensions();
-    let width =  dimensions.w;
-    let height = dimensions.h;
-
-    // uniform declaration
-    let resolution = [width, height];
-    let iTime = rollStore.value !== undefined ? rollStore.value.time : (new Date().getTime());
-    
     // sample parameters
     let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
-    let note = this.getParameterSafe('n', 0);
-    let cps = this.getParameterSafe('cps', 1);
-    let delta = this.getParameterSafe('delta', 1);
-    let cycle = this.getParameterSafe('cycle', 1);
-    let begin = this.getParameterSafe('begin', 0);
-    let end = this.getParameterSafe('end', 1);
-    let room = this.getParameterSafe('room', 1);
-    let gain = this.getParameterSafe('gain', 1);
-    let channel = this.getParameterSafe('sirenChan', 0);
+    let note = this.getParameterSafe('n', 0, rollStore);
+    let cps = this.getParameterSafe('cps', 1, rollStore);
+    let delta = this.getParameterSafe('delta', 1, rollStore);
+    let cycle = this.getParameterSafe('cycle', 1, rollStore);
+    let sustain = this.getParameterSafe('sustain', 1, rollStore);
+    let begin = this.getParameterSafe('begin', 0, rollStore);
+    let end = this.getParameterSafe('end', 1, rollStore);
+    let room = this.getParameterSafe('room', 1, rollStore);
+    let gain = this.getParameterSafe('gain', 1, rollStore);
+    let channel = this.getParameterSafe('sirenChan', 0, rollStore);
 
+    // pass rms information to shader
+    let rmsArray = _.fill(Array(10), 0);
+    _.each(menubarStore.rmsArray, (e, i) => { 
+      rmsArray[i] = e.rms;
+    });
+  
+    return <Node
+      shader={shaders.marchGL}
+      uniforms={{
+        res,
+        time: time / 1000,
+        rmss: rmsArray,
+        nameAscii,
+        note,
+        // cps,
+        // delta,
+        cycle,
+        // sustain,
+        // begin,
+        // end,
+        // room,
+        // gain,
+        // channel
+      }}
+    />;
+  }
+}
+
+const CanvasLoop = timeLoop(Canvas);
+
+export const FX_Shake = ({ children: t, time }) =>
+  <Node shader={shaders.shake}
+    uniforms={{
+      texture: t,
+      time: time / 1000,
+      amount: 0.01
+    }} />;
+
+const FX_ShakeLoop = timeLoop(FX_Shake);
+
+export const FX_RGBShift = ({ children: t }) =>
+  <Node shader={shaders.rgbShift}
+    uniforms={{
+      texture: t,
+      amount: 0.005,
+      angle: 3.14
+    }} />;
+
+@inject('rollStore')
+@observer
+export default class Graphics extends React.Component {
+  render() {
+    console.log("RENDER GRAPHICS");
+
+    let dim = this.props.rollStore.dimensions;
     return (
-      <Surface width={width} height={height} ref="graphicsGL">
-        <GL.Node
-          shader={shaders.helloGL}
-          uniforms={{
-            resolution, iTime,
-            nameAscii, note,
-            cps, delta, cycle,
-            begin, end,
-            room, 
-            gain, 
-            channel
-          }}
-          width={width}
-          height={height}
-        />
+      <Surface width={dim[0]} height={dim[1]}>
+        <Bus ref='main'>
+          <CanvasLoop res={[dim[0], dim[1]]} rollStore={this.props.rollStore}/>
+        </Bus>
+        <FX_RGBShift>
+          <FX_ShakeLoop>
+            {() => this.refs.main}
+          </FX_ShakeLoop>
+        </FX_RGBShift>  
       </Surface>     
     );
   }
 }
-      
-

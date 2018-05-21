@@ -56,15 +56,15 @@
   padding: 2px 5px 2px 5px;
   line-height: 20px;
   border: solid 1px rgba(180,180,180, 0.1);
-  border-bottom: solid 3px var(--global-color);
+  border-bottom: solid 2px var(--global-color);
   font-weight: bold;
   color: var(--global-white);
 }
 .PanelHeader.Tidal {
-  border-bottom: solid 3px var(--tidal-color);
+  border-bottom: solid 2px var(--tidal-color);
 }
 .PanelHeader.SuperCollider {
-  border-bottom: solid 3px var(--sc-color);
+  border-bottom: solid 2px var(--sc-color);
 }
 /*Panel Close Button */
 .PanelClose {

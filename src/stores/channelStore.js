@@ -79,6 +79,7 @@ class ChannelStore
     @action updateAll() {
         _.forEach(_.filter(this.channels, ['scene', sceneStore.active_scene]), (channel, i) => {
             if (channel.gate && pulseStore.pulse.beat % channel.rate === 0) {
+                // TODO: FIX
                 channel['activeSceneIndex'] = i;
 
                 // if not still looping

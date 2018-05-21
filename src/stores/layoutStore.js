@@ -49,6 +49,7 @@ class LayoutStore
     return this.layouts;
   };
 
+  // REMOVE
   @action gridParameters(specifier) {
     let item = this.layouts.filter(l => l.i === specifier)[0];
     return {i: item.i, x: item.x, y: item.y, h: item.h, w: item.w, isVisible: item.isVisible}
@@ -105,13 +106,13 @@ class LayoutStore
     this.layouts = [{i: "scenes", x: 0, y: 0, w: 3, h: 20, isVisible: true},
                     {i: 'tracker', x: 3, y: 0, w: 13, h: 13, isVisible: true},
                     {i: 'patterns', x: 16, y: 0, w: 8, h: 20, isVisible: true},
-                    {i: 'pattern_history', x: 3, y: 13, w: 13, h: 3, isVisible: true},
-                    {i: 'globals', x: 6, y: 16, w: 5, h: 4, isVisible: false},
+                    {i: 'tidal_history', x: 3, y: 13, w: 13, h: 3, isVisible: true},
+                    {i: 'tidal_globals', x: 6, y: 16, w: 5, h: 4, isVisible: false},
                     {i: 'sc_console', x: 11, y: 16, w: 5, h: 4, isVisible: true },
                     {i: 'tidal_console', x: 11, y: 16, w: 5, h: 4, isVisible: true},
-                    {i: 'debug_console', x: 8, y: 21, w: 7, h: 13, isVisible: true},
-                    {i: 'paths', x: 0, y: 21, w: 7, h: 13, isVisible: true},
-                    {i: 'canvas', x: 0, y: 21, w: 7, h: 13, isVisible: true},
+                    {i: 'tidal_log', x: 8, y: 21, w: 7, h: 13, isVisible: true},
+                    {i: 'config_paths', x: 0, y: 21, w: 7, h: 13, isVisible: true},
+                    {i: 'tidal_roll', x: 0, y: 21, w: 7, h: 13, isVisible: true},
                     {i: 'graphics', x: 0, y: 21, w: 7, h: 13, isVisible: true}
     ];
   };
