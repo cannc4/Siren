@@ -18,7 +18,6 @@
     "better-queue": "^3.8.7",
     "codemirror": "^5.37.0",
     "concurrently": "^3.5.1",
-    "d3": "^5.4.0",
     "electron": "^1.8.6",
     "electron-dl": "^1.12.0",
     "express": "^4.16.2",
@@ -56,6 +55,7 @@
     "superagent": "^3.8.3",
     "superagent-promise": "^1.1.0",
     "supercolliderjs": "^0.14.2",
+    "tree-model": "^1.0.7",
     "wait-on": "^2.1.0"
   },
   "scripts": {

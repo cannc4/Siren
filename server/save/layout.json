@@ -72,13 +72,23 @@
   },
   {
    "w": 15,
-   "h": 6,
-   "x": 0,
+   "h": 12,
+   "x": 9,
    "y": 20,
    "i": "tidal_roll",
    "moved": false,
    "static": false,
-   "isVisible": false
+   "isVisible": true
+  },
+  {
+   "w": 24,
+   "h": 11,
+   "x": 0,
+   "y": 32,
+   "i": "graphics",
+   "moved": false,
+   "static": false,
+   "isVisible": true
   },
   {
    "w": 6,
@@ -86,16 +96,6 @@
    "x": 18,
    "y": 0,
    "i": "tidal_log",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 17,
-   "h": 5,
-   "x": 0,
-   "y": 12,
-   "i": "graphics",
    "moved": false,
    "static": false,
    "isVisible": false

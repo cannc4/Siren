@@ -271,6 +271,9 @@ class REPL {
             if (_.trim(msg[0]) === '/play2') {
               let cycleInfo = _.fromPairs(_.chunk(_.drop(msg), 2));
               cycleInfo['time'] = time;
+              cycleInfo.n === undefined ? cycleInfo['n'] = 0 : cycleInfo.n; 
+              cycleInfo.sirenChan === undefined ? cycleInfo['sirenChan'] = 0 : cycleInfo.sirenChan; 
+              
               current_cycle = cycleInfo.cycle;
 
               // Send current cycle playback info to front end  
@@ -474,8 +477,6 @@ const Siren = () => {
             return;
           }  
         }) 
-
-        console.log(isReserved);
         
         if (isReserved) { return; }
         // Random parameter 

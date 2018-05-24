@@ -2,63 +2,82 @@ import { observable, action } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
 
-import D3 from '../utils/d3'
+import TreeModel from 'tree-model'
 
 class RollStore {
     sc_log_socket = io('http://localhost:4002/');
-    future_vis_socket = io('http://localhost:4006/');
+    // future_vis_socket = io('http://localhost:4006/');
 
     // Trigger value
     @observable value = {};
 
     // Future triggers
-    @observable future_values = [];
+    // @observable future_values = [];
 
     // Pattern Roll Window parameters
     @observable resolution = 12;
     @observable cycles = 8;
     
-    // d3 main object
-    @observable d3_object; 
+    @observable dimensions_g = [200, 200];
+    @observable dimensions_c = [200, 200];
 
-    @observable dimensions = [200, 200];
+    // pat roll
+    @observable roll_canvas_element;
+    @observable tree_start_cycle = 0;
 
-    // data organization
-    @observable canvas_data = [];
-    @observable canvas_min_cycle = 0;
-    @observable canvas_max_cycle = 9999;
-
-    // mouse variables x,y 
-    @observable mouse = [0, 0];
-    @observable prevMouse = [0, 0];
-    @observable dragAmount = [0, 0];
-    @observable mouseEvent = 'idle';
+    @observable treeRoot = null;
+    @observable tree;
 
     constructor() {
-        const ctx = this;
+        let ctx = this;
+
+        // init tree
+        this.tree = new TreeModel();
+
         // Sample value on trigger;
         this.sc_log_socket.on("/sclog", action((data) => {
+            data.trigger['rendered'] = false;
             ctx.value = data.trigger;
+
+            // -- init canvas 
+            if (this.roll_canvas_element === null || this.roll_canvas_element === undefined) { 
+                this.roll_canvas_element = document.getElementById("pat_roll");
+            }    
+
+            // -- process data 
+            this.processData();
+
+
+            // -- render
+            //  see if channel is new
+            //          clear everything
+            //      else
+            //          if s is new
+            //              clear channel portion of the window and redraw channel 
+            //          else
+            //              if n new
+            //                  clear n portion and redraw
+            //              else
             this.renderCanvas();
         }))
 
-        // Future samples on execution
-        this.future_vis_socket.on('connect', (reason) => {
-            console.log("Port 4006 Connected: ", reason);
-        });
-        this.future_vis_socket.on('disconnect', action((reason) => {
-            console.log("Port 4006 Disconnected: ", reason);
-        }));
-        this.future_vis_socket.on("/vis", action((data) => {
-            console.log("Processed Data: ", data);
-            this.canvas_data = data;
+        // -- Future samples on execution
+        // this.future_vis_socket.on('connect', (reason) => {
+        //     console.log("Port 4006 Connected: ", reason);
+        // });
+        // this.future_vis_socket.on('disconnect', action((reason) => {
+        //     console.log("Port 4006 Disconnected: ", reason);
+        // }));
+        // this.future_vis_socket.on("/vis", action((data) => {
+        //     console.log("Processed Data: ", data);
+        //     this.canvas_data = data;
 
-            // refreshes the data for canvas
-            this.updateCanvas();
-        }))
+        //     // refreshes the data for canvas
+        //     this.updateCanvas();
+        // }))
     }
 
-    // Module functions
+    // -- Module interaction
     @action updateCycles(c) {
         this.cycles = c;
     }
@@ -66,90 +85,161 @@ class RollStore {
         this.resolution = r;
     }
 
-    // The dimensions of the graphics module
+    // -- The dimensions 
+    @action updateCanvasDimensions() {
+        const element = document.getElementById('canvasLayout');
+        if(element && element !== null){
+            const w = element.clientWidth;
+            const h = element.clientHeight;
+    
+            this.dimensions_c = [ w, h - 55 ];
+            return;
+        }
+        this.dimensions_c = [ 1000, 200 ];
+    }
     @action updateGraphicsDimensions() {
         const element = document.getElementById('graphicsLayout');
         if(element && element !== null){
             const w = element.clientWidth;
             const h = element.clientHeight;
     
-            this.dimensions = [ w, h - 40 ];
+            this.dimensions_g = [ w, h - 30 ];
             return;
         }
-        this.dimensions = [ 1000, 200 ];
+        this.dimensions_g = [ 1000, 200 ];
     }
-    // The dimensions of the pattern roll module
+
+    // -- Hot reload
     @action reloadRoll() {
-        if (this.d3_object !== undefined) { 
-            this.d3_object.resize();
-            this.d3_object.render();
-        }
+        this.tree_start_cycle = _.toInteger(this.value.cycle);
 
         this.updateGraphicsDimensions();
+        this.updateCanvasDimensions();
     }
 
-    // mouse functions
-    @action updateMouseEvent(event) { 
-        this.mouseEvent = event;
-    }
-    @action updateMouse(mouseX, mouseY) { 
-        this.mouse[0] = mouseX;
-        this.mouse[1] = mouseY;
+    // --Canvas functions 
+    @action processData() { 
 
-        if (this.mouseEvent === 'drag') {
-            this.dragAmount[0] += this.mouse[0] - this.prevMouse[0];
-            this.dragAmount[1] += this.mouse[1] - this.prevMouse[1];
-            // console.log("Drag:", this.dragAmount.peek());
-            
-            this.renderCanvas();
-        }
-        this.prevMouse[0] = mouseX;
-        this.prevMouse[1] = mouseY;
-    }
-   
-    // initialize D3 object
-    @action initD3() { 
-        this.d3_object = new D3([1800, 190],
-            this.canvas_min_cycle,
-            this.canvas_max_cycle,
-            this.resolution,
-            this.value !== undefined ? this.value.cycles : 0,
-            this.dragAmount[0]);
-        this.d3_object.resize();
-    }
+        const node = {
+            type: 'channel',
+            value: _.toNumber(this.value.sirenChan),
+            children: [{
+                type: 'sample',
+                value: this.value.s,
+                children: [{
+                    type: 'note',
+                    value: this.value.n,
+                    time: [this.value]
+                }]
+            }]
+        };
 
-    @action updateCanvas() { 
-        // retrieve minimum and maximum values of the data
-        this.canvas_min_cycle = _.minBy(this.canvas_data, (o) => { return o.obj.cycle; });
-        this.canvas_max_cycle = _.maxBy(this.canvas_data, (o) => { return o.obj.cycle; });
-
-        if (this.canvas_min_cycle !== undefined && this.canvas_max_cycle !== undefined) {
-            this.canvas_min_cycle = this.canvas_min_cycle.obj.cycle;
-            this.canvas_max_cycle = this.canvas_max_cycle.obj.cycle;
+        // initialize start cycle
+        if (this.tree_start_cycle === 0) { 
+            this.tree_start_cycle = _.toInteger(this.value.cycle);
         }
 
-        // Updates and renders the D3 Canvas
-        if (this.d3_object !== undefined) { 
-            this.d3_object.updateVariables(this.canvas_min_cycle,
-                this.canvas_max_cycle,
-                this.resolution,
-                this.cycles,
-                this.dragAmount[0],
-                this.canvas_data);
-            this.renderCanvas();
+        // reset time
+        if (this.value.cycle > this.cycles + this.tree_start_cycle) { 
+            // delete all nodes
+            this.treeRoot = null; 
+            this.tree_start_cycle = _.toInteger(this.value.cycle);
+        }
+
+        // if its empty
+        if (this.treeRoot === null) { 
+            this.treeRoot = this.tree.parse({type: 'root', value: -1, children: [node]});
+        }
+        
+        let channel_node;
+        let sample_node;
+        let note_node;
+
+        channel_node = this.treeRoot.first({strategy: 'breadth'}, (n) => {
+            if (n.model.type === 'channel' && n.model.value === node.value) {
+                return true;
+            }
+            return false;
+        });
+        if (channel_node === undefined) {
+            channel_node = this.treeRoot.addChild(this.tree.parse(node));
+        }
+        else { 
+            sample_node = channel_node.first({strategy: 'breadth'}, (n) => {
+                if (n.model.type === 'sample' && n.model.value === this.value.s) {
+                    return true;
+                }
+                return false;
+            });
+            if (sample_node === undefined) {
+                sample_node = channel_node.addChild(this.tree.parse(node.children[0]));
+            }
+            else { 
+                note_node = sample_node.first({strategy: 'breadth'}, (n) => {
+                    if (n.model.type === 'note' && n.model.value === this.value.n) {
+                        return true;
+                    }
+                    return false;
+                });
+                if (note_node === undefined) {
+                    sample_node.addChild(this.tree.parse(node.children[0].children[0]));
+                }
+                else { 
+                    note_node.model.time.push(this.value);
+                }
+            }
         }
     }
+
     @action renderCanvas() { 
-        let timeOffset = 0;
-        if (this.value.cycle !== undefined) {
-            timeOffset = (this.value.cycle - this.canvas_min_cycle) * this.resolution; 
+        let ctx = this.roll_canvas_element.getContext("2d", { alpha: false });
+        
+        this.updateCanvasDimensions();
+        let w = this.roll_canvas_element.width = this.dimensions_c[0];
+        let h = this.roll_canvas_element.height = this.dimensions_c[1];
+
+        // background
+        for (let i = 0; i < this.treeRoot.children.length; i++) {            
+            i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(53, 53, 53)";         
+
+            ctx.fillRect(
+                0,
+                _.toInteger(h / (this.treeRoot.children.length) * i),
+                w,
+                _.toInteger(h / (this.treeRoot.children.length))
+            );
         }
 
-        if (this.d3_object !== undefined) { 
-            this.d3_object.translateVis(-timeOffset, 0);
-            this.d3_object.resize();
-            this.d3_object.render(this.canvas_data);
-        }
+        // nodes
+        this.treeRoot.walk({ strategy: 'post' }, (n) => { 
+            // leaf node
+            if (!n.hasChildren()) { 
+                const path = n.getPath();
+
+                const _w = w / (this.cycles * this.resolution);
+                const _c_h = h / (path[0].children.length);
+                const _c_i = path[1].getIndex();
+                const _s_h = _c_h / (path[1].children.length);
+                const _s_i = path[2].getIndex();
+                const _n_h = _s_h / (path[2].children.length);
+                const _n_i = path[3].getIndex();
+
+                ctx.fillStyle = "rgb(180, 180, 180)";
+                _.each(n.model.time, (item) => { 
+                    if (!item.rendered) { 
+                        ctx.fillStyle = "rgb(180, 0, 0)";
+                        item.rendered = true;
+                    }
+                    ctx.fillRect(
+                        _.toInteger(((item.cycle - this.tree_start_cycle) * this.resolution) * _w),
+                        _.toInteger(_c_i * _c_h + _s_h * _s_i + _n_i * _n_h),
+                        _.toInteger(_w),
+                        _.toInteger(_n_h)
+                    );
+                })
+
+            }
+        });
     }
 }
 

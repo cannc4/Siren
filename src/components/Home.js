@@ -163,9 +163,7 @@ export default class Home extends React.Component {
         <div className={"PanelHeader Tidal"}> ● Pattern Roll
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
-        <div className={'Canvas'}>
-          <Canvas/>
-        </div>
+        <Canvas/>
       </div>);
     }  
     /// ----- SUPERCOLLIDER LAYOUTS ------  

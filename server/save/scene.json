@@ -6819,14 +6819,14 @@
    ],
    "transition": "(clutchIn 4)",
    "rate": 8,
-   "gate": true,
+   "gate": false,
    "solo": false,
    "mute": false,
    "loop": false,
    "cid": 2,
-   "time": 17,
+   "time": 18,
    "selected": false,
-   "executed": false,
+   "executed": true,
    "activeSceneIndex": 0
   },
   {
@@ -6857,14 +6857,14 @@
    ],
    "transition": "(clutchIn 4)",
    "rate": 8,
-   "gate": true,
+   "gate": false,
    "solo": false,
    "mute": false,
    "loop": false,
    "cid": 3,
-   "time": 17,
+   "time": 18,
    "selected": false,
-   "executed": false,
+   "executed": true,
    "activeSceneIndex": 1
   },
   {
@@ -6900,7 +6900,7 @@
    "mute": false,
    "loop": true,
    "cid": 4,
-   "time": 18,
+   "time": 24,
    "selected": false,
    "executed": false,
    "activeSceneIndex": 2
@@ -6911,7 +6911,7 @@
    "type": "Tidal",
    "steps": 19,
    "rate": 8,
-   "time": 18,
+   "time": 24,
    "transition": "",
    "cells": [
     "",
@@ -6949,7 +6949,7 @@
    "type": "Tidal",
    "steps": 19,
    "rate": 8,
-   "time": 18,
+   "time": 24,
    "transition": "",
    "cells": [
     "atmo `0`",
@@ -6987,7 +6987,7 @@
    "type": "Tidal",
    "steps": 19,
    "rate": 8,
-   "time": 18,
+   "time": 0,
    "transition": "",
    "cells": [
     "",

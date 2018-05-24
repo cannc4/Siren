@@ -96,7 +96,7 @@ export default class Graphics extends React.Component {
   render() {
     console.log("RENDER GRAPHICS");
 
-    let dim = this.props.rollStore.dimensions;
+    let dim = this.props.rollStore.dimensions_g;
     return (
       <Surface width={dim[0]} height={dim[1]}>
         <Bus ref='main'>

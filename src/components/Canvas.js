@@ -5,29 +5,29 @@ import { inject, observer } from 'mobx-react';
 @inject('rollStore')
 @observer
 export default class Canvas extends React.Component {
-  componentDidMount() {
-    let getMousePos = (cn, evt) => { 
-      var rect = cn.getBoundingClientRect();
-      return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-      }
-    };
-    // get HTML canvas 
-    var can = document.getElementById("d3_visualizer");
-    can.addEventListener('mousemove', (evt) => {
-        let mousePos = getMousePos(can, evt);
-        this.props.rollStore.updateMouse(mousePos.x, mousePos.y);
-    }, false);
-    can.addEventListener('mousedown', (evt) => {
-        this.props.rollStore.updateMouseEvent('drag');
-    }, false);
-    can.addEventListener('mouseup', (evt) => {
-        this.props.rollStore.updateMouseEvent('idle');
-    }, false);
+  // componentDidMount() {
+  //   let getMousePos = (cn, evt) => { 
+  //     var rect = cn.getBoundingClientRect();
+  //     return {
+  //         x: evt.clientX - rect.left,
+  //         y: evt.clientY - rect.top
+  //     }
+  //   };
+  //   // get HTML canvas 
+  //   var can = document.getElementById("d3_visualizer");
+  //   can.addEventListener('mousemove', (evt) => {
+  //       let mousePos = getMousePos(can, evt);
+  //       this.props.rollStore.updateMouse(mousePos.x, mousePos.y);
+  //   }, false);
+  //   can.addEventListener('mousedown', (evt) => {
+  //       this.props.rollStore.updateMouseEvent('drag');
+  //   }, false);
+  //   can.addEventListener('mouseup', (evt) => {
+  //       this.props.rollStore.updateMouseEvent('idle');
+  //   }, false);
 
-    this.props.rollStore.initD3();
-  }
+  //   this.props.rollStore.initD3();
+  // }
 
   render() {
     console.log("RENDER CANVAS.JS");
@@ -46,14 +46,13 @@ export default class Canvas extends React.Component {
         </div>
         <button className={"Button"}
           onClick={(e) => {
-            this.props.rollStore.reloadRoll(true);
-            _.delay(() => { this.props.rollStore.reloadRoll(false) }, 50)
+            this.props.rollStore.reloadRoll();
           }
           }>⭯</button>
       </div>
 
       <div className={'CanvasSketch'}>
-        <div id="d3_visualizer"></div>  
+        <canvas id="pat_roll" width={'100'} height={'100'}></canvas>  
       </div>
     </div>);
   }
