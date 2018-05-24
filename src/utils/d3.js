@@ -60,7 +60,7 @@ export default class D3 {
     resize() { 
         let elem = document.getElementById("canvasLayout");
         if (elem) {
-            this.size = [elem.clientWidth, elem.clientHeight-50];
+            this.size = [elem.clientWidth, elem.clientHeight-55];
             this.svg
                 .attr('width', this.size[0])
                 .attr('height', this.size[1]);

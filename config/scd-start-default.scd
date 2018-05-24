@@ -1,7 +1,7 @@
 (
 s.options.numBuffers = 2048 * 8;
 s.options.maxNodes = 1024 * 4;
-s.options.memSize = 13000 * 16;
+s.options.memSize = 8 * 13000 * 16;
 s.quit;
 
 s.waitForBoot 
@@ -10,10 +10,13 @@ s.waitForBoot
 	// Initalize SuperDirt //
 	// ------------------- //
 	~dirt = SuperDirt(2, s);
-	~dirt.loadSoundFiles;
+	//~dirt.loadSoundFiles;
+	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\gfix\\*");
+	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\poolx\\*");
 	0.2.wait;
 	~dirt.start(57120, [0, 1]);
 	"SUPERDIRT LOADED".postln;
+
 
 	s.volume = -12;
 	s.latency = 0.3;
@@ -51,6 +54,12 @@ s.waitForBoot
 	// ------------------------------- //
 	// SIREN FUNCTIONS -- END 		   //
 
+	
+	1.wait;
+	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customfx.scd".load;
+	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customsynth.scd".load;
+	0.5.wait;
+	
 	s.meter;
 	//s.makeGui;
   };

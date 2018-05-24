@@ -69,26 +69,27 @@ class Canvas extends React.Component {
   }
 }
 
-const CanvasLoop = timeLoop(Canvas);
 
-export const FX_Shake = ({ children: t, time }) =>
-  <Node shader={shaders.shake}
+export const FXShake = ({ children: t, time }) =>
+<Node shader={shaders.shake}
     uniforms={{
       texture: t,
       time: time / 1000,
       amount: 0.01
     }} />;
+    
+    
+export const FXRGBShift = ({ children: t }) =>
+<Node shader={shaders.rgbShift}
+uniforms={{
+  texture: t,
+  amount: 0.005,
+  angle: 3.14
+}} />;
 
-const FX_ShakeLoop = timeLoop(FX_Shake);
-
-export const FX_RGBShift = ({ children: t }) =>
-  <Node shader={shaders.rgbShift}
-    uniforms={{
-      texture: t,
-      amount: 0.005,
-      angle: 3.14
-    }} />;
-
+const CanvasLoop = timeLoop(Canvas);
+const FXShakeLoop = timeLoop(FXShake);
+    
 @inject('rollStore')
 @observer
 export default class Graphics extends React.Component {
@@ -101,11 +102,11 @@ export default class Graphics extends React.Component {
         <Bus ref='main'>
           <CanvasLoop res={[dim[0], dim[1]]} rollStore={this.props.rollStore}/>
         </Bus>
-        <FX_RGBShift>
-          <FX_ShakeLoop>
+        <FXRGBShift>
+          {/* <FXShakeLoop> */}
             {() => this.refs.main}
-          </FX_ShakeLoop>
-        </FX_RGBShift>  
+          {/* </FXShakeLoop> */}
+        </FXRGBShift>  
       </Surface>     
     );
   }

@@ -231,7 +231,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 }
 /*Scene Items on Scene Panel*/
 .SceneItem {
-  justify-content: space-around;
+  /* justify-content: flex-start; */
   border: 1px solid rgba(120, 120, 120, 0.75);
   line-height: 12px;
   width: 98%;
@@ -343,6 +343,9 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   font-size: 12px;
   width: 100%;
   height: 100%;
+}
+.PatternHistoryItem {
+ margin: 2px 0; 
 }
 
 
@@ -518,50 +521,4 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 } 
 .ChannelItemHeader.SuperCollider {
   background: var(--sc-color);
-}
-
-/*Individual Grid Cells*/
-.GridItem {
-  display: flex;
-  flex-grow: 1;
-  resize: none;
-  width: 100%;
-  line-height: 20px;
-  font-size: 13px;
-  text-rendering: optimizeSpeed;
-  text-align: left;
-  vertical-align: center;
-  border: none;
-  background: rgba(0,0,0,0.3);
-  padding: 0 2px 0 2px;
-}
-.GridItem.even {
-  background: rgba(0,0,0,0.45);
-}
-.GridItem.odd::-webkit-input-placeholder { /* Chrome */
-  opacity: 0.8;
-  color: #777;
-  font-size: 12px;
-  text-align: right;
-  vertical-align: bottom;
-  transition: opacity 250ms ease-in-out;
-}
-.GridItem.odd:focus::-webkit-input-placeholder {
-  opacity: 0.4;
-}
-
-/*Active Individual Grid Cells*/
-.GridItem.active {
-  background-color: var(--accent-color);
-  box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
-}
-/*Selected Grid Items*/
-.GridItem.selected {
-  background: rgba(103, 230, 220, 0.05);
-  outline: 1px solid rgba(255, 255, 255, 0.35);
-}
-/*Highlighted Grid Items*/
-.GridItem.highlighted {
-  background: rgba(103, 230, 220, 0.15);
-  outline: 1px solid rgba(255, 255, 255, 0.45);
 }

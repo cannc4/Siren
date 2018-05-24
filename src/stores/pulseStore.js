@@ -79,7 +79,7 @@ class PulseStore
             });
     }
     @action stopPulseStop() {
-        channelStore.resetAll();
+        channelStore.resetAllTimes();
         
         // actually stop the pulse
         this.stopPulse();

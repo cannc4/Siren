@@ -23,7 +23,6 @@ class ChannelStore
         gate: false,
         solo: false,
         mute: false,
-        // TODO: Fix LOOP
         loop: true, executed: false,
         selected: false,
         time: 0,
@@ -31,6 +30,24 @@ class ChannelStore
     }];
     @observable soloEnabled = false;
     
+    // Getters
+    @computed get getActiveChannels() {
+        return this.channels.filter(c => c.scene === sceneStore.active_scene);
+    }
+    @computed get getMaxStep() { 
+        if(this.getActiveChannels.length > 0)
+            return _.maxBy(this.getActiveChannels, 'steps').steps;
+        else
+            return 0;
+    }
+    getChannelType = (name) => {
+        let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
+        if(ch !== undefined) {
+            return ch.type;
+        }
+    }
+
+    // ???
     @action updateChannel(index, type, value){
         let activeChannels = this.getActiveChannels;
         switch (type) {
@@ -62,7 +79,7 @@ class ChannelStore
         }
     }
 
-    @action resetAll() {
+    @action resetAllTimes() {
         _.each(this.channels,   (ch, i) => { 
             if(ch !== undefined) {
                 ch.time = 0;
@@ -70,28 +87,39 @@ class ChannelStore
         });
         
     }
-    @action seekTimer(index) {
-        _.forEach(_.filter(this.channels, ['scene', sceneStore.active_scene]), (channel, i) => {            
-            channel.time = (index >= channel.steps ? channel.steps-1: index);
-        });
+    @action seekTimer(step_index, channel_index = -1) {
+        let active_channels = this.getActiveChannels;
+        if (channel_index === -1)
+            _.forEach(active_channels, (channel, i) => {
+                channel.time = (step_index >= channel.steps ? channel.steps - 1 : step_index);
+            });
+        else { 
+            if (channel_index >= active_channels.length)
+                return;
+            else { 
+                // KORG values are between 0-127
+                active_channels[channel_index].time = _.toInteger(step_index / 128.0 * active_channels[channel_index].steps);
+            }
+        }
     }
+
     // Update the timer values based on the pulse 
     @action updateAll() {
-        _.forEach(_.filter(this.channels, ['scene', sceneStore.active_scene]), (channel, i) => {
+        _.forEach(this.getActiveChannels, (channel, i) => {
             if (channel.gate && pulseStore.pulse.beat % channel.rate === 0) {
                 // TODO: FIX
-                channel['activeSceneIndex'] = i;
+                //channel['activeSceneIndex'] = i;
 
                 // if not still looping
                 if (!channel.executed) { 
-                    channel.time += 1;
-    
-                    let current_step = channel.time % channel.steps;
+                    let current_step = channel.time % channel.steps;                
+
                     // if cell is not empty
-                    if (channel.cells[current_step] !== undefined && channel.cells[current_step] !== '') {
+                    if (channel.cells[current_step] !== undefined) {
                         // check if solo or mute enabled
                         if ((!this.soloEnabled || (this.soloEnabled && channel.solo)) && !channel.mute) { 
-                            this.sendPattern(channel, channel.cells[current_step]);
+                            if(channel.cells[current_step] !== '')
+                                this.sendPattern(channel, channel.cells[current_step]);
                             
                             if(!channel.loop && current_step === channel.steps-1) {
                                 if (!channel.executed) { 
@@ -100,21 +128,32 @@ class ChannelStore
                             }
                         }
                     }
+
+                    channel.time += 1;
+                }
+                else if (channel.executed && channel.type === 'Tidal') { 
+                    consoleStore.submitGHC(channel.name + ' $ silence');
+                    channel.gate = false;
                 }
             }
         });
     }
+
     sendPattern(channel, step){
-        let globoj = {channels:globalStore.global_channels,
-                    transform:globalStore.global_transform,
-                    modifier:globalStore.global_modifier,
-                    param: globalStore.global_param
+        let globoj = {
+            channels:   globalStore.global_channels,
+            transform:  globalStore.global_transform,
+            modifier:   globalStore.global_modifier,
+            param:      globalStore.global_param,
+            res_parameters: patternStore.reserved_parameters
         }
+
         let patobj = patternStore.activePatterns;
         request.post('http://localhost:3001/patternstream', {  'step': step, 
-                                                                'patterns': patobj,
-                                                                'channel': channel,
-                                                                'global_mod': globoj })
+                                                               'patterns': patobj,
+                                                               'channel': channel,
+                                                               'global_mod': globoj,
+                                                            })
         .then((response) => {
             console.log(" ## Pattern response: ", response.data.pattern);
             console.log(" ## CID response: ", response.data.cid);
@@ -126,19 +165,6 @@ class ChannelStore
         }).catch(function (error) {
             console.error(" ## Pattern errors: ", error);
         });
-    }
-
-    @computed get getActiveChannels() {
-        return this.channels.filter(c => c.scene === sceneStore.active_scene);
-    }
-
-    @computed get getMaxStep() { 
-        if(this.getActiveChannels.length > 0){
-            return _.maxBy(this.getActiveChannels, 'steps').steps;
-        }
-        else{
-            return 0;
-        }
     }
 
     @action overwriteCell(scene_channel_index, cell_index, value) {
@@ -172,17 +198,44 @@ class ChannelStore
         });
     }
     
-    // EDIT HEADERFIELDS
+    // Add Delete Channels
+    @action addChannel(name, type, steps, transition) {
+        if(_.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene }) === undefined) {
+            this.channels.push({
+                scene: sceneStore.active_scene,
+                activeSceneIndex: this.getActiveChannels.length,
+                name: name,
+                type: type,
+                steps: steps, rate: 8, time: 0,
+                transition: transition,
+                cells: _.fill(Array(_.toInteger(steps)), ''),
+                gate: false,
+                solo: false, mute: false, 
+                loop: true, executed: false,
+                selected: false,
+                cid: this.channels.length
+            });
+        }
+        else {
+            alert(name + ' already exists.');
+        }
+    }
+    @action deleteChannel(name, scene = sceneStore.active_scene) {
+        this.channels = _.reject(this.channels, { 'name': name, 'scene': scene });
+        // Rearrange the active scene index
+        _.each(this.getActiveChannels, (c, i) => { 
+            c.activeSceneIndex = i;
+        })
+    }
+    @action deleteAllChannelsInScene(scene) {
+        this.channels = _.reject(this.channels, { 'scene': scene });
+    }
+
+    // Edit Header Fields
     @action changeChannelRate(name, rate) {
         let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
         if(ch !== undefined) {
             ch.rate = _.toInteger(rate);
-        }
-    }
-    @action toggleGate(name) {
-        let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
-        if(ch !== undefined) {
-            ch.gate = !ch.gate;
         }
     }
     @action changeChannelName(name, new_name) {
@@ -205,44 +258,7 @@ class ChannelStore
         }
     }
 
-
-    getChannelType = (name) => {
-        let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
-        if(ch !== undefined) {
-            return ch.type;
-        }
-    }
-
-    // ADD DELETE
-    @action addChannel(name, type, steps, transition) {
-        if(_.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene }) === undefined) {
-            this.channels.push({
-                scene: sceneStore.active_scene,
-                name: name,
-                type: type,
-                steps: steps, rate: 8, time: 0,
-                transition: transition,
-                cells: _.fill(Array(_.toInteger(steps)), ''),
-                gate: false,
-                solo: false, mute: false, 
-                loop: true, executed: false,
-                selected: false,
-                cid: this.channels.length
-            });
-        }
-        else {
-            alert(name + ' already exists.');
-        }
-    }
-    
-    @action deleteChannel(name, scene = sceneStore.active_scene) {
-        this.channels = _.reject(this.channels, { 'name': name, 'scene': scene });
-    }
-    @action deleteAllChannelsInScene(scene) {
-        this.channels = _.reject(this.channels, { 'scene': scene });
-    }
-
-    // TOGGLE
+    // Toggle Header Fields
     @action toggleMute(name) {
         let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
         if(ch !== undefined) {
@@ -252,7 +268,6 @@ class ChannelStore
             // TODO: SC
             if (ch.mute === true && ch.type === 'Tidal') { 
                 consoleStore.submitGHC(ch.name + ' $ silence');
-                ch.gate = false;
             }
         }
     }
@@ -270,7 +285,6 @@ class ChannelStore
                         // TODO: SC
                         if (other.type === 'Tidal') { 
                             consoleStore.submitGHC(other.name + ' $ silence');
-                            ch.gate = false;
                         }
                     }
                 });
@@ -285,6 +299,12 @@ class ChannelStore
             ch.executed = false;
         }
     }
+    @action toggleGate(name) {
+        let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
+        if(ch !== undefined) {
+            ch.gate = !ch.gate;
+        }
+    }
 
     // Step Modifiers
     @action addStep(name) {
@@ -296,7 +316,6 @@ class ChannelStore
             ch.cells.push('');
         }
     }
-
     @action removeStep(name) {
         let ch = _.find(this.channels, { 'name': name, 'scene': sceneStore.active_scene });
         if(ch !== undefined) {

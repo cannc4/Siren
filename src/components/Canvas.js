@@ -5,19 +5,6 @@ import { inject, observer } from 'mobx-react';
 @inject('rollStore')
 @observer
 export default class Canvas extends React.Component {
-
-  updateDimensions() {
-    const element = document.getElementById('canvasLayout');
-    if(element && element !== null){
-      const w = element.clientWidth;
-      const h = element.clientHeight;
-
-      // -25 (header) -3 (borders) -24 (controls) -1 border
-      return {w: w, h: h-53};
-    }
-    return { w: 800, h: 190 };
-  }
-
   componentDidMount() {
     let getMousePos = (cn, evt) => { 
       var rect = cn.getBoundingClientRect();

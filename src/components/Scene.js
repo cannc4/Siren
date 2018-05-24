@@ -48,7 +48,7 @@ export default class Scene extends React.Component {
             </div>
             <div className={'AllScenes'}>
                 <div>
-                    {_.map(this.props.sceneStore.scene_list, this.renderScene.bind(this))}
+                    {_.map(this.props.sceneStore.scenesReversedOrder, this.renderScene.bind(this))}
                 </div>
             </div>
         </div>

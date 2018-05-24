@@ -271,15 +271,15 @@ export const shaders = Shaders.create({
             ///////////////////////////
             // return fractal(samplePoint);
 
-            return unionSDF(sphereSDF(samplePoint - vec3(ballOffset, 0.0, 0.0), rmss[0]*5.0),
-                            sphereSDF(samplePoint + vec3(ballOffset, 0.0, 0.0), rmss[1]*5.0) );
+            // return unionSDF(sphereSDF(samplePoint - vec3(ballOffset, 0.0, 0.0), rmss[0]*5.0),
+            //                 sphereSDF(samplePoint + vec3(ballOffset, 0.0, 0.0), rmss[1]*5.0) );
 
             float tim = time*0.2;	
             S1=mix(Setup(tim-1.0),Setup(tim),smoothstep(0.0,1.0,fract(tim)*2.0));
             tim=tim*0.9+2.5;
             S2=mix(Setup(tim-1.0),Setup(tim),smoothstep(0.0,1.0,fract(tim)*2.0));
 
-            // return DDE(samplePoint, vec3(1.));
+            return DDE(samplePoint, vec3(1.));
         }
         float shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, float end) {
             float depth = start;

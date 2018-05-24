@@ -7,6 +7,21 @@ import sceneStore from './sceneStore'
 
 class PatternStore 
 {
+    // reserved parameters for channels
+    reserved_parameters = [{
+            word: 't',
+            value: 'time' // channel.time
+        },
+        {
+            word: 'rt',
+            value: 'rate' // channel.rate
+        },
+        {
+            word: 'st',
+            value: 'steps' // channel.steps
+        }
+    ]
+
     @observable patterns = [{
         scene: 'default',
         name: 'def',
@@ -45,7 +60,9 @@ class PatternStore
                 }
                 match = expr.exec(text);
             }
-            _.remove(matches, function(n) { return n === 't';});
+            _.each(this.reserved_parameters, (p) => { 
+                _.remove(matches, function (n) { return n === p.word; });
+            })
 
             item.text = text;
             item.params = matches.toString();

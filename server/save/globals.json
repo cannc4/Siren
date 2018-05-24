@@ -10,5 +10,11 @@
   "transformer": "slow 2 $",
   "modifier": "#coarse 4",
   "param": "let gx = 0"
+ },
+ {
+  "channels": "0",
+  "transformer": "",
+  "modifier": "# orbit 0",
+  "param": ""
  }
 ]

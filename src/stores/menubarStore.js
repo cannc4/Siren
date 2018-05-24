@@ -33,6 +33,9 @@ class MenubarStore
                 this.rmsArray[i] = { rms: data.rms, peak: data.peak };
             else
                 this.rmsArray.push({ rms: data.rms, peak: data.peak });
+               
+            this.createRMSShape_Left();
+            this.createRMSShape_Right();
         }))
     }
 
@@ -60,27 +63,44 @@ class MenubarStore
         this.history_folders = hf;
         console.log(this.history_folders);
     }
-    createRMSShape(orbit) { 
-        const setCharAt = (str, index, chr) => {
-            if (index > str.length - 1) return str;
-            return str.substr(0, index) + chr + str.substr(index + 1);
-        };
+    createRMSShape_Left() { 
+        let c = document.getElementById("RMSVis_Left");
+        let ctx = c.getContext("2d");
 
-        let rms = this.rmsArray.length > orbit ? this.rmsArray[orbit].rms : 0;
+        const length = _.toInteger(this.rmsArray.length * 0.5);
+        const w = c.width, h = c.height;
+        const m = 5;
+        
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < length; i++) {
+            const _w = w / length;
+            const _h = _.toNumber(this.rmsArray[i].rms.toFixed(10)) * 10.;
+            
+            ctx.fillStyle = "rgba(180, 180, 180, " + (_h + 0.2) / (0.75*h) + ")";
 
-        let shape = "⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀";
-        for(let i = 0; i < _.toInteger(rms * 20); i++) { 
-            let mod = rms * 20.0 - i;
-            if (mod < 0.33)
-                shape = setCharAt(shape, i, '\\');
-            else if (mod < 0.66)
-                shape = setCharAt(shape, i, '|');
-            else if (mod < 1.0) 
-                shape = setCharAt(shape, i, '/');
-            else
-                shape = setCharAt(shape, i, '⣿');
+            ctx.fillRect(i * _w + m, h * 0.5, _w - m, _h);
+            ctx.fillRect(i * _w + m, h * 0.5, _w - m, -_h);
         }
-        return shape;
+    }
+    createRMSShape_Right() { 
+        let c = document.getElementById("RMSVis_Right");
+        let ctx = c.getContext("2d");
+        
+        const l_left = _.toInteger(this.rmsArray.length * 0.5);
+        const l_right = this.rmsArray.length - l_left;
+        const w = c.width, h = c.height;
+        const m = 5;
+        
+        ctx.clearRect(0, 0, w, h);
+        for (let i = l_left; i < this.rmsArray.length; i++) {
+            const _w = w / l_right;
+            const _h = _.toNumber(this.rmsArray[i].rms.toFixed(10)) * 10.;
+
+            ctx.fillStyle = "rgba(180, 180, 180, " + (_h + 0.2) / (0.75*h) + ")";
+
+            ctx.fillRect((i - l_left) * _w + m, h * 0.5, _w - m, _h);
+            ctx.fillRect((i - l_left) * _w + m, h * 0.5, _w - m, -_h);
+        }
     }
 
     @action stopServer() {

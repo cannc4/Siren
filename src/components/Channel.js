@@ -28,13 +28,13 @@ class ChannelHeader extends React.Component {
                     onClick={() => this.nameInputName.focus()}
                     onBlur = {() => this.nameInputName.value = ''}/>
                 <div className={"ChannelItemHeaderButtons"}>
-                    <button className={"Button "+ item.loop} title={'Loop'} onClick={() => 
-                        this.props.channelStore.toggleLoop(item.name)}>L</button>
                     <button className={"Button "+ item.solo} title={'Solo'} onClick={() => 
                         this.props.channelStore.toggleSolo(item.name)}>S</button>
                     <button className={"Button "+ item.mute} title={'Mute'}
                         onClick={() => 
-                          this.props.channelStore.toggleMute(item.name)}>M</button>
+                            this.props.channelStore.toggleMute(item.name)}>M</button>
+                    <button className={"Button "+ !item.loop} title={'Loop'} onClick={() => 
+                        this.props.channelStore.toggleLoop(item.name)}>R</button>
                   <button className={"Button"} title={'Delete'} onClick={() => 
                         this.props.channelStore.deleteChannel(item.name)}>X</button>
                 </div>

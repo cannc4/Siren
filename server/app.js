@@ -1,31 +1,38 @@
 import _ from 'lodash';
 import fs from 'fs';
-const math = require("mathjs");
 import { spawn } from 'child_process';
 import express from 'express';
 import bodyParser from 'body-parser';
 import jsonfile from'jsonfile';
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
+const Queue = require('better-queue');
+const math = require("mathjs");
 const exec = require('child_process').exec;
 const osc = require("osc");
-const Queue = require('better-queue');
+
+// Connection to KORG nanoKontrol2 
+let nanoKONTROL = require('korg-nano-kontrol');
 
 // timers
 const abletonlink = require('abletonlink');
 const link = new abletonlink();
+
 const NanoTimer = require('nanotimer');
 let nano = new NanoTimer();
 
-let link_pulse = socketIo.listen(4001);
-
+// Variables for recording
 let isRecording = false;
 let isPlaying = false;
 let recordFilename = '';
-
 let historyArray = [];
 let history_index = 0;
 let commandobj;
+
+// link pulse socket 
+let link_pulse = socketIo.listen(4001);
+
+
 class REPL {
   hush() {
     this.tidalSendExpression('hush');
@@ -45,66 +52,36 @@ class REPL {
     });
     console.log(" ## -->   GHC Spawned");
 
-    /*KORG 
-    let nano_socket = socketIo.listen(4003);
+    // KORG 
+    let nano_socket = socketIo.listen(4005);
     nanoKONTROL.connect('nanoKONTROL2').then((device) => {
-      
-      device.on('slider:*', function(value){
-        //console.log(this.event+' => '+value);
-        //SuperCollider
-        let scorbit;
-        let slider_value = value.map(0, 127, 0, 2);
-        let slider_index = _.replace(this.event,"slider:","")
-        let sc_msg = "~dirt.orbits[" + slider_index+ "].set(\\amp,"+ slider_value + ");"// reduce the amplitude of one orbit
-        SirenComm.siren_console.sendSCLang(sc_msg); 
+      device.on('slider:*', (value) => {
+        console.log(device.event + ' => ' + value);
 
-        //last 2 dif functions
+        nano_socket.sockets.emit('/nano_slider', {
+          key: _.replace(device.event, "slider:", ""),
+          value: value
+        });
+      });
+    
+      device.on('knob:*', (value) => {
+        console.log(device.event + ' => ' + value);
+        nano_socket.sockets.emit('/nano_knob', {
+          key: _.replace(device.event, "knob:", ""),
+          value: value
+        });
       });
       
-      device.on('knob:*', function(value){
-        // console.log(this.event+' => '+value);
-        let knob_value = value.map(0, 127, 0, 2);
-        let knob_index = _.replace(this.event,"knob:","");
+      device.on('button:**', (value) => {
+        console.log(device.event+' => '+value);
+      
+        nano_socket.sockets.emit('/nano_button', {
+          key: _.replace(device.event, "button:", ""),
+          value: value
+        });
 
-        nano_socket.sockets.emit('/nanoknob', {index: knob_index, value: knob_value});
       });
-      
-      device.on('button:**', function(value){
-        // console.log(this.event+' => '+value);
-        //gate: false ,solo: false, mute: false, loop: true//
-        let button_value = value;
-        let button_index = _.replace(this.event,"button:","");
-        // console.log(button_index);
-        switch (button_index) {
-          case 'next':
-      
-            break;
-          case 'prev':
-            
-            break;
-          case 'play':
-            if(button_value === true) nano_socket.sockets.emit('/nanostart', {trigger: true});
-            break;
-          case 'stop':
-            if(button_value === true) nano_socket.sockets.emit('/nanostart', {trigger: false});
-            break;
-          case 'rec':
-            if(button_value === 'true'){
-              let sc_msg = "Server.default.record;"; SirenComm.siren_console.sendSCLang(sc_msg); 
-            }
-            else{
-              let sc_msg = "Server.default.stopRecording"; SirenComm.siren_console.sendSCLang(sc_msg); 
-            }
-            break;        
-          default:
-            break;
-        }
-        button_index = _.replace(button_index, ":", "");
-        if(button_index !== undefined){
-          nano_socket.sockets.emit('/nanobutton', {type:button_index[0], index: button_index[1], value: button_value});
-        }
-      });
-    });*/
+    });
   }
 
   initGHC(config) {
@@ -317,6 +294,9 @@ class REPL {
             
             // compile functions for Tidal future values
             self.sendFutureExprs();
+
+            // compile functions for Single cycle compilation with 'oneshot'
+            self.sendOneshot();
           });
         }, 4000)
       });
@@ -376,6 +356,10 @@ class REPL {
                               fs = map f (enumerate ds)
                           return fs`);
     this.tidalSendExpression("[x1,x2,x3,x4,x5,x6,x7,x8,x9] <- wrapDirts [d1,d2,d3,d4,d5,d6,d7,d8,d9]");
+  }
+  sendOneshot() { 
+    this.tidalSendExpression('let startclock d p = do {now <- getNow; d $ (pure (nextSam now)) ~> p}');
+    this.tidalSendExpression('let one d p = startclock d $ seqP [(0, 1, p)]');
   }
 
   sendSCLang(message) {
@@ -476,12 +460,25 @@ const Siren = () => {
     }
     const processParameters = (parameters, newCommand, cellItem) => {
       // For each parameter in parameter list
-      _.forEach(parameters, function (value, i) {
-        // Temporal parameter
-        if (value === 't') {
-          newCommand = _.replace(newCommand, new RegExp("`t`", "g"), channel.time);
-        }
-        // Random parameter
+      _.each(parameters, (value, i) => {
+
+        // reserved parameter parsing
+        //   't'  Temporal parameter 
+        //   'rt' Channel rate 
+        //   'st' Channel step count
+        let isReserved = false;
+        _.each(global_mod.res_parameters, (reserved, i) => { 
+          if (value === reserved.word) {
+            newCommand = _.replace(newCommand, new RegExp("`" + reserved.word + "`", "g"), channel[[reserved.value]]);
+            isReserved = true;
+            return;
+          }  
+        }) 
+
+        console.log(isReserved);
+        
+        if (isReserved) { return; }
+        // Random parameter 
         else if (_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length - 1) {
           cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
           let bounds = _.split(cellItem[i], ',');
@@ -498,10 +495,11 @@ const Siren = () => {
           if (cellItem[i] === '' || cellItem[i] === undefined) {
             // Look for the default value (e.g. "`x?slow 3`")
             // eslint-disable-next-line
-            let re = new RegExp("`((" + value + "\?)[^`]+)`", "g"), match = re.exec(newCommand);
+            let re = new RegExp("`((" + value + "\?)[^`]+)`", "g");
+            let match = re.exec(newCommand);
     
             // We have a default parameter ready
-            if (match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
+            if (match !== null && match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
               const defaultValue = match[1].substring(_.indexOf(match[1], '?') + 1);
               newCommand = _.replace(newCommand, new RegExp("`(" + value + ")[^`]*`", "g"), defaultValue);
             }
@@ -516,7 +514,7 @@ const Siren = () => {
           }
         }
       });
-      return newCommand
+      return newCommand;
     }
 
     // pattern name
@@ -541,9 +539,9 @@ const Siren = () => {
         
       // Applies parameters
       if (pat.params !== '')
-        newCommand = processParameters(_.concat(_.split(pat.params, ','), 't'), newCommand, cellItem);
+        newCommand = processParameters(_.concat(_.split(pat.params, ','), _.map(global_mod.res_parameters, 'word')), newCommand, cellItem);
       else
-        newCommand = processParameters(['t'], newCommand, cellItem);
+        newCommand = processParameters(_.map(global_mod.res_parameters, 'word'), newCommand, cellItem);
 
       // Math Parser
       // eslint-disable-next-line
@@ -716,7 +714,7 @@ const Siren = () => {
   const stopRecording = (reply) => { 
     try {
       let history_json = [];
-      if (isRecording) { 
+      if (isRecording && historyArray.length > 0) { 
         let time = new Date();
         recordFilename = time.getHours()+"-"+time.getMinutes()+"-"+time.getSeconds()+"-"+time.getMilliseconds()+ ".json";   
         jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 

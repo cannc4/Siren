@@ -4,6 +4,10 @@ import _ from 'lodash';
 
 import { save, timer } from '../keyFunctions'
 
+// import Prism from 'prismjs'
+
+import '../styles/Cell.css'
+
 @inject('cellStore')
 @observer
 export default class Cell extends React.Component {
@@ -30,8 +34,10 @@ export default class Cell extends React.Component {
         // deselect with esc    
         else if (event.keyCode === 27) {
             this.props.cellStore.updateSelectState(false);
-            document.getElementById('cell'+this.props.cellStore.current_cell[0]+
-                                            this.props.cellStore.current_cell[1]).focus();
+            let elem = document.getElementById('cell_'+this.props.cellStore.current_cell[0]+"_"+
+                                                       this.props.cellStore.current_cell[1]);
+            if (elem)
+                elem.focus();
             this.props.cellStore.selectCell(channel_index, cell_index);
             this.nameInput.readOnly = false;
 
@@ -47,8 +53,12 @@ export default class Cell extends React.Component {
             }
             else {
                 this.props.cellStore.updateSelectState(false);
-                document.getElementById('cell'+this.props.cellStore.current_cell[0]+
-                                                this.props.cellStore.current_cell[1]).focus();
+                let elem = document.getElementById('cell_'+this.props.cellStore.current_cell[0]+"_"+
+                    this.props.cellStore.current_cell[1]);
+                console.log('cell_'+this.props.cellStore.current_cell[0]+"_"+this.props.cellStore.current_cell[1]);
+                
+                if (elem)
+                    elem.focus();
                 this.props.cellStore.selectCell(channel_index, cell_index);
                 this.nameInput.readOnly = false;
             }
@@ -143,7 +153,7 @@ export default class Cell extends React.Component {
             className += ' highlighted';
         }
         return (<div>
-            <textarea id={'cell'+channel_index+cell_index}
+            <textarea id={'cell_' + channel_index + "_" + cell_index}
                 ref={(input) => { this.nameInput = input; }}
                 className={className +" draggableCancel"} type="text"
                 placeholder={cell_index % 2 === 1 ? _.toString(cell_index+1) : ''}
@@ -156,5 +166,25 @@ export default class Cell extends React.Component {
                     this.nameInput.focus();
                 }}/>
             </div>);
+
+        // return (<div className={"editor-holder"}>
+        //     <div className={"scroller"}>    
+        //         <textarea
+        //             className={"GridItem-core draggableCancel"}    
+        //             id={'cell_' + channel_index + "_" + cell_index}
+        //             ref={(input) => { this.nameInput = input; }}
+        //             placeholder={cell_index % 2 === 1 ? _.toString(cell_index + 1) : ''}
+        //             value={value}
+        //             onInput={() =>
+        //                 (this.props.cellStore.updateCell(item.name, cell_index, this.nameInput.value))}
+        //             onKeyDown={(event) => (this.handleKeys(event, channel_index, cell_index))}
+        //             onClick={() => {
+        //                 this.props.cellStore.updateSelectState(false);
+        //                 this.nameInput.focus();
+        //             }}/>
+        //         <pre><code className={className + " draggableCancel"}
+        //             dangerouslySetInnerHTML={{ __html: Prism.highlight(value, Prism.languages.javascript, 'javascript') }}></code></pre>
+        //     </div>
+        // </div>);
     }
 }

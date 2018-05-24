@@ -7,6 +7,7 @@ import '../styles/App.css';
 import '../styles/Layout.css';
 import '../styles/MenuBar.css';
 import '../styles/Help.css';
+import menubarStore from '../stores/menubarStore';
 
 // import Popup from "reactjs-popup";
 
@@ -43,30 +44,34 @@ export default class MenuBar extends React.Component {
       </div>
 
       <div className={'TimerControls'}>
-        {/* <p className={'RMSVis'}>
-          {this.props.menubarStore.createRMSShape(0).split("").reverse().join("")}
-        </p> */}
-      
+        
+        {/* RMS SHAPE LEFT */}
+        <canvas className={'RMSVis'} id={'RMSVis_Left'}
+          width={menubarStore.rmsArray.length * 0.5 * 20} height={30}>
+        </canvas>
+        
+        {<button className={'Button'} title={'Stop Pulse'}
+            onClick={() => (this.props.pulseStore.stopPulseStop())}>◼</button>}
         {!this.props.pulseStore.isActive && 
           <button className={'Button'} title={'Start Pulse'}
               onClick={() => (this.props.pulseStore.startPulse())}>▶</button>}
         {this.props.pulseStore.isActive && 
           <button className={'Button'} title={'Pause Pulse'}
               onClick={() => (this.props.pulseStore.stopPulse())}>⏸</button>}
-        {<button className={'Button'} title={'Stop Pulse'}
-            onClick={() => (this.props.pulseStore.stopPulseStop())}>◼</button>}
     
         <div style={{borderLeft: "1px solid var(--global-color)", height: "90%", marginLeft: "5px", marginRight: "10px"}}></div>
 
         {<button className={'Button ' + (this.props.menubarStore.isRecording ? 'Record' : '')}
           title={(this.props.menubarStore.isRecording ? 'Recording...' : 'Start recording')}
           onClick={() => {this.props.menubarStore.toggleRecording()}}>
-          ⏺
+          ⬤
         </button>}
 
-        {/* <p className={'RMSVis'}>
-          {this.props.menubarStore.createRMSShape(1)}
-        </p> */}
+        {/* RMS SHAPE RIGHT */}
+        <canvas className={'RMSVis'} id={'RMSVis_Right'}
+          width={menubarStore.rmsArray.length * 0.5 * 20} height={30}>
+        
+        </canvas>
       </div>
 
       {/* <div className={'OtherControls'}>

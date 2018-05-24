@@ -35,7 +35,6 @@ class LayoutStore
   };
   @action saveCustom(i) {
     this.customs[i] = this.layouts;
-    // this.save();
   };
   @action deleteCustom(i) {
     if (this.customs[i])

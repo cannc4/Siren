@@ -64,10 +64,9 @@
 }
 .RMSVis {
   display: flex;
-  margin: 25px 10px 5px 5px;
   flex-direction: column;
   justify-content: baseline;
-  opacity: 0.7;
+  margin: 0 20px;
 }
 
 

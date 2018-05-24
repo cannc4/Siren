@@ -44,7 +44,7 @@ export default class ConsoleSC extends React.Component {
     };
     return (<div className={'ConsoleTextBox'}>
         <p>select --> ctrl+enter</p>
-        <CodeMirror className={"ConsoleTextBox draggableCancel"}
+      <CodeMirror className={"ConsoleTextBox draggableCancel"}
                     value={this.props.consoleStore.sc_text}
                     options={options}
                     onBeforeChange={(editor, metadata, value) => {

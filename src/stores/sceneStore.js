@@ -21,12 +21,31 @@ class SceneStore
         return this.active_scene === name;  
     }
 
+    @computed get scenesReversedOrder() { 
+        let temp = this.scene_list.filter(s => s !== "default");
+        return _.concat("default", _.reverse(temp));
+    }
+
     @computed get activeScene() {
         return this.active_scene;
     }
     @action changeActiveScene(name) {
         this.active_scene = name;
         cellStore.updateSelectState(false);
+    }
+    @action changeNextScene() { 
+        const reversed = this.scenesReversedOrder;
+        const index = _.indexOf(reversed, this.active_scene);
+        if (index >= reversed.length - 1)
+            return;
+        this.changeActiveScene(reversed[index+1]);
+    }
+    @action changePrevScene() { 
+        const reversed = this.scenesReversedOrder;
+        const index = _.indexOf(reversed, this.active_scene);
+        if (index <= 0)
+            return;
+        this.changeActiveScene(reversed[index-1]);
     }
 
     @action clearActiveGrid() {

@@ -65,6 +65,8 @@ class RollStore {
     @action updateResolution(r) {
         this.resolution = r;
     }
+
+    // The dimensions of the graphics module
     @action updateGraphicsDimensions() {
         const element = document.getElementById('graphicsLayout');
         if(element && element !== null){
@@ -76,6 +78,7 @@ class RollStore {
         }
         this.dimensions = [ 1000, 200 ];
     }
+    // The dimensions of the pattern roll module
     @action reloadRoll() {
         if (this.d3_object !== undefined) { 
             this.d3_object.resize();
