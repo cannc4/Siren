@@ -103,11 +103,8 @@ pre code .active {
   }
  */
 
-
-
-
-
 /*Individual Grid Cells*/
+
 .GridItem {
     display: flex;
     flex-grow: 1;
@@ -119,37 +116,45 @@ pre code .active {
     text-align: left;
     vertical-align: center;
     border: none;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 0 2px 0 2px;
-  }
-  .GridItem.even {
-    background: rgba(0,0,0,0.45);
-  }
-  .GridItem.odd::-webkit-input-placeholder { /* Chrome */
+}
+
+.GridItem.even {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.GridItem.odd::-webkit-input-placeholder {
+    /* Chrome */
     opacity: 0.8;
     color: #777;
     font-size: 12px;
     text-align: right;
     vertical-align: bottom;
     transition: opacity 250ms ease-in-out;
-  }
-  .GridItem.odd:focus::-webkit-input-placeholder {
+}
+
+.GridItem.odd:focus::-webkit-input-placeholder {
     opacity: 0.4;
-  }
-  
-  /*Selected Grid Items*/
-  .GridItem.selected {
+}
+
+/*Selected Grid Items*/
+
+.GridItem.selected {
     background: rgba(103, 230, 220, 0.02);
     outline: 1px solid rgba(255, 255, 255, 0.35);
-  }
-  /*Highlighted Grid Items*/
-  .GridItem.highlighted {
+}
+
+/*Highlighted Grid Items*/
+
+.GridItem.highlighted {
     background: rgba(103, 230, 220, 0.05);
     outline: 1px solid rgba(255, 255, 255, 0.45);
-  }
-  /*Active Individual Grid Cells*/
-  .GridItem.active {
+}
+
+/*Active Individual Grid Cells*/
+
+.GridItem.active {
     background-color: rgba(223, 219, 35, 0.2);
-    box-shadow: inset 0px 0px 15px rgba(0,0,0, 0.15);
-  }
-  
+    box-shadow: inset 0px 0px 15px rgba(0, 0, 0, 0.15);
+}

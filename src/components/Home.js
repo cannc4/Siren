@@ -217,7 +217,7 @@ export default class Home extends React.Component {
     return (
       <div>
         <ContextMenuTrigger id="global_context" holdToDisplay={-1}>
-          <div className={'Home cont'}>
+          <div id={"homepage"} className={'Home'}>
             <ResponsiveReactGridLayout
               className={"layout"}
               layouts={{lg: this.props.layoutStore.visibleLayouts }}

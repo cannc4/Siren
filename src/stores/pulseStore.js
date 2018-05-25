@@ -1,4 +1,8 @@
-import { observable, action, computed } from 'mobx';
+import {
+    observable,
+    action,
+    computed
+} from 'mobx';
 // import _ from 'lodash';
 import io from 'socket.io-client';
 
@@ -7,13 +11,14 @@ import channelStore from './channelStore'
 // nodejs connections
 import request from '../utils/request';
 
-class PulseStore 
-{
+class PulseStore {
     @observable cps_info = true;
     @observable pulse_info = false;
-    @observable pulse ={ bpm: 120,
-                        beat: '',
-                        phase: ''}
+    @observable pulse = {
+        bpm: 120,
+        beat: '',
+        phase: ''
+    }
 
     link_pulse = io('http://localhost:4001/');
 
@@ -36,13 +41,13 @@ class PulseStore
             ctx.setActive(true);
         })
     }
- 
+
     @action setActive(value) {
         this.pulse_info = value;
     }
 
     @computed get isActive() {
-        return this.pulse_info;  
+        return this.pulse_info;
     }
 
     @action startPulse() {
@@ -50,14 +55,13 @@ class PulseStore
         console.log("Start Pulse");
         request.post('http://localhost:3001/pulse')
             .then((response) => {
-            if (response.status === 200) {
-                console.log(" ## Pulse started.");
-                ctx.setActive(true);
-            }
-            else{ 
-                console.log(" ## Pulse failed.");
-                ctx.setActive(false);
-            }
+                if (response.status === 200) {
+                    console.log(" ## Pulse started.");
+                    ctx.setActive(true);
+                } else {
+                    console.log(" ## Pulse failed.");
+                    ctx.setActive(false);
+                }
             }).catch(function (error) {
                 console.error(" ## Server errors: ", error);
             });
@@ -66,21 +70,20 @@ class PulseStore
     @action stopPulse() {
         const ctx = this;
         request.post('http://localhost:3001/pulseStop')
-        .then((response) => {
-            if (response.status === 200) {
-                console.log(" ## Pulse stopped.");
-                ctx.setActive(false);
-            }
-            else{ 
-                console.log(" ## Pulse can't be stopped.");
-            }
+            .then((response) => {
+                if (response.status === 200) {
+                    console.log(" ## Pulse stopped.");
+                    ctx.setActive(false);
+                } else {
+                    console.log(" ## Pulse can't be stopped.");
+                }
             }).catch(function (error) {
                 console.error(" ## Server errors: ", error);
             });
     }
     @action stopPulseStop() {
         channelStore.resetAllTimes();
-        
+
         // actually stop the pulse
         this.stopPulse();
     }
@@ -100,7 +103,7 @@ class PulseStore
     // }
 
 
-    
+
 }
 
 export default new PulseStore();

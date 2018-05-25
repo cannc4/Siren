@@ -66,20 +66,22 @@ export const shaders = Shaders.create({
         uniform vec2 res;
         uniform float time;
 
-        uniform float rmss[10];
-
+        // rms values
+        uniform float rmss[2];
+        
         // sample parameters
         uniform float nameAscii[5];
-        uniform float note;
-        // uniform float cps;
-        // uniform float delta;
+        uniform float n;
+        uniform float cps;
+        uniform float delta;
         uniform float cycle;
-        // uniform float sustain;
-        // uniform float begin;
-        // uniform float end;
-        // uniform float room; 
-        // uniform float gain; 
-        // uniform float channel;
+        uniform float note;
+        uniform float sustain;
+        uniform float begin;
+        uniform float end;
+        uniform float room; 
+        uniform float gain; 
+        uniform float channel;
 
         const int MAX_MARCHING_STEPS = 255;
         const float MIN_DIST = 0.0;
@@ -402,4 +404,4 @@ export const shaders = Shaders.create({
         }
         `
     }
-  });
+});

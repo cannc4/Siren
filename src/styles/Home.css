@@ -1,48 +1,51 @@
-
 /* CSS Variables */
+
 :root {
   --tidal-color: rgb(42, 85, 110);
   --cps-color: rgb(70, 117, 60);
   --sc-color: rgb(131, 57, 34);
-  --global-color: rgba(255,255,255,0.4);
-
+  --global-color: rgba(255, 255, 255, 0.4);
+  --record-color: #bf2618;
+  --layout-background: rgb(40, 40, 40);
   --global-white: rgb(200, 200, 200);
-  --accent-color: rgba(255,255,102,0.25);
+  --accent-color: rgba(255, 255, 102, 0.25);
   --accent-color-opaque: rgb(202, 202, 80);
 }
 
 .Home {
-  background:black;
-  overflow: auto;
+  background: black;
   height: calc(100% - 40px);
-  padding-top: 5px;
 }
 
 /*Disable views in specific cases*/
+
 .disabledView {
   pointer-events: none;
   filter: opacity(80%);
 }
+
 .enabledView {
   pointer-events: auto;
   filter: opacity(100%);
 }
 
-
-
 /* Animation for input submission */
+
 @keyframes submission_anim {
-  to {background-color: var(--accent-color)}
+  to {
+    background-color: var(--accent-color)
+  }
 }
+
 .Executed {
   animation-name: submission_anim;
   animation-duration: 0.5s;
 }
 
-
 /* 
   layout and app css 
 */
+
 .PanelAdjuster {
   margin: 5px;
   max-height: calc(100% - 34px);
@@ -50,66 +53,75 @@
   overflow-y: auto;
   scroll-behavior: smooth;
 }
+
 /*Panel Headers*/
+
 .PanelHeader {
   background: rgba(45, 45, 45, 0.9);
   padding: 2px 5px 2px 5px;
   line-height: 20px;
-  border: solid 1px rgba(180,180,180, 0.1);
+  border: solid 1px rgba(180, 180, 180, 0.1);
   border-bottom: solid 2px var(--global-color);
   font-weight: bold;
   color: var(--global-white);
 }
+
 .PanelHeader.Tidal {
   border-bottom: solid 2px var(--tidal-color);
 }
+
 .PanelHeader.SuperCollider {
   border-bottom: solid 2px var(--sc-color);
 }
+
 /*Panel Close Button */
+
 .PanelClose {
   color: var(--global-white);
   float: right;
   cursor: pointer;
 }
 
-
-
 /*------------INPUTS AND BUTTONS------------*/
+
 .Input {
   font-size: 12px;
-  border: 1px solid rgba(125,125,125, 0.8);
+  border: 1px solid rgba(125, 125, 125, 0.8);
   cursor: text;
   width: 100%;
 }
+
 .Button {
   font-size: 10px;
   color: #aaa;
-  border: 0.5px solid rgba(125,125,125, 0.8);
+  border: 0.5px solid rgba(125, 125, 125, 0.8);
   cursor: pointer;
   padding: 3px 3x 3px 3px;
 }
+
 .Button:hover {
   background: rgba(255, 255, 158, 0.15);
   color: white;
 }
+
 .Button:active {
   background: var(--accent-color);
 }
+
 .Button.active {
   background: var(--accent-color);
-  color: #333;  
+  color: #333;
   font-weight: bold;
 }
+
 .Button.true {
   background: #ccc;
   color: #333;
   font-weight: bold;
 }
 
-
-
 /*------------PATHS------------*/
+
 .Paths {
   overflow-y: auto;
   display: flex;
@@ -117,22 +129,26 @@
   margin: 5px 5px 10px 5px;
   height: calc(100% - 30px);
 }
+
 .PathItems {
   display: flex;
   flex-direction: column;
   width: calc(100% - 40px);
 }
+
 .PathsSave {
   display: flex;
   flex-direction: row;
   height: 210px;
   justify-content: space-around;
 }
+
 .PathsItem {
   display: flex;
   min-height: 30px;
   width: calc(100% - 10px);
 }
+
 .PathsLabel {
   padding-right: 10px;
   display: inline-flex;
@@ -141,13 +157,12 @@
   min-width: 150px;
 }
 
-
-
-
 /*------------GLOBAL PARAMETERS------------*/
+
 .GlobalParams {
   align-items: center;
 }
+
 .GlobalParams p {
   font-size: 11px;
   color: #888;
@@ -156,9 +171,11 @@
   margin: 0px;
   font-weight: bold;
 }
+
 .GlobalSequencer {
   width: 100%;
 }
+
 .GlobalParamsInputs {
   display: flex;
   flex-direction: row;
@@ -167,6 +184,7 @@
   border: 1px solid #000;
   margin-bottom: 8px;
 }
+
 .GlobalParamsInputsII {
   display: flex;
   flex-direction: column;
@@ -174,62 +192,69 @@
   padding: 1px;
   margin-bottom: 8px;
 }
+
 .StoredGlobalParams {
   background: rgba(200, 200, 200, 0.05);
   border: 1px solid #000;
   min-height: 35px;
   height: auto;
 }
+
 .StoredGlobalParams button {
   margin: 5px;
   padding: 4px 7px 4px 7px;
   min-width: 30px;
 }
 
-
-
-
 /*------------CODEMIRROR------------*/
+
 .CodeMirror {
-  background-color: rgba(255,255,255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
 /*height*/
+
 div.cm-s-_style.CodeMirror-wrap {
   height: 100%;
 }
+
 div.cm-s-_style_sc.CodeMirror-wrap {
   height: 100%;
 }
 
-
-
-
-
 /*------------SCENES PANEL------------*/
+
 .Scenes {
   overflow-y: auto;
   height: calc(100% - 4px);
 }
+
 .ScenesButtons {
   display: inline-flex;
   justify-content: space-around;
   width: 100%;
   line-height: 15px;
 }
+
 .ScenesButtons button {
   width: 100%;
 }
+
 /*All Scene Items together*/
+
 .AllScenes {
   margin-top: 10px;
   padding: 1px;
   border: 1px solid #000;
 }
+
 .SceneName {
   font-size: 12px;
-  width: calc(100% - 20px);  
+  width: calc(100% - 20px);
 }
+
 /*Scene Items on Scene Panel*/
+
 .SceneItem {
   /* justify-content: flex-start; */
   border: 1px solid rgba(120, 120, 120, 0.75);
@@ -238,7 +263,9 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   background: none;
   margin: 1px;
 }
+
 /*Active Scene Items on Scene Panel*/
+
 .SceneItem-active {
   border: 1px solid rgba(200, 200, 200, 0.75);
   width: 98%;
@@ -247,15 +274,16 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 1px;
 }
 
-
-
-
 /*------------PATTERNS PANEL------------*/
+
 /*All patterns*/
+
 .AllPatterns {
   overflow-y: auto;
 }
+
 /*Individual Pattern*/
+
 .PatternItem {
   overflow-y: auto;
   width: calc(100% - 5px);
@@ -263,8 +291,9 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   padding: 1px;
   border: 1px solid #000;
 }
+
 .PatternPanelHeader {
-  background: rgba(200,200,200, 0.1);
+  background: rgba(200, 200, 200, 0.1);
   font-size: 10px;
   padding: 0 0 5px 5px;
   height: 15px;
@@ -272,37 +301,41 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   border-style: double;
   border-width: 1px;
   border-radius: 5px;
-  border-color: rgba(180,180,180, 1);
+  border-color: rgba(180, 180, 180, 1);
   color: #ddd;
 }
+
 .PatternItemInputs {
   display: flex;
   flex-direction: row;
   width: calc(100%);
 }
-.PatternItemInputs button{
+
+.PatternItemInputs button {
   padding: 0 10px 0 10px;
 }
+
 /*CodeMirror window of each pattern*/
+
 .PatternItemCodeMirror {
-  resize:both;
+  resize: both;
   overflow-y: auto;
   width: 100%;
-  border: 1px rgba(125,100,100, 0.8);
+  border: 1px rgba(125, 100, 100, 0.8);
   max-height: 100px;
 }
 
-
-
-
 /*------------CONSOLE PANEL------------*/
+
 /*Tidal and SC Console textboxes*/
+
 .Console {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   height: 100%;
 }
+
 .Console p {
   font-size: 11px;
   color: #888;
@@ -311,6 +344,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 0px;
   font-weight: bold;
 }
+
 .ConsoleTextBox {
   height: calc(100% - 12px);
   /* border: 1px solid rgba(120, 120, 120, 0.75); */
@@ -318,14 +352,13 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 2.5px;
   cursor: text;
 }
-.ConsoleTextBox > .react-codemirror2 {
+
+.ConsoleTextBox>.react-codemirror2 {
   height: calc(100% - 10px);
 }
 
-
-
-
 /*------------DEBUG CONSOLE PANEL------------*/
+
 .DebugConsole {
   color: #ccc;
   overflow: scroll;
@@ -333,27 +366,27 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   height: 100%;
 }
 
-
-
-
 /*------------PATTERN HISTORY PANEL------------*/
+
 /*Pattern History Fields*/
+
 .defaultPatternHistoryArea {
   overflow-y: auto;
   font-size: 12px;
   width: 100%;
   height: 100%;
 }
+
 .PatternHistoryItem {
- margin: 2px 0; 
+  margin: 2px 0;
 }
-
-
-
 
 /*------------ADD CHANNEL PANEL------------*/
+
 .Canvas {
+  cursor: auto;
 }
+
 .CanvasControls {
   background: rgba(27, 27, 27, 1);
   position: fixed;
@@ -361,35 +394,38 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   height: 25px;
   line-height: 15px;
   width: calc(100%);
-  vertical-align: middle; 
+  vertical-align: middle;
   justify-content: space-between;
   border-bottom: 1px solid rgb(180, 180, 180);
   padding: 0 15px 0 15px;
   font-size: 10px;
 }
+
 .CanvasControls input {
   margin-top: 2.5px;
   height: 20px;
   width: 40px;
 }
+
 .CanvasControls button {
   margin-top: 2.5px;
   height: 20px;
 }
+
 .CanvasSketch {
   transform: translate(0, 26px);
-  cursor: ew-resize;
 }
 
-
-
 /*------------MATRIX PANEL------------*/
+
 /*All Channels Together*/
+
 .AllChannels {
   display: flex;
   flex-direction: row;
   overflow-y: auto;
 }
+
 .MatrixScroll {
   width: 40px;
   border: 1px solid rgba(200, 200, 200, 0.35);
@@ -397,13 +433,14 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin-top: 10px;
   opacity: 0.65;
   transform: translate(0px, 40px);
-  box-shadow: inset 0px 0px 50px rgba(0,0,0, 1);
+  box-shadow: inset 0px 0px 50px rgba(0, 0, 0, 1);
 }
+
 .Timeline {
   border: 1px solid rgba(200, 200, 200, 0.4);
   opacity: 0.65;
   transform: translate(0px, 40px);
-  width: 20px;
+  min-width: 20px;
   background: rgba(200, 200, 200, 0.15);
   height: 38px;
   cursor: ns-resize;
@@ -411,6 +448,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 }
 
 /*Individual Channels*/
+
 .ChannelItem {
   padding-left: 2px;
   display: flex;
@@ -418,17 +456,32 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 0 2px 0 2px;
   line-height: 20px;
   min-height: 35px;
-  width: 160px;
+  width: 150px;
   padding: 0;
   z-index: 2;
   transition: opacity 100ms ease-in-out;
 }
+
+/* .ChannelHeader {
+  display: block;
+  position: absolute;
+  width: inherit;
+  background: var(--layout-background);
+  z-index: 3;
+}
+.ChannelSteps {
+  display: block;
+  width: inherit;
+  transform: translate(0, 60px);
+} */
+
 .ChannelItemSteps {
-  display: inline-flex;
+  display: inherit;
   justify-content: center;
   margin-top: 3px;
 }
-.ChannelItemSteps button{
+
+.ChannelItemSteps button {
   color: white;
   font-weight: bolder;
   width: 50%;
@@ -439,31 +492,34 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 }
 
 /*Individual Channels -- disabled style*/
+
 .ChannelItem.disabled {
   opacity: 0.7;
   filter: grayscale(1);
 }
 
 /* Matrix header styling*/
+
 .ChannelItemHeader {
   display: flex;
   height: 25px;
   width: 100%;
-  background: rgba(200,200,200,0.3);
+  background: rgba(200, 200, 200, 0.3);
   line-height: 25px;
   font-weight: bold;
   margin-bottom: 5px;
-
   transition: background-color 100ms ease-in-out;
 }
+
 .ChannelItemHeader-Text {
   padding-left: 7px;
   font-size: 12px;
   border: none;
-  width: 30%;
+  width: 25%;
 }
 
 /* Channel Header Name Input */
+
 .ChannelItemHeader-NameText {
   padding-left: 7px;
   font-size: 12px;
@@ -472,13 +528,16 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   transition: all 500ms ease;
   font-weight: bolder;
 }
+
 .ChannelItemHeader-NameText:focus {
-  background: rgba(180,180,180, 0.6);
+  background: rgba(180, 180, 180, 0.6);
 }
+
 .ChannelItemHeader-NameText::-webkit-input-placeholder {
   color: #ddd;
   font-weight: bold;
 }
+
 .ChannelItemHeader-Transition {
   display: flex;
   justify-content: flex-end;
@@ -487,24 +546,30 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   border: none;
   width: 100%;
 }
+
 .ChannelItemHeader-time {
   display: inline-flex;
   justify-content: space-around;
-  width: 100%; 
+  width: 100%;
   height: 25px;
 }
+
 .ChannelItemHeader-time button {
   width: 26px;
 }
+
 /*Individual Transition Cells*/
+
 .ChannelItemHeader-Transition::-webkit-input-placeholder {
-  color: rgba(200,200,200,0.5);
+  color: rgba(200, 200, 200, 0.5);
 }
+
 .ChannelItemHeader button {
   color: #ddd;
   border: 0px solid rgba(30, 30, 30, 0.5);
   line-height: 15px;
 }
+
 .ChannelItemHeaderButtons {
   display: flex;
   justify-content: flex-end;
@@ -513,12 +578,15 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   height: 100%;
   width: 100%;
 }
+
 .ChannelItemHeader.Tidal {
   background: var(--tidal-color);
 }
+
 .ChannelItemHeader.CPS {
   background: var(--cps-color);
-} 
+}
+
 .ChannelItemHeader.SuperCollider {
   background: var(--sc-color);
 }

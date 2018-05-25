@@ -1,4 +1,7 @@
-import { observable, action } from 'mobx';
+import {
+    observable,
+    action
+} from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
 
@@ -17,7 +20,7 @@ class RollStore {
     // Pattern Roll Window parameters
     @observable resolution = 12;
     @observable cycles = 8;
-    
+
     @observable dimensions_g = [200, 200];
     @observable dimensions_c = [200, 200];
 
@@ -40,25 +43,24 @@ class RollStore {
             ctx.value = data.trigger;
 
             // -- init canvas 
-            if (this.roll_canvas_element === null || this.roll_canvas_element === undefined) { 
+            if (this.roll_canvas_element === null || this.roll_canvas_element === undefined) {
                 this.roll_canvas_element = document.getElementById("pat_roll");
-            }    
-
-            // -- process data 
-            this.processData();
-
-
-            // -- render
-            //  see if channel is new
-            //          clear everything
-            //      else
-            //          if s is new
-            //              clear channel portion of the window and redraw channel 
-            //          else
-            //              if n new
-            //                  clear n portion and redraw
-            //              else
-            this.renderCanvas();
+                // -- process data 
+                this.processData();
+    
+    
+                // -- render
+                //  see if channel is new
+                //          clear everything
+                //      else
+                //          if s is new
+                //              clear channel portion of the window and redraw channel 
+                //          else
+                //              if n new
+                //                  clear n portion and redraw
+                //              else
+                this.renderCanvas();
+            }
         }))
 
         // -- Future samples on execution
@@ -88,25 +90,25 @@ class RollStore {
     // -- The dimensions 
     @action updateCanvasDimensions() {
         const element = document.getElementById('canvasLayout');
-        if(element && element !== null){
+        if (element && element !== null) {
             const w = element.clientWidth;
             const h = element.clientHeight;
-    
-            this.dimensions_c = [ w, h - 55 ];
+
+            this.dimensions_c = [w, h - 55];
             return;
         }
-        this.dimensions_c = [ 1000, 200 ];
+        this.dimensions_c = [800, 300];
     }
     @action updateGraphicsDimensions() {
         const element = document.getElementById('graphicsLayout');
-        if(element && element !== null){
+        if (element && element !== null) {
             const w = element.clientWidth;
             const h = element.clientHeight;
-    
-            this.dimensions_g = [ w, h - 30 ];
+
+            this.dimensions_g = [w, h - 40];
             return;
         }
-        this.dimensions_g = [ 1000, 200 ];
+        this.dimensions_g = [400, 400];
     }
 
     // -- Hot reload
@@ -118,7 +120,7 @@ class RollStore {
     }
 
     // --Canvas functions 
-    @action processData() { 
+    @action processData() {
 
         const node = {
             type: 'channel',
@@ -135,27 +137,33 @@ class RollStore {
         };
 
         // initialize start cycle
-        if (this.tree_start_cycle === 0) { 
+        if (this.tree_start_cycle === 0) {
             this.tree_start_cycle = _.toInteger(this.value.cycle);
         }
 
         // reset time
-        if (this.value.cycle > this.cycles + this.tree_start_cycle) { 
+        if (this.value.cycle > this.cycles + this.tree_start_cycle) {
             // delete all nodes
-            this.treeRoot = null; 
+            this.treeRoot = null;
             this.tree_start_cycle = _.toInteger(this.value.cycle);
         }
 
         // if its empty
-        if (this.treeRoot === null) { 
-            this.treeRoot = this.tree.parse({type: 'root', value: -1, children: [node]});
+        if (this.treeRoot === null) {
+            this.treeRoot = this.tree.parse({
+                type: 'root',
+                value: -1,
+                children: [node]
+            });
         }
-        
+
         let channel_node;
         let sample_node;
         let note_node;
 
-        channel_node = this.treeRoot.first({strategy: 'breadth'}, (n) => {
+        channel_node = this.treeRoot.first({
+            strategy: 'breadth'
+        }, (n) => {
             if (n.model.type === 'channel' && n.model.value === node.value) {
                 return true;
             }
@@ -163,9 +171,10 @@ class RollStore {
         });
         if (channel_node === undefined) {
             channel_node = this.treeRoot.addChild(this.tree.parse(node));
-        }
-        else { 
-            sample_node = channel_node.first({strategy: 'breadth'}, (n) => {
+        } else {
+            sample_node = channel_node.first({
+                strategy: 'breadth'
+            }, (n) => {
                 if (n.model.type === 'sample' && n.model.value === this.value.s) {
                     return true;
                 }
@@ -173,9 +182,10 @@ class RollStore {
             });
             if (sample_node === undefined) {
                 sample_node = channel_node.addChild(this.tree.parse(node.children[0]));
-            }
-            else { 
-                note_node = sample_node.first({strategy: 'breadth'}, (n) => {
+            } else {
+                note_node = sample_node.first({
+                    strategy: 'breadth'
+                }, (n) => {
                     if (n.model.type === 'note' && n.model.value === this.value.n) {
                         return true;
                     }
@@ -183,24 +193,25 @@ class RollStore {
                 });
                 if (note_node === undefined) {
                     sample_node.addChild(this.tree.parse(node.children[0].children[0]));
-                }
-                else { 
+                } else {
                     note_node.model.time.push(this.value);
                 }
             }
         }
     }
 
-    @action renderCanvas() { 
-        let ctx = this.roll_canvas_element.getContext("2d", { alpha: false });
-        
+    @action renderCanvas() {
+        let ctx = this.roll_canvas_element.getContext("2d", {
+            alpha: false
+        });
+
         this.updateCanvasDimensions();
         let w = this.roll_canvas_element.width = this.dimensions_c[0];
         let h = this.roll_canvas_element.height = this.dimensions_c[1];
 
         // background
-        for (let i = 0; i < this.treeRoot.children.length; i++) {            
-            i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(53, 53, 53)";         
+        for (let i = 0; i < this.treeRoot.children.length; i++) {
+            i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
 
             ctx.fillRect(
                 0,
@@ -211,9 +222,11 @@ class RollStore {
         }
 
         // nodes
-        this.treeRoot.walk({ strategy: 'post' }, (n) => { 
+        this.treeRoot.walk({
+            strategy: 'post'
+        }, (n) => {
             // leaf node
-            if (!n.hasChildren()) { 
+            if (!n.hasChildren()) {
                 const path = n.getPath();
 
                 const _w = w / (this.cycles * this.resolution);
@@ -225,9 +238,11 @@ class RollStore {
                 const _n_i = path[3].getIndex();
 
                 ctx.fillStyle = "rgb(180, 180, 180)";
-                _.each(n.model.time, (item) => { 
-                    if (!item.rendered) { 
-                        ctx.fillStyle = "rgb(180, 0, 0)";
+                ctx.strokeStyle = "#111"
+                _.each(n.model.time, (item) => {
+                    if (!item.rendered) {
+                        ctx.fillStyle = "rgb(180, 180, 20)";
+                        ctx.strokeStyle = "rgb(180, 0, 0)"
                         item.rendered = true;
                     }
                     ctx.fillRect(
@@ -237,7 +252,6 @@ class RollStore {
                         _.toInteger(_n_h)
                     );
                 })
-
             }
         });
     }

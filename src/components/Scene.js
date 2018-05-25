@@ -5,16 +5,10 @@ import { inject, observer } from 'mobx-react';
 @inject('sceneStore')
 @observer
 export default class Scene extends React.Component {
-    executionCss = (event, duration = 500) => {
-        event.persist();
-        event.target.className += ' Executed';
-        _.delay( () => (event.target.className = _.replace(event.target.className, ' Executed', '') ),
-                duration);
-    }
-
+    
     handleControlEnter = (event) => {
         if(event.ctrlKey && event.keyCode === 13){
-            this.executionCss(event);
+            this.props.sceneStore.executionCss(event);
             this.props.sceneStore.addScene(document.getElementById('new_scene_input').value)
         }
     }

@@ -1,5 +1,8 @@
 import React from 'react';
-import { inject, observer } from 'mobx-react';
+import {
+  inject,
+  observer
+} from 'mobx-react';
 import _ from 'lodash';
 
 // CSS Imports
@@ -7,10 +10,19 @@ import '../styles/App.css';
 import '../styles/Layout.css';
 import '../styles/Home.css';
 
-import { shaders } from './shaders/simple';
+import {
+  shaders
+} from './shaders/simple';
 
-import { Surface } from "gl-react-dom";
-import { Shaders, Node, GLSL, Bus, Uniform } from "gl-react";
+import {
+  Surface
+} from "gl-react-dom";
+import {
+  Shaders,
+  Node,
+  Bus,
+  Uniform
+} from "gl-react";
 
 import timeLoop from "../utils/timeLoop";
 import menubarStore from '../stores/menubarStore';
@@ -30,7 +42,8 @@ class Canvas extends React.Component {
 
     // sample parameters
     let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
-    let note = this.getParameterSafe('n', 0, rollStore);
+    let n = this.getParameterSafe('n', 0, rollStore);
+    let note = this.getParameterSafe('note', 0, rollStore);
     let cps = this.getParameterSafe('cps', 1, rollStore);
     let delta = this.getParameterSafe('delta', 1, rollStore);
     let cycle = this.getParameterSafe('cycle', 1, rollStore);
@@ -42,7 +55,7 @@ class Canvas extends React.Component {
     let channel = this.getParameterSafe('sirenChan', 0, rollStore);
 
     // pass rms information to shader
-    let rmsArray = _.fill(Array(10), 0);
+    let rmsArray = _.fill(Array(2), 0);
     _.each(menubarStore.rmsArray, (e, i) => { 
       rmsArray[i] = e.rms;
     });
@@ -54,16 +67,17 @@ class Canvas extends React.Component {
         time: time / 1000,
         rmss: rmsArray,
         nameAscii,
+        n,
         note,
-        // cps,
-        // delta,
+        cps,
+        delta,
         cycle,
-        // sustain,
-        // begin,
-        // end,
-        // room,
-        // gain,
-        // channel
+        sustain,
+        begin,
+        end,
+        room,
+        gain,
+        channel
       }}
     />;
   }

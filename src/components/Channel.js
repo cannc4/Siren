@@ -18,7 +18,7 @@ class ChannelHeader extends React.Component {
         console.log('RENDER CHANNEL HEADER');
         const item = this.props.value;
 
-        return (<div>
+        return (<div className={'ChannelHeader'}>
             <div className={"ChannelItemHeader " + item.type }>
                 <input ref={(input_name) => { this.nameInputName = input_name; }}
                     title={"Channel Name (" + item.name + ") [enter to submit changes]"}
@@ -38,7 +38,6 @@ class ChannelHeader extends React.Component {
                   <button className={"Button"} title={'Delete'} onClick={() => 
                         this.props.channelStore.deleteChannel(item.name)}>X</button>
                 </div>
-                
             </div>
             <div className={"ChannelItemHeader"}>
                 <div className={"ChannelItemHeader-time"}>
@@ -85,18 +84,20 @@ class Channel extends React.Component {
       channelClass += " disabled";
     }
     return (<div className={channelClass}>
-        <ChannelHeader key={index} value={item}/>
-        {item.cells.map((c, i) => {
-           return <Cell key={i} item={item} channel_index={index} index={i} value={c}/>
-        })}
-        <div className={'ChannelItemSteps'}>
-            <button className={"Button"}
-                    title={"Add Step"}
-                    onClick={() => (this.props.channelStore.addStep(item.name))}> + </button>
-            <button className={"Button"}
-                    title={"Remove Step"}
-                    onClick={() => (this.props.channelStore.removeStep(item.name))}> - </button>
-        </div>
+        <ChannelHeader key={index} value={item} />
+        <div className={"ChannelSteps"}>
+            {item.cells.map((c, i) => {
+            return <Cell key={i} item={item} channel_index={index} index={i} value={c}/>
+            })}
+            <div className={'ChannelItemSteps'}>
+                <button className={"Button"}
+                        title={"Add Step"}
+                        onClick={() => (this.props.channelStore.addStep(item.name))}> + </button>
+                <button className={"Button"}
+                        title={"Remove Step"}
+                        onClick={() => (this.props.channelStore.removeStep(item.name))}> - </button>
+            </div>
+        </div>    
     </div>);
   }
 }

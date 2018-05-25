@@ -1,10 +1,13 @@
-body, .fill, .cont {
-  position: fixed;
-  top: 40px;
+body,
+.fill,
+.cont {
+  position: inherit;
+  background: black;
+  top: 43px;
   bottom: 0;
   left: 0;
   right: 0;
-  overflow-y: none;
+  overflow-y: scroll;
   z-index: 0;
   font-size: 14px;
 }
@@ -15,10 +18,11 @@ body, .fill, .cont {
 }
 
 *:focus {
-    outline: none;
+  outline: none;
 }
 
-* > button, input {
+*>button,
+input {
   padding: 4px;
   font-size: 10px;
   border: none;
@@ -27,21 +31,22 @@ body, .fill, .cont {
 input {
   background: none;
   color: #ddd;
-  border-bottom: 1px solid rgba(125,125,125, 0.8);
+  border-bottom: 1px solid rgba(125, 125, 125, 0.8);
   font-size: 10px;
   width: 95%;
 }
 
-* > input .light {
+*>input .light {
   border-bottom: 2px solid #fff;
 }
 
 button:hover {
   cursor: pointer;
-  color: rgba(255,255,102, 0.75);
+  color: rgba(255, 255, 102, 0.75);
 }
 
-b, p {
+b,
+p {
   padding: 0;
   margin: 0;
 }
@@ -64,27 +69,24 @@ b, p {
   font-weight: 100;
 }
 
-*::-webkit-scrollbar-track
-{
-	-webkit-box-shadow: inset 0 0 5px rgba(25,77,110,0.5);
-	background-color: #ddd;
+*::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgba(25, 77, 110, 0.5);
+  -webkit-box-shadow: inset 0 0 5px rgba(25, 77, 110, 0.5);
+  background-color: #ddd;
 }
 
-*::-webkit-scrollbar
-{
+*::-webkit-scrollbar {
   width: 0px;
   height: 0px;
-	background-color: #EEEEEE;
+  background-color: #EEEEEE;
   z-index: 1;
 }
 
-::-webkit-scrollbar:hover
-{
-	width: 3px;
+::-webkit-scrollbar:hover {
+  width: 3px;
   height: 5px;
 }
 
-*::-webkit-scrollbar-thumb
-{
-	background-color: #aaa;
+*::-webkit-scrollbar-thumb {
+  background-color: #aaa;
 }

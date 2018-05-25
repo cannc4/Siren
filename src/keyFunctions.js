@@ -6,10 +6,19 @@ import consoleStore from '../src/stores/consoleStore'
 import globalStore from '../src/stores/globalStore'
 import pathStore from '../src/stores/pathStore'
 
-const executionCss = (duration = 750) => {
-    let logo = document.getElementById('logo_disp');
-    logo.className += ' SaveExecuted';
-    _.delay(() => {logo.className = _.replace(logo.className, ' SaveExecuted', '')}, duration);
+export const executionCssById = (elem_id, classname = ' SaveExecuted', duration = 750) => {
+    let elem = document.getElementById('logo_disp');
+    if (elem !== undefined || elem !== null) { 
+        elem.className += classname;
+        _.delay(() => {elem.className = _.replace(elem.className, classname, '')}, duration);
+    }
+}
+
+export const executionCssEvent = (event, duration = 500) => {
+    event.persist();
+    event.target.className += ' Executed';
+    _.delay( () => (event.target.className = _.replace(event.target.className, ' Executed', '') ),
+            duration);
 }
 
 export const save = () => {
@@ -18,13 +27,13 @@ export const save = () => {
     globalStore.save();
     pathStore.save();
     console.log(' ## Saving...')
-    executionCss();
+    executionCssById('logo_disp');
     return false;
 }
 
 export const saveLayout = () => { 
     layoutStore.save();
-    executionCss();
+    executionCssById('logo_disp');
     return false;
 }
 

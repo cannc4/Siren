@@ -1,16 +1,23 @@
 //@flow
-import React, { PureComponent } from "react";
+import React, {
+  PureComponent
+} from "react";
 import raf from "raf";
 import hoistNonReactStatics from "hoist-non-react-statics";
 
 // NB this is only an utility for the examples
 export default (
-  C: ReactClass<*>,
-  { refreshRate = 60 }: { refreshRate?: number } = {}
-): ReactClass<*> => {
+  C: ReactClass < * > , {
+    refreshRate = 60
+  }: {
+    refreshRate ? : number
+  } = {}
+): ReactClass < * > => {
   class TL extends PureComponent {
     static displayName = `timeLoop(${C.displayName||C.name||""})`;
-    state: { time: number };
+    state: {
+      time: number
+    };
     state = {
       time: 0,
       tick: 0,
@@ -19,7 +26,9 @@ export default (
     componentDidMount() {
       this.onPausedChange(this.props.paused);
     }
-    componentWillReceiveProps({ paused }) {
+    componentWillReceiveProps({
+      paused
+    }) {
       if (this.props.paused !== paused) {
         this.onPausedChange(paused);
       }
@@ -47,15 +56,14 @@ export default (
     onPausedChange = paused => {
       if (paused) {
         raf.cancel(this._r);
-      }
-      else {
+      } else {
         this.startLoop();
       }
     };
     render() {
-      return <C
-        {...this.props}
-        {...this.state}
+      return <C { ...this.props
+      } { ...this.state
+      }
       />;
     }
   };

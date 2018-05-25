@@ -25,7 +25,7 @@
   white-space: nowrap;
   background: 0 0;
   border: 0;
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .react-contextmenu-item.react-contextmenu-item--active,
@@ -38,7 +38,7 @@
 
 .react-contextmenu-item.react-contextmenu-item--disabled,
 .react-contextmenu-item.react-contextmenu-item--disabled:hover {
-  color:#000;
+  color: #000;
   background-color: #ddd;
   text-decoration: underline;
   font-weight: bold;
@@ -48,22 +48,22 @@
   margin-bottom: 3px;
   padding: 2px 0;
   /*border-bottom: 1px solid rgba(200,200,200, 0.85);*/
-  border-bottom: 1px solid rgba(30,30,30, 0.85);
+  border-bottom: 1px solid rgba(30, 30, 30, 0.85);
   cursor: inherit;
 }
+
 /*.react-contextmenu-item--divider:hover {
   background-color: transparent;
   border-color: rgba(0,0,0,.15);
 }*/
 
 .react-contextmenu-item.react-contextmenu-submenu {
-	padding: 0;
+  padding: 0;
 }
 
-.react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item {
-}
+/* .react-contextmenu-item.react-contextmenu-submenu>.react-contextmenu-item {} */
 
-.react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item:after {
+.react-contextmenu-item.react-contextmenu-submenu>.react-contextmenu-item:after {
   content: "➤";
   display: inline-block;
   position: absolute;

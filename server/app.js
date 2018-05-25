@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import fs from 'fs';
-import { spawn } from 'child_process';
+import {
+  spawn
+} from 'child_process';
 import express from 'express';
 import bodyParser from 'body-parser';
-import jsonfile from'jsonfile';
+import jsonfile from 'jsonfile';
 const supercolliderjs = require('supercolliderjs');
 const socketIo = require('socket.io');
 const Queue = require('better-queue');
@@ -40,15 +42,19 @@ class REPL {
 
   doSpawn(config, reply) {
     this.repl = spawn(config.ghcipath, ['-XOverloadedStrings']);
-    
+
     let tidalog = socketIo.listen(4003);
     this.repl.stderr.on('data', (data) => {
       console.error(data.toString('utf8'));
-      tidalog.sockets.emit('/scdebuglog', {msg: data.toString('utf8')});
+      tidalog.sockets.emit('/scdebuglog', {
+        msg: data.toString('utf8')
+      });
     });
     this.repl.stdout.on('data', data => {
       console.error(data.toString())
-      tidalog.sockets.emit('/scdebuglog', {msg: data.toString('utf8')});
+      tidalog.sockets.emit('/scdebuglog', {
+        msg: data.toString('utf8')
+      });
     });
     console.log(" ## -->   GHC Spawned");
 
@@ -63,7 +69,7 @@ class REPL {
           value: value
         });
       });
-    
+
       device.on('knob:*', (value) => {
         console.log(device.event + ' => ' + value);
         nano_socket.sockets.emit('/nano_knob', {
@@ -71,10 +77,10 @@ class REPL {
           value: value
         });
       });
-      
+
       device.on('button:**', (value) => {
-        console.log(device.event+' => '+value);
-      
+        console.log(device.event + ' => ' + value);
+
         nano_socket.sockets.emit('/nano_button', {
           key: _.replace(device.event, "button:", ""),
           value: value
@@ -86,7 +92,7 @@ class REPL {
 
   initGHC(config) {
     const tidalparams = fs.readFileSync(config.tidal_boot).toString().split('\n');
-    if ( tidalparams )
+    if (tidalparams)
       for (let i = 0; i < tidalparams.length; i++) {
         this.tidalSendLine(tidalparams[i]);
       }
@@ -95,7 +101,7 @@ class REPL {
 
   initSCSynth(config, reply) {
     const self = this;
-    if (!nano)   nano = new NanoTimer();
+    if (!nano) nano = new NanoTimer();
     supercolliderjs.resolveOptions(config.path).then((options) => {
       // replace options
       options.sclang = config.sclang;
@@ -105,7 +111,7 @@ class REPL {
 
       supercolliderjs.lang.boot(options).then((sclang) => {
         self.sc = sclang;
-        
+
         // open socket for SuperCollider log
         let sclog = socketIo.listen(4002);
         var udpPort = new osc.UDPPort({
@@ -114,156 +120,159 @@ class REPL {
           metadata: true
         });
         udpPort.open();
-        
-        // socket for Tidal future values
-        let future_vis = socketIo.listen(4006);
-        
-        let future_values = [];
-        let current_cycle = 0;
-        udpPort.on("message", (oscMsg) => {
-          try {
-            if (oscMsg.address === "/vis") {
-              let blob = Buffer.from(oscMsg.args[1].value);
-              let blobJSON = JSON.parse(blob.toString())
-             
-              // Process incoming data
-               
-              // TEMP ARRAY I
- 
-              // let future_values = []; 
- 
-              let json = JSON.parse(blobJSON);
-              json.forEach((element, index) => {
-                let obj = _.fromPairs(json[index][1]);
-                obj['cycle'] = json[index][0][0].numerator / json[index][0][0].denominator;
-                   
-                future_values.push(obj);
-              });
 
-              // Delete old samples
-              future_values = _.dropWhile(future_values, (i) => {
-                let max_cycles = 32;
-                return i.cycle < current_cycle - max_cycles;
-              })
-             
-              // TEMP ARRAY II
-               
-              let GROUPED_DATA = [];
-             
-              if (future_values !== undefined && future_values.length !== 0) {
-                     
-                // min and max of the data
-                // this.canvas_min_cycle = _.minBy(DATA, 'cycle').cycle;
-                // this.canvas_max_cycle = _.maxBy(DATA, 'cycle').cycle;
-     
-                // canvas_data: [c1, c2, c3, c4], length channel_num
-                //               c# = {ch: #, samples: [s1, s2, s3], length sample_num}
-                //                                      s# = {s: #, notes: [n1, n2], length note_num}
-                //                                                          n# = {n: #, time: [objs]}
-                _.forEach(future_values, (d) => {
-                  if (d['sirenChan'] === undefined) d['sirenChan'] = 0;
-                  if (d['n'] === undefined) d['n'] = 0;
-                  // d = {cycle: ##, s: ##, n: ##, sirenChan: ##, ... }
-     
-                  let new_obj = {
-                    ch: d['sirenChan'],
-                    samples: [
-                      {
-                        s: d['s'],
-                        notes: [
-                          {
-                            n: d['n'],
-                            time: [d]
-                          }
-                        ]
-                      }
-                    ]
-                  };
-     
-                  // process data
-                  let _ch, _s, _n;
-                  if ((_ch = _.find(GROUPED_DATA, ['ch', d['sirenChan']])) !== undefined) {
-                    // if channel exist, manipulate samples
-                             
-                    if ((_s = _.find(_ch.samples, ['s', d['s']])) !== undefined) {
-                      // if sample exist, manipulate notes
-     
-                      if ((_n = _.find(_s.notes, ['n', d['n']])) !== undefined) {
-                        // if note exist, manipulate time
-                                     
-                        _n.time.push(d);
-                      } else {
-                        // if note DOESNT exist
-                        _s.notes.push(new_obj.samples[0].notes[0]);
-                      }
-                    } else {
-                      // if sample DOESNT exist
-                      _ch.samples.push(new_obj.samples[0]);
-                    }
-                  } else {
-                    // if channel DOESNT exist
-                    GROUPED_DATA.push(new_obj);
-                  }
-                });
-                     
-                // build final data
-                 
-                // TEMP ARRAY III
-                 
-                let canvas_data = [];
-                _.forEach(GROUPED_DATA, (d, i) => {
-                  _.forEach(d.samples, (_s, j) => {
-                    _.forEach(_s.notes, (_n, k) => {
-                      _.forEach(_n.time, (_t, l) => {
-                        canvas_data.push({
-                          obj: _t,
-                          aux: {
-                            c_n: GROUPED_DATA.length,
-                            s_n: d.samples.length,
-                            n_n: _s.notes.length,
-                            c_i: i,
-                            s_i: j,
-                            n_i: k
-                          }
-                        });
-                      });
-                    });
-                  });
-                });
-                 
-                // Send processed data
-                future_vis.sockets.emit('/vis', canvas_data );
-              }
-           
-            }
-          }
-          catch (e) { 
-            console.error(e.toString()); 
-          }
-        }); 
+        // socket for Tidal future values
+        // let future_vis = socketIo.listen(4006);
+
+        // let future_values = [];
+        // let current_cycle = 0;
+        // udpPort.on("message", (oscMsg) => {
+        //   try {
+        //     if (oscMsg.address === "/vis") {
+        //       let blob = Buffer.from(oscMsg.args[1].value);
+        //       let blobJSON = JSON.parse(blob.toString())
+
+        //       // Process incoming data
+
+        //       // TEMP ARRAY I
+
+        //       // let future_values = []; 
+
+        //       let json = JSON.parse(blobJSON);
+        //       json.forEach((element, index) => {
+        //         let obj = _.fromPairs(json[index][1]);
+        //         obj['cycle'] = json[index][0][0].numerator / json[index][0][0].denominator;
+
+        //         future_values.push(obj);
+        //       });
+
+        //       // Delete old samples
+        //       future_values = _.dropWhile(future_values, (i) => {
+        //         let max_cycles = 32;
+        //         return i.cycle < current_cycle - max_cycles;
+        //       })
+
+        //       // TEMP ARRAY II
+
+        //       let GROUPED_DATA = [];
+
+        //       if (future_values !== undefined && future_values.length !== 0) {
+
+        //         // min and max of the data
+        //         // this.canvas_min_cycle = _.minBy(DATA, 'cycle').cycle;
+        //         // this.canvas_max_cycle = _.maxBy(DATA, 'cycle').cycle;
+
+        //         // canvas_data: [c1, c2, c3, c4], length channel_num
+        //         //               c# = {ch: #, samples: [s1, s2, s3], length sample_num}
+        //         //                                      s# = {s: #, notes: [n1, n2], length note_num}
+        //         //                                                          n# = {n: #, time: [objs]}
+        //         _.forEach(future_values, (d) => {
+        //           if (d['sirenChan'] === undefined) d['sirenChan'] = 0;
+        //           if (d['n'] === undefined) d['n'] = 0;
+        //           // d = {cycle: ##, s: ##, n: ##, sirenChan: ##, ... }
+
+        //           let new_obj = {
+        //             ch: d['sirenChan'],
+        //             samples: [
+        //               {
+        //                 s: d['s'],
+        //                 notes: [
+        //                   {
+        //                     n: d['n'],
+        //                     time: [d]
+        //                   }
+        //                 ]
+        //               }
+        //             ]
+        //           };
+
+        //           // process data
+        //           let _ch, _s, _n;
+        //           if ((_ch = _.find(GROUPED_DATA, ['ch', d['sirenChan']])) !== undefined) {
+        //             // if channel exist, manipulate samples
+
+        //             if ((_s = _.find(_ch.samples, ['s', d['s']])) !== undefined) {
+        //               // if sample exist, manipulate notes
+
+        //               if ((_n = _.find(_s.notes, ['n', d['n']])) !== undefined) {
+        //                 // if note exist, manipulate time
+
+        //                 _n.time.push(d);
+        //               } else {
+        //                 // if note DOESNT exist
+        //                 _s.notes.push(new_obj.samples[0].notes[0]);
+        //               }
+        //             } else {
+        //               // if sample DOESNT exist
+        //               _ch.samples.push(new_obj.samples[0]);
+        //             }
+        //           } else {
+        //             // if channel DOESNT exist
+        //             GROUPED_DATA.push(new_obj);
+        //           }
+        //         });
+
+        //         // build final data
+
+        //         // TEMP ARRAY III
+
+        //         let canvas_data = [];
+        //         _.forEach(GROUPED_DATA, (d, i) => {
+        //           _.forEach(d.samples, (_s, j) => {
+        //             _.forEach(_s.notes, (_n, k) => {
+        //               _.forEach(_n.time, (_t, l) => {
+        //                 canvas_data.push({
+        //                   obj: _t,
+        //                   aux: {
+        //                     c_n: GROUPED_DATA.length,
+        //                     s_n: d.samples.length,
+        //                     n_n: _s.notes.length,
+        //                     c_i: i,
+        //                     s_i: j,
+        //                     n_i: k
+        //                   }
+        //                 });
+        //               });
+        //             });
+        //           });
+        //         });
+
+        //         // Send processed data
+        //         future_vis.sockets.emit('/vis', canvas_data );
+        //       }
+
+        //     }
+        //   }
+        //   catch (e) { 
+        //     console.error(e.toString()); 
+        //   }
+        // }); 
 
         // On SC Message
         sclang.on('stdout', (d) => {
           // Send SuperCollider log to front end
-          sclog.sockets.emit('/scdebuglog', {msg: d});
-          
+          sclog.sockets.emit('/scdebuglog', {
+            msg: d
+          });
+
           // Siren loaded message
           if (_.startsWith(d, 'SIREN LOADED')) {
             reply.sendStatus(200);
           }
 
           // Converts 'd' into an object
-          let re = /\[.+\]/g, match = re.exec(d);
-          if(match !== null && match !== undefined && match[0] !== undefined) {
+          let re = /\[.+\]/g,
+            match = re.exec(d);
+          if (match !== null && match !== undefined && match[0] !== undefined) {
             let msg = _.split(_.trim(match[0], '[]'), ',')
-            _.each(msg, function(m, i) {
+            _.each(msg, function (m, i) {
               msg[i] = _.trim(m)
             })
 
             let time = 0;
             re = /(time:).+/g;
             match = re.exec(d);
-            if(match !== null && match !== undefined && match[0] !== undefined) {
+            if (match !== null && match !== undefined && match[0] !== undefined) {
               time = _.toNumber(_.trim(match[0].substring(5, 16)));
             }
 
@@ -271,15 +280,16 @@ class REPL {
             if (_.trim(msg[0]) === '/play2') {
               let cycleInfo = _.fromPairs(_.chunk(_.drop(msg), 2));
               cycleInfo['time'] = time;
-              cycleInfo.n === undefined ? cycleInfo['n'] = 0 : cycleInfo.n; 
-              cycleInfo.sirenChan === undefined ? cycleInfo['sirenChan'] = 0 : cycleInfo.sirenChan; 
-              
-              current_cycle = cycleInfo.cycle;
+              cycleInfo.n === undefined ? cycleInfo['n'] = 0 : cycleInfo.n;
+              cycleInfo.sirenChan === undefined ? cycleInfo['sirenChan'] = 0 : cycleInfo.sirenChan;
+
+              // current_cycle = cycleInfo.cycle;
 
               // Send current cycle playback info to front end  
-              sclog.sockets.emit('/sclog', { trigger: cycleInfo });
-            }
-            else if (_.startsWith(_.trim(msg[0]), '/orbit' )) { 
+              sclog.sockets.emit('/sclog', {
+                trigger: cycleInfo
+              });
+            } else if (_.startsWith(_.trim(msg[0]), '/orbit')) {
               // Send RMS to the front end
               sclog.sockets.emit('/rms', {
                 orbit: msg[0],
@@ -290,13 +300,13 @@ class REPL {
           }
         });
 
-        setTimeout(function() {
+        setTimeout(function () {
           const samples = fs.readFileSync(config.scd_start).toString()
           sclang.interpret(samples).then((samplePromise) => {
             console.log(' ## -->   SuperCollider initialized');
-            
+
             // compile functions for Tidal future values
-            self.sendFutureExprs();
+            // self.sendFutureExprs();
 
             // compile functions for Single cycle compilation with 'oneshot'
             self.sendOneshot();
@@ -305,7 +315,7 @@ class REPL {
       });
     });
   }
-    
+
   start(config, reply) {
     this.doSpawn(config);
     this.initGHC(config);
@@ -360,30 +370,28 @@ class REPL {
                           return fs`);
     this.tidalSendExpression("[x1,x2,x3,x4,x5,x6,x7,x8,x9] <- wrapDirts [d1,d2,d3,d4,d5,d6,d7,d8,d9]");
   }
-  sendOneshot() { 
+  sendOneshot() {
     this.tidalSendExpression('let startclock d p = do {now <- getNow; d $ (pure (nextSam now)) ~> p}');
     this.tidalSendExpression('let one d p = startclock d $ seqP [(0, 1, p)]');
   }
 
   sendSCLang(message) {
     this.sc.interpret(message)
-      .then(function(result) {
-        console.log(" ### sendSC: " , result);
-      }, function(error) {
-        console.error("### sendSC ERROR:" , error);
+      .then(function (result) {
+        console.log(" ### sendSC: ", result);
+      }, function (error) {
+        console.error("### sendSC ERROR:", error);
       });
   }
 
   sendSC(message, reply) {
     this.sc.interpret(message)
-      .then(function(result) {
-        console.log(" ### sendSC: " , result);
+      .then(function (result) {
+        console.log(" ### sendSC: ", result);
         reply.sendStatus(200);
-        // reply.status(200).json({sc_result: result});
-      }, function(error) {
+      }, function (error) {
         console.error("### sendSC ERROR:", error);
         reply.sendStatus(500);
-        // reply.status(500).json({sc_result: undefined});
       });
   }
 }
@@ -395,18 +403,24 @@ const SirenComm = {
 const Siren = () => {
 
   const app = express();
-  app.use(bodyParser.json({ limit: '50mb' }))
+  app.use(bodyParser.json({
+    limit: '50mb'
+  }))
   app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
   });
-    
+
   const tidalPatternQueue = new Queue((pat, cb) => {
     SirenComm.siren_console.tidalSendExpression(pat);
-    
-    if (isRecording) { 
-      let tidalobj = {pattern: pat, timestamp: Date.now(), type: 'Tidal'};
+
+    if (isRecording) {
+      let tidalobj = {
+        pattern: pat,
+        timestamp: Date.now(),
+        type: 'Tidal'
+      };
       historyArray.push(tidalobj);
     }
     cb(null, result);
@@ -424,7 +438,7 @@ const Siren = () => {
       reply.sendStatus(500);
     }
   };
-  
+
   // TODO: Server Doesnt Stop Properly
   const stopSiren = (req, reply) => {
     SirenComm.siren_console = null;
@@ -439,24 +453,34 @@ const Siren = () => {
   const sendSCpattern = (pattern, reply) => {
     SirenComm.siren_console.sendSC(pattern, reply);
 
-    if (isRecording) { 
-    
-      let scobj = {pattern: pattern, timestamp: Date.now(), type: 'SuperCollider'};
+    if (isRecording) {
+
+      let scobj = {
+        pattern: pattern,
+        timestamp: Date.now(),
+        type: 'SuperCollider'
+      };
       historyArray.push(scobj);
-    
+
     }
   };
-  
+
   //Pattern Stream <->
   app.post('/patternstream', (req, reply) => {
-    const { step, channel, patterns, global_mod } = req.body;
-    let k = channel.name, v = step;
-      
+    const {
+      step,
+      channel,
+      patterns,
+      global_mod
+    } = req.body;
+    let k = channel.name,
+      v = step;
+
     const getParameters = (v) => {
       let param = [];
       _.map(_.split(v, /[`]+/g), (p1, p2) => {
         p1 = _.trim(p1);
-    
+
         if (p1 !== "") param.push(p1);
       });
       return param;
@@ -470,15 +494,17 @@ const Siren = () => {
         //   'rt' Channel rate 
         //   'st' Channel step count
         let isReserved = false;
-        _.each(global_mod.res_parameters, (reserved, i) => { 
+        _.each(global_mod.res_parameters, (reserved, i) => {
           if (value === reserved.word) {
             newCommand = _.replace(newCommand, new RegExp("`" + reserved.word + "`", "g"), channel[[reserved.value]]);
             isReserved = true;
             return;
-          }  
-        }) 
-        
-        if (isReserved) { return; }
+          }
+        })
+
+        if (isReserved) {
+          return;
+        }
         // Random parameter 
         else if (_.indexOf(cellItem[i], '|') === 0 && _.lastIndexOf(cellItem[i], '|') === cellItem[i].length - 1) {
           cellItem[i] = cellItem[i].substring(1, _.indexOf(cellItem[i], '|', 1));
@@ -498,7 +524,7 @@ const Siren = () => {
             // eslint-disable-next-line
             let re = new RegExp("`((" + value + "\?)[^`]+)`", "g");
             let match = re.exec(newCommand);
-    
+
             // We have a default parameter ready
             if (match !== null && match[1] !== undefined && _.indexOf(match[1], '?') !== -1) {
               const defaultValue = match[1].substring(_.indexOf(match[1], '?') + 1);
@@ -520,7 +546,7 @@ const Siren = () => {
 
     // pattern name
     const cellName = getParameters(v)[0];
-      
+
     // command of the pattern
     const pat = _.find(patterns, c => c.name === cellName);
     let newCommand;
@@ -529,15 +555,19 @@ const Siren = () => {
 
     if (channel.type === 'CPS') {
       newCommand = cellName;
-        
+
       tidalPatternQueue.push("cps " + newCommand);
-      reply.status(200).json({ pattern: "cps " + newCommand, cid: channel.cid, timestamp: new Date().getMilliseconds() });
+      reply.status(200).json({
+        pattern: "cps " + newCommand,
+        cid: channel.cid,
+        timestamp: new Date().getMilliseconds()
+      });
     }
     // other channels
     else if (pat !== undefined && pat !== null && pat !== "" && v !== "") {
       let cellItem = _.slice(getParameters(v), 1);
       newCommand = pat.text;
-        
+
       // Applies parameters
       if (pat.params !== '')
         newCommand = processParameters(_.concat(_.split(pat.params, ','), _.map(global_mod.res_parameters, 'word')), newCommand, cellItem);
@@ -552,23 +582,23 @@ const Siren = () => {
 
       // Prepare transition, solo & globals
       let transitionHolder, pattern;
-        
+
       if (channel.type === "SuperCollider") {
         pattern = newCommand;
         sendSCpattern(pattern, reply);
         // reply.status(200);
-      }
-      else if (channel.type === "FoxDot") {
+      } else if (channel.type === "FoxDot") {
         pattern = newCommand;
         //sendPythonPattern(pattern);
-        reply.status(200).json({ pattern: pattern, cid: channel.cid });
-      }
-      else if (channel.type === "Tidal") {
+        reply.status(200).json({
+          pattern: pattern,
+          cid: channel.cid
+        });
+      } else if (channel.type === "Tidal") {
         if (channel.transition !== "" && channel.transition !== undefined) {
           let na = channel.name.substring(1, channel.name.length);
           transitionHolder = "t" + na + " " + channel.transition + " $ ";
-        }
-        else {
+        } else {
           transitionHolder = k + " $ ";
         }
         if (global_mod.channels.includes(channel.cid.toString()) || global_mod.channels.includes(0)) {
@@ -578,21 +608,30 @@ const Siren = () => {
         }
         pattern = transitionHolder + newCommand + " # sirenChan " + channel.activeSceneIndex.toString();
         tidalPatternQueue.push(pattern);
-        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
-      }
-      else if (channel.type === "TidalV") {
+        reply.status(200).json({
+          pattern: pattern,
+          cid: channel.cid,
+          timestamp: new Date().getMilliseconds()
+        });
+      } else if (channel.type === "TidalV") {
         let chn = channel.name.substring(1, channel.name.length);
         transitionHolder = "x" + chn + " $ ";
         pattern = transitionHolder + newCommand;
         tidalPatternQueue.push(pattern);
-        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
-      }
-      else if (channel.type === '') {
+        reply.status(200).json({
+          pattern: pattern,
+          cid: channel.cid,
+          timestamp: new Date().getMilliseconds()
+        });
+      } else if (channel.type === '') {
         pattern = newCommand;
         tidalPatternQueue.push(pattern);
-        reply.status(200).json({ pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds() });
-      }
-      else {
+        reply.status(200).json({
+          pattern: pattern,
+          cid: channel.cid,
+          timestamp: new Date().getMilliseconds()
+        });
+      } else {
         reply.sendStatus(400);
       }
     }
@@ -627,21 +666,20 @@ const Siren = () => {
     });
     reply.sendStatus(200);
   }
-    
+
   const stopPulse = (reply) => {
     if (nano) {
       link.stopUpdate();
       reply.sendStatus(200);
-    }
-    else {
+    } else {
       reply.sendStatus(400);
     }
   }
-  
+
 
 
   //Record compiled patterns with timestamps
-  const startRecording = (reply) => { 
+  const startRecording = (reply) => {
     if (isRecording) {
       isRecording = false;
       reply.sendStatus(500);
@@ -650,12 +688,12 @@ const Siren = () => {
     isRecording = true;
     reply.sendStatus(200);
   }
-      
-  const stopHistory = () => { 
+
+  const stopHistory = () => {
     isPlaying = false;
   }
-  
-  const playHistory = () => { 
+
+  const playHistory = () => {
     let history_json = [];
     isPlaying = true;
     fs.readdirSync('./server/save/recordings/').forEach(file => {
@@ -668,291 +706,358 @@ const Siren = () => {
   }
 
   const sendHistoryPatternPrepare = () => {
-    if (history_index === 0) { 
+    if (history_index === 0) {
       sendHistoryPatterns();
       return;
     }
-    
+
     let interval = parseInt(commandobj[history_index].timestamp - commandobj[history_index - 1].timestamp);
-    
-    if(isPlaying){
-      nano.setTimeout(sendHistoryPatterns, [], (interval + "m").toString(), function(err) {
-        if(err) {
+
+    if (isPlaying) {
+      nano.setTimeout(sendHistoryPatterns, [], (interval + "m").toString(), function (err) {
+        if (err) {
           console.log("ERROR History Patterns");
         }
       });
     }
   }
-  const sendHistoryPatterns =() => {
-    if(commandobj[history_index]) {
+  const sendHistoryPatterns = () => {
+    if (commandobj[history_index]) {
 
       console.log(history_index);
 
       // Execute commands
-      if(commandobj[history_index].type === 'SuperCollider') 
-        SirenComm.siren_console.sendSCLang(commandobj[history_index].pattern); 
+      if (commandobj[history_index].type === 'SuperCollider')
+        SirenComm.siren_console.sendSCLang(commandobj[history_index].pattern);
       else
         tidalPatternQueue.push(commandobj[history_index].pattern);
 
-      
+
       nano.clearTimeout();
       if (commandobj[history_index + 1] !== undefined) {
         history_index++;
         sendHistoryPatternPrepare();
-      }
-      else{
+      } else {
         history_index = 0;
         isPlaying = false;
       }
-    }
-    else{
+    } else {
       history_index = 0;
       isPlaying = false;
       nano.clearTimeout();
     }
   }
 
-  const stopRecording = (reply) => { 
+  const stopRecording = (reply) => {
     try {
       let history_json = [];
-      if (isRecording && historyArray.length > 0) { 
+      if (isRecording && historyArray.length > 0) {
         let time = new Date();
-        recordFilename = time.getHours()+"-"+time.getMinutes()+"-"+time.getSeconds()+"-"+time.getMilliseconds()+ ".json";   
-        jsonfile.writeFileSync('./server/save/recordings/'+recordFilename, 
-                                  _.sortBy(historyArray, ['timestamp']), 
-                                  {spaces: 1, flag: 'w'});
+        recordFilename = time.getHours() + "-" + time.getMinutes() + "-" + time.getSeconds() + "-" + time.getMilliseconds() + ".json";
+        jsonfile.writeFileSync('./server/save/recordings/' + recordFilename,
+          _.sortBy(historyArray, ['timestamp']), {
+            spaces: 1,
+            flag: 'w'
+          });
         isRecording = false;
       }
       historyArray = [];
       fs.readdirSync('./server/save/recordings/').forEach(file => {
         history_json.push(file);
       });
-      reply.status(200).json({history_folders: history_json}); //send the folder names back to front-end for dropdown
-    } catch (e) { 
-      reply.status(500).json({history_folders: undefined});
+      reply.status(200).json({
+        history_folders: history_json
+      }); //send the folder names back to front-end for dropdown
+    } catch (e) {
+      reply.status(500).json({
+        history_folders: undefined
+      });
     }
   }
 
 
 
-    app.post('/pulse', (req, reply) => {
-      startPulse(reply);
+  app.post('/pulse', (req, reply) => {
+    startPulse(reply);
+  });
+  app.post('/pulseStop', (req, reply) => {
+    stopPulse(reply);
+  });
+  app.post('/global_ghc', (req, reply) => {
+    const {
+      pattern
+    } = req.body;
+    console.log(' ## -->   Pattern inbound:', pattern);
+    tidalPatternQueue.push(pattern);
+    reply.sendStatus(200);
+  });
+
+  app.post('/console_ghc', (req, reply) => {
+    const {
+      pattern
+    } = req.body;
+    console.log(' ## -->   Pattern inbound:', pattern);
+    tidalPatternQueue.push(pattern);
+    reply.sendStatus(200);
+  });
+
+  app.post('/nano_ghc', (req, reply) => {
+    const {
+      pattern,
+      channel
+    } = req.body;
+    console.log(' ## -->   Pattern inbound:', pattern);
+    tidalPatternQueue.push(pattern);
+    reply.status(200).json({
+      pattern: pattern,
+      cid: channel.cid,
+      timestamp: new Date().getMilliseconds()
     });
-    app.post('/pulseStop', (req, reply) => {
-      stopPulse(reply);
-    });
-    app.post('/global_ghc', (req, reply) => {
-      const { pattern } = req.body;
-      console.log(' ## -->   Pattern inbound:', pattern);
-      tidalPatternQueue.push(pattern);
+  });
+  app.post('/console_sc', (req, reply) => {
+    const {
+      pattern
+    } = req.body;
+    console.log(' ## -->   SC Pattern inbound:', pattern);
+    sendSCpattern(pattern, reply);
+  })
+  // Save Paths
+  app.post('/paths', (req, reply) => {
+    const {
+      paths
+    } = req.body;
+    if (paths) {
+      jsonfile.writeFileSync('./server/save/paths.json',
+        paths, {
+          spaces: 1,
+          flag: 'w'
+        });
+
       reply.sendStatus(200);
-    });
-  
-    app.post('/console_ghc', (req, reply) => {
-      const { pattern } = req.body;
-      console.log(' ## -->   Pattern inbound:', pattern);
-      tidalPatternQueue.push(pattern);
+    } else
+      reply.sendStatus(400);
+  });
+  // Load Paths
+  app.get('/paths', (req, reply) => {
+    const obj = jsonfile.readFileSync('./server/save/paths.json');
+    if (obj)
+      reply.status(200).json({
+        paths: obj
+      });
+    else
+      reply.status(404).json({
+        paths: undefined
+      });
+  });
+  // Save Scenes
+  app.post('/scenes', (req, reply) => {
+    const {
+      scenes,
+      patterns,
+      channels,
+      active_s
+    } = req.body;
+
+    if (scenes && patterns && channels) {
+      jsonfile.writeFileSync('./server/save/scene.json', {
+        'scenes': scenes,
+        'active_s': active_s,
+        'patterns': patterns,
+        'channels': channels
+      }, {
+        spaces: 1,
+        flag: 'w'
+      });
+
       reply.sendStatus(200);
-    });
-  
-    app.post('/nano_ghc', (req, reply) => {
-      const { pattern, channel } = req.body;
-      console.log(' ## -->   Pattern inbound:', pattern);
-      tidalPatternQueue.push(pattern);
-      reply.status(200).json({pattern: pattern, cid: channel.cid, timestamp: new Date().getMilliseconds()});
-    });
-    app.post('/console_sc', (req, reply) => {
-      const { pattern } = req.body;
-      console.log(' ## -->   SC Pattern inbound:', pattern);
-      sendSCpattern(pattern, reply);
-    })
-    // Save Paths
-    app.post('/paths', (req, reply) => {
-      const { paths } = req.body;
-      if( paths ) {
-        jsonfile.writeFileSync('./server/save/paths.json', 
-                                paths , 
-                                {spaces: 1, flag: 'w'});
+    } else
+      reply.sendStatus(400);
+  });
+  // Load Scenes
+  app.get('/scenes', (req, reply) => {
+    const obj = jsonfile.readFileSync('./server/save/scene.json');
+    if (obj.scenes && obj.active_s && obj.patterns && obj.channels)
+      reply.status(200).json({
+        'scenes': obj.scenes,
+        'active_s': obj.active_s,
+        'patterns': obj.patterns,
+        'channels': obj.channels
+      });
+    else
+      reply.status(404).json({
+        layouts: undefined
+      });
+  });
 
-        reply.sendStatus(200);
-      }
+  // Save Globals
+  app.post('/globals_save', (req, reply) => {
+    const {
+      globals
+    } = req.body;
+    if (globals) {
+      jsonfile.writeFileSync('./server/save/globals.json',
+        globals, {
+          spaces: 1,
+          flag: 'w'
+        });
+
+      reply.sendStatus(200);
+    } else
+      reply.sendStatus(400);
+  });
+
+  // Load Globals
+  app.get('/globals_load', (req, reply) => {
+    const obj = jsonfile.readFileSync('./server/save/globals.json');
+    if (obj)
+      reply.status(200).json({
+        globals: obj
+      });
+    else
+      reply.status(404).json({
+        globals: undefined
+      });
+  });
+  // Save Console
+  app.post('/console', (req, reply) => {
+    const {
+      sc,
+      tidal
+    } = req.body;
+    // console.log(tidal, sc, req.body);
+    if (tidal !== undefined && sc !== undefined) {
+
+      jsonfile.writeFileSync('./server/save/console.json', {
+        'sc': sc,
+        'tidal': tidal
+      }, {
+        flag: 'w'
+      });
+
+      reply.sendStatus(200);
+    } else reply.sendStatus(400);
+  });
+  // Load Console
+  app.get('/console', (req, reply) => {
+    const obj = jsonfile.readFileSync('./server/save/console.json');
+    if (obj.tidal !== undefined && obj.sc !== undefined)
+      reply.status(200).json({
+        'sc': obj.sc,
+        'tidal': obj.tidal
+      });
+    else
+      reply.status(404).json({
+        layouts: undefined
+      });
+  });
+
+
+  // Save Layouts
+  app.post('/layouts', (req, reply) => {
+    const {
+      layouts,
+      customs
+    } = req.body;
+
+    if (layouts) {
+      jsonfile.writeFileSync('./server/save/layout.json', {
+        'layouts': layouts,
+        'customs': customs
+      }, {
+        spaces: 1,
+        flag: 'w'
+      });
+
+      reply.status(200).json({
+        saved: true
+      });
+    } else
+      reply.status(400).json({
+        saved: false
+      });
+  });
+
+  // Load Layouts
+  app.get('/layouts', (req, reply) => {
+    const obj = jsonfile.readFileSync('./server/save/layout.json');
+    if (obj)
+      reply.status(200).json({
+        layouts: obj.layouts,
+        customs: obj.customs
+      });
+    else
+      reply.status(404).json({
+        layouts: undefined,
+        customs: undefined
+      });
+  });
+
+  app.post('/init', (req, reply) => {
+    const {
+      b_config
+    } = req.body;
+    if (b_config) {
+      startSiren(b_config, reply);
+    } else
+      reply.sendStatus(400);
+  });
+
+  // recording 
+  app.post('/record', (req, reply) => {
+    try {
+      const {
+        isRecord
+      } = req.body;
+      console.log("app.post /recording", isRecord);
+
+      if (isRecord)
+        startRecording(reply);
       else
-        reply.sendStatus(400);
-    });
-    // Load Paths
-    app.get('/paths', (req, reply) => {
-      const obj = jsonfile.readFileSync('./server/save/paths.json');
-      if ( obj )
-        reply.status(200).json({ paths: obj });
+        stopRecording(reply);
+    } catch (error) {
+      reply.sendStatus(500);
+    }
+  });
+  // recording 
+  app.post('/playhistory', (req, reply) => {
+    try {
+      const {
+        isPlay
+      } = req.body;
+      console.log("app.post /playing", isPlay);
+
+      if (isPlay)
+        playHistory();
       else
-        reply.status(404).json({ paths: undefined });
-    });
-    // Save Scenes
-    app.post('/scenes', (req, reply) => {
-        const { scenes, patterns, channels, active_s } = req.body;
+        stopHistory();
 
-        if( scenes && patterns && channels) {
-          jsonfile.writeFileSync('./server/save/scene.json', 
-                                  { 'scenes': scenes, 
-                                    'active_s': active_s, 
-                                    'patterns': patterns,
-                                    'channels': channels }, 
-                                    {spaces: 1, flag: 'w'});
+      // reply.sendStatus(200);
+    } catch (error) {
+      reply.sendStatus(500);
+    }
+  });
 
-          reply.sendStatus(200);
-        }
-        else
-          reply.sendStatus(400);
-    });
-    // Load Scenes
-    app.get('/scenes', (req, reply) => {
-      const obj = jsonfile.readFileSync('./server/save/scene.json');
-      if ( obj.scenes && obj.active_s && obj.patterns && obj.channels )
-        reply.status(200).json({ 'scenes': obj.scenes,
-                                 'active_s': obj.active_s, 
-                                 'patterns': obj.patterns,
-                                 'channels': obj.channels });
-      else
-        reply.status(404).json({ layouts: undefined });
-    });
+  // TODO: FIX 
+  app.get('/quit', (req, reply) => {
+    try {
+      stopSiren(req, reply);
+      reply.sendStatus(200);
+    } catch (error) {
+      reply.sendStatus(500);
+    }
+  });
 
-    // Save Globals
-    app.post('/globals_save', (req, reply) => {
-      const { globals } = req.body;
-      if( globals ) {
-        jsonfile.writeFileSync('./server/save/globals.json', 
-                                globals, 
-                                {spaces: 1, flag: 'w'});
+  app.listen(3001, () => {
+    console.log(` ## -->   Server started at http://localhost:${3001}`);
 
-        reply.sendStatus(200);
-      }
-      else
-        reply.sendStatus(400);
-    });
-    
-    // Load Globals
-    app.get('/globals_load', (req, reply) => {
-      const obj = jsonfile.readFileSync('./server/save/globals.json');
-      if ( obj )
-        reply.status(200).json({ globals: obj });
-      else
-        reply.status(404).json({ globals: undefined });
-    });
-    // Save Console
-    app.post('/console', (req, reply) => {
-      const { sc, tidal } = req.body;
-      // console.log(tidal, sc, req.body);
-      if( tidal !== undefined && sc !== undefined) {
-        
-        jsonfile.writeFileSync('./server/save/console.json', 
-                                { 'sc': sc, 
-                                  'tidal': tidal }, 
-                                {flag: 'w'});
-
-        reply.sendStatus(200);
-      }
-      else reply.sendStatus(400);
-    });
-    // Load Console
-    app.get('/console', (req, reply) => {
-      const obj = jsonfile.readFileSync('./server/save/console.json');
-      if ( obj.tidal !== undefined && obj.sc !== undefined)
-        reply.status(200).json({ 'sc': obj.sc,
-                                 'tidal': obj.tidal });
-      else
-        reply.status(404).json({ layouts: undefined });
-    });
+  });
 
 
-    // Save Layouts
-    app.post('/layouts', (req, reply) => {
-      const { layouts, customs } = req.body;
+}
 
-      if( layouts ) {
-        jsonfile.writeFileSync('./server/save/layout.json', 
-                                { 'layouts' : layouts, 'customs' : customs }, 
-                                {spaces: 1, flag: 'w'});
-
-        reply.status(200).json({ saved: true });
-      }
-      else
-        reply.status(400).json({ saved: false });
-    });
-
-    // Load Layouts
-    app.get('/layouts', (req, reply) => {
-      const obj = jsonfile.readFileSync('./server/save/layout.json');
-      if ( obj )
-        reply.status(200).json({ layouts: obj.layouts, customs: obj.customs });
-      else
-        reply.status(404).json({ layouts: undefined, customs: undefined });
-    });
-
-    app.post('/init', (req, reply) => {
-      const { b_config } = req.body;
-      if( b_config ) {
-        startSiren(b_config, reply);
-      }
-      else
-        reply.sendStatus(400);
-    });
-
-    // recording 
-    app.post('/record', (req, reply) => {
-      try {
-        const { isRecord } = req.body;
-        console.log("app.post /recording", isRecord);
-
-        if (isRecord)
-          startRecording(reply);
-        else
-          stopRecording(reply);  
-      } catch(error) {
-        reply.sendStatus(500);
-      }
-    });
-      // recording 
-    app.post('/playhistory', (req, reply) => {
-      try {
-        const { isPlay } = req.body;
-        console.log("app.post /playing", isPlay);
-
-        if (isPlay)
-          playHistory();
-        else
-          stopHistory();  
-        
-        // reply.sendStatus(200);
-      } catch(error) {
-        reply.sendStatus(500);
-      }
-    });
-  
-    // TODO: FIX 
-    app.get('/quit', (req, reply) => {
-      try{
-        stopSiren(req, reply);
-        reply.sendStatus(200);
-      }catch(error) {
-        reply.sendStatus(500);
-      }
-    });
-
-    app.listen(3001, () => {
-      console.log(` ## -->   Server started at http://localhost:${3001}`);
-
-    });
-    
-    
-  }
-
-  // process.on('SIGINT', () => {
-  //   if (TidalData.TidalConsole.repl !== undefined) TidalData.TidalConsole.repl.kill();
-  //   process.exit(1)
-  // });
-  //app.use("/", express.static(path.join(__dirname, "build")));
-  module.exports = Siren;
-
-
-
-
+// process.on('SIGINT', () => {
+//   if (TidalData.TidalConsole.repl !== undefined) TidalData.TidalConsole.repl.kill();
+//   process.exit(1)
+// });
+//app.use("/", express.static(path.join(__dirname, "build")));
+module.exports = Siren;

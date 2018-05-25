@@ -18,50 +18,75 @@
   opacity: 0.9;
   cursor: pointer;
 }
+
 .Logo:hover {
   opacity: 0.7;
 }
 
 /* Radiation Animation */
+
 @keyframes radiate {
   to {
     transform: scale(1.5);
     opacity: 0.0;
   }
 }
-/* Save Animation */
-@keyframes flusa {
-  0% {transform: scale(1);}
-  20% {transform: scale(0.9);}
-  100% {transform: scale(1);}
+
+@keyframes radiate_wout_scale {
+  to {
+    box-shadow: 0 0 0 3px rgba(200, 0, 0, 0.2) inset;
+  }
 }
+
+/* Save Animation */
+
+@keyframes flusa {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .SaveExecuted {
   animation-name: flusa;
   animation-duration: 1s;
 }
 
-
-.TimerControls{
+.TimerControls {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
 }
-.TimerControls > .Button.Record {
-  color: #bf2618;
-  animation: radiate 2s infinite; 
+
+.TimerControls>.Button.Record {
+  color: var(--record-color);
+  animation: radiate 2s infinite;
 }
 
-.TimerControls > .Button {
+.recording {
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--record-color) inset;
+  animation: radiate_wout_scale 2s infinite alternate;
+}
+
+.TimerControls>.Button {
   font-size: 16px;
   vertical-align: middle;
   border: none;
   margin-right: 5px;
 }
-.TimerControls > .Button:hover{
+
+.TimerControls>.Button:hover {
   background-color: transparent;
   color: var(--accent-color-opaque);
 }
+
 .RMSVis {
   display: flex;
   flex-direction: column;
@@ -69,14 +94,14 @@
   margin: 0 20px;
 }
 
-
 .OtherControls {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
 }
-.OtherControls > button {
+
+.OtherControls>button {
   height: 75%;
   width: 50px;
   border-color: rgba(255, 255, 255, 0.1);
@@ -90,10 +115,15 @@
   opacity: 0.6;
   transition: all 100ms ease;
 }
+
 .ServerStatus.inactive {
   background: #bf2618;
-}.ServerStatus.ready {
+}
+
+.ServerStatus.ready {
   background: #ffc005;
-}.ServerStatus.running {
+}
+
+.ServerStatus.running {
   background: #1fc60f;
 }
