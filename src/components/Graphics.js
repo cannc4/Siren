@@ -38,7 +38,10 @@ class Canvas extends React.Component {
   }
   
   render() {
-    const { time, res, rollStore} = this.props;
+    const { time, res, rollStore } = this.props;
+
+    // decay variables
+    rollStore.decayEvolutionMatrix();
 
     // sample parameters
     let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
@@ -66,7 +69,7 @@ class Canvas extends React.Component {
         res,
         time: time / 1000,
         rmss: rmsArray,
-        evolutions: [[1, 2, 3, 4],[5,6,7,8],[9,10,11,12],[13,14,15,16]],
+        evolution: rollStore.evolutions.valueOf(),
         nameAscii,
         n,
         note,

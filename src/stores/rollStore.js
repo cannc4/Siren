@@ -14,6 +14,8 @@ class RollStore {
 
     // Trigger value
     @observable value = {};
+    @observable value_time = 0;
+    @observable cycle_time_offset = 0;
 
     // Future triggers
     // @observable future_values = [];
@@ -33,12 +35,7 @@ class RollStore {
     @observable tree;
 
     // graphic evolution matrices // 4 limited
-    @observable evolutions = [
-        math.matrix(math.zeros([4, 4])),
-        math.matrix(math.zeros([4, 4])),
-        math.matrix(math.zeros([4, 4])),
-        math.matrix(math.zeros([4, 4]))
-    ];
+    @observable evolutions = math.matrix(math.zeros([4, 4]));
 
     constructor() {
         let ctx = this;
@@ -56,9 +53,11 @@ class RollStore {
                 this.roll_canvas_element = document.getElementById("pat_roll");
             }
             else {
+                this.cycle_time_offset = _.toInteger(this.value.cycle - this.value_time);
+                
                 // -- process data and render canvas
                 this.processData();
-                this.renderCanvas();
+                // this.renderCanvas();
 
                 // -- update evolution matrices
                 this.updateEvolutionMatrix();
@@ -129,20 +128,20 @@ class RollStore {
     // -- Update evolution matrices
     @action
     updateEvolutionMatrix() { 
-        let matrix_index = this.value.sirenChan;
-        if (matrix_index < this.evolutions.length) { 
-            let matrix = this.evolutions[matrix_index];
+        this.evolutions = math.eye(4);
+        // let matrix_index = this.value.sirenChan;
+        // if (matrix_index < this.evolutions.length) { 
+        //     let matrix = this.evolutions[matrix_index];
 
-
-        }
+//        }
     }
 
-    // -- Update evolution matrices
+    // -- Decay evolution matrices
     @action
     decayEvolutionMatrix() { 
-        for (let i = 0; i < 4; i++) {
-            math.multiply(this.evolutions[i], 0.99);
-        }
+        this.evolutions = math.multiply(this.evolutions, 0.99);
+        // for (let i = 0; i < 4; i++) {
+        // }
     }    
 
 
@@ -165,16 +164,17 @@ class RollStore {
         };
 
         // initialize start cycle
-        if (this.tree_start_cycle === 0) {
-            this.tree_start_cycle = _.toInteger(this.value.cycle);
-        }
+        // if (this.tree_start_cycle === 0) {
+        //     this.tree_start_cycle = _.toInteger(this.value.cycle);
+        // }
 
-        // reset time
-        if (this.value.cycle > this.cycles + this.tree_start_cycle) {
-            // delete all nodes
-            this.treeRoot = null;
-            this.tree_start_cycle = _.toInteger(this.value.cycle);
-        }
+        // // reset time
+        // if (this.value.cycle > this.cycles + this.tree_start_cycle) {
+        //     // delete all nodes
+        //     this.treeRoot = null;
+        //     this.tree_start_cycle = _.toInteger(this.value.cycle);
+        // }
+        //////////////
 
         // if its empty
         if (this.treeRoot === null) {
@@ -185,10 +185,38 @@ class RollStore {
             });
         }
 
+        // Delete old nodes
+        this.treeRoot.all({strategy: 'post'},  (n) => { 
+            if (n.model.type === 'note') { 
+                n.model.time = _.dropWhile(n.model.time, (o) => { 
+                    return o.cycle < this.value.cycle - this.cycles;
+                });
+                return n.model.time.length === 0;
+            }
+            return false;
+        }).forEach(function (node) {
+            node.drop();
+        });
+        this.treeRoot.all({strategy: 'post'},  (n) => { 
+            if (n.model.type === 'sample' && !n.hasChildren())
+                return true;
+            return false;
+        }).forEach(function (node) {
+            node.drop();
+        });
+        this.treeRoot.all({strategy: 'post'},  (n) => { 
+            if (n.model.type === 'channel' && !n.hasChildren())
+                return true;
+            return false;
+        }).forEach(function (node) {
+            node.drop();
+        });
+        ////////////////////////
+        
+
         let channel_node;
         let sample_node;
         let note_node;
-
         channel_node = this.treeRoot.first({
             strategy: 'breadth'
         }, (n) => {
@@ -214,9 +242,8 @@ class RollStore {
                 note_node = sample_node.first({
                     strategy: 'breadth'
                 }, (n) => {
-                    if (n.model.type === 'note' && n.model.value === this.value.n) {
+                    if (n.model.type === 'note' && n.model.value === this.value.n)
                         return true;
-                    }
                     return false;
                 });
                 if (note_node === undefined) {
@@ -235,56 +262,61 @@ class RollStore {
             let ctx = this.roll_canvas_element.getContext("2d", {
                 alpha: false
             });
-    
+
             this.updateCanvasDimensions();
             let w = this.roll_canvas_element.width = this.dimensions_c[0];
             let h = this.roll_canvas_element.height = this.dimensions_c[1];
     
             // channel backgrounds
-            for (let i = 0; i < this.treeRoot.children.length; i++) {
-                i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
-    
-                ctx.fillRect(
-                    0,
-                    _.toInteger(h / (this.treeRoot.children.length) * i),
-                    w,
-                    _.toInteger(h / (this.treeRoot.children.length))
-                );
-            }
-    
-            // nodes
-            this.treeRoot.walk({
-                strategy: 'post'
-            }, (n) => {
-                // leaf node
-                if (!n.hasChildren()) {
-                    const path = n.getPath();
-    
-                    const _w = w / (this.cycles * this.resolution);
-                    const _c_h = h / (path[0].children.length);
-                    const _c_i = path[1].getIndex();
-                    const _s_h = _c_h / (path[1].children.length);
-                    const _s_i = path[2].getIndex();
-                    const _n_h = _s_h / (path[2].children.length);
-                    const _n_i = path[3].getIndex();
-    
-                    ctx.fillStyle = "rgb(180, 180, 180)";
-                    ctx.strokeStyle = "#111"
-                    _.each(n.model.time, (item) => {
-                        if (!item.rendered) {
-                            ctx.fillStyle = "rgb(180, 180, 20)";
-                            item.rendered = true;
-                        }
-                        
-                        ctx.fillRect(
-                            ((item.cycle - this.tree_start_cycle) * this.resolution) * _w,
-                            _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
-                            _w * (item.sustain !== undefined ? item.sustain : 1),
-                            _n_h
-                        );
-                    })
+            if (this.treeRoot) { 
+
+                for (let i = 0; i < this.treeRoot.children.length; i++) {
+                    i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
+        
+                    ctx.fillRect(
+                        0,
+                        _.toInteger(h / (this.treeRoot.children.length) * i),
+                        w,
+                        _.toInteger(h / (this.treeRoot.children.length))
+                    );
                 }
-            });
+        
+                // nodes
+                this.treeRoot.walk({
+                    strategy: 'post'
+                }, (n) => {
+                    // leaf node
+                    if (!n.hasChildren()) {
+                        const path = n.getPath();
+        
+                        const _w = w / (this.cycles * this.resolution);
+                        const _c_h = h / (path[0].children.length);
+                        const _c_i = path[1].getIndex();
+                        const _s_h = _c_h / (path[1].children.length);
+                        const _s_i = path[2].getIndex();
+                        const _n_h = _s_h / (path[2].children.length);
+                        const _n_i = path[3].getIndex();
+        
+                        ctx.fillStyle = "rgb(180, 180, 180)";
+                        ctx.strokeStyle = "#111"
+                        _.each(n.model.time, (item) => {
+                            if (!item.rendered) {
+                                ctx.fillStyle = "rgb(180, 100, 20)";
+                                item.rendered = true;
+                            }
+                            
+                            ctx.fillRect(
+                                (((item.cycle-this.cycle_time_offset) - (this.value_time - this.cycles)) * this.resolution ) * _w,                            
+                                //((item.cycle - (this.value.cycle - this.cycles)) * (this.resolution - 1)) * _w,
+                                //((item.cycle - this.tree_start_cycle) * this.resolution) * _w,
+                                _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
+                                _w * (item.sustain !== undefined ? item.sustain : 1),
+                                _n_h
+                            );
+                        })
+                    }
+                });
+            }
         }
     }
 }

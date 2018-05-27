@@ -1,6 +1,23 @@
 import _ from 'lodash';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
+import timeLoop from '../utils/timeLoop';
+import rollStore from '../stores/rollStore';
+
+class Roll extends React.Component { 
+  render() {
+    rollStore.value_time = this.props.time / 1000.;
+    rollStore.renderCanvas();
+
+    return (
+      <div className={'CanvasSketch'}>
+        <canvas id="pat_roll" width={'100'} height={'100'}></canvas>  
+      </div>
+    );
+  }
+};
+
+const RollLoop = timeLoop(Roll);
 
 @inject('rollStore')
 @observer
@@ -50,10 +67,7 @@ export default class Canvas extends React.Component {
           }
           }>⭯</button>
       </div>
-
-      <div className={'CanvasSketch'}>
-        <canvas id="pat_roll" width={'100'} height={'100'}></canvas>  
-      </div>
+      <RollLoop></RollLoop>
     </div>);
   }
 }

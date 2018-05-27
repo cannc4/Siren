@@ -68,7 +68,7 @@ export const shaders = Shaders.create({
 
         // channel-wise evolution matrix
         ////// 4 channels max ////
-        uniform mat4 evolutions[4];
+        uniform mat4 evolution;
 
         // rms values
         uniform float rmss[2];
@@ -443,7 +443,7 @@ export const shaders = Shaders.create({
             vec3 color = render(p, worldDir);
             // vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
             
-            gl_FragColor = vec4(color, 1.0);
+            gl_FragColor = vec4(evolution[0].xyz, 1.0);
         }
         `
     }
