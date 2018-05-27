@@ -25,9 +25,10 @@
   "gfix1",
   "19may",
   "21may",
-  "0521"
+  "0521",
+  "0526"
  ],
- "active_s": "gfix1",
+ "active_s": "0526",
  "patterns": [
   {
    "scene": "default",
@@ -1765,6 +1766,36 @@
    "name": "bts_p",
    "params": "x",
    "text": "(0.5~>) $ n (scaleP \"`x?minor`\" \"c3 e5 g4 a3\") # s \"bass0\" # orbit 1"
+  },
+  {
+   "scene": "0526",
+   "name": "pat",
+   "params": "y,x,z",
+   "text": "every `y` (#n (run &`x`-1&)) $ slow &`x`/(7.5/`z?1`)& $ n (run `x`) # s \"rd1\""
+  },
+  {
+   "scene": "0526",
+   "name": "pat2",
+   "params": "y,x,z",
+   "text": "modNote 2  ((#speed (scale 0.5 0.9 $ saw)).(#s \"foil3\")) $ modNote 1 (#s \"phit\") $ every `y` (#n (run &`x`-1&)) $ slow &`x`/(7.5/`z?1`)& $ n (run `x`) # s \"rd1\""
+  },
+  {
+   "scene": "0526",
+   "name": "pat3",
+   "params": "y,x,z",
+   "text": "every `y` (#n (run &`x`-1&)) $ slow &`x`/(7.5/`z?1`)& $ n (run `x`) # s \"rd1\""
+  },
+  {
+   "scene": "0526",
+   "name": "s",
+   "params": "",
+   "text": "silence"
+  },
+  {
+   "scene": "0526",
+   "name": "amb",
+   "params": "x,y",
+   "text": "`x?` slow 6 $ sound \"monopad:3\" #  hpf 1000 #lpf 9000 #hall 0.3 \n# up (scaleP \"dorian\" \"<1 3 -2 4>\") `y?`"
   }
  ],
  "channels": [
@@ -7010,7 +7041,7 @@
     "",
     ""
    ],
-   "gate": false,
+   "gate": true,
    "solo": false,
    "mute": false,
    "loop": true,
@@ -7738,6 +7769,114 @@
    "executed": false,
    "selected": false,
    "cid": 143
+  },
+  {
+   "scene": "0526",
+   "activeSceneIndex": 0,
+   "name": "d2",
+   "type": "Tidal",
+   "steps": 29,
+   "rate": 8,
+   "time": 0,
+   "transition": "(xfadeIn 2)",
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "s",
+    "pat2 `1` `15` `4`",
+    "pat2 `2` `15` `8`",
+    "pat2 `4` `15` `1`",
+    "",
+    "pat2 `1` `5` `2`",
+    "pat2 `2` `5` `1`",
+    "pat2 `4` `5` `3`",
+    "",
+    "",
+    "s",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "gate": true,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "executed": false,
+   "selected": false,
+   "cid": 146
+  },
+  {
+   "scene": "0526",
+   "activeSceneIndex": 1,
+   "name": "d1",
+   "type": "Tidal",
+   "steps": 14,
+   "rate": 8,
+   "time": 0,
+   "transition": "",
+   "cells": [
+    "",
+    "amb",
+    "",
+    "s",
+    "",
+    "amb `every 2 (fast 2) $ ` `# delay 0.5 #delayTime 0.5 #delayfeedback 2 `",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "gate": true,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "executed": false,
+   "selected": false,
+   "cid": 146
+  },
+  {
+   "scene": "0526",
+   "activeSceneIndex": 2,
+   "name": "one d1",
+   "type": "Tidal",
+   "steps": 8,
+   "rate": 8,
+   "time": 0,
+   "transition": "",
+   "cells": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "gate": false,
+   "solo": false,
+   "mute": false,
+   "loop": true,
+   "executed": false,
+   "selected": false,
+   "cid": 146
   }
  ]
 }

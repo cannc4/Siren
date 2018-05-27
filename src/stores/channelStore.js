@@ -13,10 +13,12 @@ import globalStore from './globalStore';
 import consoleStore from './consoleStore';
 
 import request from '../utils/request'
+import menubarStore from './menubarStore';
 
 class ChannelStore {
     @observable channels = [{
         scene: 'default',
+        activeSceneIndex: 0,
         name: 'd1',
         type: 'Tidal',
         steps: 8,
@@ -35,10 +37,12 @@ class ChannelStore {
     @observable soloEnabled = false;
 
     // Getters
-    @computed get getActiveChannels() {
+    @computed get
+    getActiveChannels() {
         return this.channels.filter(c => c.scene === sceneStore.active_scene);
     }
-    @computed get getMaxStep() {
+    @computed get
+    getMaxStep() {
         if (this.getActiveChannels.length > 0)
             return _.maxBy(this.getActiveChannels, 'steps').steps;
         else
@@ -54,7 +58,8 @@ class ChannelStore {
         }
     }
 
-    @action clearChannel(name) {
+    @action
+    clearChannel(name) {
         let ch = _.find(this.channels, {
             'name': name,
             'scene': sceneStore.active_scene
@@ -64,7 +69,8 @@ class ChannelStore {
         }
     }
 
-    @action resetTime(name) {
+    @action
+    resetTime(name) {
         let ch = _.find(this.channels, {
             'name': name,
             'scene': sceneStore.active_scene
@@ -74,7 +80,8 @@ class ChannelStore {
         }
     }
 
-    @action resetAllTimes() {
+    @action
+    resetAllTimes() {
         _.each(this.channels, (ch, i) => {
             if (ch !== undefined) {
                 ch.time = 0;
@@ -82,7 +89,8 @@ class ChannelStore {
         });
 
     }
-    @action seekTimer(step_index, channel_index = -1) {
+    @action
+    seekTimer(step_index, channel_index = -1) {
         let active_channels = this.getActiveChannels;
         if (channel_index === -1)
             _.forEach(active_channels, (channel, i) => {
@@ -98,15 +106,28 @@ class ChannelStore {
         }
     }
 
-    // Update the timer values based on the pulse 
-    @action updateAll() {
-        _.forEach(this.getActiveChannels, (channel, i) => {
-            if (channel.gate && pulseStore.pulse.beat % channel.rate === 0) {
-                // TODO: FIX
-                //channel['activeSceneIndex'] = i;
+    silenceChannel(channel) {
+        if (channel.type === "Tidal") {
+            consoleStore.submitGHC(channel.name + "$ silence");
+        }
+        else if ("SuperCollider") { 
+            consoleStore.submitSC("s.freeAll;");
+        }
+    }
+    silenceAllChannels() {
+        _.each(this.getActiveChannels, (channel) => { 
+            this.silenceChannel(channel);
+        });
+    }
 
+    // Update the timer values based on the pulse 
+    @action
+    updateAll() {
+        _.forEach(this.getActiveChannels, (channel, i) => {
+            if (channel.gate && pulseStore.pulse.beat % channel.rate === 0 ) {
                 // if not still looping
                 if (!channel.executed) {
+                    channel.time += 1;
                     let current_step = channel.time % channel.steps;
 
                     // if cell is not empty
@@ -124,7 +145,6 @@ class ChannelStore {
                         }
                     }
 
-                    channel.time += 1;
                 } else if (channel.executed && channel.type === 'Tidal') {
                     consoleStore.submitGHC(channel.name + ' $ silence');
                     channel.gate = false;

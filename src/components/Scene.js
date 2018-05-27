@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
+import { executionCssByEvent } from '../keyFunctions';
 
 @inject('sceneStore')
 @observer
@@ -8,7 +9,7 @@ export default class Scene extends React.Component {
     
     handleControlEnter = (event) => {
         if(event.ctrlKey && event.keyCode === 13){
-            this.props.sceneStore.executionCss(event);
+            executionCssByEvent(event);
             this.props.sceneStore.addScene(document.getElementById('new_scene_input').value)
         }
     }

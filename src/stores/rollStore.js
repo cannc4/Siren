@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import _ from 'lodash';
 
 import TreeModel from 'tree-model'
+let math = require('mathjs')
 
 class RollStore {
     sc_log_socket = io('http://localhost:4002/');
@@ -31,6 +32,14 @@ class RollStore {
     @observable treeRoot = null;
     @observable tree;
 
+    // graphic evolution matrices // 4 limited
+    @observable evolutions = [
+        math.matrix(math.zeros([4, 4])),
+        math.matrix(math.zeros([4, 4])),
+        math.matrix(math.zeros([4, 4])),
+        math.matrix(math.zeros([4, 4]))
+    ];
+
     constructor() {
         let ctx = this;
 
@@ -45,21 +54,14 @@ class RollStore {
             // -- init canvas 
             if (this.roll_canvas_element === null || this.roll_canvas_element === undefined) {
                 this.roll_canvas_element = document.getElementById("pat_roll");
-                // -- process data 
+            }
+            else {
+                // -- process data and render canvas
                 this.processData();
-    
-    
-                // -- render
-                //  see if channel is new
-                //          clear everything
-                //      else
-                //          if s is new
-                //              clear channel portion of the window and redraw channel 
-                //          else
-                //              if n new
-                //                  clear n portion and redraw
-                //              else
                 this.renderCanvas();
+
+                // -- update evolution matrices
+                this.updateEvolutionMatrix();
             }
         }))
 
@@ -80,15 +82,18 @@ class RollStore {
     }
 
     // -- Module interaction
-    @action updateCycles(c) {
+    @action
+    updateCycles(c) {
         this.cycles = c;
     }
-    @action updateResolution(r) {
+    @action
+    updateResolution(r) {
         this.resolution = r;
     }
 
     // -- The dimensions 
-    @action updateCanvasDimensions() {
+    @action
+    updateCanvasDimensions() {
         const element = document.getElementById('canvasLayout');
         if (element && element !== null) {
             const w = element.clientWidth;
@@ -99,7 +104,8 @@ class RollStore {
         }
         this.dimensions_c = [800, 300];
     }
-    @action updateGraphicsDimensions() {
+    @action
+    updateGraphicsDimensions() {
         const element = document.getElementById('graphicsLayout');
         if (element && element !== null) {
             const w = element.clientWidth;
@@ -112,15 +118,37 @@ class RollStore {
     }
 
     // -- Hot reload
-    @action reloadRoll() {
+    @action
+    reloadRoll() {
         this.tree_start_cycle = _.toInteger(this.value.cycle);
 
         this.updateGraphicsDimensions();
-        this.updateCanvasDimensions();
+        this.renderCanvas();
     }
 
-    // --Canvas functions 
-    @action processData() {
+    // -- Update evolution matrices
+    @action
+    updateEvolutionMatrix() { 
+        let matrix_index = this.value.sirenChan;
+        if (matrix_index < this.evolutions.length) { 
+            let matrix = this.evolutions[matrix_index];
+
+
+        }
+    }
+
+    // -- Update evolution matrices
+    @action
+    decayEvolutionMatrix() { 
+        for (let i = 0; i < 4; i++) {
+            math.multiply(this.evolutions[i], 0.99);
+        }
+    }    
+
+
+    // -- Canvas functions 
+    @action
+    processData() {
 
         const node = {
             type: 'channel',
@@ -200,60 +228,64 @@ class RollStore {
         }
     }
 
-    @action renderCanvas() {
-        let ctx = this.roll_canvas_element.getContext("2d", {
-            alpha: false
-        });
+    @action
+    renderCanvas() {
+        if (this.roll_canvas_element) { 
 
-        this.updateCanvasDimensions();
-        let w = this.roll_canvas_element.width = this.dimensions_c[0];
-        let h = this.roll_canvas_element.height = this.dimensions_c[1];
-
-        // background
-        for (let i = 0; i < this.treeRoot.children.length; i++) {
-            i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
-
-            ctx.fillRect(
-                0,
-                _.toInteger(h / (this.treeRoot.children.length) * i),
-                w,
-                _.toInteger(h / (this.treeRoot.children.length))
-            );
-        }
-
-        // nodes
-        this.treeRoot.walk({
-            strategy: 'post'
-        }, (n) => {
-            // leaf node
-            if (!n.hasChildren()) {
-                const path = n.getPath();
-
-                const _w = w / (this.cycles * this.resolution);
-                const _c_h = h / (path[0].children.length);
-                const _c_i = path[1].getIndex();
-                const _s_h = _c_h / (path[1].children.length);
-                const _s_i = path[2].getIndex();
-                const _n_h = _s_h / (path[2].children.length);
-                const _n_i = path[3].getIndex();
-
-                ctx.fillStyle = "rgb(180, 180, 180)";
-                ctx.strokeStyle = "#111"
-                _.each(n.model.time, (item) => {
-                    if (!item.rendered) {
-                        ctx.fillStyle = "rgb(180, 180, 20)";
-                        ctx.strokeStyle = "rgb(180, 0, 0)"
-                        item.rendered = true;
-                    }
-                    ctx.fillRect(
-                        _.toInteger(((item.cycle - this.tree_start_cycle) * this.resolution) * _w),
-                        _.toInteger(_c_i * _c_h + _s_h * _s_i + _n_i * _n_h),
-                        _.toInteger(_w),
-                        _.toInteger(_n_h)
-                    );
-                })
+            let ctx = this.roll_canvas_element.getContext("2d", {
+                alpha: false
+            });
+    
+            this.updateCanvasDimensions();
+            let w = this.roll_canvas_element.width = this.dimensions_c[0];
+            let h = this.roll_canvas_element.height = this.dimensions_c[1];
+    
+            // channel backgrounds
+            for (let i = 0; i < this.treeRoot.children.length; i++) {
+                i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
+    
+                ctx.fillRect(
+                    0,
+                    _.toInteger(h / (this.treeRoot.children.length) * i),
+                    w,
+                    _.toInteger(h / (this.treeRoot.children.length))
+                );
             }
-        });
+    
+            // nodes
+            this.treeRoot.walk({
+                strategy: 'post'
+            }, (n) => {
+                // leaf node
+                if (!n.hasChildren()) {
+                    const path = n.getPath();
+    
+                    const _w = w / (this.cycles * this.resolution);
+                    const _c_h = h / (path[0].children.length);
+                    const _c_i = path[1].getIndex();
+                    const _s_h = _c_h / (path[1].children.length);
+                    const _s_i = path[2].getIndex();
+                    const _n_h = _s_h / (path[2].children.length);
+                    const _n_i = path[3].getIndex();
+    
+                    ctx.fillStyle = "rgb(180, 180, 180)";
+                    ctx.strokeStyle = "#111"
+                    _.each(n.model.time, (item) => {
+                        if (!item.rendered) {
+                            ctx.fillStyle = "rgb(180, 180, 20)";
+                            item.rendered = true;
+                        }
+                        
+                        ctx.fillRect(
+                            ((item.cycle - this.tree_start_cycle) * this.resolution) * _w,
+                            _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
+                            _w * (item.sustain !== undefined ? item.sustain : 1),
+                            _n_h
+                        );
+                    })
+                }
+            });
+        }
     }
 }
 

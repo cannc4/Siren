@@ -59,13 +59,14 @@ class Canvas extends React.Component {
     _.each(menubarStore.rmsArray, (e, i) => { 
       rmsArray[i] = e.rms;
     });
-  
+
     return <Node
       shader={shaders.marchGL}
       uniforms={{
         res,
         time: time / 1000,
         rmss: rmsArray,
+        evolutions: [[1, 2, 3, 4],[5,6,7,8],[9,10,11,12],[13,14,15,16]],
         nameAscii,
         n,
         note,
@@ -84,8 +85,8 @@ class Canvas extends React.Component {
 }
 
 
-export const FXShake = ({ children: t, time }) =>
-<Node shader={shaders.shake}
+const FXShake = ({ children: t, time }) =>
+  <Node shader={shaders.shake}
     uniforms={{
       texture: t,
       time: time / 1000,
@@ -93,13 +94,14 @@ export const FXShake = ({ children: t, time }) =>
     }} />;
     
     
-export const FXRGBShift = ({ children: t }) =>
-<Node shader={shaders.rgbShift}
-uniforms={{
-  texture: t,
-  amount: 0.005,
-  angle: 3.14
-}} />;
+const FXRGBShift = ({ children: t }) =>
+  <Node shader={shaders.rgbShift}
+    uniforms={{
+      texture: t,
+      amount: 0.005,
+      angle: 3.14
+    }} />;
+
 
 const CanvasLoop = timeLoop(Canvas);
 const FXShakeLoop = timeLoop(FXShake);
@@ -113,14 +115,16 @@ export default class Graphics extends React.Component {
     let dim = this.props.rollStore.dimensions_g;
     return (
       <Surface width={dim[0]} height={dim[1]}>
-        <Bus ref='main'>
-          <CanvasLoop res={[dim[0], dim[1]]} rollStore={this.props.rollStore}/>
-        </Bus>
-        <FXRGBShift>
+        {/* <Bus ref='main'> */}
+        <CanvasLoop
+          res={[dim[0], dim[1]]}
+          rollStore={this.props.rollStore} />
+        {/* </Bus> */}
+        {/* <FXRGBShift> */}
           {/* <FXShakeLoop> */}
-            {() => this.refs.main}
+            {/* {() => this.refs.main} */}
           {/* </FXShakeLoop> */}
-        </FXRGBShift>  
+        {/* </FXRGBShift>   */}
       </Surface>     
     );
   }

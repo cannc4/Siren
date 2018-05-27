@@ -23,7 +23,7 @@ class ChannelHeader extends React.Component {
                 <input ref={(input_name) => { this.nameInputName = input_name; }}
                     title={"Channel Name (" + item.name + ") [enter to submit changes]"}
                     className={"ChannelItemHeader-NameText draggableCancel"}
-                    placeholder={item.name}
+                    placeholder={(item.name === '' ? '___': item.name)}
                     onKeyUp={this.handleControlEnter.bind(this)}
                     onClick={() => this.nameInputName.focus()}
                     onBlur = {() => this.nameInputName.value = ''}/>
