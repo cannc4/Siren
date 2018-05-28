@@ -6,7 +6,7 @@ import {
 import _ from 'lodash';
 
 import channelStore from './channelStore';
-import sceneStore from './sceneStore';
+// import sceneStore from './sceneStore';
 import {
     executionCssById
 } from '../keyFunctions';

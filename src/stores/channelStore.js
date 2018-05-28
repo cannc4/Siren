@@ -13,7 +13,7 @@ import globalStore from './globalStore';
 import consoleStore from './consoleStore';
 
 import request from '../utils/request'
-import menubarStore from './menubarStore';
+// import menubarStore from './menubarStore';
 
 class ChannelStore {
     @observable channels = [{

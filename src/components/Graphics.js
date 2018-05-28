@@ -18,10 +18,10 @@ import {
   Surface
 } from "gl-react-dom";
 import {
-  Shaders,
+  // Shaders,
   Node,
-  Bus,
-  Uniform
+  Bus
+  // Uniform
 } from "gl-react";
 
 import timeLoop from "../utils/timeLoop";
