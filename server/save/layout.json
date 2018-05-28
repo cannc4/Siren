@@ -4,7 +4,7 @@
    "w": 2,
    "h": 20,
    "x": 0,
-   "y": 10,
+   "y": 0,
    "i": "scenes",
    "moved": false,
    "static": false,
@@ -14,7 +14,7 @@
    "w": 8,
    "h": 20,
    "x": 2,
-   "y": 10,
+   "y": 0,
    "i": "tracker",
    "moved": false,
    "static": false,
@@ -24,7 +24,7 @@
    "w": 5,
    "h": 13,
    "x": 10,
-   "y": 10,
+   "y": 7,
    "i": "patterns",
    "moved": false,
    "static": false,
@@ -34,7 +34,7 @@
    "w": 9,
    "h": 7,
    "x": 15,
-   "y": 10,
+   "y": 13,
    "i": "tidal_history",
    "moved": false,
    "static": false,
@@ -44,7 +44,7 @@
    "w": 9,
    "h": 6,
    "x": 15,
-   "y": 17,
+   "y": 7,
    "i": "tidal_console",
    "moved": false,
    "static": false,
@@ -54,7 +54,7 @@
    "w": 14,
    "h": 7,
    "x": 10,
-   "y": 23,
+   "y": 0,
    "i": "tidal_roll",
    "moved": false,
    "static": false,
@@ -68,7 +68,7 @@
    "i": "graphics",
    "moved": false,
    "static": false,
-   "isVisible": true
+   "isVisible": false
   },
   {
    "w": 9,
@@ -266,21 +266,21 @@
     "isVisible": true
    },
    {
+    "w": 24,
+    "h": 6,
+    "x": 0,
+    "y": 20,
+    "i": "tidal_roll",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
     "w": 5,
     "h": 6,
     "x": 19,
     "y": 14,
     "i": "tidal_globals",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 24,
-    "h": 6,
-    "x": 0,
-    "y": 14,
-    "i": "tidal_roll",
     "moved": false,
     "static": false,
     "isVisible": false
@@ -348,7 +348,7 @@
     "isVisible": true
    },
    {
-    "w": 10,
+    "w": 8,
     "h": 20,
     "x": 2,
     "y": 10,
@@ -358,39 +358,39 @@
     "isVisible": true
    },
    {
-    "w": 7,
-    "h": 9,
-    "x": 12,
-    "y": 21,
+    "w": 5,
+    "h": 13,
+    "x": 10,
+    "y": 17,
     "i": "patterns",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
-    "w": 5,
-    "h": 9,
-    "x": 19,
-    "y": 21,
+    "w": 9,
+    "h": 7,
+    "x": 15,
+    "y": 23,
     "i": "tidal_history",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
-    "w": 5,
-    "h": 11,
-    "x": 19,
-    "y": 10,
+    "w": 9,
+    "h": 6,
+    "x": 15,
+    "y": 17,
     "i": "tidal_console",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
-    "w": 7,
-    "h": 11,
-    "x": 12,
+    "w": 14,
+    "h": 7,
+    "x": 10,
     "y": 10,
     "i": "tidal_roll",
     "moved": false,
@@ -448,6 +448,115 @@
     "isVisible": false
    }
   ],
-  []
+  [
+   {
+    "w": 2,
+    "h": 13,
+    "x": 11,
+    "y": 0,
+    "i": "scenes",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 11,
+    "h": 13,
+    "x": 13,
+    "y": 0,
+    "i": "tracker",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 13,
+    "h": 7,
+    "x": 11,
+    "y": 13,
+    "i": "patterns",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 4,
+    "h": 13,
+    "x": 7,
+    "y": 0,
+    "i": "tidal_history",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 11,
+    "h": 7,
+    "x": 0,
+    "y": 13,
+    "i": "tidal_log",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 7,
+    "h": 13,
+    "x": 0,
+    "y": 0,
+    "i": "tidal_roll",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 5,
+    "h": 4,
+    "x": 11,
+    "y": 23,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 5,
+    "h": 4,
+    "x": 11,
+    "y": 23,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 7,
+    "h": 13,
+    "x": 0,
+    "y": 13,
+    "i": "graphics",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 7,
+    "h": 13,
+    "x": 0,
+    "y": 20,
+    "i": "config_paths",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "i": "tidal_globals",
+    "x": 6,
+    "y": 16,
+    "w": 5,
+    "h": 4,
+    "isVisible": false
+   }
+  ]
  ]
 }

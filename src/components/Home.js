@@ -25,7 +25,7 @@ import { SubMenu, ContextMenu, MenuItem, ContextMenuTrigger } from "react-contex
 import {
   save, saveLayout, timer,
   loadCustomLayout_0, loadCustomLayout_1, loadCustomLayout_2, loadCustomLayout_3,
-  resetLayout, fullscreenLayout
+  resetLayout, fullscreen_matrix, fullscreen_graphics
 } from '../keyFunctions'
 
 // Grid Layout Initialization
@@ -45,7 +45,8 @@ export default class Home extends React.Component {
     keymaster('ctrl+enter', timer);
 
     keymaster('shift+r', resetLayout);
-    keymaster('shift+f', fullscreenLayout);
+    keymaster('shift+g', fullscreen_graphics);
+    keymaster('shift+f', fullscreen_matrix);
     keymaster('shift+1', loadCustomLayout_0);
     keymaster('shift+2', loadCustomLayout_1);
     keymaster('shift+3', loadCustomLayout_2);
@@ -57,7 +58,8 @@ export default class Home extends React.Component {
     keymaster.unbind('ctrl+enter', timer); 
 
     keymaster.unbind('shift+r', resetLayout);
-    keymaster.unbind('shift+f', fullscreenLayout);
+    keymaster.unbind('shift+g', fullscreen_graphics);
+    keymaster.unbind('shift+f', fullscreen_matrix);
     keymaster.unbind('shift+1', loadCustomLayout_0);
     keymaster.unbind('shift+2', loadCustomLayout_1);
     keymaster.unbind('shift+3', loadCustomLayout_2);
@@ -191,7 +193,8 @@ export default class Home extends React.Component {
     else if (param.type === 'modulesAdd') this.props.layoutStore.showLayout(param.val);
     else if (param.type === 'layoutSave') this.props.layoutStore.save();
     else if (param.type === 'layoutReset') this.props.layoutStore.reset();
-    else if (param.type === 'matrixFull') this.props.layoutStore.matrixFullscreen();
+    else if (param.type === 'matrixFull') fullscreen_matrix();
+    else if (param.type === 'graphicsFull') fullscreen_graphics();  
     else if (param.type === 'layoutSaveCustom') { 
       this.props.layoutStore.saveCustom(param.val);
       this.props.layoutStore.save();
@@ -262,7 +265,8 @@ export default class Home extends React.Component {
           </SubMenu>
           <SubMenu title={'Layouts'} onClick={(event) => { event.preventDefault();}}>
             <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'layoutReset'})} data={{ item: 'reset' }}>Reset Layout<span style={{float: 'right'}}>⇧ + R</span></MenuItem>
-            <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'matrixFull'})} data={{ item: 'reset' }}>Max. Grid<span style={{float: 'right'}}>⇧ + F</span></MenuItem>
+            <MenuItem onClick={ctx.handleRightClick.bind(ctx, { type: 'matrixFull' })} data={{ item: 'reset' }}>Max. Grid<span style={{ float: 'right' }}>⇧ + F</span></MenuItem>
+            <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'graphicsFull'})} data={{ item: 'reset' }}>Max. Graphics<span style={{float: 'right'}}>⇧ + G</span></MenuItem>
             <MenuItem divider />
             <MenuItem disabled> Alt-Click to remove </MenuItem>
             {_.map({a:0, b:1, c:2, d:3}, (i, key) => {

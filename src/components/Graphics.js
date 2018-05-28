@@ -41,21 +41,21 @@ class Canvas extends React.Component {
     const { time, res, rollStore } = this.props;
 
     // decay variables
-    rollStore.decayEvolutionMatrix();
+    rollStore.decayEvolutionMatrices();
 
     // sample parameters
     let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
-    let n = this.getParameterSafe('n', 0, rollStore);
-    let note = this.getParameterSafe('note', 0, rollStore);
-    let cps = this.getParameterSafe('cps', 1, rollStore);
-    let delta = this.getParameterSafe('delta', 1, rollStore);
-    let cycle = this.getParameterSafe('cycle', 1, rollStore);
-    let sustain = this.getParameterSafe('sustain', 1, rollStore);
-    let begin = this.getParameterSafe('begin', 0, rollStore);
-    let end = this.getParameterSafe('end', 1, rollStore);
-    let room = this.getParameterSafe('room', 1, rollStore);
-    let gain = this.getParameterSafe('gain', 1, rollStore);
-    let channel = this.getParameterSafe('sirenChan', 0, rollStore);
+    // let n = this.getParameterSafe('n', 0, rollStore);
+    // let note = this.getParameterSafe('note', 0, rollStore);
+    // let cps = this.getParameterSafe('cps', 1, rollStore);
+    // let delta = this.getParameterSafe('delta', 1, rollStore);
+    // let cycle = this.getParameterSafe('cycle', 1, rollStore);
+    // let sustain = this.getParameterSafe('sustain', 1, rollStore);
+    // let begin = this.getParameterSafe('begin', 0, rollStore);
+    // let end = this.getParameterSafe('end', 1, rollStore);
+    // let room = this.getParameterSafe('room', 1, rollStore);
+    // let gain = this.getParameterSafe('gain', 1, rollStore);
+    // let channel = this.getParameterSafe('sirenChan', 0, rollStore);
 
     // pass rms information to shader
     let rmsArray = _.fill(Array(2), 0);
@@ -63,25 +63,31 @@ class Canvas extends React.Component {
       rmsArray[i] = e.rms;
     });
 
+    // flatten evolution matrices
+    let evol = _.fill(Array(4), []);
+    _.each(rollStore.evolutions, (e, i) => { 
+      evol[i] = _.flatten(e.valueOf());
+    });
+    
     return <Node
       shader={shaders.marchGL}
       uniforms={{
         res,
         time: time / 1000,
-        rmss: rmsArray,
-        evolution: rollStore.evolutions.valueOf(),
+        // rmss: rmsArray,
+        evolutions: evol,
         nameAscii,
-        n,
-        note,
-        cps,
-        delta,
-        cycle,
-        sustain,
-        begin,
-        end,
-        room,
-        gain,
-        channel
+        // n,
+        // note,
+        // cps,
+        // delta,
+        // cycle,
+        // sustain,
+        // begin,
+        // end,
+        // room,
+        // gain,
+        // channel
       }}
     />;
   }
@@ -118,16 +124,16 @@ export default class Graphics extends React.Component {
     let dim = this.props.rollStore.dimensions_g;
     return (
       <Surface width={dim[0]} height={dim[1]}>
-        {/* <Bus ref='main'> */}
+        <Bus ref='main'>
         <CanvasLoop
           res={[dim[0], dim[1]]}
           rollStore={this.props.rollStore} />
-        {/* </Bus> */}
-        {/* <FXRGBShift> */}
-          {/* <FXShakeLoop> */}
-            {/* {() => this.refs.main} */}
-          {/* </FXShakeLoop> */}
-        {/* </FXRGBShift>   */}
+        </Bus>
+        <FXRGBShift>
+          <FXShakeLoop>
+            {() => this.refs.main}
+          </FXShakeLoop>
+        </FXRGBShift>  
       </Surface>     
     );
   }

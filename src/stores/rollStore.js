@@ -6,19 +6,15 @@ import io from 'socket.io-client';
 import _ from 'lodash';
 
 import TreeModel from 'tree-model'
-let math = require('mathjs')
+import math from 'mathjs'
 
 class RollStore {
     sc_log_socket = io('http://localhost:4002/');
-    // future_vis_socket = io('http://localhost:4006/');
 
     // Trigger value
     @observable value = {};
     @observable value_time = 0;
     @observable cycle_time_offset = 0;
-
-    // Future triggers
-    // @observable future_values = [];
 
     // Pattern Roll Window parameters
     @observable resolution = 12;
@@ -35,7 +31,12 @@ class RollStore {
     @observable tree;
 
     // graphic evolution matrices // 4 limited
-    @observable evolutions = math.matrix(math.zeros([4, 4]));
+    @observable evolutions = _.fill(Array(4), math.matrix(math.eye(4)));
+    def_value = 0;
+
+    newWindows() { 
+        window.open('localhost:3000/#');
+    }
 
     constructor() {
         let ctx = this;
@@ -51,33 +52,18 @@ class RollStore {
             // -- init canvas 
             if (this.roll_canvas_element === null || this.roll_canvas_element === undefined) {
                 this.roll_canvas_element = document.getElementById("pat_roll");
-            }
-            else {
-                this.cycle_time_offset = _.toInteger(this.value.cycle - this.value_time);
-                
+            } else {
+                // update time-cycle offset
+                if ( this.cycle_time_offset === 0)
+                    this.cycle_time_offset = this.value.cycle - this.value_time;
+
                 // -- process data and render canvas
                 this.processData();
-                // this.renderCanvas();
 
-                // -- update evolution matrices
-                this.updateEvolutionMatrix();
+                // -- update evolution matrices for graphics
+                this.updateEvolutionMatrices();
             }
         }))
-
-        // -- Future samples on execution
-        // this.future_vis_socket.on('connect', (reason) => {
-        //     console.log("Port 4006 Connected: ", reason);
-        // });
-        // this.future_vis_socket.on('disconnect', action((reason) => {
-        //     console.log("Port 4006 Disconnected: ", reason);
-        // }));
-        // this.future_vis_socket.on("/vis", action((data) => {
-        //     console.log("Processed Data: ", data);
-        //     this.canvas_data = data;
-
-        //     // refreshes the data for canvas
-        //     this.updateCanvas();
-        // }))
     }
 
     // -- Module interaction
@@ -125,56 +111,82 @@ class RollStore {
         this.renderCanvas();
     }
 
+    getAverageVariableOnChannel(channel_id, varName) { 
+        if (channel_id < this.treeRoot.children.length) { 
+            let variable = this.treeRoot.children[channel_id].model.average[[varName]];
+            return (variable === undefined ? this.def_value : variable * 5);
+        }
+        return this.def_value;
+    }
+
     // -- Update evolution matrices
     @action
-    updateEvolutionMatrix() { 
-        this.evolutions = math.eye(4);
-        // let matrix_index = this.value.sirenChan;
-        // if (matrix_index < this.evolutions.length) { 
-        //     let matrix = this.evolutions[matrix_index];
+    updateEvolutionMatrices() {
+        let index = this.value.sirenChan;
 
-//        }
+        if (index === undefined) index = 0;
+
+        if (index < this.evolutions.length) {
+            this.evolutions[index] = math.matrix([
+                [
+                    this.getAverageVariableOnChannel(index, "delta"),
+                    this.getAverageVariableOnChannel(index, "speed"),
+                    this.getAverageVariableOnChannel(index, "note"),
+                    this.getAverageVariableOnChannel(index, "n")
+                ], [
+                    this.getAverageVariableOnChannel(index, "begin"),
+                    this.getAverageVariableOnChannel(index, "end"),
+                    this.getAverageVariableOnChannel(index, "sustain"),
+                    this.getAverageVariableOnChannel(index, "gain")
+                ], [
+                    this.getAverageVariableOnChannel(index, "lcutoff"),
+                    this.getAverageVariableOnChannel(index, "hcutoff"),
+                    this.getAverageVariableOnChannel(index, "resonance"),
+                    this.getAverageVariableOnChannel(index, "comb")
+                ], [
+                    this.getAverageVariableOnChannel(index, "pan"),
+                    this.getAverageVariableOnChannel(index, "shape"),
+                    this.getAverageVariableOnChannel(index, "hall"),
+                    this.getAverageVariableOnChannel(index, "coarse")
+                ]
+            ]);
+        }
     }
 
     // -- Decay evolution matrices
     @action
-    decayEvolutionMatrix() { 
-        this.evolutions = math.multiply(this.evolutions, 0.99);
-        // for (let i = 0; i < 4; i++) {
-        // }
-    }    
+    decayEvolutionMatrices() {
+        for (let i = 0; i < this.evolutions.length; i++) {
+            this.evolutions[i] = math.matrix(math.multiply(this.evolutions[i], 0.98));
+        }
+    }
 
 
     // -- Canvas functions 
     @action
     processData() {
-
         const node = {
             type: 'channel',
             value: _.toNumber(this.value.sirenChan),
+            average: {},
             children: [{
                 type: 'sample',
                 value: this.value.s,
+                average: {},
                 children: [{
                     type: 'note',
                     value: this.value.n,
+                    average: {},
                     time: [this.value]
                 }]
             }]
         };
 
-        // initialize start cycle
-        // if (this.tree_start_cycle === 0) {
-        //     this.tree_start_cycle = _.toInteger(this.value.cycle);
-        // }
+        // initalize average on the node
+        _.each(_.keys(this.value), (k) => {
+            node.children[0].children[0].average[k] = _.meanBy([this.value], (o) => { return o[k]; });
+        })
 
-        // // reset time
-        // if (this.value.cycle > this.cycles + this.tree_start_cycle) {
-        //     // delete all nodes
-        //     this.treeRoot = null;
-        //     this.tree_start_cycle = _.toInteger(this.value.cycle);
-        // }
-        //////////////
 
         // if its empty
         if (this.treeRoot === null) {
@@ -185,38 +197,79 @@ class RollStore {
             });
         }
 
-        // Delete old nodes
-        this.treeRoot.all({strategy: 'post'},  (n) => { 
-            if (n.model.type === 'note') { 
-                n.model.time = _.dropWhile(n.model.time, (o) => { 
-                    return o.cycle < this.value.cycle - this.cycles;
+        // Delete nodes older than spesified amount
+        this.treeRoot.all({
+            strategy: 'post'
+        }, (n) => {
+            if (n.model.type === 'note') {
+                n.model.time = _.dropWhile(n.model.time, (o) => {
+                    return o.cycle < _.toInteger(this.value.cycle - this.cycles);
                 });
+                
+                // maintain average values of every field in note's array
+                if (n.model.time.length !== 0)
+                    _.each(_.keys(n.model.average), (k) => {
+                        n.model.average[k] = _.meanBy(n.model.time, (o) => {
+                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                        });
+                    })
+                
                 return n.model.time.length === 0;
             }
             return false;
         }).forEach(function (node) {
             node.drop();
         });
-        this.treeRoot.all({strategy: 'post'},  (n) => { 
-            if (n.model.type === 'sample' && !n.hasChildren())
-                return true;
+        this.treeRoot.all({
+            strategy: 'post'
+        }, (n) => {
+            if (n.model.type === 'sample')
+                if (!n.hasChildren())
+                    return true;
+                // maintain average values of every field in sample's children
+                else {
+                    let children_average = [];
+                    _.each(n.children, (c) => {
+                        children_average.push(c.model.average);
+                    });
+                    _.each(_.keys(children_average[0]), (k) => {
+                        n.model.average[k] = _.meanBy(children_average, (o) => {
+                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                        });
+                    })
+                }
             return false;
         }).forEach(function (node) {
             node.drop();
         });
-        this.treeRoot.all({strategy: 'post'},  (n) => { 
-            if (n.model.type === 'channel' && !n.hasChildren())
-                return true;
+        this.treeRoot.all({
+            strategy: 'post'
+        }, (n) => {
+            if (n.model.type === 'channel') {
+                if (!n.hasChildren())
+                    return true;
+                // maintain average values of every field in channels's children
+                else {
+                    let children_average = [];
+                    _.each(n.children, (c) => {
+                        children_average.push(c.model.average);
+                    });
+                    _.each(_.keys(children_average[0]), (k) => {
+                        n.model.average[k] = _.meanBy(children_average, (o) => {
+                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                        });
+                    })
+                }
+            }
             return false;
         }).forEach(function (node) {
             node.drop();
         });
         ////////////////////////
-        
 
-        let channel_node;
-        let sample_node;
-        let note_node;
+
+        // Add new item
+        let channel_node, sample_node, note_node;
         channel_node = this.treeRoot.first({
             strategy: 'breadth'
         }, (n) => {
@@ -225,6 +278,7 @@ class RollStore {
             }
             return false;
         });
+        // channel existence check
         if (channel_node === undefined) {
             channel_node = this.treeRoot.addChild(this.tree.parse(node));
         } else {
@@ -236,6 +290,7 @@ class RollStore {
                 }
                 return false;
             });
+            // sample existence check
             if (sample_node === undefined) {
                 sample_node = channel_node.addChild(this.tree.parse(node.children[0]));
             } else {
@@ -246,6 +301,7 @@ class RollStore {
                         return true;
                     return false;
                 });
+                // note existence check
                 if (note_node === undefined) {
                     sample_node.addChild(this.tree.parse(node.children[0].children[0]));
                 } else {
@@ -257,30 +313,30 @@ class RollStore {
 
     @action
     renderCanvas() {
-        if (this.roll_canvas_element) { 
+        if (this.roll_canvas_element) {
 
             let ctx = this.roll_canvas_element.getContext("2d", {
-                alpha: false
+                alpha: true
             });
 
             this.updateCanvasDimensions();
             let w = this.roll_canvas_element.width = this.dimensions_c[0];
             let h = this.roll_canvas_element.height = this.dimensions_c[1];
-    
-            // channel backgrounds
-            if (this.treeRoot) { 
 
+            if (this.treeRoot) {
+                // channel backgrounds
                 for (let i = 0; i < this.treeRoot.children.length; i++) {
                     i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";
-        
+
                     ctx.fillRect(
-                        0,
-                        _.toInteger(h / (this.treeRoot.children.length) * i),
-                        w,
-                        _.toInteger(h / (this.treeRoot.children.length))
+                        0, _.toInteger(h / (this.treeRoot.children.length) * i),
+                        w, _.toInteger(h / (this.treeRoot.children.length))
                     );
                 }
-        
+                // TODO
+                // background for samples and notes ?
+                // grid lines
+
                 // nodes
                 this.treeRoot.walk({
                     strategy: 'post'
@@ -288,7 +344,7 @@ class RollStore {
                     // leaf node
                     if (!n.hasChildren()) {
                         const path = n.getPath();
-        
+
                         const _w = w / (this.cycles * this.resolution);
                         const _c_h = h / (path[0].children.length);
                         const _c_i = path[1].getIndex();
@@ -296,19 +352,22 @@ class RollStore {
                         const _s_i = path[2].getIndex();
                         const _n_h = _s_h / (path[2].children.length);
                         const _n_i = path[3].getIndex();
-        
-                        ctx.fillStyle = "rgb(180, 180, 180)";
-                        ctx.strokeStyle = "#111"
+
                         _.each(n.model.time, (item) => {
+                            // right-to-left
+                            // let x = (((item.cycle - this.cycle_time_offset) - (this.value_time - this.cycles)) * (this.resolution - 1)) * _w;
+                            
+                            // left-to-right
+                            let x = ((this.value_time - item.cycle + this.cycle_time_offset) * (this.resolution)) * _w;
+                            
+                            ctx.fillStyle = "rgba(180, 180, 180, " + (1-x/w) +")";
                             if (!item.rendered) {
-                                ctx.fillStyle = "rgb(180, 100, 20)";
+                                ctx.fillStyle = "rgb(200, 20, 20)";
                                 item.rendered = true;
                             }
-                            
+
                             ctx.fillRect(
-                                (((item.cycle-this.cycle_time_offset) - (this.value_time - this.cycles)) * this.resolution ) * _w,                            
-                                //((item.cycle - (this.value.cycle - this.cycles)) * (this.resolution - 1)) * _w,
-                                //((item.cycle - this.tree_start_cycle) * this.resolution) * _w,
+                                x,
                                 _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
                                 _w * (item.sustain !== undefined ? item.sustain : 1),
                                 _n_h

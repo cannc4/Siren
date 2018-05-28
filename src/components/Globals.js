@@ -2,7 +2,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 
 // CSS Imports
-import _ from 'lodash';
+// import _ from 'lodash';
 import '../styles/App.css';
 import '../styles/Home.css';
 import '../styles/Layout.css';

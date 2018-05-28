@@ -226,12 +226,11 @@ class LayoutStore {
     ];
   };
 
-  @action matrixFullscreen
-    () {
+  @action fullscreen(modelName) {
       if (this.layouts !== undefined) {
         let found = false;
         _.forEach(this.layouts, (item, i) => {
-          if (item.i === 'tracker') {
+          if (item.i === modelName) {
             item.x = 0;
             item.y = 0;
             item.w = 24;
@@ -245,7 +244,7 @@ class LayoutStore {
 
         if (!found) {
           this.layouts = _.concat(this.layouts, {
-            i: 'tracker',
+            i: modelName,
             x: 0,
             y: 0,
             w: 24,

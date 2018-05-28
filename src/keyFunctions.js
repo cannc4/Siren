@@ -5,6 +5,7 @@ import pulseStore from '../src/stores/pulseStore'
 import consoleStore from '../src/stores/consoleStore'
 import globalStore from '../src/stores/globalStore'
 import pathStore from '../src/stores/pathStore'
+import rollStore from './stores/rollStore';
 
 export const executionCssById = (elem_id, classname = ' SaveExecuted', duration = 750) => {
     let elem = document.getElementById('logo_disp');
@@ -47,8 +48,12 @@ export const timer = () => {
 export const resetLayout = () => { 
     layoutStore.reset();
 }
-export const fullscreenLayout = () => { 
-    layoutStore.matrixFullscreen();
+export const fullscreen_graphics = () => { 
+    layoutStore.fullscreen('graphics');
+    rollStore.reloadRoll();
+}
+export const fullscreen_matrix = () => { 
+    layoutStore.fullscreen('tracker');
 }
 export const loadCustomLayout_0 = () => { 
     layoutStore.loadCustom(0);

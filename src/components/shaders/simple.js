@@ -68,24 +68,24 @@ export const shaders = Shaders.create({
 
         // channel-wise evolution matrix
         ////// 4 channels max ////
-        uniform mat4 evolution;
+        uniform mat4 evolutions[4];
 
         // rms values
-        uniform float rmss[2];
+        // uniform float rmss[2];
         
         // sample parameters
         uniform float nameAscii[5];
-        uniform float n;
-        uniform float cps;
-        uniform float delta;
-        uniform float cycle;
-        uniform float note;
-        uniform float sustain;
-        uniform float begin;
-        uniform float end;
-        uniform float room; 
-        uniform float gain; 
-        uniform float channel;
+        // uniform float n;
+        // uniform float cps;
+        // uniform float delta;
+        // uniform float cycle;
+        // uniform float note;
+        // uniform float sustain;
+        // uniform float begin;
+        // uniform float end;
+        // uniform float room; 
+        // uniform float gain; 
+        // uniform float channel;
 
         const int MAX_MARCHING_STEPS = 255;
         const float MIN_DIST = 0.0;
@@ -249,8 +249,12 @@ export const shaders = Shaders.create({
             
             ///////////////////////////
 
+            S1 = evolutions[0][1] * 5.;
+            
+
             float tim = time * 0.3;
-            S1 = mix(Setup(tim - 1.0), Setup(tim), smoothstep(0.0, 1.0, fract(tim) * 2.0));
+            // S1 = mix(Setup(tim - 1.0), Setup(tim), smoothstep(0.0, 1.0, fract(tim) * 2.0));
+            
             tim = tim * 0.9 + 2.5;
             S2 = mix(Setup(tim - 1.0), Setup(tim), smoothstep(0.0, 1.0, fract(tim) * 2.0));
 
@@ -369,7 +373,6 @@ export const shaders = Shaders.create({
         }
 
         vec3 render(in vec3 p, in vec3 rd) {
-
             vec3 lig = normalize(vec3(4.0, 2.0, 4.0)),
                  nor = estimateNormal(p, rd),
                  ref = reflect(rd, nor);
@@ -410,9 +413,11 @@ export const shaders = Shaders.create({
         void main ()
         {
             vec3 viewDir = rayDirection(45.0, res.xy, gl_FragCoord.xy);
+
+            // vec3 eye = rotateX(cos(time)) * rotateY(sin(time)) * vec3(8.0 + sin(time) * 10., 5.0, 7.0);
             
-            vec3 eye = rotateX(cos(time)) * rotateY(sin(time)) * vec3(8.0 + sin(time) * 10., 5.0, 7.0);
-            // vec3 eye = rotateY((sin(time)+1.)*3.) * vec3(8.0 + sin(time) * 10., 5.0, 7.0);
+            // vec3 eye = vec3(8.0, 5.0, 7.0);
+            vec3 eye = rotateY((sin(time)+1.)*3.) * vec3(8.0 + sin(time) * 10., 5.0, 7.0);
             
             mat3 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
             
@@ -443,7 +448,7 @@ export const shaders = Shaders.create({
             vec3 color = render(p, worldDir);
             // vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
             
-            gl_FragColor = vec4(evolution[0].xyz, 1.0);
+            gl_FragColor = vec4(color*evolutions[0][0].x, 1.0);
         }
         `
     }

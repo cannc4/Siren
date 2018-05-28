@@ -35,6 +35,8 @@ class SceneStore {
 
     @action changeActiveScene(name) {
         this.active_scene = name;
+        if(!_.some(_.filter(channelStore.channels, ['scene', name]), ['solo', true]))
+            channelStore.soloEnabled = false;
         cellStore.updateSelectState(false);
     }
     @action changeNextScene() {
