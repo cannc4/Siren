@@ -36,6 +36,13 @@ class CellStore {
         }
     }
 
+    isCellActive(channel_index, index) {
+        let ch = channelStore.getActiveChannels[channel_index];
+        if (ch !== undefined) {
+            return ch.time % ch.steps === index;
+        }
+    }
+
     isCellSelected(channel_i, cell_i) {
         if (this.select_state) {
             if (channel_i <= _.max([this.init_selection_cell[0], this.last_selection_cell[0]]) &&
@@ -182,27 +189,12 @@ class CellStore {
         }
     }
 
-    //////////////////////////////
-    @action updateCell(channel, cell_index, cell_value) {
-        let ch = _.find(channelStore.getActiveChannels, {
-            'name': channel,
-            'scene': sceneStore.active_scene
-        });
+    @action updateCell(channel_index, cell_index, cell_value) {
+        let ch = channelStore.getActiveChannels[channel_index];
         if (ch !== undefined) {
             ch.cells[cell_index] = cell_value;
         }
     }
-
-    isCellActive(channel, index) {
-        let ch = _.find(channelStore.getActiveChannels, {
-            'name': channel,
-            'scene': sceneStore.active_scene
-        });
-        if (ch !== undefined) {
-            return ch.time % ch.steps === index;
-        }
-    }
-
 
     // /*------------------------------------------
     //     Render existing code

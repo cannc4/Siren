@@ -87,7 +87,7 @@ class Channel extends React.Component {
         <ChannelHeader key={index} value={item} />
         <div className={"ChannelSteps"}>
             {item.cells.map((c, i) => {
-            return <Cell key={i} item={item} channel_index={index} index={i} value={c}/>
+                return <Cell key={i} channel_index={index} index={i} value={c}/>
             })}
             <div className={'ChannelItemSteps'}>
                 <button className={"Button"}

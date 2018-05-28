@@ -6,6 +6,8 @@ import rollStore from '../stores/rollStore';
 
 class Roll extends React.Component { 
   render() {
+    // console.log("RENDER CANVASLOOP");
+    
     rollStore.value_time = this.props.time / 1000.;
     rollStore.renderCanvas();
 

@@ -55,7 +55,6 @@ export default class Cell extends React.Component {
                 this.props.cellStore.updateSelectState(false);
                 let elem = document.getElementById('cell_'+this.props.cellStore.current_cell[0]+"_"+
                     this.props.cellStore.current_cell[1]);
-                console.log('cell_'+this.props.cellStore.current_cell[0]+"_"+this.props.cellStore.current_cell[1]);
                 
                 if (elem)
                     elem.focus();
@@ -136,16 +135,17 @@ export default class Cell extends React.Component {
     render() {
         console.log('RENDER CELL');
 
-        const item = this.props.item;
         const value = this.props.value;
         const cell_index = this.props.index;
         const channel_index = this.props.channel_index;
 
         var className = "GridItem";
-        if(this.props.cellStore.isCellActive(item.name, cell_index)){
+        className += (cell_index % 2 === 0) ? ' even' : ' odd'; 
+        // TODO 
+        // Replace with more efficient checking system
+        if(this.props.cellStore.isCellActive(channel_index, cell_index)){
             className += ' active';
         }
-        className += (cell_index % 2 === 0) ? ' even' : ' odd'; 
         if(this.props.cellStore.isCellSelected(channel_index, cell_index)) {
             className += ' selected';
         }
@@ -159,7 +159,7 @@ export default class Cell extends React.Component {
                 placeholder={cell_index % 2 === 1 ? _.toString(cell_index+1) : ''}
                 value={value}
                 onChange={() => 
-                    (this.props.cellStore.updateCell(item.name, cell_index, this.nameInput.value))}
+                    (this.props.cellStore.updateCell(channel_index, cell_index, this.nameInput.value))}
                 onKeyDown={(event) => (this.handleKeys(event, channel_index, cell_index))}
                 onClick={() => {
                     this.props.cellStore.updateSelectState(false);

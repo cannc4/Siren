@@ -12,9 +12,9 @@ class RollStore {
     sc_log_socket = io('http://localhost:4002/');
 
     // Trigger value
-    @observable value = {};
-    @observable value_time = 0;
-    @observable cycle_time_offset = 0;
+    value = {};
+    value_time = 0;
+    cycle_time_offset = 0;
 
     // Pattern Roll Window parameters
     @observable resolution = 12;
@@ -24,14 +24,14 @@ class RollStore {
     @observable dimensions_c = [200, 200];
 
     // pat roll
-    @observable roll_canvas_element;
-    @observable tree_start_cycle = 0;
+    roll_canvas_element;
+    tree_start_cycle = 0;
 
-    @observable treeRoot = null;
-    @observable tree;
+    treeRoot = null;
+    tree;
 
-    // graphic evolution matrices // 4 limited
-    @observable evolutions = _.fill(Array(4), math.matrix(math.eye(4)));
+    // graphic evolution matrices // NOT OBSERVABLE
+    evolutions = _.fill(Array(4), math.matrix(math.eye(4)));
     def_value = 0;
 
     newWindows() { 
@@ -103,9 +103,8 @@ class RollStore {
     }
 
     // -- Hot reload
-    @action
     reloadRoll() {
-        this.tree_start_cycle = _.toInteger(this.value.cycle);
+        this.tree_start_cycle = 0;
 
         this.updateGraphicsDimensions();
         this.renderCanvas();
@@ -120,7 +119,6 @@ class RollStore {
     }
 
     // -- Update evolution matrices
-    @action
     updateEvolutionMatrices() {
         let index = this.value.sirenChan;
 
@@ -154,7 +152,6 @@ class RollStore {
     }
 
     // -- Decay evolution matrices
-    @action
     decayEvolutionMatrices() {
         for (let i = 0; i < this.evolutions.length; i++) {
             this.evolutions[i] = math.matrix(math.multiply(this.evolutions[i], 0.98));
@@ -163,7 +160,6 @@ class RollStore {
 
 
     // -- Canvas functions 
-    @action
     processData() {
         const node = {
             type: 'channel',
@@ -311,18 +307,17 @@ class RollStore {
         }
     }
 
-    @action
     renderCanvas() {
         if (this.roll_canvas_element) {
-
+            
             let ctx = this.roll_canvas_element.getContext("2d", {
                 alpha: true
             });
-
+            
             this.updateCanvasDimensions();
             let w = this.roll_canvas_element.width = this.dimensions_c[0];
             let h = this.roll_canvas_element.height = this.dimensions_c[1];
-
+            
             if (this.treeRoot) {
                 // channel backgrounds
                 for (let i = 0; i < this.treeRoot.children.length; i++) {

@@ -16,7 +16,7 @@ import menubarStore from '../stores/menubarStore';
 export default class MenuBar extends React.Component {
 
   render() {
-    console.log("RENDER MENUBAR.JS");
+    // console.log("RENDER MENUBAR.JS");
 
     let serverStatusClass = 'ServerStatus';
     if (this.props.menubarStore.getActive <= 0) 

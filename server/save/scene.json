@@ -26,10 +26,9 @@
   "19may",
   "21may",
   "0521",
-  "0526",
-  "t1"
+  "0526"
  ],
- "active_s": "t1",
+ "active_s": "19may",
  "patterns": [
   {
    "scene": "default",
@@ -7818,45 +7817,6 @@
    "time": 0,
    "transition": "",
    "cells": [
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "gate": false,
-   "solo": false,
-   "mute": false,
-   "loop": true,
-   "executed": false,
-   "selected": false,
-   "cid": 146
-  },
-  {
-   "scene": "t1",
-   "activeSceneIndex": 0,
-   "name": "d1",
-   "type": "Tidal",
-   "steps": 20,
-   "rate": 8,
-   "time": 0,
-   "transition": "",
-   "cells": [
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
     "",
     "",
     "",

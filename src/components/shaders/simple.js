@@ -249,7 +249,7 @@ export const shaders = Shaders.create({
             
             ///////////////////////////
 
-            S1 = evolutions[0][1] * 5.;
+            S1 = evolutions[0][0] * 5.;
             
 
             float tim = time * 0.3;

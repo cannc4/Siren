@@ -39,6 +39,7 @@ class Canvas extends React.Component {
   
   render() {
     const { time, res, rollStore } = this.props;
+    console.log("RENDER GRAPHICS");
 
     // decay variables
     rollStore.decayEvolutionMatrices();
@@ -107,7 +108,7 @@ const FXRGBShift = ({ children: t }) =>
   <Node shader={shaders.rgbShift}
     uniforms={{
       texture: t,
-      amount: 0.005,
+      amount: 0.002,
       angle: 3.14
     }} />;
 
@@ -119,7 +120,7 @@ const FXShakeLoop = timeLoop(FXShake);
 @observer
 export default class Graphics extends React.Component {
   render() {
-    console.log("RENDER GRAPHICS");
+    // console.log("RENDER GRAPHICS");
 
     let dim = this.props.rollStore.dimensions_g;
     return (
@@ -130,9 +131,9 @@ export default class Graphics extends React.Component {
           rollStore={this.props.rollStore} />
         </Bus>
         <FXRGBShift>
-          <FXShakeLoop>
+          {/* <FXShakeLoop> */}
             {() => this.refs.main}
-          </FXShakeLoop>
+          {/* </FXShakeLoop> */}
         </FXRGBShift>  
       </Surface>     
     );
