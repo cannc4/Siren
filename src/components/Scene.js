@@ -41,6 +41,11 @@ export default class Scene extends React.Component {
                 <button className={'Button draggableCancel'} 
                         onClick={() => (this.props.sceneStore.clearActiveGrid())}>Clear</button>
             </div>
+            <button className={'Button ' + (this.props.sceneStore.scene_mode ? 'true' : '') + ' draggableCancel'} 
+                style={{ width: '100%', height: '10px' }}    
+                title={'Song Mode: ' + (this.props.sceneStore.scene_mode ? 'On' : 'Off')}
+                onClick={() => (this.props.sceneStore.toggleScenemode())}> </button>
+            
             <div className={'AllScenes'}>
                 <div>
                     {_.map(this.props.sceneStore.scenesReversedOrder, this.renderScene.bind(this))}

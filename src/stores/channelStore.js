@@ -151,6 +151,7 @@ class ChannelStore {
                 }
             }
         });
+        sceneStore.progressScenes();
     }
 
     sendPattern(channel, step) {

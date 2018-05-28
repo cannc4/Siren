@@ -16,6 +16,8 @@ class SceneStore {
     @observable active_scene = 'default';
     @observable scene_list = ['default'];
 
+    @observable scene_mode = false;
+
     constructor() {
         this.load();
     }
@@ -35,8 +37,18 @@ class SceneStore {
 
     @action changeActiveScene(name) {
         this.active_scene = name;
-        if(!_.some(_.filter(channelStore.channels, ['scene', name]), ['solo', true]))
+        
+        // fixes a bug where solo and scene change didnt work
+        if (!_.some(_.filter(channelStore.channels, ['scene', name]), ['solo', true]))
             channelStore.soloEnabled = false;
+        
+        // required for progression
+        if (this.scene_mode) 
+            _.each(channelStore.getActiveChannels, (c) => { 
+                c.loop = false;
+                c.executed = false;
+            });
+        
         cellStore.updateSelectState(false);
     }
     @action changeNextScene() {
@@ -70,6 +82,21 @@ class SceneStore {
             }
         } else {
             alert("Please enter a scene name.");
+        }
+    }
+
+    @action toggleScenemode() { 
+        this.scene_mode = !this.scene_mode;
+        _.each(channelStore.getActiveChannels, (c) => { 
+            c.loop = false;
+            c.executed = false;
+        });
+    }
+
+    @action progressScenes() { 
+        if (this.scene_mode === true && _.every(channelStore.getActiveChannels, ['executed', true])) { 
+            // TODO give some sort of a delay here
+            this.changeNextScene();
         }
     }
 
