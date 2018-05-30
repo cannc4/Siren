@@ -30,21 +30,21 @@ class MenubarStore {
             this.server_info = 0;
         }));
         this.sc_log_socket.on("/rms", action((data) => {
-            const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
+            // const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
 
-            if (this.rmsArray[i] !== undefined)
-                this.rmsArray[i] = {
-                    rms: data.rms,
-                    peak: data.peak
-                };
-            else
-                this.rmsArray.push({
-                    rms: data.rms,
-                    peak: data.peak
-                });
+            // if (i < this.rmsArray.length)
+            //     this.rmsArray[i] = {
+            //         rms: data.rms,
+            //         peak: data.peak
+            //     };
+            // else
+            //     this.rmsArray.push({
+            //         rms: data.rms,
+            //         peak: data.peak
+            //     });
 
-            this.createRMSShape_Left();
-            this.createRMSShape_Right();
+            // this.createRMSShape_Left();
+            // this.createRMSShape_Right();
         }))
     }
 

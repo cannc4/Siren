@@ -30,9 +30,16 @@ class RollStore {
     treeRoot = null;
     tree;
 
+    def_values = [
+        [1, 0.5, 0, 0],
+        [1, 1, 1, 1],
+        [1, 0, 1, 0],
+        [0, 0, 20000, 0]
+    ];
+   
     // graphic evolution matrices // NOT OBSERVABLE
     evolutions = _.fill(Array(4), math.matrix(math.eye(4)));
-    def_value = 0;
+    def_value = 0.5;
 
     newWindows() { 
         window.open('localhost:3000/#');
@@ -110,56 +117,140 @@ class RollStore {
         this.renderCanvas();
     }
 
-    getAverageVariableOnChannel(channel_id, varName) { 
-        if (channel_id < this.treeRoot.children.length) { 
-            let variable = this.treeRoot.children[channel_id].model.average[[varName]];
-            return (variable === undefined ? this.def_value : variable * 5);
+    getAverageVariableOnChannel(channel_id, varName, defaultValue) { 
+        let node = _.find(this.treeRoot.children, (o) => { 
+            return o.model.value === channel_id;
+        })
+        if (node !== undefined) { 
+            let variable = node.model.average[[varName]];
+            return ((variable === undefined || _.isNaN(variable)) ? defaultValue : (variable));
         }
         return this.def_value;
     }
 
     // -- Update evolution matrices
     updateEvolutionMatrices() {
-        let index = this.value.sirenChan;
+        let index = _.toInteger(this.value.sirenChan);
 
         if (index === undefined) index = 0;
 
         if (index < this.evolutions.length) {
-            this.evolutions[index] = math.matrix([
-                [
-                    this.getAverageVariableOnChannel(index, "delta"),
-                    this.getAverageVariableOnChannel(index, "speed"),
-                    this.getAverageVariableOnChannel(index, "note"),
-                    this.getAverageVariableOnChannel(index, "n")
-                ], [
-                    this.getAverageVariableOnChannel(index, "begin"),
-                    this.getAverageVariableOnChannel(index, "end"),
-                    this.getAverageVariableOnChannel(index, "sustain"),
-                    this.getAverageVariableOnChannel(index, "gain")
-                ], [
-                    this.getAverageVariableOnChannel(index, "lcutoff"),
-                    this.getAverageVariableOnChannel(index, "hcutoff"),
-                    this.getAverageVariableOnChannel(index, "resonance"),
-                    this.getAverageVariableOnChannel(index, "comb")
-                ], [
-                    this.getAverageVariableOnChannel(index, "pan"),
-                    this.getAverageVariableOnChannel(index, "shape"),
-                    this.getAverageVariableOnChannel(index, "hall"),
-                    this.getAverageVariableOnChannel(index, "coarse")
-                ]
-            ]);
+            this.evolutions[index].subset(math.index(0, 0), this.getAverageVariableOnChannel(index, "delta", 1));      // speed of progression  ( 0  1)    <~x~>    global velocity
+            this.evolutions[index].subset(math.index(0, 1), this.getAverageVariableOnChannel(index, "pan", 0.5));      // position of sound     ( 0  1)    <~~~>    
+            this.evolutions[index].subset(math.index(0, 2), this.getAverageVariableOnChannel(index, "n", 0));          // folder selector       ( 0  ~)    <~~~>
+            this.evolutions[index].subset(math.index(0, 3), this.getAverageVariableOnChannel(index, "note", 0));       // freq of playback      (-60 60)   <~~~> 
+            this.evolutions[index].subset(math.index(1, 0), this.getAverageVariableOnChannel(index, "coarse", 1));     // sr ratio (inv. frq)   ( 1 64)    <~~~> 
+            this.evolutions[index].subset(math.index(1, 1), this.getAverageVariableOnChannel(index, "speed", 1));      // speed of playb.(frq)  (-9  9)    <~~~>    local velocity
+            this.evolutions[index].subset(math.index(1, 2), this.getAverageVariableOnChannel(index, "gain", 1));       // volume of playback    ( 0  2)    <~~~> 
+            this.evolutions[index].subset(math.index(1, 3), this.getAverageVariableOnChannel(index, "sustain", 1));    // dur. of playb. (s)    ( 0  ~)    <~~~> 
+            this.evolutions[index].subset(math.index(2, 0), this.getAverageVariableOnChannel(index, "legato", 1));     // dur. of playb.(delta) ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(2, 1), this.getAverageVariableOnChannel(index, "begin", 0));      // start of playb.       ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(2, 2), this.getAverageVariableOnChannel(index, "end", 1));        // end of playb.         ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(2, 3), this.getAverageVariableOnChannel(index, "hall", 0));       // reverb                ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(3, 0), this.getAverageVariableOnChannel(index, "resonance", 0));  // resonance             ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(3, 1), this.getAverageVariableOnChannel(index, "shape", 0));      // distortion            ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(3, 2), this.getAverageVariableOnChannel(index, "cutoff", 20000)); // lfreq threshold       ( 0 20k)   <~~~> 
+            this.evolutions[index].subset(math.index(3, 3), this.getAverageVariableOnChannel(index, "hcutoff", 0));    // hfreq threshold       ( 0 20k)   <~~~> 
         }
     }
 
-    // -- Decay evolution matrices
+    // -- Decay evolution matrix values towards their default values
     decayEvolutionMatrices() {
         for (let i = 0; i < this.evolutions.length; i++) {
-            this.evolutions[i] = math.matrix(math.multiply(this.evolutions[i], 0.98));
+            for (let j = 0; j < 16; j++) {
+                const a = _.toInteger(j / 4);
+                const b = j % 4;
+                const val = this.evolutions[i].subset(math.index(a, b));
+                this.evolutions[i].subset(math.index(a, b),
+                    (val - this.def_values[a][b]) * 0.99 + this.def_values[a][b]);  
+            }    
         }
     }
 
 
     // -- Canvas functions 
+    cleanData() { 
+        if (this.treeRoot !== null) {
+            
+            // Delete nodes older than spesified amount
+            this.treeRoot.all({
+                strategy: 'post'
+            }, (n) => {
+                if (n.model.type === 'note') {
+                    n.model.time = _.dropWhile(n.model.time, (o) => {
+                        const cycle_corres = this.cycle_time_offset + this.value_time;
+                        return o.cycle < _.toInteger(cycle_corres - this.cycles);
+                    });
+                    // maintain average values of every field in note's array
+                    if (n.model.time.length !== 0)
+                        _.each(_.keys(n.model.average), (k) => {
+                            n.model.average[k] = _.meanBy(n.model.time, (o) => {
+                                return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                            });
+                        })
+                    
+                    return n.model.time.length === 0;
+                }
+                return false;
+            }).forEach(function (node) {
+                console.log("DROPPED NODE -- note: " + node.model.value + ' / sample: '+ node.parent.model.value+' / channel: '+ node.parent.parent.model.value);
+                node.drop();
+            });
+            this.treeRoot.all({
+                strategy: 'post'
+            }, (n) => {
+                if (n.model.type === 'sample') {
+                    if (!n.hasChildren())
+                        return true;
+                    // maintain average values of every field in sample's children
+                    else {
+                        let merged_keys = {};
+                        let children_average = [];
+                        _.each(n.children, (c) => {
+                            merged_keys = _.merge(merged_keys, c.model.average);
+                            children_average.push(c.model.average);
+                        });
+                        _.each(_.keys(merged_keys), (k) => {
+                            n.model.average[k] = _.meanBy(children_average, (o) => {
+                                return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                            });
+                        })
+                    }
+                }
+                return false;
+            }).forEach(function (node) {
+                console.log("DROPPED NODE -- sample");
+                node.drop();
+            });
+            this.treeRoot.all({
+                strategy: 'breadth'
+            }, (n) => {
+                if (n.model.type === 'channel') {
+                    if (!n.hasChildren())
+                        return true;
+                    // maintain average values of every field in channels's children
+                    else {
+                        let merged_keys = {};
+                        let children_average = [];
+                        _.each(n.children, (c) => {
+                            merged_keys = _.merge(merged_keys, c.model.average);
+                            children_average.push(c.model.average);
+                        });
+                        _.each(_.keys(merged_keys), (k) => {
+                            n.model.average[k] = _.meanBy(children_average, (o) => {
+                                return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
+                            });
+                        })
+                    }
+                }
+                return false;
+            }).forEach(function (node) {
+                console.log("DROPPED NODE -- channel");
+                node.drop();
+            });
+        }
+    }
+
     processData() {
         const node = {
             type: 'channel',
@@ -192,77 +283,6 @@ class RollStore {
                 children: [node]
             });
         }
-
-        // Delete nodes older than spesified amount
-        this.treeRoot.all({
-            strategy: 'post'
-        }, (n) => {
-            if (n.model.type === 'note') {
-                n.model.time = _.dropWhile(n.model.time, (o) => {
-                    return o.cycle < _.toInteger(this.value.cycle - this.cycles);
-                });
-                
-                // maintain average values of every field in note's array
-                if (n.model.time.length !== 0)
-                    _.each(_.keys(n.model.average), (k) => {
-                        n.model.average[k] = _.meanBy(n.model.time, (o) => {
-                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
-                        });
-                    })
-                
-                return n.model.time.length === 0;
-            }
-            return false;
-        }).forEach(function (node) {
-            node.drop();
-        });
-        this.treeRoot.all({
-            strategy: 'post'
-        }, (n) => {
-            if (n.model.type === 'sample')
-                if (!n.hasChildren())
-                    return true;
-                // maintain average values of every field in sample's children
-                else {
-                    let children_average = [];
-                    _.each(n.children, (c) => {
-                        children_average.push(c.model.average);
-                    });
-                    _.each(_.keys(children_average[0]), (k) => {
-                        n.model.average[k] = _.meanBy(children_average, (o) => {
-                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
-                        });
-                    })
-                }
-            return false;
-        }).forEach(function (node) {
-            node.drop();
-        });
-        this.treeRoot.all({
-            strategy: 'post'
-        }, (n) => {
-            if (n.model.type === 'channel') {
-                if (!n.hasChildren())
-                    return true;
-                // maintain average values of every field in channels's children
-                else {
-                    let children_average = [];
-                    _.each(n.children, (c) => {
-                        children_average.push(c.model.average);
-                    });
-                    _.each(_.keys(children_average[0]), (k) => {
-                        n.model.average[k] = _.meanBy(children_average, (o) => {
-                            return (_.isNaN(_.toNumber(o[k])) ? this.def_value :_.toNumber(o[k]));
-                        });
-                    })
-                }
-            }
-            return false;
-        }).forEach(function (node) {
-            node.drop();
-        });
-        ////////////////////////
-
 
         // Add new item
         let channel_node, sample_node, note_node;
@@ -318,7 +338,7 @@ class RollStore {
             let w = this.roll_canvas_element.width = this.dimensions_c[0];
             let h = this.roll_canvas_element.height = this.dimensions_c[1];
             
-            if (this.treeRoot) {
+            if (this.treeRoot && this.treeRoot.children.length > 0) {
                 // channel backgrounds
                 for (let i = 0; i < this.treeRoot.children.length; i++) {
                     i % 2 === 0 ? ctx.fillStyle = "rgb(50, 50, 50)" : ctx.fillStyle = "rgb(40, 40, 40)";

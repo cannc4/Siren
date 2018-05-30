@@ -185,6 +185,7 @@ export default class Home extends React.Component {
         </div>)
     }
   }
+
   handleRightClick = (param, event) => {
     if (param.type === 'channelAddTidal') this.props.channelStore.addChannel('', 'Tidal', 8, '');
     else if (param.type === 'channelAddSC') this.props.channelStore.addChannel('s', 'SuperCollider', 8, '');

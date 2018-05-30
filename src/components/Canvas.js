@@ -9,6 +9,7 @@ class Roll extends React.Component {
     // console.log("RENDER CANVASLOOP");
     
     rollStore.value_time = this.props.time / 1000.;
+    rollStore.cleanData();
     rollStore.renderCanvas();
 
     return (
@@ -24,30 +25,6 @@ const RollLoop = timeLoop(Roll);
 @inject('rollStore')
 @observer
 export default class Canvas extends React.Component {
-  // componentDidMount() {
-  //   let getMousePos = (cn, evt) => { 
-  //     var rect = cn.getBoundingClientRect();
-  //     return {
-  //         x: evt.clientX - rect.left,
-  //         y: evt.clientY - rect.top
-  //     }
-  //   };
-  //   // get HTML canvas 
-  //   var can = document.getElementById("d3_visualizer");
-  //   can.addEventListener('mousemove', (evt) => {
-  //       let mousePos = getMousePos(can, evt);
-  //       this.props.rollStore.updateMouse(mousePos.x, mousePos.y);
-  //   }, false);
-  //   can.addEventListener('mousedown', (evt) => {
-  //       this.props.rollStore.updateMouseEvent('drag');
-  //   }, false);
-  //   can.addEventListener('mouseup', (evt) => {
-  //       this.props.rollStore.updateMouseEvent('idle');
-  //   }, false);
-
-  //   this.props.rollStore.initD3();
-  // }
-
   render() {
     console.log("RENDER CANVAS.JS");
 

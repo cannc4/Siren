@@ -13,7 +13,6 @@ import globalStore from './globalStore';
 import consoleStore from './consoleStore';
 
 import request from '../utils/request'
-// import menubarStore from './menubarStore';
 
 class ChannelStore {
     @observable channels = [{
@@ -48,14 +47,24 @@ class ChannelStore {
         else
             return 0;
     }
-    getChannelType = (name) => {
-        let ch = _.find(this.channels, {
-            'name': name,
-            'scene': sceneStore.active_scene
-        });
-        if (ch !== undefined) {
-            return ch.type;
+    @computed get
+    updateCellActiveClasses() { 
+        // deselect all
+        for (let i = 0; i < this.getActiveChannels.length; i++) {
+            const element = this.getActiveChannels[i];
+            for (let j = 0; j < element.cells.length; j++) {
+                let dom_cell = document.getElementById('cell_' + i + '_' + j);
+                if (dom_cell) { 
+                    dom_cell.className = _.replace(dom_cell.className, ' active', ''); 
+                }
+            }
         }
+
+        // Active
+        this.getActiveChannels.forEach(ch => {
+            let dom_cell = document.getElementById('cell_' + ch.activeSceneIndex + '_' + (ch.time % ch.steps));
+            if (dom_cell) dom_cell.className += ' active'; 
+        });
     }
 
     @action
@@ -237,6 +246,8 @@ class ChannelStore {
                 selected: false,
                 cid: this.channels.length
             });
+            // const dom = document.getElementById('channelheader_' + (this.getActiveChannels.length - 1));
+            // if (dom) dom.focus(); 
         } else {
             alert(name + ' already exists.');
         }

@@ -20,7 +20,7 @@ class ChannelHeader extends React.Component {
 
         return (<div className={'ChannelHeader'}>
             <div className={"ChannelItemHeader " + item.type }>
-                <input ref={(input_name) => { this.nameInputName = input_name; }}
+                <input ref={(input_name) => { this.nameInputName = input_name; }}    
                     title={"Channel Name (" + item.name + ") [enter to submit changes]"}
                     className={"ChannelItemHeader-NameText draggableCancel"}
                     placeholder={(item.name === '' ? '___': item.name)}
@@ -49,7 +49,7 @@ class ChannelHeader extends React.Component {
                         onChange={() => (this.props.channelStore.changeChannelRate(item.name, this.nameInputRate.value))}
                         onClick={() => this.nameInputRate.focus()}/>
                     
-                    {this.props.channelStore.getChannelType(item.name) === "Tidal" && 
+                    {item.type === "Tidal" && 
                     <input ref={(input_transition) => { this.nameInputTrans = input_transition; }}
                         title={"Tidal Transition " + (item.transition === '' ? "NONE": "("+item.transition+")")}
                         className={"ChannelItemHeader-Transition draggableCancel"}
@@ -78,7 +78,7 @@ class Channel extends React.Component {
   render() {
     const { item, index } = this.props;
     console.log('RENDER CHANNEL', item);
-
+      
     let channelClass = "ChannelItem";
     if ((!item.loop && item.executed) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
       channelClass += " disabled";
@@ -105,14 +105,17 @@ class Channel extends React.Component {
 @inject('channelStore')
 @observer
 export default class Grid extends React.Component {
-    
     onDragStop = (event, position) => {
-        let stepIndex = _.toInteger((position.lastY-60)/40);
+        let stepIndex = _.toInteger((position.lastY - 60) / 40);
         this.props.channelStore.seekTimer(stepIndex);
     }
     
     render() {
         console.log('RENDER GRID');
+
+        // eslint-disable-next-line no-unused-expressions
+        // this.props.channelStore.updateCellActiveClasses
+
         return (<div className={'AllChannels draggableCancel PanelAdjuster'}>    
             <Draggable position={null}
                 defaultPosition={{x: 0, y: 60}}    
@@ -130,9 +133,8 @@ export default class Grid extends React.Component {
                     
             {this.props.channelStore.getActiveChannels
                 .map((t, i) => {
-                    return <Channel key={t.scene+"_"+t.name} item={t} index={i}/>;
+                    return <Channel key={t.scene + "_" + t.name} item={t} index={i} />;
                 })}
-            
         </div>
         );
     }

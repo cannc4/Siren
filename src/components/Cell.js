@@ -13,8 +13,6 @@ import '../styles/Cell.css'
 export default class Cell extends React.Component {
     
     handleKeys = (event, channel_index, cell_index) => {
-
-        // console.log(event.keyCode);
         // 8 -> backspace
         // 46 -> del
         // 27 esc
@@ -45,7 +43,7 @@ export default class Cell extends React.Component {
         }
         
         //select with enter
-        else if(event.keyCode === 13) {
+        else if (event.keyCode === 13) {
             if(!this.props.cellStore.isSelected) {
                 this.props.cellStore.updateSelectState(true);
                 this.props.cellStore.selectCell(channel_index, cell_index);
@@ -141,17 +139,14 @@ export default class Cell extends React.Component {
 
         var className = "GridItem";
         className += (cell_index % 2 === 0) ? ' even' : ' odd'; 
-        // TODO 
-        // Replace with more efficient checking system
-        if(this.props.cellStore.isCellActive(channel_index, cell_index)){
-            className += ' active';
-        }
-        if(this.props.cellStore.isCellSelected(channel_index, cell_index)) {
-            className += ' selected';
-        }
-        if(this.props.cellStore.isCellHighlighted(channel_index, cell_index)) {
-            className += ' highlighted';
-        }
+        
+        // eslint-disable-next-line no-unused-expressions
+        this.props.cellStore.updateCellSelectedClasses;
+
+        if (channelStore.getActiveChannels[channel_index].time %
+            channelStore.getActiveChannels[channel_index].steps === cell_index)
+            className += ' active'; 
+
         return (<div>
             <textarea id={'cell_' + channel_index + "_" + cell_index}
                 ref={(input) => { this.nameInput = input; }}
@@ -159,7 +154,7 @@ export default class Cell extends React.Component {
                 placeholder={cell_index % 2 === 1 ? _.toString(cell_index+1) : ''}
                 value={value}
                 onChange={() => 
-                    (this.props.cellStore.updateCell(channel_index, cell_index, this.nameInput.value))}
+                    (this.props.cellStore.updateCellValue(channel_index, cell_index, this.nameInput.value))}
                 onKeyDown={(event) => (this.handleKeys(event, channel_index, cell_index))}
                 onClick={() => {
                     this.props.cellStore.updateSelectState(false);
@@ -176,7 +171,7 @@ export default class Cell extends React.Component {
         //             placeholder={cell_index % 2 === 1 ? _.toString(cell_index + 1) : ''}
         //             value={value}
         //             onInput={() =>
-        //                 (this.props.cellStore.updateCell(item.name, cell_index, this.nameInput.value))}
+        //                 (this.props.cellStore.updateCellValue(item.name, cell_index, this.nameInput.value))}
         //             onKeyDown={(event) => (this.handleKeys(event, channel_index, cell_index))}
         //             onClick={() => {
         //                 this.props.cellStore.updateSelectState(false);

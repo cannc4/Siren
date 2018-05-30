@@ -41,6 +41,8 @@ class SceneStore {
         // fixes a bug where solo and scene change didnt work
         if (!_.some(_.filter(channelStore.channels, ['scene', name]), ['solo', true]))
             channelStore.soloEnabled = false;
+        else
+            channelStore.soloEnabled = true;
         
         // required for progression
         if (this.scene_mode) 
@@ -48,7 +50,7 @@ class SceneStore {
                 c.loop = false;
                 c.executed = false;
             });
-        
+
         cellStore.updateSelectState(false);
     }
     @action changeNextScene() {
