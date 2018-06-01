@@ -9,12 +9,14 @@ s.waitForBoot
 	
 	// Initalize SuperDirt //
 	// ------------------- //
+	SuperDirt.postBadValues = false;
 	~dirt = SuperDirt(2, s);
 	//~dirt.loadSoundFiles;
 	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\gfix\\*");
 	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\poolx\\*");
 	0.2.wait;
-	~dirt.start(57120, [0, 1]);
+	
+	~dirt.start(57120, [0, 0, 0, 0,0,0,0,0]);
 	"SUPERDIRT LOADED".postln;
 
 
@@ -23,14 +25,14 @@ s.waitForBoot
 
 	// SIREN FUNCTIONS - DO NOT REMOVE //
 	// ------------------------------- //
-	~dirt.orbits.do { |orbit, i|
+	/*~dirt.orbits.do { |orbit, i|
 		{SendPeakRMS.kr(
 			InFeedback.ar(orbit.dryBus, ~dirt.numChannels),
 				4,
 				3,
 				"/orbit" ++ i);
 		}.play;
-	};
+	};*/
 
 	(
 		// Tidal playback information
@@ -41,12 +43,12 @@ s.waitForBoot
 		};
 		thisProcess.addOSCRecvFunc(f);
 
-		g = { |msg, time, addr|
+		/*g = { |msg, time, addr|
 			if(msg[0].asString.includesAll("/orbit")) {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
-		thisProcess.addOSCRecvFunc(g);
+		thisProcess.addOSCRecvFunc(g);*/
 		
 	);
   	0.2.wait;

@@ -29,23 +29,23 @@ class MenubarStore {
         this.sc_log_socket.on('disconnect', action((reason) => {
             this.server_info = 0;
         }));
-        this.sc_log_socket.on("/rms", action((data) => {
-            // const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
+        // this.sc_log_socket.on("/rms", action((data) => {
+        //     const i = _.toNumber(data.orbit.charAt(data.orbit.length - 1));
 
-            // if (i < this.rmsArray.length)
-            //     this.rmsArray[i] = {
-            //         rms: data.rms,
-            //         peak: data.peak
-            //     };
-            // else
-            //     this.rmsArray.push({
-            //         rms: data.rms,
-            //         peak: data.peak
-            //     });
+        //     if (i < this.rmsArray.length)
+        //         this.rmsArray[i] = {
+        //             rms: data.rms,
+        //             peak: data.peak
+        //         };
+        //     else
+        //         this.rmsArray.push({
+        //             rms: data.rms,
+        //             peak: data.peak
+        //         });
 
-            // this.createRMSShape_Left();
-            // this.createRMSShape_Right();
-        }))
+        //     this.createRMSShape_Left();
+        //     this.createRMSShape_Right();
+        // }))
     }
 
     @computed get getActive() {

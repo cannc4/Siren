@@ -1,7 +1,28 @@
 import { GLSL, Shaders } from "gl-react";
 
 export const shaders = Shaders.create({
+  lines: {
+    frag: GLSL`
+    precision highp float;
 
+    uniform sampler2D texture;
+    varying vec2 uv;
+
+    uniform float lineStrength;
+    uniform float lineSize;
+    uniform float lineTilt;
+
+    void main() {
+      vec2 vUv = uv.st;
+
+      vec4 col = texture2D(texture, vUv);
+      col += sin(vUv.x*lineSize*(1.0-lineTilt)+
+                 vUv.y*lineSize*lineTilt)*lineStrength;
+
+      gl_FragColor = col;
+    }
+    `
+  },
   barrelBlur: {
     frag: GLSL`
     precision mediump float;
@@ -311,8 +332,7 @@ export const shaders = Shaders.create({
       p.x -= mod(p.x, 1.0 / pixels.x);
       p.y -= mod(p.y, 1.0 / pixels.y);
 
-      vec3 col = texture2D(texture, p).rgb;
-      gl_FragColor = vec4(col, 1.0);
+      gl_FragColor = vec4(texture2D(texture, p).rgb, 1.0);
     }
     `
   },
@@ -340,10 +360,11 @@ export const shaders = Shaders.create({
   },
   marchGL: {
       frag: GLSL`
-      #define AO_STEPS 4
+      #define AO_STEPS 2
       #define SS_STEPS 32
+      #define FAR 30.
 
-      precision highp float;
+      precision mediump float;
 
       uniform vec2 res;
       uniform float time;
@@ -351,46 +372,99 @@ export const shaders = Shaders.create({
       // channel-wise evolution matrix (hard coded)
       uniform mat4 evolutions[4];
 
-      // rms values for each orbit (hard coded)
-      // uniform float rmss[2];
-
-      // sample name in ascii
+      // current sample name in ascii
       uniform float nameAscii[5];
+
+      // the active scene id
+      uniform int activeSceneId;
 
       const int MAX_MARCHING_STEPS = 255;
       const float MIN_DIST = 0.0;
       const float MAX_DIST = 100.0;
-      const float EPSILON = 0.001;
+      const float EPSILON = 0.0001;
 
-      ////////////////
+      const vec3 LIGHT = vec3(4.0, 2.0, 4.0);
+
+      vec3 foregroundColor = vec3(1., 1., 1.);
+      vec3 backgroundColor = vec3(0.1, 0.1, 0.1);
+
       // Supershape globals
       vec4 S1, S2;
 
-      vec4 Setup(float t)
+      vec4 SetupSupershape(float t)
       {
-          t = mod(t, 8.0);
-          if (t < 1.0)       return vec4(7.75, 15.0, 12.0, 16.0);
-          else if (t < 2.0)  return vec4(-2.6, 11.2, 1.5, 8.982);
-          else if (t < 3.0)  return vec4(5.6, 2.5, 6.1, 6.4);
-          else if (t < 4.0)  return vec4(-1.0, 1.0, 6.0, 0.2);
+          t = mod(t, 10.0);
+          if (t < 1.0)      return vec4(3.0, 0.5, 1.7, 1.7);
+          else if (t < 2.0) return vec4(2.6, 11.2, 1.5, 8.982);
+          else if (t < 3.0) return vec4(2.0, 7.3, 5.01, 2.2);
+          else if (t < 4.0) return vec4(4.0, 2.4, 4.2, 1.2);
           else if (t < 5.0) return vec4(3.6, 2.4, 1.2, 5.45);
           else if (t < 6.0) return vec4(2.0, 2.3, 2.0, 2.2);
           else if (t < 7.0) return vec4(5.1, 11.5, 1.51, 2.0);
-          else                return vec4(3.0, 4.5, 10.0, -1.74);
+          else if (t < 8.0) return vec4(4.75, 2.0, 6.0, 3.45);
+          else if (t < 9.0) return vec4(3.0, 4.5, 10.0, -1.74);
+          else              return vec4(2., 10., 10., 10.);
       }
-      ////////////////
+      vec3 SetupCamera(float t)
+      {
+          t = mod(t, 10.0);
+          if (t < 1.0)      return vec3(8.0, 2.0, 7.0);
+          else if (t < 2.0) return vec3(11.2, 1.5, 4.982);
+          else if (t < 3.0) return vec3(10.0, 10.0, 10.0);
+          else if (t < 4.0) return vec3(6.4, 15.2, 11.2);
+          else if (t < 5.0) return vec3(-8.2, 1.2, 9.2);
+          else if (t < 6.0) return vec3(-6.4, -2.3, 10.2);
+          else if (t < 7.0) return vec3(-9, 1.2, -9.74);
+          else if (t < 8.0) return vec3(6.4, 2.3, -10.9);
+          else if (t < 9.0) return vec3(12.4, 5.13, 5.5);
+          else              return vec3(9.4, 3.5, 9.2);
+      }
 
+      // ---------------------------- //
+      //          NOISE FROM Xyptonjtroz
+      // ---------------------------- //
+      float tri(in float x){return abs(fract(x)-.5);}
+      vec3 tri3(in vec3 p){return vec3( tri(p.z+tri(p.y*1.)), tri(p.z+tri(p.x*1.)), tri(p.y+tri(p.x*1.)));}
+      mat2 m2 = mat2(0.970,  0.242, -0.242,  0.970);
+      float triNoise3d(in vec3 p, in float spd) {
+        float z = 1.4;
+        float rz = 0.;
+        vec3 bp = p;
+      	for (float i=0.; i<=3.; i++ )
+      	{
+          vec3 dg = tri3(bp*2.);
+          p += (dg+time*spd);
+
+          bp *= 1.8;
+      		z *= 1.5;
+      		p *= 1.2;
+
+          rz+= (tri(p.z+tri(p.x+tri(p.y))))/z;
+          bp += 0.14;
+      	}
+      	return rz;
+      }
+      float bnoise(in vec3 p) {
+          float n = sin(triNoise3d(p*.3,0.0)*11.)*0.6+0.4;
+          n += sin(triNoise3d(p*1.,0.05)*40.)*0.1+0.9;
+          return (n*n)*0.003;
+      }
 
       // ---------------------------- //
       //          UTILITY
       // ---------------------------- //
       float map(float value,  float istart,  float iend,  float ostart,  float oend) {
-          return ( (value-istart) / (iend-istart) * (oend-ostart) ) + ostart;
+          return clamp( ((value-istart) / (iend-istart) * (oend-ostart) ) + ostart, ostart, oend);
       }
       vec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {
           vec2 xy = fragCoord - size / 2.0;
           float z = size.y / tan(radians(fieldOfView) / 2.0);
           return normalize(vec3(xy, -z));
+      }
+      vec2 hash22(vec2 p) {
+      	p  = fract(p * vec2(5.3983, 5.4427));
+        p += dot(p.yx, p.xy +  vec2(21.5351, 14.3137));
+      	return fract(vec2(p.x * p.y * 95.4337, p.x * p.y * 97.597));
       }
 
       // ---------------------------- //
@@ -441,7 +515,7 @@ export const shaders = Shaders.create({
           return min(distA, distB);
       }
       float blend( float a, float b) {
-          float k = 0.2; // might be parameter
+          float k = 0.7 + sin(time)*0.253;
           float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
           return mix( b, a, h ) - k*h*(1.0-h);
       }
@@ -456,9 +530,6 @@ export const shaders = Shaders.create({
       // ---------------------------- //
       //      PRIMITIVE SHAPES
       // ---------------------------- //
-      float plane(vec3 p) {
-          return p.y;
-      }
       float sphere(vec3 p, float r) {
           return length(p) - r;
       }
@@ -474,6 +545,33 @@ export const shaders = Shaders.create({
           float insideDistance = min(max(inOutRadius, inOutHeight), 0.0);
           float outsideDistance = length(max(vec2(inOutRadius, inOutHeight), 0.0));
           return insideDistance + outsideDistance;
+      }
+      // from Xyptonjtroz
+      float height(vec2 p) {
+        p *= 0.2;
+        return sin(p.y)*0.4 + sin(p.x)*0.4;
+      }
+      float vine(vec3 p, in float c, in float h) {
+          p.y += sin(p.z*0.2625)*2.5;
+          p.x += cos(p.z*0.1575)*3.;
+          vec2 q = vec2(mod(p.x, c)-c/2., p.y);
+          return length(q) - h -sin(p.z*2.+sin(p.x*7.)*0.5+time*0.5)*0.13;
+      }
+      float plane(vec3 p) {
+        p.y += height(p.zx);
+
+        vec3 bp = p;
+        vec2 hs = hash22(floor(p.zx/4.));
+        p.zx = mod(p.zx, 4.) - 2.;
+
+        float d = p.y+0.5;
+        p.y -= hs.x*0.4 - 0.15;
+        p.zx += hs*1.34;
+        d = blend(d, sphere(p - (hs.y * evolutions[0][0].x), hs.x*0.4));
+
+        d = blend(d, vine(bp+vec3(1.8,0.,0), 30.,.8) );
+        d = blend(d, vine(bp.zyx+vec3(0.,0,17.), 40.,0.75) );
+        return d;
       }
 
       // ---------------------------- //
@@ -493,15 +591,15 @@ export const shaders = Shaders.create({
           float rho = asin(sn);
 
           float r1 = superformula(phi, 1.0 + EPSILON, 1.0,
-            S1.x + evolutions[0][1][3],
-            S1.y + evolutions[0][2][0],
-            S1.z + evolutions[0][2][1],
-            S1.w + evolutions[0][2][2]);
+            S1.x + evolutions[0][2][1] * 10.,         // begin 0 / 1
+            S1.y + evolutions[0][2][3] * 10.,         // end   0 / 1
+            S1.z + evolutions[0][2][3] * 10.,         // hall  0 / 1
+            S1.w + evolutions[0][3][0] * 10.);         // shape 0 / 1
           float r2 = superformula(rho, 1.0, 1.0,
-            S2.x + evolutions[0][1][0],
-            S2.y + evolutions[0][1][1],
-            S2.z + evolutions[0][1][2],
-            S2.w + evolutions[0][1][3]);
+            S2.x + evolutions[0][1][0],             // coarse 1 / 64
+            S2.y + evolutions[0][1][1] * 5.,        // speed -10 / 10
+            S2.z + evolutions[0][1][2] * 10.,       // gain   0 / 1
+            S2.w + evolutions[0][1][3] * 10.);      // sustain 0 / 1
 
           //same as above but optimized a bit
           d -= r2 * sqrt(r1 * r1 * (1.0 - sn * sn) + sn * sn);
@@ -518,56 +616,17 @@ export const shaders = Shaders.create({
       //          THE SCENE
       // ---------------------------- //
       float scene(vec3 p, vec3 rd) {
-          // Slowly spin the whole scene
           // p = rotateY(time / 2.0) * p;
 
-          // float cylinderRadius = 0.4 + (1.0 - 0.4) * (1.0) / 2.0;
-          // float cylinder1 = cylinder(p, 2.0, cylinderRadius);
-          // float cylinder2 = cylinder(rotateX(radians(90.0)) * p, 2.0, cylinderRadius);
-          // float cylinder3 = cylinder(rotateY(radians(90.0)) * p, 2.0, cylinderRadius);
-          //
-          // float cube = box(p, vec3(1.8, 1.8, 1.8) );
-          //
-          // float sp = sphere(p, 1.2);
-          //
-          // float ballOffset = 0.4 + 1.0 + sin(1.7 * time);
-          // float ballRadius = 0.3;
-          // float balls = sphere(p - vec3(ballOffset, 0.0, 0.0), ballRadius);
-          // balls = unite(balls, sphere(p + vec3(ballOffset, 0.0, 0.0), ballRadius));
-          // balls = unite(balls, sphere(p - vec3(0.0, ballOffset, 0.0), ballRadius));
-          // balls = unite(balls, sphere(p + vec3(0.0, ballOffset, 0.0), ballRadius));
-          // balls = unite(balls, sphere(p - vec3(0.0, 0.0, ballOffset), ballRadius));
-          // balls = unite(balls, sphere(p + vec3(0.0, 0.0, ballOffset), ballRadius));
-          //
-          // // float csgNut = difference(intersect(cube, sp),
-          // //                     unite(cylinder1, unite(cylinder2, cylinder3)));
-          // float csgNut = intersect(cube, sp);
-          //
-          // return unite(sphere(repeat(p + vec3(1.5, 0, 0), vec3(4.0)), 0.7), blend(balls, csgNut));
-
-
-          ///////////////////////////
-          // S1 = (evolutions[0][1].xyzw + vec4(0.24)) * (evolutions[0][0].y + 5.);
-          // S2 = (evolutions[0][2].xyzw + vec4(evolutions[0][0].x)) * 10.;
-
-          // S1 = (vec4 (1.) + vec4 (1.0)) * 2.2;
-          // S2 = (vec4 (1., 0., 1., 0.) + vec4(0.5)) * 10.;
-
-          // goes to 0
+          // goes to 0 as it goes to silence
           float inv_delta = (1. - evolutions[0][0].x);
 
-          float tim = time * (0.05) ;
-          S1 = mix(Setup(tim - 1.0), Setup(tim), smoothstep(0.0, 1.0, fract(tim)));
-          tim = tim * (0.09) + 2.5;
-          S2 = mix(Setup(tim - 1.0), Setup(tim), smoothstep(0.0, 1.0, fract(tim)));
+          float tim = time * (0.05 * inv_delta);
+          S1 = mix(SetupSupershape(tim - 1.0), SetupSupershape(tim), smoothstep(0.0, 1.0, fract(tim)));
+          tim = tim * (0.09 * inv_delta) + 2.5;
+          S2 = mix(SetupSupershape(tim - 1.0), SetupSupershape(tim), smoothstep(0.0, 1.0, fract(tim)));
 
-
-          return supershape(p, rd);
-          // return blend(
-          //   sphere(
-          //     repeat(sin(20.*p) + vec3(evolutions[0][1].y, evolutions[0][2].z, evolutions[0][3].x), vec3(4.0)),
-          //     0.3),
-          //   blend(balls, cube));
+          return supershape(p + vec3(map(evolutions[0][0][1], 0., 1., -3.28, 3.28), 0., 0.), rd);
       }
 
 
@@ -599,60 +658,77 @@ export const shaders = Shaders.create({
       // ---------------------------- //
       //          RENDER
       // ---------------------------- //
-      float calcAO( vec3 p, vec3 n, vec3 rd) {
-          float occ = 0.0, sca = 1.0;
-          for (int i = 0; i < AO_STEPS; i++) {
-              float hr = 0.01 + 0.03 * float(i);
-              vec3 aop = n * hr + p;
-              float dd = scene(aop, rd);
-              occ += -(dd - hr) * sca;
-              sca *= 0.97;
-          }
-          return clamp(1. - 3. * occ, 0., 1.);
+      float curv(vec3 p, float w, vec3 rd) {
+          vec2 e = vec2(-1., 1.)*w;
+
+          float t1 = scene(p + e.yxx, rd), t2 = scene(p + e.xxy, rd);
+          float t3 = scene(p + e.xyx, rd), t4 = scene(p + e.yyy, rd);
+
+          return .125/(e.x*e.x) *(t1 + t2 + t3 + t4 - 4. * scene(p, rd));
       }
-      float calcSoftShadow(vec3 p, vec3 rd, float mint, float tmax, int samples) {
-          float res = 1.0, t = mint, stepDist = (tmax - mint) / float(samples);
-          for (int i = 0; i < SS_STEPS; i++) {
-              float h = scene(p + rd * t, rd);
-              res = min(res, 8.0 * h / t);
-              t += clamp(h, stepDist, 1e10);
-              if (h < mint || t > tmax) break;
-          }
-          return clamp(res, 0., 1.);
+      float calcSoftShadow(vec3 p, vec3 rd, float mint, float tmax) {
+        float res = 1.0;
+        float t = mint;
+        for( int i=0; i<SS_STEPS; i++ )
+        {
+    		    float h = scene(p + rd*t, rd);
+            res = min( res, 4.*h/t );
+            t += clamp( h, 0.05, .5 );
+            if(h<0.001 || t>tmax) break;
+        }
+        return clamp( res, 0.0, 1.0 );
       }
       vec3 render(vec3 p, vec3 rd) {
-          vec3 lig = normalize(vec3(4.0, 2.0, 4.0)),
+          vec3 lig = normalize(LIGHT),
                nor = estimateNormal(p, rd),
                ref = reflect(rd, nor);
 
-          // Material color
-          vec3 col = vec3(nor * .5 + .55);
+          // Material color (based on scene ID
+          if (activeSceneId == 0)
+            foregroundColor = vec3(nor * .34 + .55);
+          else if (activeSceneId == 1)
+            foregroundColor = vec3(normalize(p) * .34 + .5);
+          else if (activeSceneId == 2)
+            foregroundColor = vec3(0.8, 0.3, 0.4);
+          else if (activeSceneId == 3)
+            foregroundColor = vec3(0.8, 0.7, 0.4);
+          else if (activeSceneId == 4)
+            foregroundColor = vec3(0.2, 0.33, 0.72);
+          else
+            foregroundColor = vec3(nor * .5 + .55);
 
-          float dif = clamp(dot(nor, lig), 0., 1.),
-              spe = pow(clamp(dot(reflect(-lig, nor), -rd), 0., 1.), 5.),
-              fre = pow(clamp(1.0 + dot(nor, rd), 0., 1.), 5.),
-              dom = smoothstep(-0.15, 0.15, ref.y),
-              amb = 1.0,
-              occ = calcAO(p, nor, rd);
 
-          dif *= calcSoftShadow(p, lig, .001, 3.1, 40);
+          float crv = clamp(curv(p, .4, rd),.0,10.);
+          float shd = calcSoftShadow(p,lig,0.1,3.);
+          float dif = clamp( dot( nor, lig ), 0.0, 1.0 )*shd;
+          float spe = pow(clamp( dot( reflect(rd,nor), lig ), 0.0, 1.0 ),50.)*shd;
+          float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 1.5 );
 
-          vec3 brdf = vec3(0);
-          brdf += 0.8 * dif;
-          brdf += 1.0 * spe * dif;
-          brdf += 0.3 * amb * occ;
-          brdf += 0.1 * fre * occ;
-          brdf += 0.1 * dom * occ;
-          col *= brdf;
+          vec3 innerGlow = vec3(
+            map(nameAscii[0], 97., 122., 0., 1.),
+            map(nameAscii[1], 97., 122., 0., 1.),
+            map(nameAscii[2], 97., 122., 0., 1.)
+          );
 
-          return col;
+          vec3 brdf = evolutions[1][2].xyz;//vec3(0.10,0.11,0.13);
+          brdf += 1.5*dif*evolutions[1][0 ].xyz;//vec3(1.00,0.90,0.7);
+          foregroundColor = mix(foregroundColor, innerGlow, p.y*.5)*0.2+.1;
+          foregroundColor *= (nor * sin(bnoise(p)*evolutions[1][0].z*200.)*0.2 + evolutions[1][0].x);
+          foregroundColor = foregroundColor*brdf + foregroundColor*spe*.5 + fre*innerGlow*.3*crv;
+
+          return foregroundColor;
       }
 
       void main ()
       {
-          vec3 eye = rotateY(map(evolutions[0][0][1], 0., 1., -6.28, 6.28)) * vec3(8.0, 5.0, 7.0);
-          // vec3 eye = vec3 (-8., 3.0, -10.);
-          vec3 viewDir = rayDirection(60.0, res.xy, gl_FragCoord.xy);
+          // setup camera
+          // silence (0, 1) dense
+          // float inv_delta = (1. - evolutions[2][0].x) * 0.5;
+
+          float tim = time * (0.05);
+          vec3 eye = mix(SetupCamera(tim - 1.0), SetupCamera(tim), smoothstep(0.0, 1.0, fract(tim)));
+
+          vec3 viewDir = rayDirection(45.0, res.xy, gl_FragCoord.xy);
           mat3 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
           vec3 worldDir = viewToWorld * viewDir;
 
@@ -660,12 +736,12 @@ export const shaders = Shaders.create({
 
           if (dist > MAX_DIST - EPSILON) {
               // Didn't hit anything
-              vec3 outColor;
-              outColor.x = map(nameAscii[0], 97., 122., 0., 1.);
-              outColor.y = map(nameAscii[1], 97., 122., 0., 1.);
-              outColor.z = map(nameAscii[2], 97., 122., 0., 1.);
+              // vec3 outColor;
+              // outColor.x = map(nameAscii[0], 97., 122., 0., 1.);
+              // outColor.y = map(nameAscii[1], 97., 122., 0., 1.);
+              // outColor.z = map(nameAscii[2], 97., 122., 0., 1.);
 
-              gl_FragColor = vec4(outColor, 1.0);
+              gl_FragColor = vec4(backgroundColor, 1.);
               return;
           }
 
@@ -675,7 +751,24 @@ export const shaders = Shaders.create({
           // Render final color
           vec3 color = render(p, worldDir);
 
-          // color *= evolutions[0][0].x;
+          //-----------------------------------------------------
+        	// postprocessing
+          //-----------------------------------------------------
+          // gamma
+        	color = pow( color, vec3(0.45) );
+
+          // desat
+          color = mix( color, vec3(dot(color,vec3(0.333))), 0.2 );
+
+          // tint
+        	color *= vec3( 1.0, 1.0, 1.0*0.9);
+
+        	// vigneting
+          vec2 q = gl_FragCoord.xy / res.xy;
+          color *= 0.2 + 0.8*pow( 16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.1 );
+
+          // fade in
+        	color *= smoothstep( 0.0, 2.0, time );
 
           gl_FragColor = vec4(color, 1.0);
       }

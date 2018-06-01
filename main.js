@@ -19,7 +19,7 @@ function createWindow() {
         show: true,
         icon: __dirname + './favicon.icns',
         fullscreenable: true,
-        fullscreen: true,
+        // fullscreen: true,
         title: "Siren"
     })
     // app.setAboutPanelOptions({
@@ -41,7 +41,7 @@ function createWindow() {
 
     // Show dev tools
     // Remove this line before distributing
-    //mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 
 
     // Remove window once app is closed

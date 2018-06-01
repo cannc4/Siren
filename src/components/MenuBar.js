@@ -46,9 +46,9 @@ export default class MenuBar extends React.Component {
       <div className={'TimerControls'}>
         
         {/* RMS SHAPE LEFT */}
-        <canvas className={'RMSVis'} id={'RMSVis_Left'}
+        {/* <canvas className={'RMSVis'} id={'RMSVis_Left'}
           width={menubarStore.rmsArray.length * 0.5 * 20} height={30}>
-        </canvas>
+        </canvas> */}
         
         {<button className={'Button'} title={'Stop Pulse'}
             onClick={() => (this.props.pulseStore.stopPulseStop())}>◼</button>}
@@ -68,10 +68,9 @@ export default class MenuBar extends React.Component {
         </button>}
 
         {/* RMS SHAPE RIGHT */}
-        <canvas className={'RMSVis'} id={'RMSVis_Right'}
+        {/* <canvas className={'RMSVis'} id={'RMSVis_Right'}
           width={menubarStore.rmsArray.length * 0.5 * 20} height={30}>
-        
-        </canvas>
+        </canvas> */}
       </div>
 
       {/* <div className={'OtherControls'}>

@@ -34,6 +34,9 @@ class SceneStore {
     @computed get activeScene() {
         return this.active_scene;
     }
+    @computed get activeSceneId() {
+        return _.indexOf(this.scenesReversedOrder, this.active_scene);
+    }
 
     @action changeActiveScene(name) {
         this.active_scene = name;
@@ -55,9 +58,9 @@ class SceneStore {
     }
     @action changeNextScene() {
         const reversed = this.scenesReversedOrder;
-        const index = _.indexOf(reversed, this.active_scene);
+        let index = _.indexOf(reversed, this.active_scene);
         if (index >= reversed.length - 1)
-            return;
+            index = 0;
         this.changeActiveScene(reversed[index + 1]);
     }
     @action changePrevScene() {

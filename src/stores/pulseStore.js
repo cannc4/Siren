@@ -70,9 +70,6 @@ class PulseStore {
     @action stopPulse() {
         const ctx = this;
 
-        channelStore.resetAllTimes();
-        channelStore.silenceAllChannels();
-
         request.post('http://localhost:3001/pulseStop')
             .then((response) => {
                 if (response.status === 200) {
@@ -86,6 +83,10 @@ class PulseStore {
             });
     }
     @action stopPulseStop() {
+        // stop the audio
+        channelStore.resetAllTimes();
+        channelStore.silenceAllChannels();
+        
         // actually stop the pulse
         this.stopPulse();
     }

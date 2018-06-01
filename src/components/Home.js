@@ -114,7 +114,7 @@ export default class Home extends React.Component {
     }
     else if (layoutItem.i === 'graphics') {
       return layoutItem.isVisible && (<div key={layoutItem.i} id={'graphicsLayout'} >
-        <div className={"PanelHeader"}> ● Graphics
+        <div className={"PanelHeader Tidal"}> ● Graphics
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <div className={'Graphics PanelAdjuster'}>
@@ -203,6 +203,7 @@ export default class Home extends React.Component {
     else if (param.type === 'layoutLoadCustom') { 
       if (event.altKey) { 
         this.props.layoutStore.deleteCustom(param.val);
+        this.props.layoutStore.saveCustom(param.val);
         this.props.layoutStore.save();
       }
       else this.props.layoutStore.loadCustom(param.val);
@@ -269,7 +270,7 @@ export default class Home extends React.Component {
             <MenuItem onClick={ctx.handleRightClick.bind(ctx, { type: 'matrixFull' })} data={{ item: 'reset' }}>Max. Grid<span style={{ float: 'right' }}>⇧ + F</span></MenuItem>
             <MenuItem onClick={ctx.handleRightClick.bind(ctx,{type:'graphicsFull'})} data={{ item: 'reset' }}>Max. Graphics<span style={{float: 'right'}}>⇧ + G</span></MenuItem>
             <MenuItem divider />
-            <MenuItem disabled> Alt-Click to remove </MenuItem>
+            <MenuItem disabled> Alt-Click to replace </MenuItem>
             {_.map({a:0, b:1, c:2, d:3}, (i, key) => {
               if(!ctx.props.layoutStore.isSlotEmpty(i))
                 return <MenuItem key={key}

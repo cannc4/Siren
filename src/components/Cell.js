@@ -6,6 +6,7 @@ import { save, timer } from '../keyFunctions'
 
 // import Prism from 'prismjs'
 
+import channelStore from "../stores/channelStore";
 import '../styles/Cell.css'
 
 @inject('cellStore')

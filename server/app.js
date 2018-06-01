@@ -373,6 +373,7 @@ class REPL {
   sendOneshot() {
     this.tidalSendExpression('let startclock d p = do {now <- getNow; d $ (pure (nextSam now)) ~> p}');
     this.tidalSendExpression('let one d p = startclock d $ seqP [(0, 1, p)]');
+    this.tidalSendExpression('let on a d p = startclock d $ seqP [(0, a, p)]');
   }
 
   sendSCLang(message) {

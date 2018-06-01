@@ -1,6 +1,7 @@
 import {
     observable,
-    action
+    action,
+    computed
 } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
@@ -37,8 +38,14 @@ class RollStore {
         [0, 0, 20000, 0]
     ];
    
-    // graphic evolution matrices // NOT OBSERVABLE
-    evolutions = _.fill(Array(4), math.matrix(math.eye(4)));
+    // graphic evolution matrices 
+    // DO NOT MAKE OBSERVABLE
+    evolutions = [
+        math.matrix(math.eye(4)),
+        math.matrix(math.eye(4)),
+        math.matrix(math.eye(4)),
+        math.matrix(math.eye(4))
+    ];
     def_value = 0.5;
 
     newWindows() { 
@@ -111,16 +118,25 @@ class RollStore {
 
     // -- Hot reload
     reloadRoll() {
-        this.tree_start_cycle = 0;
+        this.cycle_time_offset = 0;
 
         this.updateGraphicsDimensions();
         this.renderCanvas();
     }
 
+    getEvalMatItem(matrix_id, col, row) {
+        if (matrix_id < this.evolutions.length) { 
+            return this.evolutions[matrix_id].valueOf()[col][row];
+        }
+        return 0;
+    }
+
     getAverageVariableOnChannel(channel_id, varName, defaultValue) { 
+        // find the channel on tree
         let node = _.find(this.treeRoot.children, (o) => { 
             return o.model.value === channel_id;
         })
+
         if (node !== undefined) { 
             let variable = node.model.average[[varName]];
             return ((variable === undefined || _.isNaN(variable)) ? defaultValue : (variable));
@@ -133,6 +149,7 @@ class RollStore {
         let index = _.toInteger(this.value.sirenChan);
 
         if (index === undefined) index = 0;
+        // console.log(index);
 
         if (index < this.evolutions.length) {
             this.evolutions[index].subset(math.index(0, 0), this.getAverageVariableOnChannel(index, "delta", 1));      // speed of progression  ( 0  1)    <~x~>    global velocity
@@ -147,8 +164,8 @@ class RollStore {
             this.evolutions[index].subset(math.index(2, 1), this.getAverageVariableOnChannel(index, "begin", 0));      // start of playb.       ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(2, 2), this.getAverageVariableOnChannel(index, "end", 1));        // end of playb.         ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(2, 3), this.getAverageVariableOnChannel(index, "hall", 0));       // reverb                ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(3, 0), this.getAverageVariableOnChannel(index, "resonance", 0));  // resonance             ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(3, 1), this.getAverageVariableOnChannel(index, "shape", 0));      // distortion            ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(3, 0), this.getAverageVariableOnChannel(index, "shape", 0));      // distortion            ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(3, 1), this.getAverageVariableOnChannel(index, "resonance", 0));  // resonance             ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(3, 2), this.getAverageVariableOnChannel(index, "cutoff", 20000)); // lfreq threshold       ( 0 20k)   <~~~> 
             this.evolutions[index].subset(math.index(3, 3), this.getAverageVariableOnChannel(index, "hcutoff", 0));    // hfreq threshold       ( 0 20k)   <~~~> 
         }
@@ -381,10 +398,11 @@ class RollStore {
                                 item.rendered = true;
                             }
 
+                            const sust = (item.sustain !== undefined ? item.sustain : 1);
                             ctx.fillRect(
                                 x,
                                 _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
-                                _w * (item.sustain !== undefined ? item.sustain : 1),
+                                _w * sust,
                                 _n_h
                             );
                         })

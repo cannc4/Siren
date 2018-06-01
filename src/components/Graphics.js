@@ -25,6 +25,7 @@ import {
 import timeLoop from "../utils/timeLoop";
 import menubarStore from '../stores/menubarStore';
 import rollStore from '../stores/rollStore';
+import sceneStore from '../stores/sceneStore';
 
 class Canvas extends React.Component {
   // getParameterSafe(parameterName, defaultValue, store) {
@@ -45,12 +46,6 @@ class Canvas extends React.Component {
     // sample parameters
     let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
 
-    // pass rms information to shader
-    let rmsArray = _.fill(Array(2), 0);
-    _.each(menubarStore.rmsArray, (e, i) => { 
-      rmsArray[i] = e.rms;
-    });
-
     // flatten evolution matrices
     let evol = _.fill(Array(4), []);
     _.each(rollStore.evolutions, (e, i) => { 
@@ -61,40 +56,15 @@ class Canvas extends React.Component {
       shader={shaders.marchGL}
       uniforms={{
         res,
-        nameAscii,
         time: time / 1000,
-        // rmss: rmsArray,
+        nameAscii,
         evolutions: evol,
+        activeSceneId: sceneStore.activeSceneId
       }}
     />;
   }
 }
 
-
-// Time shaders
-const BarrelBlur = ({ children: t, time}) =>
-  <Node shader={shaders.barrelBlur}
-    uniforms={{
-      texture: t,
-      time: time / 1000,
-      amount: 0.04
-    }} />;
-const FXShake = ({ children: t, time }) =>
-  <Node shader={shaders.shake}
-    uniforms={{
-      texture: t,
-      time: time / 1000,
-      amount: 0.01
-    }} />;
-const PixelRolls = ({ children: t, time }) =>
-  <Node shader={shaders.rolls}
-    uniforms={{
-      texture: t,
-      time: time / 1000,
-      pixels: [100, 10],
-      rollRate: 2,
-      rollAmount: 0.08
-    }} />;  
 // Shaders without the time
 const Patches = ({ children: t }) =>
     <Node shader={shaders.patches}
@@ -133,19 +103,42 @@ const Mirror = ({ children: t }) =>
         texture: t,
         dir: 1
       }} />;
-    
-const Pixelate = ({ children: t }) =>
-  <Node shader={shaders.pixelate}
-  uniforms={{
-    texture: t,
-    pixels: [100, 10]
-  }} />;
+const Lines = ({ children: t }) =>
+    <Node shader={shaders.lines}
+    uniforms={{
+      texture: t,
+      lineStrength: 0.01,
+      lineSize: 500,
+      lineTilt: 1.6
+    }} />;
 
+// Time shaders
+const BarrelBlur = ({ children: t, time}) =>
+  <Node shader={shaders.barrelBlur}
+    uniforms={{
+      texture: t,
+      time: time / 1000,
+      amount: rollStore.getEvalMatItem(3, 2, 3)*0.1
+    }} />;
+const FXShake = ({ children: t, time }) =>
+  <Node shader={shaders.shake}
+    uniforms={{
+      texture: t,
+      time: time / 1000,
+      amount: rollStore.getEvalMatItem(3, 3, 0) * 0.01
+    }} />;
+    const Pixelate = ({ children: t, time }) =>
+    <Node shader={shaders.pixelate}
+      uniforms={{
+        texture: t,
+        pixels: [_.toInteger(1600 / rollStore.getEvalMatItem(3, 1, 0)),
+                 _.toInteger(512 / rollStore.getEvalMatItem(3, 1, 0))],
+        }} />;
 
 const CanvasLoop = timeLoop(Canvas);
 const FXShakeLoop = timeLoop(FXShake);
 const BarrelBlurLoop = timeLoop(BarrelBlur);
-const PixelRollsLoop = timeLoop(PixelRolls);
+const PixelateLoop = timeLoop(Pixelate);
 
 @inject('rollStore')
 @observer
@@ -159,27 +152,27 @@ export default class Graphics extends React.Component {
           res={[dim[0], dim[1]]}
           rollStore={this.props.rollStore} />
         </Bus>
-          {/* <FXShakeLoop> */}
-            {/* <BarrelBlurLoop> */}
-        {/* <Edge> */}
-        {/* <Halftone> */}
-        {/* <Glow> */}
-        {/* <Patches> */}
-        {/* <Mirror> */}
-        {/* <Pixelate> */}
-        {/* <PixelRollsLoop> */}
-        <FXRGBShift>
-          {() => this.refs.main}
-        </FXRGBShift>  
-          {/* </PixelRollsLoop> */}
-          {/* </Pixelate> */}
-          {/* </Mirror> */}
-          {/* </Patches> */}
-          {/* </Glow> */}
-          {/* </Halftone> */}
+        <Lines>
+          <BarrelBlurLoop>
+            {/* <Patches> */}
+            {/* <Halftone> */}
+            {/* <Glow> */}
+            {/* <Mirror> */}
+            {/* <Edge> */}
+              <PixelateLoop>
+                <FXShakeLoop>
+                  <FXRGBShift>
+                    {() => this.refs.main}
+                  </FXRGBShift>  
+                </FXShakeLoop>
+              </PixelateLoop>
             {/* </Edge> */}
-            {/* </BarrelBlurLoop> */}
-          {/* </FXShakeLoop> */}
+            {/* </Mirror> */}
+            {/* </Glow> */}
+            {/* </Halftone> */}
+            {/* </Patches> */}
+          </BarrelBlurLoop>
+        </Lines>
       </Surface>     
     );
   }
