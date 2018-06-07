@@ -7,6 +7,7 @@ import _ from 'lodash';
 // nodejs connections
 import request from '../utils/request'
 import historyStore from './historyStore';
+import channelStore from './channelStore';
 
 class GlobalStore {
     @observable global_mod = [{
@@ -94,51 +95,64 @@ class GlobalStore {
     @action updatePatterns() {
 
         const ctx = this;
-        // let histpat = [];
         let channels = this.global_channels;
         let transformer = this.global_transformer;
         let modifier = this.global_modifier;
         let gbchan = channels.split(" ");
 
-        let activePatternsLen = historyStore.latestPatterns.length - 1;
+        // TODO: CHANGE HISTORY AND FIX THIS PROPERLY
         let activePatterns = historyStore.latestPatterns;
+        let activePatternsLen = activePatterns.length;
         if (transformer !== undefined && modifier !== undefined) {
-            //console.log("GLOBAL UPDATE PATTERNS:", channels, transformer, modifier,activePatterns,activePatternsLen);
+            // console.log("GLOBAL UPDATE PATTERNS:", channels, transformer, modifier,activePatterns,activePatternsLen);
             if (gbchan !== undefined && gbchan.length > 0 && activePatterns !== undefined && activePatternsLen > 0) {
-                if (gbchan === undefined || gbchan[0] === undefined || gbchan[0] === ' ' || gbchan[0] === '0') {
-                    console.log("Global All channels");
+                // if (gbchan === undefined || gbchan[0] === undefined || gbchan[0] === ' ') {
+                    // console.log("Global All channels");
                     for (let i = 0; i < activePatternsLen; i++) {
                         let curPat = _.last(activePatterns[i]);
                         if (curPat !== undefined && curPat.pattern !== '') {
                             let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
                             let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
-                            if (transformer === undefined) transformer = '';
-                            if (modifier === undefined) modifier = '';
-                            let pattern = patname + transformer + patternbody + modifier;
-                            console.log(pattern);
-                            ctx.submitGHC(pattern);
-                        }
-                    }
-                } else {
-                    for (let j = 0; j < gbchan.length; j++) {
-                        if (activePatterns[j] !== undefined) {
-                            if (activePatterns[j][0] !== undefined) {
-                                let curPat = _.last(activePatterns[j]);
-                                if (curPat !== undefined && curPat.pattern !== '') {
-                                    let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
-                                    let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
-                                    if (transformer === undefined) transformer = '';
-                                    if (modifier === undefined) modifier = '';
-                                    let pattern = patname + transformer + patternbody + modifier;
-                                    console.log(pattern);
-                                    ctx.submitGHC(pattern);
-                                }
+                            
+                            let patchannumber = _.toInteger(patname.charAt(1));
+                            if (_.includes(gbchan, patchannumber.toString()) || _.includes(gbchan, "0")) { 
+                                if (transformer === undefined) transformer = '';
+                                if (modifier === undefined) modifier = '';
+    
+                                let pattern = patname + transformer + patternbody + modifier;
+    
+                                ctx.submitGHC(pattern);
                             }
                         }
                     }
-                }
+                // }
+                // else {
+                //     // TODO: CHANGE HISTORY RECORDS
+
+                //     for (let j = 0; j < gbchan.length; j++) {
+                //         let chan_number = _.toInteger(gbchan[j]) - 1;
+                //         if (!_.isNan(chan_number)) { 
+                //             let chan_obj = _.find(channelStore.getActiveChannels, ['activeSceneIndex', chan_number]);
+    
+                //             if (activePatterns[chan_obj.activeSceneIndex] !== undefined && _.last(activePatterns[chan_number]) !== undefined) {
+                //                 let curPat = _.last(activePatterns[chan_number]);
+                //                 if (curPat !== undefined && curPat.pattern !== '') {
+                //                     let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
+                //                     let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
+                                    
+                //                     if (transformer === undefined) transformer = '';
+                //                     if (modifier === undefined) modifier = '';
+                                    
+                //                     let pattern = patname + transformer + patternbody + modifier;
+                //                     // console.log(pattern);
+                //                     ctx.submitGHC(pattern);
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
             }
-            if (this.global_param !== undefined) ctx.submitGHC(this.global_param);
+            // if (this.global_param !== undefined) ctx.submitGHC(this.global_param);
         }
     }
 

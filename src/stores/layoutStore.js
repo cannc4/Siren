@@ -8,6 +8,7 @@ import _ from 'lodash';
 // nodejs connections
 import request from '../utils/request'
 import rollStore from './rollStore';
+import { save } from '../keyFunctions';
 
 class LayoutStore {
   isLoading;
@@ -27,7 +28,6 @@ class LayoutStore {
 
     window.onload = function () {
       rollStore.reloadRoll();
-      // this.setInterval(save, 5000);
     };
   }
 
@@ -66,19 +66,6 @@ class LayoutStore {
     return this.layouts;
   };
 
-  // REMOVE
-  @action gridParameters(specifier) {
-    let item = this.layouts.filter(l => l.i === specifier)[0];
-    return {
-      i: item.i,
-      x: item.x,
-      y: item.y,
-      h: item.h,
-      w: item.w,
-      isVisible: item.isVisible
-    }
-  };
-
   @action onLayoutChange(layout, layouts) {
 
     if (!this.isLoading) {
@@ -96,7 +83,7 @@ class LayoutStore {
 
       this.layouts = _.concat(layout, hidden_items);
 
-      rollStore.reloadRoll();
+      rollStore.reloadRoll(false);
     }
   };
 
@@ -224,6 +211,236 @@ class LayoutStore {
       }
     ];
   };
+
+  @action matFullscreen() { 
+    this.layouts = [
+      {
+        "w": 17,
+        "h": 20,
+        "x": 0,
+        "y": 0,
+        "i": "tracker",
+        "moved": false,
+        "static": false,
+        "isVisible": true
+      },
+      {
+        "w": 7,
+        "h": 20,
+        "x": 17,
+        "y": 0,
+        "i": "patterns",
+        "moved": false,
+        "static": false,
+        "isVisible": true
+      },
+      {
+        "w": 24,
+        "h": 8,
+        "x": 0,
+        "y": 20,
+        "i": "tidal_roll",
+        "moved": false,
+        "static": false,
+        "isVisible": true
+      },
+      {
+        "w": 9,
+        "h": 7,
+        "x": 15,
+        "y": 28,
+        "i": "tidal_history",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 13,
+        "x": 15,
+        "y": 28,
+        "i": "tidal_console",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 2,
+        "h": 20,
+        "x": 0,
+        "y": 0,
+        "i": "scenes",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 14,
+        "h": 10,
+        "x": 0,
+        "y": 0,
+        "i": "graphics",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 14,
+        "x": 0,
+        "y": 20,
+        "i": "sc_console",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 6,
+        "h": 4,
+        "x": 13,
+        "y": 9,
+        "i": "tidal_globals",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 6,
+        "h": 12,
+        "x": 18,
+        "y": 0,
+        "i": "tidal_log",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 15,
+        "h": 6,
+        "x": 0,
+        "y": 29,
+        "i": "config_paths",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      }
+    ];
+  }
+
+  @action graphicsFullscreen() { 
+    this.layouts = [
+      {
+        "w": 24,
+        "h": 6,
+        "x": 0,
+        "y": 14,
+        "i": "tidal_roll",
+        "moved": false,
+        "static": false,
+        "isVisible": true
+      },
+      {
+        "w": 24,
+        "h": 14,
+        "x": 0,
+        "y": 0,
+        "i": "graphics",
+        "moved": false,
+        "static": false,
+        "isVisible": true
+      },
+      {
+        "w": 7,
+        "h": 20,
+        "x": 17,
+        "y": 17,
+        "i": "patterns",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 17,
+        "h": 20,
+        "x": 0,
+        "y": 0,
+        "i": "tracker",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 7,
+        "x": 15,
+        "y": 28,
+        "i": "tidal_history",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 13,
+        "x": 15,
+        "y": 28,
+        "i": "tidal_console",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 2,
+        "h": 20,
+        "x": 0,
+        "y": 0,
+        "i": "scenes",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 14,
+        "x": 0,
+        "y": 20,
+        "i": "sc_console",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 6,
+        "h": 4,
+        "x": 13,
+        "y": 9,
+        "i": "tidal_globals",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 6,
+        "h": 12,
+        "x": 18,
+        "y": 0,
+        "i": "tidal_log",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 15,
+        "h": 6,
+        "x": 0,
+        "y": 29,
+        "i": "config_paths",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      }
+    ];
+  }
 
   @action fullscreen(modelName) {
       if (this.layouts !== undefined) {

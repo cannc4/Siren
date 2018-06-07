@@ -7,7 +7,6 @@ import '../styles/App.css';
 import '../styles/Layout.css';
 import '../styles/MenuBar.css';
 import '../styles/Help.css';
-import menubarStore from '../stores/menubarStore';
 
 // import Popup from "reactjs-popup";
 

@@ -29,23 +29,6 @@ export default class Canvas extends React.Component {
     console.log("RENDER CANVAS.JS");
 
     return (<div className={"Canvas draggableCancel"}>
-      <div className={'CanvasControls'}>
-        <div>Cycles: 
-          <input className={'Input'}
-            placeholder={8}
-            onChange={(e) => {this.props.rollStore.updateCycles(_.toInteger(e.target.value))}}/>
-        </div>
-        <div>Resolution: 
-          <input className={'Input'} 
-            placeholder={12} 
-            onChange={(e) => {this.props.rollStore.updateResolution(_.toInteger(e.target.value))}}/>
-        </div>
-        <button className={"Button"}
-          onClick={(e) => {
-            this.props.rollStore.reloadRoll();
-          }
-          }>⭯</button>
-      </div>
       <RollLoop></RollLoop>
     </div>);
   }

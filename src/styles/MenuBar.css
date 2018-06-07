@@ -45,7 +45,8 @@
     transform: scale(1);
   }
   20% {
-    transform: scale(0.9);
+    transform: scale(0.6);
+    filter: invert(1);
   }
   100% {
     transform: scale(1);

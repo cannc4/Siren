@@ -14,12 +14,11 @@ function createWindow() {
         width: 1600,
         height: 900,
         backgroundColor: '#000',
-        // frame: false,
         enableLargerThanScreen: true,
         show: true,
         icon: __dirname + './favicon.icns',
         fullscreenable: true,
-        // fullscreen: true,
+        fullscreen: true,
         title: "Siren"
     })
     // app.setAboutPanelOptions({
@@ -41,7 +40,7 @@ function createWindow() {
 
     // Show dev tools
     // Remove this line before distributing
-    mainWindow.webContents.openDevTools()
+    // mainWindow.webContents.openDevTools()
 
 
     // Remove window once app is closed

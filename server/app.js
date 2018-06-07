@@ -467,6 +467,8 @@ const Siren = () => {
   };
 
   //Pattern Stream <->
+
+  // TODO: use _.template from lodash
   app.post('/patternstream', (req, reply) => {
     const {
       step,
@@ -474,6 +476,7 @@ const Siren = () => {
       patterns,
       global_mod
     } = req.body;
+
     let k = channel.name,
       v = step;
 
@@ -597,12 +600,14 @@ const Siren = () => {
         });
       } else if (channel.type === "Tidal") {
         if (channel.transition !== "" && channel.transition !== undefined) {
+          // TODO: consider cases like 'one d1', 'on 4 d1'
           let na = channel.name.substring(1, channel.name.length);
           transitionHolder = "t" + na + " " + channel.transition + " $ ";
         } else {
           transitionHolder = k + " $ ";
         }
-        if (global_mod.channels.includes(channel.cid.toString()) || global_mod.channels.includes(0)) {
+
+        if (global_mod.channels.includes(channel.activeSceneIndex.toString()) || global_mod.channels.includes("0")) {
           if (global_mod.transform === undefined) global_mod.transform = '';
           if (global_mod.modifier === undefined) global_mod.modifier = '';
           newCommand = global_mod.transform + newCommand + global_mod.modifier;
@@ -614,17 +619,19 @@ const Siren = () => {
           cid: channel.cid,
           timestamp: new Date().getMilliseconds()
         });
-      } else if (channel.type === "TidalV") {
-        let chn = channel.name.substring(1, channel.name.length);
-        transitionHolder = "x" + chn + " $ ";
-        pattern = transitionHolder + newCommand;
-        tidalPatternQueue.push(pattern);
-        reply.status(200).json({
-          pattern: pattern,
-          cid: channel.cid,
-          timestamp: new Date().getMilliseconds()
-        });
-      } else if (channel.type === '') {
+      }
+      // else if (channel.type === "TidalV") {
+      //   let chn = channel.name.substring(1, channel.name.length);
+      //   transitionHolder = "x" + chn + " $ ";
+      //   pattern = transitionHolder + newCommand;
+      //   tidalPatternQueue.push(pattern);
+      //   reply.status(200).json({
+      //     pattern: pattern,
+      //     cid: channel.cid,
+      //     timestamp: new Date().getMilliseconds()
+      //   });
+      // }
+      else if (channel.type === '') {
         pattern = newCommand;
         tidalPatternQueue.push(pattern);
         reply.status(200).json({

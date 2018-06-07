@@ -28,6 +28,8 @@ import {
   resetLayout, fullscreen_matrix, fullscreen_graphics
 } from '../keyFunctions'
 
+import rollStore from '../stores/rollStore';
+
 // Grid Layout Initialization
 let ReactGridLayout = require('react-grid-layout');
 let WidthProvider = ReactGridLayout.WidthProvider;
@@ -162,8 +164,11 @@ export default class Home extends React.Component {
     }  
     else if (layoutItem.i === 'tidal_roll') {
       return layoutItem.isVisible && (<div key={layoutItem.i}  id={'canvasLayout'} >
-        <div className={"PanelHeader Tidal"}> ● Pattern Roll
-          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        <div className={"PanelHeader draggableCancel RollHeader Tidal"}> ● Pattern Roll  
+          <input className={'Input'} title={"Cycles on roll"} placeholder={8} onChange={(e) => {rollStore.updateCycles(_.toInteger(e.target.value))}}/>
+          <input className={'Input'} title={"Cycle resolution"} placeholder={12} onChange={(e) => {rollStore.updateResolution(_.toInteger(e.target.value))}}/>
+          <button className={"Button"} title={"Refresh"} onClick={(e) => { rollStore.reloadRoll();}}>⭯</button>
+          <span className={"PanelClose "} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <Canvas/>
       </div>);

@@ -11,6 +11,7 @@ import cellStore from './cellStore';
 
 // nodejs connections
 import request from '../utils/request'
+import { save } from '../keyFunctions';
 
 class SceneStore {
     @observable active_scene = 'default';
@@ -146,6 +147,10 @@ class SceneStore {
                     patternStore.loadPatterns(response.data.patterns);
                     channelStore.loadChannels(response.data.channels);
                     console.log(" ## Scenes loaded: ", this.scene_list);
+
+
+                    // AutoSave everymin
+                    // setInterval(save, 60000);
                 }
             })).catch(function (error) {
                 console.error(" ## SceneStore errors: ", error);

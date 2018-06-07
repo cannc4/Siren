@@ -49,11 +49,13 @@ export const resetLayout = () => {
     layoutStore.reset();
 }
 export const fullscreen_graphics = () => { 
-    layoutStore.fullscreen('graphics');
+    // layoutStore.fullscreen('graphics');
+    layoutStore.graphicsFullscreen();
     rollStore.reloadRoll();
 }
 export const fullscreen_matrix = () => { 
-    layoutStore.fullscreen('tracker');
+    layoutStore.matFullscreen();
+    // layoutStore.fullscreen('tracker');
 }
 export const loadCustomLayout_0 = () => { 
     layoutStore.loadCustom(0);

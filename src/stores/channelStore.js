@@ -119,9 +119,9 @@ class ChannelStore {
         if (channel.type === "Tidal") {
             consoleStore.submitGHC(channel.name + "$ silence");
         }
-        else if ("SuperCollider") { 
-            consoleStore.submitSC("s.freeAll;");
-        }
+        // else if ("SuperCollider") { 
+        //     consoleStore.submitSC("s.freeAll;");
+        // }
     }
     silenceAllChannels() {
         _.each(this.getActiveChannels, (channel) => { 

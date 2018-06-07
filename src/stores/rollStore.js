@@ -48,9 +48,9 @@ class RollStore {
     ];
     def_value = 0.5;
 
-    newWindows() { 
-        window.open('localhost:3000/#');
-    }
+    // newWindows() { 
+    //     window.open('localhost:3000/#');
+    // }
 
     constructor() {
         let ctx = this;
@@ -98,7 +98,7 @@ class RollStore {
             const w = element.clientWidth;
             const h = element.clientHeight;
 
-            this.dimensions_c = [w, h - 55];
+            this.dimensions_c = [w, h - 35];
             return;
         }
         this.dimensions_c = [800, 300];
@@ -117,8 +117,9 @@ class RollStore {
     }
 
     // -- Hot reload
-    reloadRoll() {
-        this.cycle_time_offset = 0;
+    reloadRoll(cleanTree = true) {
+        if(cleanTree)
+            this.cycle_time_offset = 0;
 
         this.updateGraphicsDimensions();
         this.renderCanvas();
@@ -160,7 +161,7 @@ class RollStore {
             this.evolutions[index].subset(math.index(1, 1), this.getAverageVariableOnChannel(index, "speed", 1));      // speed of playb.(frq)  (-9  9)    <~~~>    local velocity
             this.evolutions[index].subset(math.index(1, 2), this.getAverageVariableOnChannel(index, "gain", 1));       // volume of playback    ( 0  2)    <~~~> 
             this.evolutions[index].subset(math.index(1, 3), this.getAverageVariableOnChannel(index, "sustain", 1));    // dur. of playb. (s)    ( 0  ~)    <~~~> 
-            this.evolutions[index].subset(math.index(2, 0), this.getAverageVariableOnChannel(index, "legato", 1));     // dur. of playb.(delta) ( 0  1)    <~~~> 
+            this.evolutions[index].subset(math.index(2, 0), this.getAverageVariableOnChannel(index, "dub", 1));        // dub                   ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(2, 1), this.getAverageVariableOnChannel(index, "begin", 0));      // start of playb.       ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(2, 2), this.getAverageVariableOnChannel(index, "end", 1));        // end of playb.         ( 0  1)    <~~~> 
             this.evolutions[index].subset(math.index(2, 3), this.getAverageVariableOnChannel(index, "hall", 0));       // reverb                ( 0  1)    <~~~> 
@@ -392,13 +393,20 @@ class RollStore {
                             // left-to-right
                             let x = ((this.value_time - item.cycle + this.cycle_time_offset) * (this.resolution)) * _w;
                             
-                            ctx.fillStyle = "rgba(180, 180, 180, " + (1-x/w) +")";
+                            
+                            ctx.fillStyle = "rgba(180, 180, 180, " + (1 - x / w) + ")";
                             if (!item.rendered) {
                                 ctx.fillStyle = "rgb(200, 20, 20)";
                                 item.rendered = true;
                             }
-
+                            
                             const sust = (item.sustain !== undefined ? item.sustain : 1);
+                            
+                            // console.log(x, _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
+                            //     _w * sust,
+                            //     _n_h,
+                            
+                            //     (1 - x / w));
                             ctx.fillRect(
                                 x,
                                 _c_i * _c_h + _s_h * _s_i + _n_i * _n_h,
@@ -409,6 +417,9 @@ class RollStore {
                     }
                 });
             }
+        }
+        else { 
+            this.roll_canvas_element = document.getElementById("pat_roll");
         }
     }
 }

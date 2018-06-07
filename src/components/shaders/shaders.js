@@ -390,6 +390,7 @@ export const shaders = Shaders.create({
 
       // Supershape globals
       vec4 S1, S2;
+      mat4 averageEvol;
 
       vec4 SetupSupershape(float t)
       {
@@ -594,10 +595,10 @@ export const shaders = Shaders.create({
             S1.x + evolutions[0][2][1] * 10.,         // begin 0 / 1
             S1.y + evolutions[0][2][3] * 10.,         // end   0 / 1
             S1.z + evolutions[0][2][3] * 10.,         // hall  0 / 1
-            S1.w + evolutions[0][3][0] * 10.);         // shape 0 / 1
+            S1.w + evolutions[0][3][0] * 10.);        // shape 0 / 1
           float r2 = superformula(rho, 1.0, 1.0,
-            S2.x + evolutions[0][1][0],             // coarse 1 / 64
-            S2.y + evolutions[0][1][1] * 5.,        // speed -10 / 10
+            S2.x + evolutions[0][1][0] * 7.,        // coarse 1 / 12
+            S2.y + evolutions[0][1][1] * 7.,       // speed -10 / 10
             S2.z + evolutions[0][1][2] * 10.,       // gain   0 / 1
             S2.w + evolutions[0][1][3] * 10.);      // sustain 0 / 1
 
@@ -618,8 +619,21 @@ export const shaders = Shaders.create({
       float scene(vec3 p, vec3 rd) {
           // p = rotateY(time / 2.0) * p;
 
+          // vec2 rnd = hash22(p.zx);
+          // float ave_delta = evolutions[0][0][0] * evolutions[0][0][1] * evolutions[0][0][2] * evolutions[0][0][3];
+          // float d = sphere(p, 1.0);
+          // if (ave_delta < 0.1) {
+          //   for (int i=0; i< 2; i++) {
+          //     float r = (evolutions[mod(i,4.)][0][0]) * 5.;
+          //     float rho = rnd.x * 6.28;
+          //     float phi = rnd.y * 3.14;
+          //     d += blend(d, sphere(p + vec3(r*sin(rho)*cos(phi), r*sin(rho)*sin(phi), r*cos(rho)), rnd.y ));
+          //   }
+          // }
+          // return d;
+
           // goes to 0 as it goes to silence
-          float inv_delta = (1. - evolutions[0][0].x);
+          float inv_delta = (1. - evolutions[0][0].x) * 3.;
 
           float tim = time * (0.05 * inv_delta);
           S1 = mix(SetupSupershape(tim - 1.0), SetupSupershape(tim), smoothstep(0.0, 1.0, fract(tim)));
@@ -679,7 +693,7 @@ export const shaders = Shaders.create({
         return clamp( res, 0.0, 1.0 );
       }
       vec3 render(vec3 p, vec3 rd) {
-          vec3 lig = normalize(LIGHT),
+          vec3 lig = normalize(rotateY(map(evolutions[0][2][1], 0., 1., -3.28, 3.28)) * LIGHT),
                nor = estimateNormal(p, rd),
                ref = reflect(rd, nor);
 
@@ -710,8 +724,8 @@ export const shaders = Shaders.create({
             map(nameAscii[2], 97., 122., 0., 1.)
           );
 
-          vec3 brdf = evolutions[1][2].xyz;//vec3(0.10,0.11,0.13);
-          brdf += 1.5*dif*evolutions[1][0 ].xyz;//vec3(1.00,0.90,0.7);
+          vec3 brdf = vec3(.1,.1,.1); //evolutions[1][2].xyz;       //vec3(0.10,0.11,0.13);
+          brdf += 1.5*dif*evolutions[1][0].xyz;   //vec3(1.00,0.90,0.7);
           foregroundColor = mix(foregroundColor, innerGlow, p.y*.5)*0.2+.1;
           foregroundColor *= (nor * sin(bnoise(p)*evolutions[1][0].z*200.)*0.2 + evolutions[1][0].x);
           foregroundColor = foregroundColor*brdf + foregroundColor*spe*.5 + fre*innerGlow*.3*crv;
@@ -719,16 +733,24 @@ export const shaders = Shaders.create({
           return foregroundColor;
       }
 
+
+      // ---------------------------- //
+      //          MAIN
+      // ---------------------------- //
       void main ()
       {
+        averageEvol = (evolutions[0] +evolutions[1] + evolutions[2] + evolutions[3])* 0.25;
+
           // setup camera
           // silence (0, 1) dense
-          // float inv_delta = (1. - evolutions[2][0].x) * 0.5;
+          // float inv_delta = (1. - averageEvol[0][2]);
 
           float tim = time * (0.05);
           vec3 eye = mix(SetupCamera(tim - 1.0), SetupCamera(tim), smoothstep(0.0, 1.0, fract(tim)));
 
-          vec3 viewDir = rayDirection(45.0, res.xy, gl_FragCoord.xy);
+          // vec3 viewDir = rayDirection(5., res.xy, gl_FragCoord.xy);
+          vec3 viewDir = rayDirection(clamp(45.0 + (0.5 - averageEvol[0][0])*30., 5., 90.), res.xy, gl_FragCoord.xy);
+          
           mat3 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
           vec3 worldDir = viewToWorld * viewDir;
 
@@ -736,12 +758,16 @@ export const shaders = Shaders.create({
 
           if (dist > MAX_DIST - EPSILON) {
               // Didn't hit anything
-              // vec3 outColor;
-              // outColor.x = map(nameAscii[0], 97., 122., 0., 1.);
-              // outColor.y = map(nameAscii[1], 97., 122., 0., 1.);
-              // outColor.z = map(nameAscii[2], 97., 122., 0., 1.);
+              vec3 outColor;
+              outColor.x = map(nameAscii[0], 97., 122., 0., .4);
+              outColor.y = map(nameAscii[1], 97., 122., 0., .4);
+              outColor.z = map(nameAscii[2], 97., 122., 0., .4);
 
-              gl_FragColor = vec4(backgroundColor, 1.);
+              vec2 q = gl_FragCoord.xy / res.xy;
+              outColor *= 0.2 + 0.8*pow( 16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.1 );
+
+              gl_FragColor = vec4(outColor, 1.);              
+              // gl_FragColor = vec4(backgroundColor, 1.);
               return;
           }
 

@@ -132,7 +132,7 @@ export default class Cell extends React.Component {
     }
 
     render() {
-        console.log('RENDER CELL');
+        // console.log('RENDER CELL');
 
         const value = this.props.value;
         const cell_index = this.props.index;
