@@ -1,179 +1,88 @@
 import React from 'react';
-import {
-  inject,
-  observer
-} from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
 // CSS Imports
-import '../styles/App.css';
+import '../styles/_comp.css';
 import '../styles/Layout.css';
+import '../styles/App.css';
 import '../styles/Home.css';
 
-import {
-  shaders
-} from './shaders/shaders';
+import { shaders } from './shaders/simple'
 
-import {
-  Surface
-} from "gl-react-dom";
-import {
-  Node,
-  Bus
-} from "gl-react";
-
-import timeLoop from "../utils/timeLoop";
-import menubarStore from '../stores/menubarStore';
-import rollStore from '../stores/rollStore';
-import sceneStore from '../stores/sceneStore';
-
-class Canvas extends React.Component {
-  // getParameterSafe(parameterName, defaultValue, store) {
-  //   return (store.value !== undefined ?
-  //     (store.value[parameterName] !== undefined ?
-  //       store.value[parameterName]
-  //       :
-  //       defaultValue)
-  //     : (defaultValue));
-  // }
-  
-  render() {
-    const { time, res, rollStore } = this.props;
-
-    // decay variables
-    rollStore.decayEvolutionMatrices();
-
-    // sample parameters
-    let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
-
-    // flatten evolution matrices
-    let evol = _.fill(Array(4), []);
-    _.each(rollStore.evolutions, (e, i) => { 
-      evol[i] = _.flatten(e.valueOf());
-    });
-    
-    return <Node
-      shader={shaders.marchGL}
-      uniforms={{
-        res,
-        time: time / 1000,
-        nameAscii,
-        evolutions: evol,
-        activeSceneId: sceneStore.activeSceneId
-      }}
-    />;
-  }
-}
-
-// Shaders without the time
-const Patches = ({ children: t }) =>
-    <Node shader={shaders.patches}
-      uniforms={{
-        texture: t,
-        row: 0.5,
-        col: 0.5
-      }} />;
-const FXRGBShift = ({ children: t }) =>
-  <Node shader={shaders.rgbShift}
-    uniforms={{
-      texture: t,
-      amount: 0.,
-      angle: 3.14
-    }} />;
-const Edge = ({ children: t }) =>
-  <Node shader={shaders.edge}
-    uniforms={{
-      texture: t
-    }} />;
-const Glow = ({ children: t }) =>
-  <Node shader={shaders.glow}
-    uniforms={{
-      texture: t,
-      brightness: 0.25
-    }} />;
-const Halftone = ({ children: t }) =>
-  <Node shader={shaders.halftone}
-    uniforms={{
-      texture: t,
-      pixelsPerRow: 80
-    }} />;
-const Mirror = ({ children: t }) =>
-    <Node shader={shaders.mirror}
-      uniforms={{
-        texture: t,
-        dir: 1
-      }} />;
-const Lines = ({ children: t }) =>
-    <Node shader={shaders.lines}
-    uniforms={{
-      texture: t,
-      lineStrength: 0.01,
-      lineSize: 500,
-      lineTilt: 1.6
-    }} />;
-
-// Time shaders
-const BarrelBlur = ({ children: t, time}) =>
-  <Node shader={shaders.barrelBlur}
-    uniforms={{
-      texture: t,
-      time: time / 1000,
-      amount: rollStore.getEvalMatItem(3, 2, 3)*0.1
-    }} />;
-const FXShake = ({ children: t, time }) =>
-  <Node shader={shaders.shake}
-    uniforms={{
-      texture: t,
-      time: time / 1000,
-      amount: rollStore.getEvalMatItem(3, 3, 0) * 0.01
-    }} />;
-    const Pixelate = ({ children: t, time }) =>
-    <Node shader={shaders.pixelate}
-      uniforms={{
-        texture: t,
-        pixels: [_.toInteger(1600 / rollStore.getEvalMatItem(3, 1, 0)),
-                 _.toInteger(512 / rollStore.getEvalMatItem(3, 1, 0))],
-        }} />;
-
-const CanvasLoop = timeLoop(Canvas);
-const FXShakeLoop = timeLoop(FXShake);
-const BarrelBlurLoop = timeLoop(BarrelBlur);
-const PixelateLoop = timeLoop(Pixelate);
+// const ReactDOM = require("react-dom");
+const { Surface } = require("gl-react-dom");
+const GL = require("gl-react");
 
 @inject('rollStore')
 @observer
 export default class Graphics extends React.Component {
+    
+  updateDimensions() {
+      const element = document.getElementById('graphicsLayout');
+      if(element && element !== null){
+          const w = element.clientWidth;
+          const h = element.clientHeight;
+
+          // -25 (header) -3 (borders) -24 (controls) -1 border
+          return {w: w, h: h-29};
+      }
+      return { w: 1100, h: 190 };
+  }
+
+  getParameterSafe(parameterName, defaultValue) {
+    return (this.props.rollStore.value !== undefined ?
+      (this.props.rollStore.value[parameterName] !== undefined ?
+        this.props.rollStore.value[parameterName]
+        :
+        defaultValue)
+      : (defaultValue));
+  }
+
   render() {
-    let dim = this.props.rollStore.dimensions_g;
+    console.log("RENDER GRAPHICS");
+      
+    let rollStore = this.props.rollStore;
+
+    let dimensions = this.updateDimensions();
+    let width =  dimensions.w;
+    let height = dimensions.h;
+
+    // uniform declaration
+    let resolution = [width, height];
+    let iTime = rollStore.value !== undefined ? rollStore.value.time : (new Date().getTime());
+    
+    // sample parameters
+    let nameAscii = _.map(_.split(_.toLower(rollStore.value !== undefined ? rollStore.value.s : ""), '', 5), (c) => { return c.charCodeAt(0) });
+    let note = this.getParameterSafe('n', 0);
+    let cps = this.getParameterSafe('cps', 1);
+    let delta = this.getParameterSafe('delta', 1);
+    let cycle = this.getParameterSafe('cycle', 1);
+    let begin = this.getParameterSafe('begin', 0);
+    let end = this.getParameterSafe('end', 1);
+    let room = this.getParameterSafe('room', 1);
+    let gain = this.getParameterSafe('gain', 1);
+    let channel = this.getParameterSafe('sirenChan', 0);
+
     return (
-      <Surface width={dim[0]} height={dim[1]}>
-        <Bus ref='main'>
-        <CanvasLoop
-          res={[dim[0], dim[1]]}
-          rollStore={this.props.rollStore} />
-        </Bus>
-        <Lines>
-          <BarrelBlurLoop>
-            {/* <Patches> */}
-            {/* <Halftone> */}
-            {/* <Glow> */}
-            {/* <Mirror> */}
-            {/* <Edge> */}
-              <PixelateLoop>
-                <FXShakeLoop>
-                  <FXRGBShift>
-                    {() => this.refs.main}
-                  </FXRGBShift>  
-                </FXShakeLoop>
-              </PixelateLoop>
-            {/* </Edge> */}
-            {/* </Mirror> */}
-            {/* </Glow> */}
-            {/* </Halftone> */}
-            {/* </Patches> */}
-          </BarrelBlurLoop>
-        </Lines>
+      <Surface width={width} height={height} ref="graphicsGL">
+        <GL.Node
+          shader={shaders.marchGL2}
+          uniforms={{
+            resolution, iTime,
+            nameAscii, note,
+            cps, delta, cycle,
+            begin, end,
+            room, 
+            gain, 
+            channel
+          }}
+          width={width}
+          height={height}
+        />
       </Surface>     
     );
   }
 }
+      
+

@@ -1,68 +1,65 @@
 (
-s.options.numBuffers = 2048 * 8;
-s.options.maxNodes = 1024 * 4;
-s.options.memSize = 8 * 13000 * 16;
+//s.options.device = "SuperCollider";
+s.options.numInputBusChannels = 0;
+s.options.numOutputBusChannels = 16;
+s.options.numBuffers = 2048 * 64;
+s.options.maxNodes = 1024 * 32;
+s.options.memSize = 131072 * 16;
 s.quit;
 
-s.waitForBoot 
-{
-	
-	// Initalize SuperDirt //
-	// ------------------- //
-	SuperDirt.postBadValues = false;
-	~dirt = SuperDirt(2, s);
-	//~dirt.loadSoundFiles;
-	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\gfix\\*");
-	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\poolx\\*");
-	0.2.wait;
-	
-	~dirt.start(57120, [0, 0, 0, 0,0,0,0,0]);
-	"SUPERDIRT LOADED".postln;
+s.waitForBoot {
+
+  ~dirt = SuperDirt.start;
+  "SUPERDIRT LOADED".postln;
+  0.5.wait;
 
 
-	s.volume = -12;
-	s.latency = 0.3;
 
-	// SIREN FUNCTIONS - DO NOT REMOVE //
-	// ------------------------------- //
-	/*~dirt.orbits.do { |orbit, i|
+  //Siren Functions - don't remove///
+	~dirt.orbits.do { |orbit, i|
 		{SendPeakRMS.kr(
 			InFeedback.ar(orbit.dryBus, ~dirt.numChannels),
 				4,
 				3,
 				"/orbit" ++ i);
 		}.play;
-	};*/
+	};
+	OSCFunc.trace(true);
+	s.sendMsg("/notify", 1);
 
 	(
-		// Tidal playback information
 		f = { |msg, time, addr|
 			if(msg[0] == '/play2') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
 		thisProcess.addOSCRecvFunc(f);
-
-		/*g = { |msg, time, addr|
-			if(msg[0].asString.includesAll("/orbit")) {
+		g = { |msg, time, addr|
+			if(msg[0] == '/orbit0') {
 				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
 			}
 		};
-		thisProcess.addOSCRecvFunc(g);*/
-		
+		thisProcess.addOSCRecvFunc(g);
+		h = { |msg, time, addr|
+			if(msg[0] == '/orbit1') {
+				"time: % sender: %\nmessage: %\n".postf(time, addr, msg);
+			}
+		};
+		thisProcess.addOSCRecvFunc(h);
 	);
-  	0.2.wait;
-  	"SIREN LOADED".postln;
-	// ------------------------------- //
-	// SIREN FUNCTIONS -- END 		   //
 
-	
-	1.wait;
-	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customfx.scd".load;
-	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customsynth.scd".load;
-	0.5.wait;
-	
-	s.meter;
-	//s.makeGui;
+  1.wait;
+
+  "SIREN LOADED".postln;
+  //Siren Functions - end///
+
+  
+  s.volume = -12;
+  s.latency = 0.3;
+  s.makeGui;
+  s.meter;
+
   };
+
+
 )

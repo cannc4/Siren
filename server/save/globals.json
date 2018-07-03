@@ -4,5 +4,11 @@
   "transformer": "",
   "modifier": "",
   "param": ""
+ },
+ {
+  "channels": "0",
+  "transformer": "slow 2 $",
+  "modifier": "#coarse 4",
+  "param": "let gx = 0"
  }
 ]

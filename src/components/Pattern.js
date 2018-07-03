@@ -2,20 +2,26 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
-import { save, executionCssByEvent } from '../keyFunctions.js';
-
 import {Controlled as CodeMirror} from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
-import '../utils/lexers/haskell.js';
-import '../utils/lexers/haskell.css';
+import '../assets/CodeMirrorRules.js';
+import '../styles/_style.css'
+import { save } from '../keyFunctions.js';
 
 @inject('sceneStore', 'patternStore')
 @observer
 export default class Patterns extends React.Component {
+  
+    executionCss = (event, duration = 500) => {
+        event.persist();
+        event.target.className += ' Executed';
+        _.delay( () => (_.replace(event.target.className, ' Executed', '') ),
+                duration);
+    }
 
     handleControlEnter = (event) => {
         if(event.ctrlKey && event.keyCode === 13){
-            executionCssByEvent(event);
+            this.executionCss(event);
             this.props.patternStore.addPattern(
                 document.getElementById('add_pattern_input').value, 
                 this.props.sceneStore.activeScene)
@@ -31,7 +37,7 @@ export default class Patterns extends React.Component {
 
     renderItem(item, i) {
         let options = {
-            mode: '_rule_haskell',
+            mode: '_rule',
             theme: '_style',
             fixedGutter: true,
             scroll: true,

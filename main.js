@@ -1,55 +1,46 @@
-const {
-    app,
-    BrowserWindow,
-    ipcMain
-} = require('electron')
-
-const url = require('url');
-const path = require('path')
+const {app, BrowserWindow} = require('electron')
+var path = require('path')
 let mainWindow = null
+const url = require('url');
+const { ipcMain } = require('electron');
 
 function createWindow() {
     // Initialize the window to our specified dimensions
     mainWindow = new BrowserWindow({
-        width: 1600,
-        height: 900,
+        width: 1600, height: 900,
         backgroundColor: '#000',
-        enableLargerThanScreen: true,
         show: true,
-        icon: __dirname + './favicon.icns',
-        fullscreenable: true,
-        fullscreen: true,
-        title: "Siren"
+        icon: __dirname + './favicon.icns', 
     })
-    // app.setAboutPanelOptions({
-    //     applicationName: "Siren",
-    //     applicationVersion: "0.6.0"
-    //   })
-
+    app.setAboutPanelOptions({
+        applicationName: "Siren",
+        applicationVersion: "6.0.0"
+      })
+    
     //mainWindow.setMenu(null);
-
+    
     // Specify entry point
     // const startUrl = process.env.ELECTRON_START_URL || url.format({
     //     pathname: path.join(__dirname, '/server/build/index.html'),
     //     protocol: 'file:',
     //     slashes: true
     // });
-
+    
     //mainWindow.loadURL(startUrl);
     mainWindow.loadURL('http://localhost:3000/#/')
 
     // Show dev tools
     // Remove this line before distributing
-    // mainWindow.webContents.openDevTools()
-
+    //mainWindow.webContents.openDevTools()
+    
 
     // Remove window once app is closed
     mainWindow.on('closed', function () {
         if (process.platform !== 'darwin') {
             app.quit();
             mainWindow = null
-        }
-
+          }
+        
     })
 
     // mainWindow.webContents.executeJavaScript(`
@@ -80,3 +71,5 @@ app.on('window-all-closed', function () {
         app.quit()
     }
 })
+
+

@@ -1,15 +1,20 @@
 import _ from 'lodash';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
-import { executionCssByEvent } from '../keyFunctions';
 
 @inject('sceneStore')
 @observer
 export default class Scene extends React.Component {
-    
+    executionCss = (event, duration = 500) => {
+        event.persist();
+        event.target.className += ' Executed';
+        _.delay( () => (_.replace(event.target.className, ' Executed', '') ),
+                duration);
+    }
+
     handleControlEnter = (event) => {
         if(event.ctrlKey && event.keyCode === 13){
-            executionCssByEvent(event);
+            this.executionCss(event);
             this.props.sceneStore.addScene(document.getElementById('new_scene_input').value)
         }
     }
@@ -29,7 +34,7 @@ export default class Scene extends React.Component {
     render() {
         console.log("RENDER SCENE.JS");
         
-        return (<div className={'Scenes PanelAdjuster'}>
+        return (<div>
             <input className={'Input draggableCancel'} id={"new_scene_input"}
                 placeholder={'New Scene Name'}
                 onKeyUp={this.handleControlEnter.bind(this)}/>
@@ -41,14 +46,9 @@ export default class Scene extends React.Component {
                 <button className={'Button draggableCancel'} 
                         onClick={() => (this.props.sceneStore.clearActiveGrid())}>Clear</button>
             </div>
-            <button className={'Button ' + (this.props.sceneStore.scene_mode ? 'true' : '') + ' draggableCancel'} 
-                style={{ width: '100%', height: '10px' }}    
-                title={'Song Mode: ' + (this.props.sceneStore.scene_mode ? 'On' : 'Off')}
-                onClick={() => (this.props.sceneStore.toggleScenemode())}> </button>
-            
             <div className={'AllScenes'}>
                 <div>
-                    {_.map(this.props.sceneStore.scenesReversedOrder, this.renderScene.bind(this))}
+                    {_.map(this.props.sceneStore.scene_list, this.renderScene.bind(this))}
                 </div>
             </div>
         </div>
