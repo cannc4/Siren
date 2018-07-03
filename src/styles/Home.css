@@ -385,7 +385,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 /*------------ADD CHANNEL PANEL------------*/
 
 .Canvas {
-  cursor: auto;
+  cursor: grab;
 }
 
 .RollHeader {

@@ -641,6 +641,7 @@ export const shaders = Shaders.create({
           S2 = mix(SetupSupershape(tim - 1.0), SetupSupershape(tim), smoothstep(0.0, 1.0, fract(tim)));
 
           return supershape(p + vec3(map(evolutions[0][0][1], 0., 1., -3.28, 3.28), 0., 0.), rd);
+          // return blend(plane(p), supershape(p + vec3(map(evolutions[0][0][1], 0., 1., -3.28, 3.28), 0., 0.), rd)) ;
       }
 
 

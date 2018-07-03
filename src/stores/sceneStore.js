@@ -94,8 +94,8 @@ class SceneStore {
     @action toggleScenemode() { 
         this.scene_mode = !this.scene_mode;
         _.each(channelStore.getActiveChannels, (c) => { 
-            c.loop = false;
-            c.executed = false;
+            c.loop = !this.scene_mode;
+            c.executed = !this.scene_mode;
         });
     }
 

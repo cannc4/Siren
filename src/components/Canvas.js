@@ -28,7 +28,7 @@ export default class Canvas extends React.Component {
   render() {
     console.log("RENDER CANVAS.JS");
 
-    return (<div className={"Canvas draggableCancel"}>
+    return (<div className={"Canvas"}>
       <RollLoop></RollLoop>
     </div>);
   }

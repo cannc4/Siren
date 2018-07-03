@@ -15,8 +15,10 @@ export default class ConsoleTidal extends React.Component {
   handleGHCSubmit = (editor, event) => {
     const body = event.target.value;
     
+    console.log(editor, event, event.target);
     if(event.keyCode === 13 && event.ctrlKey && body){
-        this.props.consoleStore.submitGHC(body); 
+
+      this.props.consoleStore.submitGHC(body); 
     }
 
     event.preventDefault();
