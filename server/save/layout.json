@@ -1,9 +1,9 @@
 {
  "layouts": [
   {
-   "w": 3,
-   "h": 12,
-   "x": 0,
+   "w": 2,
+   "h": 13,
+   "x": 11,
    "y": 0,
    "i": "scenes",
    "moved": false,
@@ -12,86 +12,96 @@
   },
   {
    "w": 11,
-   "h": 12,
-   "x": 3,
+   "h": 13,
+   "x": 13,
    "y": 0,
-   "i": "matrix",
+   "i": "tracker",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 10,
-   "h": 12,
-   "x": 14,
-   "y": 0,
+   "w": 13,
+   "h": 7,
+   "x": 11,
+   "y": 13,
    "i": "patterns",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 14,
+   "w": 4,
+   "h": 13,
+   "x": 7,
+   "y": 0,
+   "i": "tidal_history",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 7,
    "h": 13,
    "x": 0,
-   "y": 19,
-   "i": "debugconsole",
+   "y": 0,
+   "i": "tidal_roll",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 10,
-   "h": 20,
-   "x": 14,
-   "y": 12,
-   "i": "console",
-   "moved": false,
-   "static": false,
-   "isVisible": true
-  },
-  {
-   "w": 24,
-   "h": 6,
-   "x": 0,
-   "y": 32,
-   "i": "paths",
-   "moved": false,
-   "static": false,
-   "isVisible": true
-  },
-  {
-   "w": 14,
+   "w": 11,
    "h": 7,
    "x": 0,
-   "y": 12,
-   "i": "pattern_history",
+   "y": 13,
+   "i": "tidal_console",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 14,
-   "h": 8,
-   "x": 0,
-   "y": 12,
-   "i": "canvas",
+   "w": 5,
+   "h": 4,
+   "x": 11,
+   "y": 20,
+   "i": "sc_console",
    "moved": false,
    "static": false,
    "isVisible": false
   },
   {
-   "w": 21,
-   "h": 6,
-   "x": 3,
-   "y": 20,
+   "w": 11,
+   "h": 7,
+   "x": 0,
+   "y": 13,
+   "i": "tidal_log",
+   "moved": false,
+   "static": false,
+   "isVisible": false
+  },
+  {
+   "w": 7,
+   "h": 13,
+   "x": 0,
+   "y": 13,
    "i": "graphics",
    "moved": false,
    "static": false,
    "isVisible": false
   },
   {
-   "i": "globals",
+   "w": 7,
+   "h": 13,
+   "x": 0,
+   "y": 20,
+   "i": "config_paths",
+   "moved": false,
+   "static": false,
+   "isVisible": false
+  },
+  {
+   "i": "tidal_globals",
    "x": 6,
    "y": 16,
    "w": 5,
@@ -102,39 +112,201 @@
  "customs": [
   [
    {
-    "w": 24,
+    "w": 3,
     "h": 12,
     "x": 0,
-    "y": 0,
-    "i": "console",
+    "y": 5,
+    "i": "scenes",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 8,
+    "h": 12,
+    "x": 3,
+    "y": 5,
+    "i": "tracker",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 7,
+    "h": 12,
+    "x": 11,
+    "y": 5,
+    "i": "patterns",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 6,
+    "h": 5,
+    "x": 0,
+    "y": 17,
+    "i": "tidal_history",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 6,
+    "h": 5,
+    "x": 18,
+    "y": 17,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 6,
+    "h": 12,
+    "x": 18,
+    "y": 5,
+    "i": "graphics",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
     "w": 24,
-    "h": 8,
+    "h": 5,
     "x": 0,
-    "y": 12,
-    "i": "canvas",
+    "y": 0,
+    "i": "tidal_roll",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
-    "w": 12,
-    "h": 9,
-    "x": 0,
-    "y": 11,
-    "i": "debugconsole",
+    "w": 4,
+    "h": 5,
+    "x": 6,
+    "y": 17,
+    "i": "tidal_globals",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 8,
+    "h": 5,
+    "x": 10,
+    "y": 17,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 6,
+    "h": 12,
+    "x": 18,
+    "y": 0,
+    "i": "tidal_log",
     "moved": false,
     "static": false,
     "isVisible": false
    },
    {
+    "w": 15,
+    "h": 6,
+    "x": 0,
+    "y": 29,
+    "i": "config_paths",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   }
+  ],
+  [
+   {
+    "w": 9,
+    "h": 6,
+    "x": 0,
+    "y": 14,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 15,
+    "h": 6,
+    "x": 9,
+    "y": 14,
+    "i": "tidal_log",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 15,
+    "h": 8,
+    "x": 9,
+    "y": 0,
+    "i": "graphics",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 9,
+    "h": 14,
+    "x": 0,
+    "y": 0,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 15,
+    "h": 6,
+    "x": 9,
+    "y": 8,
+    "i": "tidal_roll",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
     "w": 5,
-    "h": 26,
+    "h": 6,
     "x": 19,
+    "y": 14,
+    "i": "tidal_globals",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 24,
+    "h": 20,
+    "x": 0,
+    "y": 14,
+    "i": "tracker",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 10,
+    "h": 6,
+    "x": 0,
+    "y": 5,
+    "i": "tidal_history",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 7,
+    "h": 12,
+    "x": 11,
     "y": 0,
     "i": "patterns",
     "moved": false,
@@ -142,18 +314,8 @@
     "isVisible": false
    },
    {
-    "w": 12,
-    "h": 15,
-    "x": 2,
-    "y": 0,
-    "i": "matrix",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 2,
-    "h": 15,
+    "w": 3,
+    "h": 12,
     "x": 0,
     "y": 0,
     "i": "scenes",
@@ -162,21 +324,215 @@
     "isVisible": false
    },
    {
-    "w": 5,
-    "h": 5,
+    "w": 15,
+    "h": 6,
     "x": 0,
-    "y": 15,
-    "i": "pattern_history",
+    "y": 29,
+    "i": "config_paths",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   }
+  ],
+  [
+   {
+    "w": 2,
+    "h": 20,
+    "x": 0,
+    "y": 10,
+    "i": "scenes",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 8,
+    "h": 20,
+    "x": 2,
+    "y": 10,
+    "i": "tracker",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 5,
+    "h": 13,
+    "x": 10,
+    "y": 17,
+    "i": "patterns",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 9,
+    "h": 7,
+    "x": 15,
+    "y": 23,
+    "i": "tidal_history",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 9,
+    "h": 6,
+    "x": 15,
+    "y": 17,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 14,
+    "h": 7,
+    "x": 10,
+    "y": 10,
+    "i": "tidal_roll",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 24,
+    "h": 10,
+    "x": 0,
+    "y": 0,
+    "i": "graphics",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 9,
+    "h": 14,
+    "x": 0,
+    "y": 20,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 6,
+    "h": 4,
+    "x": 13,
+    "y": 9,
+    "i": "tidal_globals",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 6,
+    "h": 12,
+    "x": 18,
+    "y": 0,
+    "i": "tidal_log",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 15,
+    "h": 6,
+    "x": 0,
+    "y": 29,
+    "i": "config_paths",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   }
+  ],
+  [
+   {
+    "w": 2,
+    "h": 13,
+    "x": 11,
+    "y": 0,
+    "i": "scenes",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 11,
+    "h": 13,
+    "x": 13,
+    "y": 0,
+    "i": "tracker",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 13,
+    "h": 7,
+    "x": 11,
+    "y": 13,
+    "i": "patterns",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 4,
+    "h": 13,
+    "x": 7,
+    "y": 0,
+    "i": "tidal_history",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 7,
+    "h": 13,
+    "x": 0,
+    "y": 0,
+    "i": "tidal_roll",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 11,
+    "h": 7,
+    "x": 0,
+    "y": 13,
+    "i": "tidal_console",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 5,
+    "h": 4,
+    "x": 11,
+    "y": 20,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 11,
+    "h": 7,
+    "x": 0,
+    "y": 13,
+    "i": "tidal_log",
     "moved": false,
     "static": false,
     "isVisible": false
    },
    {
     "w": 7,
-    "h": 6,
+    "h": 13,
     "x": 0,
-    "y": 21,
-    "i": "globals",
+    "y": 13,
+    "i": "graphics",
     "moved": false,
     "static": false,
     "isVisible": false
@@ -186,124 +542,19 @@
     "h": 13,
     "x": 0,
     "y": 20,
-    "i": "paths",
-    "minW": 7,
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   }
-  ],
-  [
-   {
-    "w": 3,
-    "h": 10,
-    "x": 0,
-    "y": 0,
-    "i": "scenes",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 11,
-    "h": 10,
-    "x": 3,
-    "y": 0,
-    "i": "matrix",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 10,
-    "h": 10,
-    "x": 14,
-    "y": 0,
-    "i": "patterns",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 14,
-    "h": 5,
-    "x": 0,
-    "y": 10,
-    "i": "pattern_roll",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 14,
-    "h": 5,
-    "x": 0,
-    "y": 15,
-    "i": "graphics",
+    "i": "config_paths",
     "moved": false,
     "static": false,
     "isVisible": false
    },
    {
-    "w": 10,
-    "h": 10,
-    "x": 14,
-    "y": 10,
-    "i": "console",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 14,
-    "h": 5,
-    "x": 0,
-    "y": 19,
-    "i": "pattern_history",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 14,
-    "h": 5,
-    "x": 0,
-    "y": 15,
-    "i": "canvas",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 14,
-    "h": 11,
-    "x": 0,
-    "y": 21,
-    "i": "debugconsole",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 7,
-    "h": 13,
-    "x": 0,
-    "y": 29,
-    "i": "paths",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "i": "globals",
+    "i": "tidal_globals",
     "x": 6,
     "y": 16,
     "w": 5,
     "h": 4,
     "isVisible": false
    }
-  ],
-  [],
-  []
+  ]
  ]
 }

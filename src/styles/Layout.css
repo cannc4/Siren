@@ -1,4 +1,3 @@
-
 /*
   react-grid-layout css
 */
@@ -11,16 +10,18 @@
   position: relative;
   transition: height 200ms ease;
 }
+
 .react-grid-item {
-  background: rgba(45, 45, 45, 1);
-  border-color: black;
-  transition: all 200ms ease;
+  background: rgb(40, 40, 40);
+  transition: all 50ms ease;
   transition-property: left, top;
   cursor: grab;
 }
+
 .react-grid-item.cssTransforms {
   transition-property: transform;
 }
+
 .react-grid-item.resizing {
   z-index: 1;
   will-change: width, height;
@@ -30,14 +31,13 @@
   transition: none;
   z-index: 3;
   will-change: transform;
-  background: rgba(80, 80, 80, 0.75);
+  filter: invert(0.2);
   cursor: grabbing;
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: rgba(200,200,90, 0.2);
-  transition-duration: 100ms;
-  box-shadow: inset  0px 0px 10px #000;
+  background: rgba(100, 100, 100, 0.7);
+  transition-duration: 10ms;
   z-index: 2;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -46,7 +46,7 @@
   user-select: none;
 }
 
-.react-grid-item > .react-resizable-handle {
+.react-grid-item>.react-resizable-handle {
   position: absolute;
   width: 20px;
   height: 20px;
@@ -65,9 +65,11 @@
 /*
   react-resizable css
 */
+
 .react-resizable {
   position: relative;
 }
+
 .react-resizable-handle {
   position: absolute;
   width: 20px;

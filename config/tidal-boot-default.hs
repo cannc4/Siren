@@ -23,7 +23,6 @@ let bps x = cps (x/2)
     hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9]
     solo = (>>) hush
     
+:script C:\Users\Mert\Dropbox\~siren\code\win\Siren\config\tidalfuncs.hs
+:script C:\Users\Mert\Dropbox\~siren\code\win\Siren\config\tidalparams.hs
 :set prompt "tidal> "
-
-
-

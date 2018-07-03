@@ -1,29 +1,20 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
+
 // CSS Imports
-import _ from 'lodash';
-import '../styles/Home.css';
-import '../styles/_comp.css';
-import '../styles/Layout.css';
+// import _ from 'lodash';
 import '../styles/App.css';
+import '../styles/Home.css';
+import '../styles/Layout.css';
+import { executionCssByEvent } from '../keyFunctions';
 
 @inject('globalStore','channelStore')
 @observer
 export default class Globals extends React.Component {
 
-  executionCss = (event, duration = 500) => {
-    event.persist();
-    let arr = document.getElementsByClassName('global_input');
-    _.each(arr, (e)=>{
-      e.className += ' Executed';
-
-      _.delay( () => {e.className = _.replace(e.className, ' Executed', '')}, duration);
-    })
-  }
-
   handleUpdatePatterns = (event) => {
     if(event.ctrlKey && event.keyCode === 13){
-      this.executionCss(event);
+      executionCssByEvent(event);
       this.props.globalStore.updatePatterns();
     }
   }

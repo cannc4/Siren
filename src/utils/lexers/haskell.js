@@ -1,26 +1,26 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 /* eslint-disable */
-(function(mod) {
+(function (mod) {
   if (typeof exports === "object" && typeof module === "object") // CommonJS
     mod(require("codemirror"));
   else if (typeof define === "function" && define.amd) // AMD
     define(["codemirror"], mod);
   else // Plain browser env
     mod(CodeMirror);
-})(function(CodeMirror) {
+})(function (CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("_rule", function() {
+  CodeMirror.defineMode("_rule_haskell", function () {
 
     function switchState(source, setState, f) {
       setState(f);
       return f(source, setState);
     }
 
-    // These should all be Unicode extended, as per the Haskell 2010 report
-    var variableRE = /(`)(.+)(`)/;
-    var mathRE = /(&)(.+)(&)/;
+    // These should all be Unicode extended
+    // var variableRE = /(`)(.+)(`)/;
+    // var mathRE = /(&)(.+)(&)/;
     var smallRE = /[a-z_]/;
     var largeRE = /[A-Z]/;
     var digitRE = /[0-9]/;
@@ -47,33 +47,28 @@
           return null;
         }
 
+        if (ch === '"') {
+          return switchState(source, setState, stringLiteral);
+        }
+
+        if (ch === '&') {
+          return switchState(source, setState, mathExpression);
+        }
+
+        if (ch === '`') {
+          return switchState(source, setState, variableExpression);
+        }
+
+
         if (ch === '\'') {
           if (source.eat('\\'))
-            source.next();  // should handle other escapes here
+            source.next(); // should handle other escapes here
           else
             source.next();
 
           if (source.eat('\''))
             return "string";
           return "error";
-        }
-
-        // console.log(ch);
-        if (ch === '&') {
-          // console.log("mathState");
-          return switchState(source, setState, mathExpression);
-        }
-
-        if (ch === '`') {
-
-            // console.log("varState");
-          return switchState(source, setState, variableExpression);
-        }
-
-        if (ch === '"') {
-
-            // console.log("stringState");
-          return switchState(source, setState, stringLiteral);
         }
 
         if (largeRE.test(ch)) {
@@ -134,7 +129,7 @@
       if (nest === 0) {
         return normal();
       }
-      return function(source, setState) {
+      return function (source, setState) {
         var currNest = nest;
         while (!source.eol()) {
           var ch = source.next();
@@ -205,7 +200,7 @@
       return "error";
     }
 
-    var wellKnownWords = (function() {
+    var wellKnownWords = (function () {
       var wkw = {};
 
       var keywords = [
@@ -228,11 +223,21 @@
 
 
     return {
-      startState: function ()  { return { f: normal() }; },
-      copyState:  function (s) { return { f: s.f }; },
+      startState: function () {
+        return {
+          f: normal()
+        };
+      },
+      copyState: function (s) {
+        return {
+          f: s.f
+        };
+      },
 
-      token: function(stream, state) {
-        var t = state.f(stream, function(s) { state.f = s; });
+      token: function (stream, state) {
+        var t = state.f(stream, function (s) {
+          state.f = s;
+        });
         var w = stream.current();
         return (wellKnownWords.hasOwnProperty(w)) ? wellKnownWords[w] : t;
       }
@@ -240,5 +245,5 @@
 
   });
 
-  CodeMirror.defineMIME("text/x-_rule", "_rule");
+  CodeMirror.defineMIME("text/x-_rule_haskell", "_rule_haskell");
 });
