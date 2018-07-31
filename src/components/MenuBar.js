@@ -56,7 +56,7 @@ export default class MenuBar extends React.Component {
               onClick={() => (this.props.pulseStore.startPulse())}>▶</button>}
         {this.props.pulseStore.isActive && 
           <button className={'Button'} title={'Pause Pulse'}
-              onClick={() => (this.props.pulseStore.stopPulse())}>⏸</button>}
+              onClick={() => (this.props.pulseStore.stopPulse())}>||</button>}
     
         <div style={{borderLeft: "1px solid var(--global-color)", height: "90%", marginLeft: "5px", marginRight: "10px"}}></div>
 

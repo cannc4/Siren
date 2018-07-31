@@ -146,6 +146,14 @@ class LayoutStore {
         isVisible: true
       },
       {
+        i: 'playback',
+        x: 3,
+        y: 13,
+        w: 13,
+        h: 3,
+        isVisible: false
+      },
+      {
         i: 'tidal_history',
         x: 3,
         y: 13,
@@ -233,6 +241,16 @@ class LayoutStore {
         "moved": false,
         "static": false,
         "isVisible": true
+      },
+      {
+        "w": 6,
+        "h": 4,
+        "x": 13,
+        "y": 9,
+        "i": "playback",
+        "moved": false,
+        "static": false,
+        "isVisible": false
       },
       {
         "w": 24,
@@ -355,6 +373,16 @@ class LayoutStore {
         "x": 17,
         "y": 17,
         "i": "patterns",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 6,
+        "h": 4,
+        "x": 13,
+        "y": 9,
+        "i": "playback",
         "moved": false,
         "static": false,
         "isVisible": false

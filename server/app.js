@@ -14,7 +14,7 @@ const exec = require('child_process').exec;
 const osc = require("osc");
 
 // Connection to KORG nanoKontrol2 
-let nanoKONTROL = require('korg-nano-kontrol');
+//let nanoKONTROL = require('korg-nano-kontrol');
 
 // timers
 const abletonlink = require('abletonlink');
@@ -58,36 +58,36 @@ class REPL {
     });
     console.log(" ## -->   GHC Spawned");
 
-    // KORG 
-    let nano_socket = socketIo.listen(4005);
-    nanoKONTROL.connect('nanoKONTROL2').then((device) => {
-      device.on('slider:*', (value) => {
-        console.log(device.event + ' => ' + value);
+    // // KORG 
+    // let nano_socket = socketIo.listen(4005);
+    // nanoKONTROL.connect('nanoKONTROL2').then((device) => {
+    //   device.on('slider:*', (value) => {
+    //     console.log(device.event + ' => ' + value);
 
-        nano_socket.sockets.emit('/nano_slider', {
-          key: _.replace(device.event, "slider:", ""),
-          value: value
-        });
-      });
+    //     nano_socket.sockets.emit('/nano_slider', {
+    //       key: _.replace(device.event, "slider:", ""),
+    //       value: value
+    //     });
+    //   });
 
-      device.on('knob:*', (value) => {
-        console.log(device.event + ' => ' + value);
-        nano_socket.sockets.emit('/nano_knob', {
-          key: _.replace(device.event, "knob:", ""),
-          value: value
-        });
-      });
+    //   device.on('knob:*', (value) => {
+    //     console.log(device.event + ' => ' + value);
+    //     nano_socket.sockets.emit('/nano_knob', {
+    //       key: _.replace(device.event, "knob:", ""),
+    //       value: value
+    //     });
+    //   });
 
-      device.on('button:**', (value) => {
-        console.log(device.event + ' => ' + value);
+    //   device.on('button:**', (value) => {
+    //     console.log(device.event + ' => ' + value);
 
-        nano_socket.sockets.emit('/nano_button', {
-          key: _.replace(device.event, "button:", ""),
-          value: value
-        });
+    //     nano_socket.sockets.emit('/nano_button', {
+    //       key: _.replace(device.event, "button:", ""),
+    //       value: value
+    //     });
 
-      });
-    });
+    //   });
+    // });
   }
 
   initGHC(config) {
@@ -397,6 +397,39 @@ class REPL {
   }
 }
 
+
+/*
+
+NAME $ `x` $ PAT $ `y`
+NAME $ `x` $ PAT $ `y`
+
+NAME TRANS $ `x` $ PAT $ `y`
+t1 (clutchIn 2) $ `x` $ PAT $ `y`
+
+$ s "bd" 
+$ s "bd" # n "0 1"
+$ s "bd" # n (run 2)
+$ s "bd" # note "0 1"
+$ s "bd" # note (run 2)
+
+$ sound "bd" 
+$ sound "bd" # n "0 1"
+$ sound "bd" # n (run 2)
+$ sound "bd" # note "0 1"
+$ sound "bd" # note (run 2)
+
+$ n "0 1"   # s "bd"
+$ n (run 2) # s "bd"
+$ n "0 1"   # sound "bd"
+$ n (run 2) # sound "bd"
+
+$ note "0 1"    # s "bd"
+$ note (run 2)  # s "bd"
+$ note "0 1"    # sound "bd"
+$ note (run 2)  # sound "bd"
+
+*/
+
 const SirenComm = {
   siren_console: new REPL()
 }
@@ -418,7 +451,7 @@ const Siren = () => {
 
     if (isRecording) {
       let tidalobj = {
-        pattern: pat,
+        pattern: _.replace(pat, '\n', ''),
         timestamp: Date.now(),
         type: 'Tidal'
       };
@@ -620,17 +653,6 @@ const Siren = () => {
           timestamp: new Date().getMilliseconds()
         });
       }
-      // else if (channel.type === "TidalV") {
-      //   let chn = channel.name.substring(1, channel.name.length);
-      //   transitionHolder = "x" + chn + " $ ";
-      //   pattern = transitionHolder + newCommand;
-      //   tidalPatternQueue.push(pattern);
-      //   reply.status(200).json({
-      //     pattern: pattern,
-      //     cid: channel.cid,
-      //     timestamp: new Date().getMilliseconds()
-      //   });
-      // }
       else if (channel.type === '') {
         pattern = newCommand;
         tidalPatternQueue.push(pattern);
@@ -701,14 +723,42 @@ const Siren = () => {
     isPlaying = false;
   }
 
-  const playHistory = () => {
+  // Generates a new scene from the recorded file
+  const generateNewScene = (fileIndex, reply) => { 
+                            // TODO: get the filename from frontend
+    
+    console.log("INDEX = ", fileIndex);
+    
+    
+                            // get all recording names
+    let history_json = [];
+    fs.readdirSync('./server/save/recordings/').forEach(file => {
+      if (file !== '.DS_Store')
+        history_json.push(file);
+    });
+    history_json = _.without(history_json, '.DS_Store');
+    console.log("HiSTJSON = ", history_json);
+
+    if (history_json.length > 0) { 
+      let selectedFile = './server/save/recordings/' + history_json[fileIndex].toString();
+      let recordedObjects = jsonfile.readFileSync(selectedFile);
+      
+      console.log("RECORD = ", recordedObjects);
+
+      reply.status(200).json({
+        recordedObjects: recordedObjects
+      });
+    }
+  }
+
+  const playHistory = (index) => {
     let history_json = [];
     isPlaying = true;
     fs.readdirSync('./server/save/recordings/').forEach(file => {
       history_json.push(file);
     });
-    let selectedFile = './server/save/recordings/' + history_json[history_json.length - 1].toString();
-    console.log(selectedFile);
+    let selectedFile = './server/save/recordings/' + history_json[index].toString();
+    // console.log(selectedFile);
     commandobj = jsonfile.readFileSync(selectedFile);
     sendHistoryPatternPrepare(); //start recursive loop
   }
@@ -1030,12 +1080,13 @@ const Siren = () => {
   app.post('/playhistory', (req, reply) => {
     try {
       const {
-        isPlay
+        isPlay,
+        index
       } = req.body;
       console.log("app.post /playing", isPlay);
 
       if (isPlay)
-        playHistory();
+        playHistory(index);
       else
         stopHistory();
 
@@ -1045,6 +1096,47 @@ const Siren = () => {
     }
   });
 
+  app.get('/stophistory', (req, reply) => {
+  try{
+    stopHistory(); 
+    reply.sendStatus(200);
+    }
+  catch (error) {
+      reply.sendStatus(500);
+    }
+  });
+  
+  app.post('/generateScene', (req, reply) => {
+    try {
+      const {
+        fileIndex
+      } = req.body;
+      generateNewScene(fileIndex, reply);
+    } catch (error) {
+      reply.sendStatus(500);
+    }
+  });
+  app.get('/recordings', (req, reply) => {
+    try {
+      getRecordings(reply);
+    } catch (error) {
+      reply.sendStatus(500);
+    }
+  });
+  
+  const getRecordings =  (reply) =>{                   // get all recording names
+    let history_json = [];
+    fs.readdirSync('./server/save/recordings/').forEach(file => {
+      if (file !== '.DS_Store')
+        history_json.push(file);
+    });
+    history_json = _.without(history_json, '.DS_Store');
+    console.log("HiSTJSON = ", history_json);
+    reply.status(200).json({
+      recordings: history_json
+    });
+  }
+  
   // TODO: FIX 
   app.get('/quit', (req, reply) => {
     try {

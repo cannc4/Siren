@@ -1,5 +1,6 @@
 import React from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2'
+import _ from 'lodash'
 import { inject, observer } from 'mobx-react';
 
 import { save } from '../keyFunctions.js';
@@ -8,17 +9,49 @@ import 'codemirror/lib/codemirror.css';
 import '../utils/lexers/haskell.js';
 import '../utils/lexers/haskell.css';
 
+// codemirror addons
+import 'codemirror/addon/selection/active-line.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+
 @inject('consoleStore')
 @observer
 export default class ConsoleTidal extends React.Component {
+
   // GHC
   handleGHCSubmit = (editor, event) => {
-    const body = event.target.value;
+    if (event.keyCode === 13 && event.ctrlKey) {
+      let expr = "";
+      
+      if (editor.somethingSelected()) {
+        // selected text
+        expr = event.target.value;
+      }
+      else {
+        const line = editor.getCursor().line;
+  
+        if (editor.getLine(line) !== "") {
+          let startLine = line;
+          let endLine = line;
     
-    console.log(editor, event, event.target);
-    if(event.keyCode === 13 && event.ctrlKey && body){
+          // determine line numbers of the code block
+          while (_.trim(editor.getLine(startLine)) !== '') { startLine -= 1; }
+          while (_.trim(editor.getLine(endLine)) !== '') { endLine += 1; }
+    
+          // the text
+          expr = editor.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 });
 
-      this.props.consoleStore.submitGHC(body); 
+          // coloring the background
+          let handle = editor.markText(
+            { line: startLine, ch: 0 },
+            { line: endLine, ch: 0 },
+            { className: 'CodeMirror-execution' });
+          _.delay(() => { handle.clear(); }, 500);
+        }
+      }
+
+      // execute the line
+      if (expr !== "")
+        this.props.consoleStore.submitGHC(expr);
     }
 
     event.preventDefault();
@@ -42,11 +75,14 @@ export default class ConsoleTidal extends React.Component {
       fixedGutter: true,
       scroll: false,
       styleSelectedText: true,
-      styleActiveLine: true,
       showToken: true,
       lineWrapping: true,
       lineNumbers: true,
-      showCursorWhenSelecting: true
+      showCursorWhenSelecting: true,
+      // addon options
+      styleActiveLine: true,
+      matchBrackets: true,
+      maxScanLines: 10
     };
     return (<div className={'ConsoleTextBox'}>
       <p>select -> ctrl+enter</p>

@@ -9,6 +9,8 @@ import 'codemirror/lib/codemirror.css';
 import '../utils/lexers/haskell.js';
 import '../utils/lexers/haskell.css';
 
+import 'codemirror/addon/edit/matchbrackets.js';
+
 @inject('sceneStore', 'patternStore')
 @observer
 export default class Patterns extends React.Component {
@@ -38,7 +40,10 @@ export default class Patterns extends React.Component {
             styleSelectedText:true,
             showToken:true,
             lineWrapping: true,
-            showCursorWhenSelecting: true
+            showCursorWhenSelecting: true,
+            // add-on
+            matchBrackets: true,
+            maxScanLines: 10
         };
     
     return (

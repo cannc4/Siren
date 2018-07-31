@@ -11,6 +11,7 @@ import ConsoleSC from './ConsoleSC';
 import ConsoleTidal from './ConsoleTidal';
 import Pattern from './Pattern';
 import Globals from './Globals';
+import Playback from './Playback';
 import Graphics from './Graphics';
 import DebugConsole from './DebugConsole'
 import PatternHistory from './PatternHistory';
@@ -124,7 +125,16 @@ export default class Home extends React.Component {
         </div>
       </div>);
     }  
-      
+    else if (layoutItem.i === 'playback') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader"}> ● Playback
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <div className={'PanelAdjuster'}>
+          <Playback/>
+        </div>
+      </div>);
+    }   
     /// ----- TIDAL LAYOUTS ------  
     else if (layoutItem.i === 'tidal_globals') {
       return layoutItem.isVisible && (<div key={layoutItem.i}  >

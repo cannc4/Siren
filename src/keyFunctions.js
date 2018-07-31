@@ -1,14 +1,14 @@
 import _ from 'lodash'
-import layoutStore from '../src/stores/layoutStore'
-import sceneStore from '../src/stores/sceneStore'
-import pulseStore from '../src/stores/pulseStore'
-import consoleStore from '../src/stores/consoleStore'
-import globalStore from '../src/stores/globalStore'
-import pathStore from '../src/stores/pathStore'
+import layoutStore from './stores/layoutStore'
+import sceneStore from './stores/sceneStore'
+import pulseStore from './stores/pulseStore'
+import consoleStore from './stores/consoleStore'
+import globalStore from './stores/globalStore'
+import pathStore from './stores/pathStore'
 import rollStore from './stores/rollStore';
 
 export const executionCssById = (elem_id, classname = ' SaveExecuted', duration = 750) => {
-    let elem = document.getElementById('logo_disp');
+    let elem = document.getElementById(elem_id);
     if (elem !== undefined || elem !== null) { 
         elem.className += classname;
         _.delay(() => {elem.className = _.replace(elem.className, classname, '')}, duration);
@@ -18,7 +18,7 @@ export const executionCssById = (elem_id, classname = ' SaveExecuted', duration 
 export const executionCssByEvent = (event, duration = 500) => {
     event.persist();
     event.target.className += ' Executed';
-    _.delay( () => (event.target.className = _.replace(event.target.className, ' Executed', '') ),
+    _.delay(() => { event.target.className = _.replace(event.target.className, ' Executed', '') },
             duration);
 }
 
@@ -28,13 +28,13 @@ export const save = () => {
     globalStore.save();
     pathStore.save();
     console.log(' ## Saving...')
-    executionCssById('logo_disp');
+    executionCssById('logo_disp', ' SaveExecuted');
     return false;
 }
 
 export const saveLayout = () => { 
     layoutStore.save();
-    executionCssById('logo_disp');
+    executionCssById('logo_disp', ' SaveExecuted');
     return false;
 }
 

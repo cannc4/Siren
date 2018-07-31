@@ -223,7 +223,7 @@ class ChannelStore {
     }
 
     // Add Delete Channels
-    @action addChannel(name, type, steps, transition) {
+    @action addChannel(name, type, steps, transition, rate = 8, warn = true) {
         if (_.find(this.channels, {
                 'name': name,
                 'scene': sceneStore.active_scene
@@ -234,7 +234,7 @@ class ChannelStore {
                 name: name,
                 type: type,
                 steps: steps,
-                rate: 8,
+                rate: rate,
                 time: 0,
                 transition: transition,
                 cells: _.fill(Array(_.toInteger(steps)), ''),
@@ -249,7 +249,8 @@ class ChannelStore {
             // const dom = document.getElementById('channelheader_' + (this.getActiveChannels.length - 1));
             // if (dom) dom.focus(); 
         } else {
-            alert(name + ' already exists.');
+            if(warn)
+                alert(name + ' already exists.');
         }
     }
     @action deleteChannel(name, scene = sceneStore.active_scene) {

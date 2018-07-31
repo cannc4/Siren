@@ -139,7 +139,6 @@ pre code .active {
 }
 
 /*Selected Grid Items*/
-
 .GridItem.selected {
     background: rgba(103, 230, 220, 0.02);
     outline: 1px solid rgba(255, 255, 255, 0.35);
@@ -153,7 +152,6 @@ pre code .active {
 }
 
 /*Active Individual Grid Cells*/
-
 .GridItem.active {
     background-color: rgba(223, 219, 35, 0.2);
     box-shadow: inset 0px 0px 15px rgba(0, 0, 0, 0.15);

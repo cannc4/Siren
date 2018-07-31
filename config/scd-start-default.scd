@@ -1,39 +1,44 @@
 (
-s.options.numBuffers = 2048 * 8;
-s.options.maxNodes = 1024 * 4;
-s.options.memSize = 8 * 13000 * 16;
+
+s.options.device = "Fireface UCX (23769248)";
+//s.options.device = "SuperCollider";
+s.options.numInputBusChannels = 0;
+//s.options.numOutputBusChannels = 6;
+s.options.numOutputBusChannels = 16;
+s.options.numBuffers = 2048 * 64;
+s.options.maxNodes = 1024 * 32;
+s.options.memSize = 131072 * 16;
 s.quit;
 
-s.waitForBoot 
-{
-	
-	// Initalize SuperDirt //
-	// ------------------- //
-	SuperDirt.postBadValues = false;
+s.waitForBoot {
+
 	~dirt = SuperDirt(2, s);
-	//~dirt.loadSoundFiles;
-	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\gfix\\*");
-	~dirt.loadSoundFiles("C:\\Users\\Mert\\Dropbox\\~siren\\sample_banks\\poolx\\*");
-	0.2.wait;
-	
-	~dirt.start(57120, [0, 0, 0, 0,0,0,0,0]);
+	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/poolx/*");
+	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfix/*");
+	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfixing/*");
+	//~dirt.start(57120, (0,2 .. 15));
+	~dirt.start(57120, [0,1,2,3,4,6]);
 	"SUPERDIRT LOADED".postln;
 
+	1.wait;
+	"/Users/canince/documents/git/Siren/deps/SynthDefs/customfx.scd".load;
+	"/Users/canince/documents/git/Siren/deps/SynthDefs/customsynth.scd".load;
+	0.5.wait;
+	if(ServerOptions.devices.find(["Fireface UCX (23769248)"]).notNil, {
+		"/Users/canince/documents/git/Siren/deps/SynthDefs/sdmidi.scd".load;
+		"SD MIDI LOADED".postln;
+	0.5.wait;
+	});
+	"/Users/canince/Documents/git/Siren/deps/SynthDefs/dx7/DX7MIDI.scd".load;
+	0.5.wait;
+	"DX7 MIDI LOADED".postln;
+	
 
-	s.volume = -12;
-	s.latency = 0.3;
+
 
 	// SIREN FUNCTIONS - DO NOT REMOVE //
 	// ------------------------------- //
-	/*~dirt.orbits.do { |orbit, i|
-		{SendPeakRMS.kr(
-			InFeedback.ar(orbit.dryBus, ~dirt.numChannels),
-				4,
-				3,
-				"/orbit" ++ i);
-		}.play;
-	};*/
-
+	
 	(
 		// Tidal playback information
 		f = { |msg, time, addr|
@@ -51,18 +56,27 @@ s.waitForBoot
 		thisProcess.addOSCRecvFunc(g);*/
 		
 	);
-  	0.2.wait;
-  	"SIREN LOADED".postln;
+	0.2.wait;
+	"SIREN LOADED".postln;
 	// ------------------------------- //
-	// SIREN FUNCTIONS -- END 		   //
-
+	// SIREN FUNCTIONS -- END 
+			   //
 	
-	1.wait;
-	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customfx.scd".load;
-	"C:\\Users\\Mert\\Dropbox\\~siren\\code\\win\\Siren\\config\\customsynth.scd".load;
-	0.5.wait;
-	
+	s.volume = -6;
+	s.latency = 0.3;
+	s.makeGui;
 	s.meter;
-	//s.makeGui;
-  };
+
+	SuperDirt.default = ~dirt;
+	~d1 = ~dirt.orbits[0];
+	~d2 = ~dirt.orbits[1];
+	~d3 = ~dirt.orbits[2];
+	~d4 = ~dirt.orbits[3];
+	~d5 = ~dirt.orbits[4];
+	~d6 = ~dirt.orbits[5];
+	~d7 = ~dirt.orbits[6];
+	~d8 = ~dirt.orbits[7];
+
+};
+
 )

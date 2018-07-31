@@ -151,7 +151,7 @@ export default class Cell extends React.Component {
         return (<div>
             <textarea id={'cell_' + channel_index + "_" + cell_index}
                 ref={(input) => { this.nameInput = input; }}
-                className={className +" draggableCancel"} type="text"
+                className={className + " draggableCancel"} type="text"
                 placeholder={cell_index % 2 === 1 ? _.toString(cell_index+1) : ''}
                 value={value}
                 onChange={() => 

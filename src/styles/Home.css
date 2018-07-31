@@ -9,6 +9,7 @@
   --layout-background: rgb(40, 40, 40);
   --global-white: rgb(200, 200, 200);
   --accent-color: rgba(255, 255, 102, 0.25);
+  --accent-color-trans: rgba(255, 255, 102, 0.05);
   --accent-color-opaque: rgb(202, 202, 80);
 }
 
@@ -211,8 +212,17 @@
 .CodeMirror {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
-
-/*height*/
+.CodeMirror-execution {
+  background-color: var(--accent-color) !important;
+  transition: background-color 100ms ease-in-out !important;
+}
+.CodeMirror-activeline-background {
+  background-color: var(--accent-color-trans) !important;
+}
+.CodeMirror-matchingbracket {
+  outline: rgba(255, 255, 255, 0.5) 1px solid;
+  text-decoration: none !important;
+}
 
 div.cm-s-_style.CodeMirror-wrap {
   height: 100%;

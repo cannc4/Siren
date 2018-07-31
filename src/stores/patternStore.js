@@ -79,7 +79,7 @@ class PatternStore {
             item.params = matches.toString();
         }
     }
-    @action addPattern(name, active_scene) {
+    @action addPattern(name, active_scene, text = '', params = '') {
         if (_.find(this.patterns, {
                 'name': name,
                 'scene': active_scene
@@ -87,8 +87,8 @@ class PatternStore {
             this.patterns.push({
                 scene: active_scene,
                 name: name,
-                params: '',
-                text: ''
+                params: params,
+                text: text
             });
         } else {
             alert(name + ' already exists.');
