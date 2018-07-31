@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.scd": "c",
+        "algorithm": "c",
+        "random": "c"
+    }
+}
