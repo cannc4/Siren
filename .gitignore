@@ -2,7 +2,6 @@ node_modules/
 deps/
 build/
 config/
-server/save/
 server/public/
 server/build/
 package-lock.json
