@@ -26,10 +26,13 @@ export default class Cell extends React.Component {
 
         //compile pattern with the parsed parameters + channel props cmd + enter
         else if(event.altKey && event.keyCode === 13) {
-            this.props.cellStore.compileCell();
+            if(event.shiftKey)
+                this.props.cellStore.compileStep();
+            else
+                this.props.cellStore.compileCell();
+
             event.preventDefault();            
         }
-
         // deselect with esc    
         else if (event.keyCode === 27) {
             this.props.cellStore.updateSelectState(false);

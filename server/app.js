@@ -12,6 +12,7 @@ const Queue = require('better-queue');
 const math = require("mathjs");
 const exec = require('child_process').exec;
 const osc = require("osc");
+var oscSender = require('node-osc');
 
 // Connection to KORG nanoKontrol2 
 //let nanoKONTROL = require('korg-nano-kontrol');
@@ -22,7 +23,7 @@ const link = new abletonlink();
 
 const NanoTimer = require('nanotimer');
 let nano = new NanoTimer();
-
+let OFXPort;
 // Variables for recording
 let isRecording = false;
 let isPlaying = false;
@@ -30,6 +31,7 @@ let recordFilename = '';
 let historyArray = [];
 let history_index = 0;
 let commandobj;
+let global_modAppend;
 
 // link pulse socket 
 let link_pulse = socketIo.listen(4001);
@@ -114,13 +116,7 @@ class REPL {
 
         // open socket for SuperCollider log
         let sclog = socketIo.listen(4002);
-        var udpPort = new osc.UDPPort({
-          localAddress: "127.0.0.1",
-          localPort: 57121,
-          metadata: true
-        });
-        udpPort.open();
-
+    
         // socket for Tidal future values
         // let future_vis = socketIo.listen(4006);
 
@@ -289,6 +285,11 @@ class REPL {
               sclog.sockets.emit('/sclog', {
                 trigger: cycleInfo
               });
+              // var OFXclient = new oscSender.Client('127.0.0.1', 8800);
+              // OFXclient.send('/oscAddress', trigger, function () {
+              //   OFXclient.kill();
+              // });
+              
             } else if (_.startsWith(_.trim(msg[0]), '/orbit')) {
               // Send RMS to the front end
               sclog.sockets.emit('/rms', {
@@ -458,7 +459,11 @@ const Siren = () => {
       historyArray.push(tidalobj);
     }
     cb(null, result);
-  }, {});
+  }, {  priority: function (pat, cb) {
+    SirenComm.siren_console.tidalSendExpression(pat);
+    cb(null, 1);
+   }}
+  );
 
   const sendPattern = (expr) => {
     SirenComm.siren_console.tidalSendExpression(expr);
@@ -499,6 +504,22 @@ const Siren = () => {
     }
   };
 
+
+
+  app.post('/ofx', (req, reply) => {
+    const {
+      evolutionArray
+    } = req.body;
+
+//   OFXPort.send(evolutionArray);
+  // reply.status(200);
+
+  });
+
+
+
+
+
   //Pattern Stream <->
 
   // TODO: use _.template from lodash
@@ -507,7 +528,8 @@ const Siren = () => {
       step,
       channel,
       patterns,
-      global_mod
+      global_mod,
+      globals
     } = req.body;
 
     let k = channel.name,
@@ -586,6 +608,8 @@ const Siren = () => {
 
     // command of the pattern
     const pat = _.find(patterns, c => c.name === cellName);
+
+    
     let newCommand;
 
     // CPS channel handling
@@ -600,6 +624,12 @@ const Siren = () => {
         timestamp: new Date().getMilliseconds()
       });
     }
+
+    else if(channel.type === "GLOBAL"){
+      newCommand =cellName;
+      global_modAppend = _.find(globals, c => c.name === newCommand);
+    }
+
     // other channels
     else if (pat !== undefined && pat !== null && pat !== "" && v !== "") {
       let cellItem = _.slice(getParameters(v), 1);
@@ -632,26 +662,41 @@ const Siren = () => {
           cid: channel.cid
         });
       } else if (channel.type === "Tidal") {
-        if (channel.transition !== "" && channel.transition !== undefined) {
-          // TODO: consider cases like 'one d1', 'on 4 d1'
-          let na = channel.name.substring(1, channel.name.length);
-          transitionHolder = "t" + na + " " + channel.transition + " $ ";
-        } else {
-          transitionHolder = k + " $ ";
-        }
+        if(channel.name === "do"){
 
-        if (global_mod.channels.includes(channel.activeSceneIndex.toString()) || global_mod.channels.includes("0")) {
-          if (global_mod.transform === undefined) global_mod.transform = '';
-          if (global_mod.modifier === undefined) global_mod.modifier = '';
-          newCommand = global_mod.transform + newCommand + global_mod.modifier;
+          pattern = `do \n` + newCommand;
+          console.log(pattern);
+          tidalPatternQueue.push(pattern);
+          reply.status(200).json({
+            pattern: pattern,
+            cid: channel.cid,
+            timestamp: new Date().getMilliseconds()
+          });
         }
-        pattern = transitionHolder + newCommand + " # sirenChan " + channel.activeSceneIndex.toString();
-        tidalPatternQueue.push(pattern);
-        reply.status(200).json({
-          pattern: pattern,
-          cid: channel.cid,
-          timestamp: new Date().getMilliseconds()
-        });
+        else{
+          if (channel.transition !== "" && channel.transition !== undefined) {
+            // TODO: consider cases like 'one d1', 'on 4 d1'
+            let na = channel.name.substring(1, channel.name.length);
+            transitionHolder = "t" + na + " " + channel.transition + " $ ";
+          } else {
+            transitionHolder = k + " $ ";
+          }
+
+          if (global_modAppend !== undefined) {
+            if(global_modAppend.channels.includes(channel.activeSceneIndex.toString()) || global_modAppend.channels.includes("0")) {
+              if (global_modAppend.transformer === undefined) global_modAppend.transformer = '';
+              if (global_modAppend.modifier === undefined) global_modAppend.modifier = '';
+                newCommand = global_modAppend.transformer + newCommand + global_modAppend.modifier;
+            }
+          } 
+          pattern = transitionHolder + newCommand + " # sirenChan " + channel.activeSceneIndex.toString();
+          tidalPatternQueue.push(pattern);
+          reply.status(200).json({
+            pattern: pattern,
+            cid: channel.cid,
+            timestamp: new Date().getMilliseconds()
+          });
+        }
       }
       else if (channel.type === '') {
         pattern = newCommand;

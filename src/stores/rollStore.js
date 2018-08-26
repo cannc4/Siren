@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 import TreeModel from 'tree-model'
 import math from 'mathjs'
+import request from '../utils/request'
 
 class RollStore {
     sc_log_socket = io('http://localhost:4002/');
@@ -37,15 +38,7 @@ class RollStore {
         [1, 0, 1, 0],
         [0, 0, 20000, 0]
     ];
-   
-    // graphic evolution matrices 
-    // DO NOT MAKE OBSERVABLE
-    evolutions = [
-        math.matrix(math.eye(4)),
-        math.matrix(math.eye(4)),
-        math.matrix(math.eye(4)),
-        math.matrix(math.eye(4))
-    ];
+  
     def_value = 0.5;
 
     // newWindows() { 
@@ -75,7 +68,7 @@ class RollStore {
                 this.processData();
 
                 // -- update evolution matrices for graphics
-                this.updateEvolutionMatrices();
+               // this.updateEvolutionMatrices();
             }
         }))
     }
@@ -92,7 +85,7 @@ class RollStore {
 
     // -- The dimensions 
     @action
-    updateCanvasDimensions() {
+    updateRollDimensions() {
         const element = document.getElementById('canvasLayout');
         if (element && element !== null) {
             const w = element.clientWidth;
@@ -103,88 +96,15 @@ class RollStore {
         }
         this.dimensions_c = [800, 300];
     }
-    @action
-    updateGraphicsDimensions() {
-        const element = document.getElementById('graphicsLayout');
-        if (element && element !== null) {
-            const w = element.clientWidth;
-            const h = element.clientHeight;
-
-            this.dimensions_g = [w, h - 40];
-            return;
-        }
-        this.dimensions_g = [400, 400];
-    }
 
     // -- Hot reload
     reloadRoll(cleanTree = true) {
         if(cleanTree)
             this.cycle_time_offset = 0;
 
-        this.updateGraphicsDimensions();
+        //this.updateGraphicsDimensions();
         this.renderCanvas();
     }
-
-    getEvalMatItem(matrix_id, col, row) {
-        if (matrix_id < this.evolutions.length) { 
-            return this.evolutions[matrix_id].valueOf()[col][row];
-        }
-        return 0;
-    }
-
-    getAverageVariableOnChannel(channel_id, varName, defaultValue) { 
-        // find the channel on tree
-        let node = _.find(this.treeRoot.children, (o) => { 
-            return o.model.value === channel_id;
-        })
-
-        if (node !== undefined) { 
-            let variable = node.model.average[[varName]];
-            return ((variable === undefined || _.isNaN(variable)) ? defaultValue : (variable));
-        }
-        return this.def_value;
-    }
-
-    // -- Update evolution matrices
-    updateEvolutionMatrices() {
-        let index = _.toInteger(this.value.sirenChan);
-
-        if (index === undefined) index = 0;
-        // console.log(index);
-
-        if (index < this.evolutions.length) {
-            this.evolutions[index].subset(math.index(0, 0), this.getAverageVariableOnChannel(index, "delta", 1));      // speed of progression  ( 0  1)    <~x~>    global velocity
-            this.evolutions[index].subset(math.index(0, 1), this.getAverageVariableOnChannel(index, "pan", 0.5));      // position of sound     ( 0  1)    <~~~>    
-            this.evolutions[index].subset(math.index(0, 2), this.getAverageVariableOnChannel(index, "n", 0));          // folder selector       ( 0  ~)    <~~~>
-            this.evolutions[index].subset(math.index(0, 3), this.getAverageVariableOnChannel(index, "note", 0));       // freq of playback      (-60 60)   <~~~> 
-            this.evolutions[index].subset(math.index(1, 0), this.getAverageVariableOnChannel(index, "coarse", 1));     // sr ratio (inv. frq)   ( 1 64)    <~~~> 
-            this.evolutions[index].subset(math.index(1, 1), this.getAverageVariableOnChannel(index, "speed", 1));      // speed of playb.(frq)  (-9  9)    <~~~>    local velocity
-            this.evolutions[index].subset(math.index(1, 2), this.getAverageVariableOnChannel(index, "gain", 1));       // volume of playback    ( 0  2)    <~~~> 
-            this.evolutions[index].subset(math.index(1, 3), this.getAverageVariableOnChannel(index, "sustain", 1));    // dur. of playb. (s)    ( 0  ~)    <~~~> 
-            this.evolutions[index].subset(math.index(2, 0), this.getAverageVariableOnChannel(index, "dub", 1));        // dub                   ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(2, 1), this.getAverageVariableOnChannel(index, "begin", 0));      // start of playb.       ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(2, 2), this.getAverageVariableOnChannel(index, "end", 1));        // end of playb.         ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(2, 3), this.getAverageVariableOnChannel(index, "hall", 0));       // reverb                ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(3, 0), this.getAverageVariableOnChannel(index, "shape", 0));      // distortion            ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(3, 1), this.getAverageVariableOnChannel(index, "resonance", 0));  // resonance             ( 0  1)    <~~~> 
-            this.evolutions[index].subset(math.index(3, 2), this.getAverageVariableOnChannel(index, "cutoff", 20000)); // lfreq threshold       ( 0 20k)   <~~~> 
-            this.evolutions[index].subset(math.index(3, 3), this.getAverageVariableOnChannel(index, "hcutoff", 0));    // hfreq threshold       ( 0 20k)   <~~~> 
-        }
-    }
-
-    // -- Decay evolution matrix values towards their default values
-    decayEvolutionMatrices() {
-        for (let i = 0; i < this.evolutions.length; i++) {
-            for (let j = 0; j < 16; j++) {
-                const a = _.toInteger(j / 4);
-                const b = j % 4;
-                const val = this.evolutions[i].subset(math.index(a, b));
-                this.evolutions[i].subset(math.index(a, b),
-                    (val - this.def_values[a][b]) * 0.99 + this.def_values[a][b]);  
-            }    
-        }
-    }
-
 
     // -- Canvas functions 
     cleanData() { 
@@ -352,7 +272,7 @@ class RollStore {
                 alpha: true
             });
             
-            this.updateCanvasDimensions();
+            this.updateRollDimensions();
             let w = this.roll_canvas_element.width = this.dimensions_c[0];
             let h = this.roll_canvas_element.height = this.dimensions_c[1];
             

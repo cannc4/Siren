@@ -7,25 +7,18 @@ import _ from 'lodash';
 // nodejs connections
 import request from '../utils/request'
 import historyStore from './historyStore';
-import channelStore from './channelStore';
 
 class GlobalStore {
     @observable global_mod = [{
+        name:'',
         channels: '',
         transformer: '',
         modifier: '',
         param: ''
     }]
 
-    @observable global_channels = ''
-    @observable global_transformer = ''
-    @observable global_modifier = ''
-    @observable global_param = ''
-
-    @observable active_index = 0;
-
     constructor() {
-        this.load();
+       this.load();
     }
 
     // getters
@@ -42,62 +35,41 @@ class GlobalStore {
         return this.global_modifier;
     }
     @computed get getParam() {
-        return this.global_param;
+        return this.global_name;
     }
 
-    // setters
-    @action updateTransformer(transformer) {
-        this.global_transformer = transformer;
-    }
-    @action updateModifier(modifier) {
-        this.global_modifier = modifier;
-    }
-    @action updateParam(param) {
-        this.global_param = param;
-    }
-    @action updateChannels(channels) {
-        this.global_channels = channels;
-    }
-
-    // @action loadGlobals(index){
-    //     this.active_index = index;
-    //     this.global_channels = this.global_mod[index].channels;
-    //     this.global_transformer = this.global_mod[index].transformer;
-    //     this.global_modifier = this.global_mod[index].modifier;
-    //     this.global_param = this.global_mod[index].param;
-    // }
-    @action updateGlobals(globalObj, index) {
-        if (globalObj !== undefined) {
-            this.active_index = index;
-            this.global_channels = globalObj.channels;
-            this.global_transformer = globalObj.transformer;
-            this.global_modifier = globalObj.modifier;
-            this.global_param = globalObj.param;
+    @action addGlobal(name) {
+        if (_.find(this.global_mod, {
+                'name': name
+            }) === undefined) {
+            this.global_mod.push({
+                name: name,
+                channels: '',
+                transformer: '',
+                modifier: '',
+                param: ''
+            });
+        } else {
+            alert(name + ' already exists.');
         }
     }
 
-    isActive(globalindex) {
-        return this.active_index === globalindex;
+
+    @action deleteGlobal(name) {
+        this.global_mod = _.reject(this.global_mod, {
+            'name': name
+        });
     }
 
-    @action saveGlobals() {
-        let gobj = {
-            channels: this.global_channels,
-            transformer: this.global_transformer,
-            modifier: this.global_modifier,
-            param: this.global_param,
-        };
-        this.global_mod.push(gobj);
-        this.active_index = this.global_mod.length - 1;
-        this.save();
-    }
-
-    @action updatePatterns() {
-
+    @action compileGlobal(name) {
+     
+        let gitem = _.find(this.global_mod, {
+            'name': name,
+        });
         const ctx = this;
-        let channels = this.global_channels;
-        let transformer = this.global_transformer;
-        let modifier = this.global_modifier;
+        let channels = gitem.channels;
+        let transformer = gitem.transformer;
+        let modifier = gitem.modifier;
         let gbchan = channels.split(" ");
 
         // TODO: CHANGE HISTORY AND FIX THIS PROPERLY
@@ -106,55 +78,66 @@ class GlobalStore {
         if (transformer !== undefined && modifier !== undefined) {
             // console.log("GLOBAL UPDATE PATTERNS:", channels, transformer, modifier,activePatterns,activePatternsLen);
             if (gbchan !== undefined && gbchan.length > 0 && activePatterns !== undefined && activePatternsLen > 0) {
-                // if (gbchan === undefined || gbchan[0] === undefined || gbchan[0] === ' ') {
-                    // console.log("Global All channels");
-                    for (let i = 0; i < activePatternsLen; i++) {
-                        let curPat = _.last(activePatterns[i]);
-                        if (curPat !== undefined && curPat.pattern !== '') {
-                            let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
-                            let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
-                            
-                            let patchannumber = _.toInteger(patname.charAt(1));
-                            if (_.includes(gbchan, patchannumber.toString()) || _.includes(gbchan, "0")) { 
-                                if (transformer === undefined) transformer = '';
-                                if (modifier === undefined) modifier = '';
-    
-                                let pattern = patname + transformer + patternbody + modifier;
-    
-                                ctx.submitGHC(pattern);
-                            }
+                for (let i = 0; i < activePatternsLen; i++) {
+                    let curPat = _.last(activePatterns[i]);
+                    if (curPat !== undefined && curPat.pattern !== '') {
+                        let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
+                        let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
+                        
+                        let patchannumber = _.toInteger(patname.charAt(1));
+                        if (_.includes(gbchan, patchannumber.toString()) || _.includes(gbchan, "0")) { 
+                            if (transformer === undefined) transformer = '';
+                            if (modifier === undefined) modifier = '';
+
+                            let pattern = patname + transformer + patternbody + modifier;
+
+                            ctx.submitGHC(pattern);
                         }
                     }
-                // }
-                // else {
-                //     // TODO: CHANGE HISTORY RECORDS
-
-                //     for (let j = 0; j < gbchan.length; j++) {
-                //         let chan_number = _.toInteger(gbchan[j]) - 1;
-                //         if (!_.isNan(chan_number)) { 
-                //             let chan_obj = _.find(channelStore.getActiveChannels, ['activeSceneIndex', chan_number]);
-    
-                //             if (activePatterns[chan_obj.activeSceneIndex] !== undefined && _.last(activePatterns[chan_number]) !== undefined) {
-                //                 let curPat = _.last(activePatterns[chan_number]);
-                //                 if (curPat !== undefined && curPat.pattern !== '') {
-                //                     let patternbody = curPat.pattern.substring(_.indexOf(curPat.pattern, "$") + 1);
-                //                     let patname = curPat.pattern.substring(0, _.indexOf(curPat.pattern, "$") + 1);
-                                    
-                //                     if (transformer === undefined) transformer = '';
-                //                     if (modifier === undefined) modifier = '';
-                                    
-                //                     let pattern = patname + transformer + patternbody + modifier;
-                //                     // console.log(pattern);
-                //                     ctx.submitGHC(pattern);
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
+                }
             }
-            // if (this.global_param !== undefined) ctx.submitGHC(this.global_param);
         }
     }
+
+    @action changeGlobalName(name, new_name) {
+        let gitem = _.find(this.global_mod, {
+            'name': name,
+        });
+        if (gitem !== undefined) {
+            gitem.name = new_name;
+        }
+    }
+    @action updateTransformer(name,transformer) {
+        let gitem = _.find(this.global_mod, {
+            'name': name
+        });
+        gitem.transformer = transformer;
+    }
+    @action updateModifier(name,modifier) {
+        let gitem = _.find(this.global_mod, {
+            'name': name
+        });
+        gitem.modifier = modifier;
+    }
+
+    @action updateChannels(name,channels) {
+        let gitem = _.find(this.global_mod, {
+            'name': name
+        });
+        gitem.channels = channels;
+    }
+
+    // @action saveGlobals() {
+    //     let gobj = {
+    //         channels: this.global_channels,
+    //         transformer: this.global_transformer,
+    //         modifier: this.global_modifier,
+    //         param: this.global_name,
+    //     };
+    //     this.global_mod.push(gobj);
+    //     this.active_index = this.global_mod.length - 1;
+    //     this.save();
+    // }
 
     submitGHC(expression) {
         request.post('http://localhost:3001/global_ghc', {
@@ -182,7 +165,7 @@ class GlobalStore {
 
     save() {
         request.post('http://localhost:3001/globals_save', {
-                'globals': this.global_mod
+                'globals': this.getGlobals
             })
             .then((response) => {
                 console.log(" ## Globals Saved");

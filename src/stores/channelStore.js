@@ -166,18 +166,20 @@ class ChannelStore {
     sendPattern(channel, step) {
         let globoj = {
             channels: globalStore.global_channels,
-            transform: globalStore.global_transform,
+            transform: globalStore.global_transformer,
             modifier: globalStore.global_modifier,
-            param: globalStore.global_param,
+            param: globalStore.global_name,
             res_parameters: patternStore.reserved_parameters
         }
 
         let patobj = patternStore.activePatterns;
+        let globnew = globalStore.getGlobals;
         request.post('http://localhost:3001/patternstream', {
                 'step': step,
                 'patterns': patobj,
                 'channel': channel,
                 'global_mod': globoj,
+                'globals': globnew
             })
             .then((response) => {
                 console.log(" ## Pattern response: ", response.data.pattern);

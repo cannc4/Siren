@@ -19,7 +19,7 @@ export default class ConsoleTidal extends React.Component {
 
   // GHC
   handleGHCSubmit = (editor, event) => {
-    if (event.keyCode === 13 && event.ctrlKey) {
+    if (event.keyCode === 13 && (event.ctrlKey || event.metaKey)) {
       let expr = "";
       
       if (editor.somethingSelected()) {
@@ -58,7 +58,7 @@ export default class ConsoleTidal extends React.Component {
     return false;
   }
 
-  saveStuff = (editor, e) => { 
+  saveConsole = (editor, e) => { 
     if(e.ctrlKey && (e.which === 83)) {
       e.preventDefault();
       save();
@@ -93,7 +93,7 @@ export default class ConsoleTidal extends React.Component {
                     this.props.consoleStore.onChangeTidal(value);
                   }}
                   onChange={() => { }}
-                  onKeyDown={this.saveStuff.bind(this)}
+                  onKeyDown={this.saveConsole.bind(this)}
                   onKeyUp={this.handleGHCSubmit.bind(this)}
                   />
       </div>);

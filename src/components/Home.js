@@ -6,7 +6,7 @@ import { inject, observer } from 'mobx-react';
 import Grid from './Channel';
 import Scene from './Scene';
 import Paths from './Paths';
-import Canvas from './Canvas';
+import Roll from './Roll';
 import ConsoleSC from './ConsoleSC';
 import ConsoleTidal from './ConsoleTidal';
 import Pattern from './Pattern';
@@ -180,7 +180,7 @@ export default class Home extends React.Component {
           <button className={"Button draggableCancel"} title={"Refresh"} onClick={(e) => { rollStore.reloadRoll();}}>⭯</button>
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
-        <Canvas/>
+        <Roll/>
       </div>);
     }  
     /// ----- SUPERCOLLIDER LAYOUTS ------  
@@ -205,6 +205,7 @@ export default class Home extends React.Component {
     if (param.type === 'channelAddTidal') this.props.channelStore.addChannel('', 'Tidal', 8, '');
     else if (param.type === 'channelAddSC') this.props.channelStore.addChannel('s', 'SuperCollider', 8, '');
     else if (param.type === 'channelAddCPS') this.props.channelStore.addChannel('cps', 'CPS', 8, '');
+    else if (param.type === 'channelAddGLOBAL') this.props.channelStore.addChannel('G', 'GLOBAL', 8, '');
     else if (param.type === 'modulesRemove') this.props.layoutStore.hideLayout(param.val);
     else if (param.type === 'modulesAdd') this.props.layoutStore.showLayout(param.val);
     else if (param.type === 'layoutSave') this.props.layoutStore.save();
@@ -256,6 +257,7 @@ export default class Home extends React.Component {
       
         <ContextMenu id="global_context" className={"draggableCancel"}>
           <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddTidal', val: true })}>Add Tidal Channel</MenuItem>
+          <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddGLOBAL', val: true })}>Add Global Channel</MenuItem>
           <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddCPS', val: true })}>Add CPS Channel</MenuItem>
           <MenuItem data={{ value: 1 }} onClick={ctx.handleRightClick.bind(ctx, { type: 'channelAddSC', val: true })}>Add SuperCollider Channel</MenuItem>
           <MenuItem divider />

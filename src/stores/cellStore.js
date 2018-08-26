@@ -76,6 +76,16 @@ class CellStore {
             executionCssById('cell_' + channel_i + '_' + cell_i, ' Executed');
         }
     }
+
+    // -- Compile All Cells in the selected step
+    compileStep() {
+        let cell_i = this.current_cell[1];
+        _.each(channelStore.getActiveChannels, (ch, i) => { 
+            channelStore.sendPattern(ch,ch.cells[cell_i]);
+            executionCssById('cell_' + i + '_' + cell_i, ' Executed');
+        });
+    }
+    
     
     // -- Updates
     @action updateSelectState(flag) {

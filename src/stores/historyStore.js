@@ -29,20 +29,20 @@ class HistoryStore {
         }
     }
 
-    submitNano(expression, channel) {
-        const ctx = this;
-        request.post('http://localhost:3001/nano_ghc', {
-                'pattern': expression,
-                'channel': channel
-            })
-            .then((response) => {
-                if (response) {
-                    ctx.updateHistory(response.data.pattern, response.data.cid, response.data.timestamp);
-                }
-            }).catch(function (error) {
-                console.error("ERROR", error);
-            });
-    }
+    // submitNano(expression, channel) {
+    //     const ctx = this;
+    //     request.post('http://localhost:3001/nano_ghc', {
+    //             'pattern': expression,
+    //             'channel': channel
+    //         })
+    //         .then((response) => {
+    //             if (response) {
+    //                 ctx.updateHistory(response.data.pattern, response.data.cid, response.data.timestamp);
+    //             }
+    //         }).catch(function (error) {
+    //             console.error("ERROR", error);
+    //         });
+    // }
 
 
 

@@ -3,8 +3,8 @@
 s.options.device = "Fireface UCX (23769248)";
 //s.options.device = "SuperCollider";
 s.options.numInputBusChannels = 0;
-//s.options.numOutputBusChannels = 6;
-s.options.numOutputBusChannels = 16;
+s.options.numOutputBusChannels = 6;
+//s.options.numOutputBusChannels = 16;
 s.options.numBuffers = 2048 * 64;
 s.options.maxNodes = 1024 * 32;
 s.options.memSize = 131072 * 16;
@@ -12,24 +12,29 @@ s.quit;
 
 s.waitForBoot {
 
-	~dirt = SuperDirt(2, s);
-	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/poolx/*");
-	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfix/*");
-	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfixing/*");
+	// ~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/poolx/*");
+	//~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfix/*");
+	//~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfixing/*");
 	//~dirt.start(57120, (0,2 .. 15));
+
+
+
+	~dirt = SuperDirt(2, s);
+	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/VSV/*");
+	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/genpool/*");
 	~dirt.start(57120, [0,1,2,3,4,6]);
 	"SUPERDIRT LOADED".postln;
 
 	1.wait;
-	"/Users/canince/documents/git/Siren/deps/SynthDefs/customfx.scd".load;
-	"/Users/canince/documents/git/Siren/deps/SynthDefs/customsynth.scd".load;
+	"/Users/canince/documents/git/Siren/deps/scsynth/customfx.scd".load;
+	"/Users/canince/documents/git/Siren/deps/scsynth/customsynth.scd".load;
 	0.5.wait;
 	if(ServerOptions.devices.find(["Fireface UCX (23769248)"]).notNil, {
-		"/Users/canince/documents/git/Siren/deps/SynthDefs/sdmidi.scd".load;
+		"/Users/canince/documents/git/Siren/deps/scsynth/sdmidi.scd".load;
 		"SD MIDI LOADED".postln;
 	0.5.wait;
 	});
-	"/Users/canince/Documents/git/Siren/deps/SynthDefs/dx7/DX7MIDI.scd".load;
+	"/Users/canince/Documents/git/Siren/deps/scsynth/dx7/DX7MIDI.scd".load;
 	0.5.wait;
 	"DX7 MIDI LOADED".postln;
 	

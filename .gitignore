@@ -1,11 +1,9 @@
 node_modules/
 deps/
-dist/
 build/
 config/
+server/save/
 server/public/
-vis/
-vis/media/
+server/build/
 package-lock.json
-asd
 .DS_Store

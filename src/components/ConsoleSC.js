@@ -19,7 +19,7 @@ export default class ConsoleSC extends React.Component {
     }
   }
 
-  saveStuff = (editor, e) => { 
+  saveConsole = (editor, e) => { 
     if(e.ctrlKey && (e.which === 83)) {
       e.preventDefault();
       save();
@@ -52,7 +52,7 @@ export default class ConsoleSC extends React.Component {
                     }}
                     onChange={() => {}}
                     onKeyUp={this.handleSCSubmit.bind(this)}
-                    onKeyDown={this.saveStuff.bind(this)}
+                    onKeyDown={this.saveConsole.bind(this)}
                     />
      </div>);
   }

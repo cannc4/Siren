@@ -1,7 +1,7 @@
 {
  "layouts": [
   {
-   "w": 15,
+   "w": 17,
    "h": 18,
    "x": 2,
    "y": 2,
@@ -11,9 +11,9 @@
    "isVisible": true
   },
   {
-   "w": 7,
+   "w": 5,
    "h": 18,
-   "x": 17,
+   "x": 19,
    "y": 2,
    "i": "patterns",
    "moved": false,
@@ -21,18 +21,18 @@
    "isVisible": true
   },
   {
-   "w": 14,
-   "h": 8,
+   "w": 24,
+   "h": 6,
    "x": 0,
-   "y": 25,
+   "y": 24,
    "i": "tidal_log",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 14,
-   "h": 5,
+   "w": 12,
+   "h": 4,
    "x": 0,
    "y": 20,
    "i": "tidal_history",
@@ -41,9 +41,9 @@
    "isVisible": true
   },
   {
-   "w": 10,
-   "h": 13,
-   "x": 14,
+   "w": 7,
+   "h": 4,
+   "x": 12,
    "y": 20,
    "i": "tidal_console",
    "moved": false,
@@ -71,6 +71,16 @@
    "isVisible": true
   },
   {
+   "w": 5,
+   "h": 4,
+   "x": 19,
+   "y": 20,
+   "i": "tidal_globals",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
    "w": 7,
    "h": 18,
    "x": 17,
@@ -86,16 +96,6 @@
    "x": 14,
    "y": 18,
    "i": "sc_console",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 10,
-   "h": 9,
-   "x": 6,
-   "y": 18,
-   "i": "tidal_globals",
    "moved": false,
    "static": false,
    "isVisible": false
@@ -124,7 +124,7 @@
  "customs": [
   [
    {
-    "w": 15,
+    "w": 17,
     "h": 18,
     "x": 2,
     "y": 2,
@@ -134,9 +134,9 @@
     "isVisible": true
    },
    {
-    "w": 7,
+    "w": 5,
     "h": 18,
-    "x": 17,
+    "x": 19,
     "y": 2,
     "i": "patterns",
     "moved": false,
@@ -144,28 +144,18 @@
     "isVisible": true
    },
    {
-    "w": 7,
-    "h": 18,
-    "x": 17,
-    "y": 2,
-    "i": "playback",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 14,
-    "h": 8,
+    "w": 24,
+    "h": 6,
     "x": 0,
-    "y": 25,
+    "y": 24,
     "i": "tidal_log",
     "moved": false,
     "static": false,
     "isVisible": true
    },
    {
-    "w": 14,
-    "h": 5,
+    "w": 12,
+    "h": 4,
     "x": 0,
     "y": 20,
     "i": "tidal_history",
@@ -174,9 +164,9 @@
     "isVisible": true
    },
    {
-    "w": 10,
-    "h": 13,
-    "x": 14,
+    "w": 7,
+    "h": 4,
+    "x": 12,
     "y": 20,
     "i": "tidal_console",
     "moved": false,
@@ -204,21 +194,31 @@
     "isVisible": true
    },
    {
-    "w": 10,
+    "w": 5,
+    "h": 4,
+    "x": 19,
+    "y": 20,
+    "i": "tidal_globals",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 7,
     "h": 18,
-    "x": 14,
-    "y": 18,
-    "i": "sc_console",
+    "x": 17,
+    "y": 20,
+    "i": "playback",
     "moved": false,
     "static": false,
     "isVisible": false
    },
    {
     "w": 10,
-    "h": 9,
-    "x": 6,
+    "h": 18,
+    "x": 14,
     "y": 18,
-    "i": "tidal_globals",
+    "i": "sc_console",
     "moved": false,
     "static": false,
     "isVisible": false
@@ -247,7 +247,7 @@
   [
    {
     "w": 7,
-    "h": 21,
+    "h": 8,
     "x": 17,
     "y": 0,
     "i": "patterns",
@@ -257,19 +257,9 @@
    },
    {
     "w": 7,
-    "h": 18,
+    "h": 8,
     "x": 17,
-    "y": 2,
-    "i": "playback",
-    "moved": false,
-    "static": false,
-    "isVisible": true
-   },
-   {
-    "w": 17,
-    "h": 5,
-    "x": 0,
-    "y": 16,
+    "y": 8,
     "i": "tidal_log",
     "moved": false,
     "static": false,
@@ -286,14 +276,44 @@
     "isVisible": true
    },
    {
-    "w": 10,
-    "h": 18,
-    "x": 14,
-    "y": 21,
-    "i": "sc_console",
+    "w": 24,
+    "h": 6,
+    "x": 0,
+    "y": 16,
+    "i": "tidal_roll",
     "moved": false,
     "static": false,
     "isVisible": true
+   },
+   {
+    "w": 24,
+    "h": 8,
+    "x": 0,
+    "y": 22,
+    "i": "tidal_globals",
+    "moved": false,
+    "static": false,
+    "isVisible": true
+   },
+   {
+    "w": 17,
+    "h": 4,
+    "x": 0,
+    "y": 22,
+    "i": "sc_console",
+    "moved": false,
+    "static": false,
+    "isVisible": false
+   },
+   {
+    "w": 7,
+    "h": 18,
+    "x": 17,
+    "y": 21,
+    "i": "playback",
+    "moved": false,
+    "static": false,
+    "isVisible": false
    },
    {
     "w": 24,
@@ -326,16 +346,6 @@
     "isVisible": false
    },
    {
-    "w": 10,
-    "h": 9,
-    "x": 6,
-    "y": 18,
-    "i": "tidal_globals",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
     "w": 24,
     "h": 6,
     "x": 0,
@@ -351,16 +361,6 @@
     "x": 3,
     "y": 32,
     "i": "graphics",
-    "moved": false,
-    "static": false,
-    "isVisible": false
-   },
-   {
-    "w": 14,
-    "h": 8,
-    "x": 0,
-    "y": 12,
-    "i": "tidal_roll",
     "moved": false,
     "static": false,
     "isVisible": false

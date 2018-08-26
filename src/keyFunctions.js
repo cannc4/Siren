@@ -9,7 +9,7 @@ import rollStore from './stores/rollStore';
 
 export const executionCssById = (elem_id, classname = ' SaveExecuted', duration = 750) => {
     let elem = document.getElementById(elem_id);
-    if (elem !== undefined || elem !== null) { 
+    if (elem !== undefined && elem !== null) { 
         elem.className += classname;
         _.delay(() => {elem.className = _.replace(elem.className, classname, '')}, duration);
     }

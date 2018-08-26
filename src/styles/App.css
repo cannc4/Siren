@@ -10,11 +10,16 @@ body,
   overflow-y: scroll;
   z-index: 0;
   font-size: 14px;
+  max-width: calc(100% - 50px);
 }
 
 * {
   font-family: 'Inconsolata';
   font-weight: 40;
+}
+
+html {
+  padding: 0;
 }
 
 *:focus {
