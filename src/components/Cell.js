@@ -131,7 +131,12 @@ export default class Cell extends React.Component {
             save();
             event.preventDefault();
         }
-        
+        // let x, y;
+        // if(this.props.cellStore.isSelected){
+
+        //     x = this.props
+        // }
+        // window.scrollTo(0, 0); // values are x,y-offset
     }
 
     render() {
@@ -147,8 +152,8 @@ export default class Cell extends React.Component {
         // eslint-disable-next-line no-unused-expressions
         this.props.cellStore.updateCellSelectedClasses;
 
-        if (channelStore.getActiveChannels[channel_index].time %
-            channelStore.getActiveChannels[channel_index].steps === cell_index)
+        if ((channelStore.getActiveChannels[channel_index].time %
+            channelStore.getActiveChannels[channel_index].steps === cell_index))
             className += ' active'; 
 
         return (<div>

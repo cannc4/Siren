@@ -1,0 +1,30 @@
+[
+ {
+  "name": "hal",
+  "channels": "",
+  "transformer": "",
+  "modifier": "",
+  "param": ""
+ },
+ {
+  "name": "row",
+  "channels": "0",
+  "transformer": "fast 1 $",
+  "modifier": "",
+  "param": ""
+ },
+ {
+  "name": "halfspeed",
+  "channels": "0",
+  "transformer": "",
+  "modifier": "#speed 0.5",
+  "param": ""
+ },
+ {
+  "name": "norm",
+  "channels": "0",
+  "transformer": "",
+  "modifier": "",
+  "param": ""
+ }
+]

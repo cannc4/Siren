@@ -17,9 +17,18 @@ class ChannelHeader extends React.Component {
     render() {
         console.log('RENDER CHANNEL HEADER');
         const item = this.props.value;
-
+        let channelHeader = "ChannelItemHeader " + item.type;
+        if(_.includes(item.name, "n")){
+            channelHeader = 'ChannelItemHeader NordTidal';
+        }
+        else if(item.type === "GLOBAL"){
+            channelHeader = 'ChannelItemHeader GlobalTidal';
+        }
+        else if(item.name === "do"){
+            channelHeader = 'ChannelItemHeader DoTidal';
+        }
         return (<div className={'ChannelHeader'}>
-            <div className={"ChannelItemHeader " + item.type }>
+            <div className={ channelHeader}>
                 <input ref={(input_name) => { this.nameInputName = input_name; }}    
                     title={"Channel Name (" + item.name + ") [enter to submit changes]"}
                     className={"ChannelItemHeader-NameText draggableCancel"}
@@ -59,6 +68,7 @@ class ChannelHeader extends React.Component {
                             (this.props.channelStore.changeChannelTransition(item.name, this.nameInputTrans.value))}
                         onClick={() => 
                             this.nameInputTrans.focus()}/>}
+                            
                     <div className={"ChannelItemHeaderButtons"}>
                         <button className={"Button "+ item.gate} title={item.gate ? 'Pause': 'Play'}
                             onClick={() => (this.props.channelStore.toggleGate(item.name))}>{item.gate ? '●': '○'}</button>
@@ -82,6 +92,9 @@ class Channel extends React.Component {
     let channelClass = "ChannelItem";
     if ((!item.loop && item.executed) || ( item.mute) || (this.props.channelStore.soloEnabled && !item.solo)) {
       channelClass += " disabled";
+    }
+    if(_.includes(item.name, "n")){
+        channelClass = "NordChannelItem";
     }
     return (<div className={channelClass}>
         <ChannelHeader key={index} value={item} />

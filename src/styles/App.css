@@ -1,3 +1,7 @@
+html {
+  padding: 0;
+}
+
 body,
 .fill,
 .cont {
@@ -10,7 +14,8 @@ body,
   overflow-y: scroll;
   z-index: 0;
   font-size: 14px;
-  max-width: calc(100% - 50px);
+  max-width: calc(100%-50px);
+  padding: 0px 5px 5px 0px;
 }
 
 * {

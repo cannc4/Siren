@@ -20,10 +20,12 @@ export default class Playback extends React.Component {
     console.log("RENDER ``Playback.js");
     let findex;
     let ctx = this;
-    return (<div className={'GlobalParams PanelAdjuster'}>
-        <div className={'StoredGlobalParams'}>
+    return (<div className={'PanelAdjuster'}>
+        
         {this.props.menubarStore.recs.map((recorded, i) => {
-          return (<div><div>{recorded} 
+          return (<div className={'Playback'}>
+            
+            <div className ={'PlaybackName'}>{recorded} 
             </div>
             <button key={i} className={'Button'} title= {'Start Recording'}
             onClick={ctx.handlePlayRecordings.bind(ctx, i,true)}>
@@ -34,10 +36,11 @@ export default class Playback extends React.Component {
             ◼
             </button>
             <button key={i} className={'Button'} title={'Generate Scene'}
-              onClick={() => (ctx.props.menubarStore.generateNewScene(i))}>ø</button>
+              onClick={() => (ctx.props.menubarStore.generateNewScene(i))}>
+            ø  (Create scene)
+              </button>
           </div>)  
         })}
-      </div>
     </div>)
   }
 }      

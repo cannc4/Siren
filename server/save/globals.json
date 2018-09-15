@@ -1,27 +1,62 @@
 [
  {
-  "name": "hal",
-  "channels": "",
+  "name": "dub",
+  "channels": "0",
   "transformer": "",
-  "modifier": "",
+  "modifier": "#hpf 2000 #dub 0.5",
   "param": ""
  },
  {
-  "name": "row",
+  "name": "slow",
   "channels": "0",
-  "transformer": "fast 1 $",
-  "modifier": "",
-  "param": ""
- },
- {
-  "name": "halfspeed",
-  "channels": "0",
-  "transformer": "",
-  "modifier": "#speed 0.5",
+  "transformer": "fast 1 $ ",
+  "modifier": "#cut 1",
   "param": ""
  },
  {
   "name": "norm",
+  "channels": "0",
+  "transformer": "",
+  "modifier": "",
+  "param": ""
+ },
+ {
+  "name": "dubslow2",
+  "channels": "0",
+  "transformer": "ghost $ slow 2 $ ",
+  "modifier": "#dub 0.6",
+  "param": ""
+ },
+ {
+  "name": "hall",
+  "channels": "0",
+  "transformer": "slow 4 $ ",
+  "modifier": "#hall 0.9",
+  "param": ""
+ },
+ {
+  "name": "ply",
+  "channels": "1",
+  "transformer": "off 0.5 ((modNotec 1(#gain 0 )).(degradeBy 0.3)) $",
+  "modifier": "",
+  "param": ""
+ },
+ {
+  "name": "off",
+  "channels": "0",
+  "transformer": "off 0.5 (#s \"707\") $",
+  "modifier": "",
+  "param": ""
+ },
+ {
+  "name": "slice",
+  "channels": "0",
+  "transformer": "",
+  "modifier": "#lpf 9000",
+  "param": ""
+ },
+ {
+  "name": "b",
   "channels": "0",
   "transformer": "",
   "modifier": "",

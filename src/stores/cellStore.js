@@ -67,17 +67,18 @@ class CellStore {
         }
     }
 
-    // -- Compile Cell
+    // -- Compile single cell
     compileCell() {
         let channel_i = this.current_cell[0];
         let cell_i = this.current_cell[1];
         if (this.select_state) {
             channelStore.sendPattern(channelStore.getActiveChannels[channel_i], channelStore.getActiveChannels[channel_i].cells[cell_i]);
             executionCssById('cell_' + channel_i + '_' + cell_i, ' Executed');
+            channelStore.updateTime(channel_i,cell_i);
         }
     }
 
-    // -- Compile All Cells in the selected step
+    // -- Compile all cells in the selected step
     compileStep() {
         let cell_i = this.current_cell[1];
         _.each(channelStore.getActiveChannels, (ch, i) => { 

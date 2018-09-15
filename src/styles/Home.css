@@ -2,9 +2,12 @@
 
 :root {
   --tidal-color: rgb(42, 85, 110);
+  --nordtidal-color: rgb(109, 9, 9);
+  --globaltidal-color: rgb(8, 39, 38);
+  --dotidal-color: rgb(42, 89, 38);
   --cps-color: rgb(70, 117, 60);
   --sc-color: rgb(131, 57, 34);
-  --global-color: rgba(255, 255, 255, 0.4);
+  --global-color: rgba(16, 39, 68, 0.4);
   --record-color: #bf2618;
   --layout-background: rgb(40, 40, 40);
   --global-white: rgb(200, 200, 200);
@@ -173,8 +176,53 @@
   font-weight: bold;
 }
 
+.Playback {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  width: calc(100% - 5px);
+  margin-top: 18px;
+  margin-bottom: 28px!important;
+  padding: 1px;
+  border: 0.5px solid #000;
+}
+
+.PlaybackName {
+  font-size : 14px;
+  width: calc(100% - 5px);
+  height: 25px; text-align:center; line-height:25px;
+  padding: 1px;
+  margin-bottom: 8px;
+}
 .GlobalSequencer {
   width: 100%;
+}
+
+.GlobalItemInputs {
+  display: flex;
+  flex-direction: row;
+  width: calc(100%);
+  height: 25px;
+}
+
+.Globals {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  width: calc(100% - 5px);
+  margin-top: 18px;
+  margin-bottom: 28px!important;
+  padding: 1px;
+  border: 0.5px solid #000;
+}
+
+.GlobalsHeader {
+  display: flex;
+  flex-direction: row;
+}
+
+.GText {
+  font-size:12px;
 }
 
 .GlobalParamsInputs {
@@ -182,7 +230,7 @@
   flex-direction: row;
   width: calc(100% - 5px);
   padding: 1px;
-  border: 1px solid #000;
+  border: 0.2px solid #000;
   margin-bottom: 8px;
 }
 
@@ -471,7 +519,22 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 0 2px 0 2px;
   line-height: 20px;
   min-height: 35px;
+  min-width: 75 !important;
   width: 150px;
+  padding: 0;
+  z-index: 2;
+  transition: opacity 100ms ease-in-out;
+}
+
+.NordChannelItem {
+  padding-left: 2px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 2px 0 2px;
+  line-height: 20px;
+  min-height: 35px;
+  min-width: 150px !important;
+  width: 200px;
   padding: 0;
   z-index: 2;
   transition: opacity 100ms ease-in-out;
@@ -598,10 +661,22 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   background: var(--tidal-color);
 }
 
+.ChannelItemHeader.NordTidal {
+  background: var(--nordtidal-color);
+}
+
+.ChannelItemHeader.GlobalTidal {
+  background: var(--globaltidal-color);
+}
+
 .ChannelItemHeader.CPS {
   background: var(--cps-color);
 }
 
 .ChannelItemHeader.SuperCollider {
   background: var(--sc-color);
+}
+
+.ChannelItemHeader.DoTidal {
+  background: var(--dotidal-color);
 }
