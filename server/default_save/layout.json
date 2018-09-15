@@ -1,21 +1,61 @@
 {
  "layouts": [
   {
-   "w": 24,
-   "h": 14,
-   "x": 0,
-   "y": 6,
+   "w": 17,
+   "h": 18,
+   "x": 2,
+   "y": 2,
    "i": "tracker",
    "moved": false,
    "static": false,
    "isVisible": true
   },
   {
-   "w": 14,
+   "w": 5,
+   "h": 18,
+   "x": 19,
+   "y": 2,
+   "i": "patterns",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 24,
+   "h": 6,
+   "x": 0,
+   "y": 24,
+   "i": "tidal_log",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 12,
    "h": 4,
    "x": 0,
-   "y": 2,
+   "y": 20,
    "i": "tidal_history",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 7,
+   "h": 4,
+   "x": 12,
+   "y": 20,
+   "i": "tidal_console",
+   "moved": false,
+   "static": false,
+   "isVisible": true
+  },
+  {
+   "w": 2,
+   "h": 18,
+   "x": 0,
+   "y": 2,
+   "i": "scenes",
    "moved": false,
    "static": false,
    "isVisible": true
@@ -31,54 +71,14 @@
    "isVisible": true
   },
   {
-   "w": 10,
+   "w": 5,
    "h": 4,
-   "x": 14,
-   "y": 2,
+   "x": 19,
+   "y": 20,
    "i": "tidal_globals",
    "moved": false,
    "static": false,
    "isVisible": true
-  },
-  {
-   "w": 5,
-   "h": 18,
-   "x": 19,
-   "y": 20,
-   "i": "patterns",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 24,
-   "h": 6,
-   "x": 0,
-   "y": 20,
-   "i": "tidal_log",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 7,
-   "h": 4,
-   "x": 12,
-   "y": 20,
-   "i": "tidal_console",
-   "moved": false,
-   "static": false,
-   "isVisible": false
-  },
-  {
-   "w": 2,
-   "h": 18,
-   "x": 0,
-   "y": 2,
-   "i": "scenes",
-   "moved": false,
-   "static": false,
-   "isVisible": false
   },
   {
    "w": 7,

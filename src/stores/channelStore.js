@@ -68,6 +68,11 @@ class ChannelStore {
     }
 
     @action
+    updateTime(ch, step_index){
+        console.log(ch, step_index);
+        this.channels[ch].time = step_index;
+    }
+    @action
     clearChannel(name) {
         let ch = _.find(this.channels, {
             'name': name,

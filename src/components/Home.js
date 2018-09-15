@@ -141,7 +141,7 @@ export default class Home extends React.Component {
         <div className={"PanelHeader Tidal"}> ● Tidal Global Controls
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
-        <div className={'PanelAdjuster'}>
+        <div className={'AllPatterns PanelAdjuster'}>
           <Globals/>
         </div>
       </div>);

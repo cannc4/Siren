@@ -1,0 +1,27 @@
+[
+ {
+  "pattern": "d2 $ nToOrbit $ modNote 4 (#orbit 3) $ every 3 (modNote 1 (cap 0.2 0.3 )) $off 0.5 ((#s \"<ssg0 gen4 nkit2>\").(#orbit 3)) $slow (3.5/3) $ n \"0 ~ 1 <~ 0>  <~ { 3, 0} >[<3 [3 3]> <[2 ~] 1?>] <~ 2 [<1 ~> 1?]>\" #s \"nkit0\" #end 1 #comp 0.5 #shape 0.5  #comp 0.5 #pan \"0.0\" # sirenChan 1",
+  "timestamp": 1532186851299,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "t3 xfade $ nToOrbit $  off 0.5 (#speed \"4.5\") $ chop 1 $ slow (3.5/3) $ n \"0 ~ <1*2 1 [1 2]> <~ 0>  <~ { 1, 0?} 2>[< 0 2 ~> <2 1>] < {{0,1} 3 2 [<1 2> 1?],<3 ~ 3*3 ~  3*3 ~>}>\" #s \"cy\" #end \"0.51\" #orbit 3 #lpf (scale 2000 8000 $ saw ) #cut \"-1\" #speed 3 #pan (disc 16 $ scale 0.33 0.66$ saw * rand)  #pan \"0.0\" # sirenChan 2",
+  "timestamp": 1532186853802,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ modNote 0 (#lpf 1200) $nToOrbit $ every 4 (#hall 0.1) $ chop 1  $ slow (3.5/3) $ n \"0 < ~ ~ 0 ~> 1 0  [~ 1] <~ 0 0 0 0> <  [ <0 ~> [3 3]] [ 1 3]>  \" #s (stack [ \"jp0\"])  #end 0.5 #gain 1 #n \"3\" #speed \"< 1>\" #shape 0.5 #pan \"0.0\" # sirenChan 0",
+  "timestamp": 1532186855616,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "t3 xfade $ nToOrbit $  off 0.5 (#speed \"4.5\") $ chop 1 $ slow (3.5/3) $ n \"0 ~ <1*2 1 [1 2]> <~ 0>  <~ { 1, 0?} 2>[< 0 2 ~> <2 1>] < {{0,1} 3 2 [<1 2> 1?],<3 ~ 3*3 ~  3*3 ~>}>\" #s \"foil3\" #end \"0.51\" #orbit 3 #lpf (scale 2000 8000 $ saw ) #cut \"-1\" #speed 3 #pan (disc 16 $ scale 0.33 0.66$ saw * rand)  #pan \"0.0\" # sirenChan 2",
+  "timestamp": 1532186856201,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $ nToOrbit $ modNote 4 (#orbit 3) $ off 0.5 ((#cut 1).(#s \"<monobass bass2 bass2 [monobass monopad] >\").(#orbit 4).(#pan 0.5).(#shape 0.3)) $slow (3.5/3) $ n \"0 ~ 1 <~ 0>  <~ { 3, 0} >[<3 [3 3]> <[2 ~] 1?>] <~ 2 [<1 ~> 1?]>\" #s \"nkit0\" #end 1 #comp 0.5 #shape 0.5  #comp 0.5 #pan \"0.0\" # sirenChan 1",
+  "timestamp": 1532186857667,
+  "type": "Tidal"
+ }
+]

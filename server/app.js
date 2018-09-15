@@ -12,7 +12,6 @@ const Queue = require('better-queue');
 const math = require("mathjs");
 const exec = require('child_process').exec;
 const osc = require("osc");
-var oscSender = require('node-osc');
 
 // Connection to KORG nanoKontrol2 
 //let nanoKONTROL = require('korg-nano-kontrol');
@@ -36,6 +35,7 @@ let global_modAppend;
 // link pulse socket 
 let link_pulse = socketIo.listen(4001);
 
+let triggerSentinel =0 ;
 
 class REPL {
   hush() {
@@ -276,19 +276,51 @@ class REPL {
             if (_.trim(msg[0]) === '/play2') {
               let cycleInfo = _.fromPairs(_.chunk(_.drop(msg), 2));
               cycleInfo['time'] = time;
-              cycleInfo.n === undefined ? cycleInfo['n'] = 0 : cycleInfo.n;
+              //cycleInfo.n === undefined ? cycleInfo['n'] = 0 : cycleInfo.n;
               cycleInfo.sirenChan === undefined ? cycleInfo['sirenChan'] = 0 : cycleInfo.sirenChan;
+              //let trigfunc = eval (cycleInfo['func']);
+
+              // ------------------------------------------------ //
+              // -------- Condition based Trigger --------//
+              // ------------------------------------------------ //
+
+              let trigSound =cycleInfo['trigSound']
+              let trigEvery = cycleInfo['trigEvery'];
+              let trigLookup = cycleInfo['trigLookup'];
+              let trigMsg = '';
+
+              //SirenComm.siren_console.tidalSendExpression(trigSound);
+              if(trigSound !== undefined)
+              //trigMsg = "(type:\\dirt, orbit:0, s: \\"+ trigSound.toString() +").play;"
+              
+              if(cycleInfo['s'] === "nord"){
+                if(cycleInfo['note'] === trigLookup){
+                  triggerSentinel++;
+                  if(triggerSentinel === _.toInteger(trigEvery)&& triggerSentinel  !== 0){
+                    triggerSentinel = 0;
+                    SirenComm.siren_console.tidalSendExpression(trigSound);
+                    //sclang.interpret(trigMsg);
+      
+                  }
+                }
+              } else if(_.includes(cycleInfo['s'], 'gen')){
+                if(cycleInfo['n'] === trigLookup){
+                  triggerSentinel++;
+                  if(triggerSentinel === _.toInteger(trigEvery) && triggerSentinel  !== 0){
+                    triggerSentinel = 0;
+                    SirenComm.siren_console.tidalSendExpression(trigSound);
+                   // sclang.interpret(trigMsg);
+                  }
+                }
+              }
+            // -------------------------------- //
+            // -------------------------------- //
 
               // current_cycle = cycleInfo.cycle;
-
               // Send current cycle playback info to front end  
               sclog.sockets.emit('/sclog', {
                 trigger: cycleInfo
               });
-              // var OFXclient = new oscSender.Client('127.0.0.1', 8800);
-              // OFXclient.send('/oscAddress', trigger, function () {
-              //   OFXclient.kill();
-              // });
               
             } else if (_.startsWith(_.trim(msg[0]), '/orbit')) {
               // Send RMS to the front end
@@ -374,6 +406,7 @@ class REPL {
   sendOneshot() {
     this.tidalSendExpression('let startclock d p = do {now <- getNow; d $ (pure (nextSam now)) ~> p}');
     this.tidalSendExpression('let one d p = startclock d $ seqP [(0, 1, p)]');
+    this.tidalSendExpression('let three d p = startclock d $ seqP [(0, 3, p)]');
     this.tidalSendExpression('let on a d p = startclock d $ seqP [(0, a, p)]');
   }
 

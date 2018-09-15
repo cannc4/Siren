@@ -34,11 +34,10 @@ renderItem(item, i) {
   };
 
 return (
-  <div key={'p'+i} className={"Globals draggableCancel"}>
-      <div>
-          <div className={'PatternItemInputs'}>
+  <div key={'g'+i} className={"Globals draggableCancel"}>
+      <div className = {'GlobalsHeader'}>
               <input type="String"
-                  className={'Input draggableCancelNested'}
+                  className={'GText'} 
                   placeholder={"Name"}
                   value={item.name}
                   onChange={(event) => {
@@ -47,41 +46,8 @@ return (
                           event.target.value,
                           document.getElementById('add_global_input').value)
                   }}
-                  />  
-                  <input type="String" id= {'add_global_channels'}
-                  className={'Input draggableCancelNested'}
-                  placeholder={"Channels"}
-                  value={item.channels}
-                  onChange={(event) => {
-                      this.props.globalStore.updateChannels(
-                          item.name,
-                          event.target.value)
-                  }}
                   />
-                  
-                  <input type="String" id= {'add_global_transformer'}
-                  className={'Input draggableCancelNested'}
-                  placeholder={"Transformer"}
-                  value={item.transformer}
-                  onChange={(event) => {
-                      this.props.globalStore.updateTransformer(
-                          item.name,
-                          event.target.value)
-                  }}
-                  />
-                  
-                  <input type="String" id= {'add_global_modifier'}
-                  className={'Input draggableCancelNested'}
-                  placeholder={"Modifier"}
-                  value={item.modifier}
-                  onChange={(event) => {
-                      this.props.globalStore.updateModifier(
-                          item.name,
-                          event.target.value)
-                  }}
-                  />
-                  
-                  <button className={'Button draggableCancelNested'} 
+                   <button className={'Button draggableCancelNested'} 
                       onClick={() => {
                           this.props.globalStore.compileGlobal(
                               item.name
@@ -93,11 +59,63 @@ return (
                           this.props.globalStore.deleteGlobal(
                               item.name
                           )
-                      }}>{'Delete'} </button>
-
+                      }}>{'Delete'} </button>  
+                </div>
+                  <input type="String" id= {'add_global_channels'}
+                  onKeyUp={(event) => {
+                    if(event.ctrlKey && event.keyCode === 13){
+                        executionCssByEvent(event);
+                        this.props.globalStore.compileGlobal(
+                            item.name);
+                        }
+                    }}
+                  placeholder={"Channels"}
+                  value={item.channels}
+                  className = {"GText"}
+                  onChange={(event) => {
+                      this.props.globalStore.updateChannels(
+                          item.name,
+                          event.target.value)
+                  }}
+                  />
+                  
+                  <input type="String" id= {'add_global_transformer'}
+                   onKeyUp={(event) => {
+                    if(event.ctrlKey && event.keyCode === 13){
+                        executionCssByEvent(event);
+                        this.props.globalStore.compileGlobal(
+                            item.name);
+                        }
+                    }}
+                  placeholder={"Transformer"}
+                  value={item.transformer}
+                  className = {"GText"}
+                  onChange={(event) => {
+                      this.props.globalStore.updateTransformer(
+                          item.name,
+                          event.target.value)
+                  }}
+                  />
+                  
+                  <input type="String" id= {'add_global_modifier'}
+                   onKeyUp={(event) => {
+                    if(event.ctrlKey && event.keyCode === 13){
+                        executionCssByEvent(event);
+                        this.props.globalStore.compileGlobal(
+                            item.name);
+                        }
+                    }}
+                  placeholder={"Modifier"}
+                  value={item.modifier}
+                  className = {"GText"}
+                  onChange={(event) => {
                       
-          </div>
-      </div>
+                      this.props.globalStore.updateModifier(
+                          item.name,
+                          event.target.value)
+                  }}
+                  />
+                  
   </div>)
 }
 
@@ -110,11 +128,19 @@ return (
     }
   }
 
+  handleControlEnterCompile = (event) => {
+    if(event.ctrlKey && event.keyCode === 13){
+        executionCssByEvent(event);
+        console.log(event);
+        console.log('here');
+    }
+  }
+
   render() {
     console.log("RENDER GLOBALS.JS");
     let ctx = this;
     
-  return (<div className={'GlobalParams PanelAdjuster'}>
+  return (<div >
              <div className={'PatternItem PatternItemInputs'}>
               <input type="text" id={'add_global_input'}
                   className={'Input draggableCancel'}
@@ -126,7 +152,8 @@ return (
                       document.getElementById('add_global_input').value)
                   )}>Add
           </button>
-          </div> {_.map(this.props.globalStore.getGlobals, 
+          </div> 
+          {_.map(this.props.globalStore.getGlobals, 
                  this.renderItem.bind(this))}
         </div>)
   }

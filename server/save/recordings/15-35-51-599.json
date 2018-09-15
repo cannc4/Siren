@@ -1,0 +1,52 @@
+[
+ {
+  "pattern": "d1 $ s\" bd\"\n",
+  "timestamp": 1533566122215,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $ s\" sn\"\n",
+  "timestamp": 1533566127345,
+  "type": "Tidal"
+ },
+ {
+  "pattern": " d5$ hurry 2   $ slow 1 $ note \"{<0 ~> <1 ~ 1 1> < ~ 0> <~ 0> < 1 1 1 4>  }%5\" #s \"ssg0:3\" #orbit 2  #comp 0.5 #hall 0.2 #rect 0.5 #pan 0.0 #speed (disc 5 $ slow 5 $  \"<2 3 [5 -2] -3 2 2 -2>\" )\n",
+  "timestamp": 1533566130723,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ off 0.5 ((#s \"<oto303 >\").(#note \"<c3 f3 [fs3 fs2] f2 [fs2 fs3]>\").(#orbit 4).(#gain 1).(#dub 0.28).(#hall 0.2).(#dubfb 0.9).(#pan \"0.5\")) $modSource \"noisehat\" ((#orbit 3).(#pan 0.0)) $ modSource \"scsn2\" ((#orbit 1).(#pan \"1\")) $modSource \"sckc\" (#pan \"0.0\") $ s \"{sckc <~ sckc> scsn2 ~ sckc <~ scsn2 > scsn2 [sckc ~] < <sckc?> > [ scsn2 ~] ~ , noisehat*2 }%5\" #pan \"0.0\" #note \"<c3>\" #comp 0.5 #shape 0.5\n",
+  "timestamp": 1533566131700,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d5$ sometimes (hurry 2)   $ slow 1 $ note \"{<0 ~> <1 ~ 1 1> < ~ 0> <~ 0> < 1 1 1 4>  }%5\" #s \"ssg0:3\" #orbit 2  #comp 0.5 #hall 0.2 #rect 0.5 #pan 0.0 #speed (disc 1 $ slow 1 $  \"<2 3 [5 -2] -3 2 2 -2>\" )\n",
+  "timestamp": 1533566135262,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $note \"{0*2  ~ 0*2 0 <0 ~ [0 0 ]> }%5\" #s \"nord\" #mcmd  #midichan 2\n",
+  "timestamp": 1533566136764,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "hush\n",
+  "timestamp": 1533566140331,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $ s\" sn\"\n",
+  "timestamp": 1533566143753,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1 $ s\" bd\"\n",
+  "timestamp": 1533566144811,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "hush\n",
+  "timestamp": 1533566150015,
+  "type": "Tidal"
+ }
+]

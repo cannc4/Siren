@@ -1,0 +1,312 @@
+[
+ {
+  "pattern": "n8 $ note \"{{4,5} ~ ~ ~ ~ ~ [3 2] {2,3} 4*2 ~}%5\" #s \"nord\"\n",
+  "timestamp": 1533556479423,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n2 $ slow \"2\" $ s \"{nord  }%5\" #ntrigger \n",
+  "timestamp": 1533556488270,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n3 $ fast 2  $ stack[ s \"{nord}%5\" #nmod2 \"<50>\", s \"{nord}%5\" #nfilter (disc 2 $ scale 29 120 $ slow 16 $ sine)] #mcc\n",
+  "timestamp": 1533556498264,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n3 $ n303filter 100 $ s \"{nord}%5\" #s\n",
+  "timestamp": 1533556500365,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<10>\"\n",
+  "timestamp": 1533556503592,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<1>\"\n",
+  "timestamp": 1533556508367,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<20>\"\n",
+  "timestamp": 1533556510249,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n5 $ s \"{nord}%5\" #nmod2 (disc 16 $ scale 20 110 $ slow 16 $ sine)\n",
+  "timestamp": 1533556515930,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<70>\"\n",
+  "timestamp": 1533556521649,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<90>\"\n",
+  "timestamp": 1533556524349,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<1100>\"\n",
+  "timestamp": 1533556527530,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<110>\"\n",
+  "timestamp": 1533556528191,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<10>\"\n",
+  "timestamp": 1533556530437,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30>\"\n",
+  "timestamp": 1533556531592,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n3 $ fast 2  $ stack[ s \"{nord}%5\" #nmod2 \"<50>\", s \"{nord}%5\" #nfilter (disc 2 $ scale 29 120 $ slow 16 $ sine)] #mcc\n",
+  "timestamp": 1533556534327,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d1$ off 0.5 (#s \"cp?\") $ modNote 5 (#orbit 2) $ modNote 4 (#orbit 3)  $ fast 1  $ n \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3*2 3 [3 3] ~ 3*2 4  }%5\" #s \"hh\"  #pan \"0.0\" #cut 1 #shape 0.5 #end  (disc 16 $ scale 0.12 0.259 $ slow 8$ rand*sine*saw*2) #bpf (disc 16 $ scale 8000 11200 $ slow 8$ sine)  #lpq 0.1 #orbit 3 #end 0.2\n",
+  "timestamp": 1533556537098,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $ modNotec 12 (#sustain 1 ) $slow 1 $ note  (scaleP \"dorian\"\"{c6 ~ ~ ~  <~ fs5> <~ [f5 c5]> ~}%5\") #s \"thic\" #gain 1.25 #orbit 4  #hall 0.45  |-|note \"12\" #sustain (scale 0.1 0.92 $ saw) #hpf 500 #thictrack 2 #filterfreq \"<100 400 200>\" #lpf 10000  #pan 0.5 #hpf 800  #coarse \"<1 2 24>\"\n",
+  "timestamp": 1533556541769,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d2 $ silence\n",
+  "timestamp": 1533556545598,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>}%5\" #s \"nord\"  #mnote\n",
+  "timestamp": 1533556548668,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1$ $ off 0.5 (#note (randcat ([\"{2 [3 ~]  ~ 3}%5\"] ++ (replicate 3 \"{ [3 2]}%5\"))))  $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3, 4 ,2 }%5\" #s \"nord\" \n",
+  "timestamp": 1533556553902,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1$ off 0.5 (#note (randcat ([\"{2 [3 ~]  ~ 3}%5\"] ++ (replicate 3 \"{ [3 2]}%5\"))))  $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3, 4 ,2 }%5\" #s \"nord\" \n",
+  "timestamp": 1533556554702,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30 70 70>\"\n",
+  "timestamp": 1533556562173,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30 70 90>\"\n",
+  "timestamp": 1533556564401,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30 70 90 110>\"\n",
+  "timestamp": 1533556567219,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"<10>\"\n",
+  "timestamp": 1533556571677,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"<20>\"\n",
+  "timestamp": 1533556572574,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"<10>\"\n",
+  "timestamp": 1533556574223,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"<90>\"\n",
+  "timestamp": 1533556575105,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n3 $ n303filter 100 $ s \"{nord}%5\" #s\n",
+  "timestamp": 1533556577753,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30>\"\n",
+  "timestamp": 1533556582543,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<20>\"\n",
+  "timestamp": 1533556583826,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n2 $ slow \"2\" $ s \"{nord  }%5\" #ntrigger \n",
+  "timestamp": 1533556586947,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n2 $ slow \"1\" $ s \"{nord  }%5\" #ntrigger \n",
+  "timestamp": 1533556589659,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ off 0.5 (#note (randcat ([\"{2 [3 ~]  ~ 3}%5\"] ++ (replicate 3 \"{ [3 2]}%5\"))))  $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3, 4 ,2 }%5\" #s \"nord\" \n",
+  "timestamp": 1533556591689,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $note \"{0 ~ 0 1 ~ 0 ~ 1 ~ ~}%5\" #s \"nord\"\n",
+  "timestamp": 1533556594166,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ note \"1\" #s \"nord\"\n",
+  "timestamp": 1533556596382,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n6 $ s \"nord\"#nperf \"<1>\"\n",
+  "timestamp": 1533556602240,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ off 0.5 (#note (randcat ([\"{2 [3 ~]  ~ 3}%5\"] ++ (replicate 3 \"{ [3 2]}%5\"))))  $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3, 4 ,2 }%5\" #s \"nord\" \n",
+  "timestamp": 1533556611922,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30>\"\n",
+  "timestamp": 1533556621923,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<70>\"\n",
+  "timestamp": 1533556623216,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"<110>\"\n",
+  "timestamp": 1533556628558,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>}%5\" #s \"nord\"  #mnote\n",
+  "timestamp": 1533556642520,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n1 $ off 0.5 (#note (randcat ([\"{2 [3 ~]  ~ 3}%5\"] ++ (replicate 3 \"{ [3 2]}%5\"))))  $ fast 1  $ note \"{<0 <~ [~ 0] <~ ~> > > < ~ [0 ~]> 1 <~ 4 5 [~ 1] [ 1 ~]>, 3, 4 ,2 }%5\" #s \"nord\" \n",
+  "timestamp": 1533556644405,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<70 110>\"\n",
+  "timestamp": 1533556649246,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<70 110 20>\"\n",
+  "timestamp": 1533556650720,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n2 $ slow \"2\n\" $ s \"{nord  }%5\" #ntrigger \n",
+  "timestamp": 1533556658032,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n2 $ slow \"2\" $ s \"{nord  }%5\" #ntrigger \n",
+  "timestamp": 1533556658686,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d8 $ trunc 0.5 $ fast 1 $ stack [s \"{nord}%5\" #n303decay (disc (25) $ scale 29 89 $ slow 9 $ saw) ,s \"{nord}%5\" #n303env (disc (25) $ scale 29 89 $ slow 9 $ saw*rand) ]\n",
+  "timestamp": 1533556671522,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "d9 $ fast \"<2 1 2 2 4 2 1 1 1 1 >\" $s \"{nord  }%5\"  #ntrigger \n",
+  "timestamp": 1533556676224,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<70 110 20>\"\n",
+  "timestamp": 1533556679473,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<10>\"\n",
+  "timestamp": 1533556684190,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<20>\"\n",
+  "timestamp": 1533556686105,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<30>\"\n",
+  "timestamp": 1533556687860,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<40>\"\n",
+  "timestamp": 1533556688920,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<50>\"\n",
+  "timestamp": 1533556690391,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<90>\"\n",
+  "timestamp": 1533556692045,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n6 $ s \"{nord}%5\" #nvar \"<110>\"\n",
+  "timestamp": 1533556693351,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n4 $ s \"{nord}%5\" #n303var \"< 20 110>\"\n",
+  "timestamp": 1533556697547,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n6 $ s \"nord\"#nperf \"<0>\"\n",
+  "timestamp": 1533556705951,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n6 $ s \"nord\"#nperf \"<1>\"\n",
+  "timestamp": 1533556713360,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "one n6 $ s \"nord\"#nperf \"<0>\"\n",
+  "timestamp": 1533556714786,
+  "type": "Tidal"
+ },
+ {
+  "pattern": "n5 $ s \"{nord}%5\" #nmod2 (disc 16 $ scale 20 110 $ slow 16 $ sine)\n",
+  "timestamp": 1533556716676,
+  "type": "Tidal"
+ }
+]

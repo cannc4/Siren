@@ -110,10 +110,10 @@ pre code .active {
     flex-grow: 1;
     resize: none;
     width: 100%;
-    line-height: 20px;
+    line-height: 24px;
     font-size: 13px;
     text-rendering: optimizeSpeed;
-    text-align: left;
+    text-align: center;
     vertical-align: center;
     border: none;
     background: rgba(0, 0, 0, 0.3);

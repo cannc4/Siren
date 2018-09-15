@@ -1,5 +1,6 @@
 (
 
+
 s.options.device = "Fireface UCX (23769248)";
 //s.options.device = "SuperCollider";
 s.options.numInputBusChannels = 0;
@@ -15,25 +16,31 @@ s.waitForBoot {
 	// ~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/poolx/*");
 	//~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfix/*");
 	//~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/gfixing/*");
-	//~dirt.start(57120, (0,2 .. 15));
-
-
-
+	
 	~dirt = SuperDirt(2, s);
 	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/VSV/*");
 	~dirt.loadSoundFiles("/Users/canince/Dropbox/\~siren/sample_banks/genpool/*");
-	~dirt.start(57120, [0,1,2,3,4,6]);
+
+	//
 	"SUPERDIRT LOADED".postln;
 
-	1.wait;
-	"/Users/canince/documents/git/Siren/deps/scsynth/customfx.scd".load;
-	"/Users/canince/documents/git/Siren/deps/scsynth/customsynth.scd".load;
+	
 	0.5.wait;
 	if(ServerOptions.devices.find(["Fireface UCX (23769248)"]).notNil, {
-		"/Users/canince/documents/git/Siren/deps/scsynth/sdmidi.scd".load;
-		"SD MIDI LOADED".postln;
+		"/Users/canince/documents/git/Siren/deps/scsynth/firefacemidi.scd".load;
+		~dirt.start(57120, [0,1,2,3,4,6]);
+		"FireFace MIDI LOADED".postln;
 	0.5.wait;
 	});
+	if(ServerOptions.devices.find(["SuperCollider"]).notNil, {
+		~dirt.start(57120, [0,1,2,3,4,6]);
+		"FireFace MIDI LOADED".postln;
+	0.5.wait;
+	});
+	1.wait;
+	"/Users/canince/documents/git/Siren/deps/scsynth/dxmidi.scd".load;
+	"/Users/canince/documents/git/Siren/deps/scsynth/customfx.scd".load;
+	"/Users/canince/documents/git/Siren/deps/scsynth/customsynth.scd".load;
 	"/Users/canince/Documents/git/Siren/deps/scsynth/dx7/DX7MIDI.scd".load;
 	0.5.wait;
 	"DX7 MIDI LOADED".postln;

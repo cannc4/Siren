@@ -96,6 +96,18 @@ siren.bat
 *Tested with Chrome on Windows 10 and MacOS High Sierra*
 
 
+## New Features
+
+Conditional pattern triggers: 
+
+``` 
+let (trigLookup,trigLookup_p)  = pS "trigLookup" (Nothing)
+    (trigEvery,trigEvery_p)  = pF "trigEvery" (Nothing)
+    (trigSound,trigSound_p)  = pS "trigSound" (Nothing) 
+```
+    
+`d1 $ note "0 1" #s "synth" #trigLookup "0" #trigEvery "7" #trigSound (pure "d2 $ note "c3" # s \"superpwm\"")`
+
 
 ## Modules
 
@@ -169,9 +181,9 @@ This module serves as a debug console for GHC.
 
 The horizontal axis denotes quantized time bins, and vertical lists the names of unique samples and notes. Default sequence length is 8 seconds and each second is quantized into 12 bins. Both parameters can be edited using the dedicated fields on the interface.
 
-### 10. Graphics
+### 10. Playback
 
-**(Under Development)** This module runs GLSL code which will be used as a visual synthesizer in synch with the current playback. 
+**(Under Development)** It's possible to record a live coding sessions by using the record button located in the menubar. Patterns get time-stamped according to their compilation time and stored in a JSON file under `server/save/` directory. With using the `Playback` module, it's possible to play the patterns stored in JSON file or automagically create a new scene with them. 
 
 
 

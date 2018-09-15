@@ -4,10 +4,16 @@
 import Sound.Tidal.Chords
 import Sound.Tidal.Scales
 import Sound.Tidal.Utils
+import Sound.Tidal.MaxMspOsc
 import Data.Maybe (fromMaybe, maybe, isJust, fromJust)
 import Control.Applicative
-
 (cps, getNow) <- bpsUtils
+
+
+m1 <- maxmspStream "127.0.0.1" 8020 1
+m2 <- maxmspStream "127.0.0.1" 8020 2
+m3 <- maxmspStream "127.0.0.1" 8020 3
+
 
 (d1,t1) <- superDirtSetters getNow
 (d2,t2) <- superDirtSetters getNow
@@ -27,12 +33,11 @@ import Control.Applicative
 (n7,tn7) <- superDirtSetters getNow
 (n8,tn8) <- superDirtSetters getNow
 (n9,tn9) <- superDirtSetters getNow
-
 (v1,vn1) <- superDirtSetters getNow
 (v2,vn2) <- superDirtSetters getNow
 (v3,vn3) <- superDirtSetters getNow
-
 (g2,tg2) <- superDirtSetters getNow
+
 
 
 let bps x = cps (x/2)
