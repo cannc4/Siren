@@ -15,6 +15,7 @@ import Playback from './Playback';
 import Graphics from './Graphics';
 import DebugConsole from './DebugConsole'
 import PatternHistory from './PatternHistory';
+import Controller from './Controller';
 
 // CSS Imports
 import '../styles/App.css';
@@ -152,6 +153,14 @@ export default class Home extends React.Component {
           <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
         </div>
         <PatternHistory />
+      </div>);
+    }  
+    else if (layoutItem.i === 'controller') {
+      return layoutItem.isVisible && (<div key={layoutItem.i}  >
+        <div className={"PanelHeader Tidal"}> ● Controller
+          <span className={"PanelClose draggableCancel"} onClick={() => layoutStore.hideLayout(layoutItem.i)}>✖</span>
+        </div>
+        <Controller />
       </div>);
     }  
     else if (layoutItem.i === 'tidal_console') {

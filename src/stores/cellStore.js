@@ -81,7 +81,8 @@ class CellStore {
     // -- Compile all cells in the selected step
     compileStep() {
         let cell_i = this.current_cell[1];
-        _.each(channelStore.getActiveChannels, (ch, i) => { 
+        _.each(channelStore.getActiveChannels, (ch, i) => {
+            
             channelStore.sendPattern(ch,ch.cells[cell_i]);
             executionCssById('cell_' + i + '_' + cell_i, ' Executed');
         });

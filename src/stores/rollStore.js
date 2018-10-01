@@ -190,6 +190,20 @@ class RollStore {
     }
 
     processData() {
+        let val, nType; 
+        
+        if(this.value.n){
+            val = this.value.n;
+            nType = 'n';
+        }
+        else if(this.value.note){
+            val = this.value.note;
+            nType = 'note';
+        }
+        else 
+            return;
+        
+
         const node = {
             type: 'channel',
             value: _.toNumber(this.value.sirenChan),
@@ -199,8 +213,8 @@ class RollStore {
                 value: this.value.s,
                 average: {},
                 children: [{
-                    type: 'note',
-                    value: this.value.n,
+                    type: nType,
+                    value: val,
                     average: {},
                     time: [this.value]
                 }]
@@ -251,7 +265,7 @@ class RollStore {
                 note_node = sample_node.first({
                     strategy: 'breadth'
                 }, (n) => {
-                    if (n.model.type === 'note' && n.model.value === this.value.n)
+                    if (n.model.type === nType && n.model.value === this.value.note || n.model.value === this.value.n)
                         return true;
                     return false;
                 });

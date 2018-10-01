@@ -24,6 +24,7 @@ import patternStore from './stores/patternStore';
 import pulseStore from './stores/pulseStore';
 import rollStore from './stores/rollStore';
 import sceneStore from './stores/sceneStore';
+import controllerStore from './stores/controllerStore';
 
 const stores = {
   layoutStore,
@@ -39,6 +40,7 @@ const stores = {
   globalStore,
   cellStore,
   nanoStore,
+  controllerStore,
   debugStore
 };
 

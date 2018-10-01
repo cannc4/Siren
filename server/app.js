@@ -14,7 +14,7 @@ const exec = require('child_process').exec;
 const osc = require("osc");
 
 // Connection to KORG nanoKontrol2 
-//let nanoKONTROL = require('korg-nano-kontrol');
+// let nanoKONTROL = require('korg-nano-kontrol');
 
 // timers
 const abletonlink = require('abletonlink');
@@ -283,11 +283,19 @@ class REPL {
               // ------------------------------------------------ //
               // -------- Condition based Trigger --------//
               // ------------------------------------------------ //
-
+              //let ch = cycleInfo['sirenChan']
+              // let trigArrayy[ch] = {
+              //   trigSound :cycleInfo['trigSound'],
+              //   trigEvery : cycleInfo['trigEvery'],
+              //   trigLookup : cycleInfo['trigLookup']
+              //  }
+              //let chanIndex = cycleInfo['sirenChan'];
               let trigSound =cycleInfo['trigSound']
               let trigEvery = cycleInfo['trigEvery'];
               let trigLookup = cycleInfo['trigLookup'];
               let trigMsg = '';
+
+              
 
               //SirenComm.siren_console.tidalSendExpression(trigSound);
               if(trigSound !== undefined)

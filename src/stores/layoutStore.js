@@ -162,6 +162,14 @@ class LayoutStore {
         isVisible: true
       },
       {
+        i: 'controller',
+        x: 3,
+        y: 13,
+        w: 13,
+        h: 3,
+        isVisible: true
+      },
+      {
         i: 'tidal_globals',
         x: 6,
         y: 16,
@@ -268,6 +276,16 @@ class LayoutStore {
         "x": 15,
         "y": 28,
         "i": "tidal_history",
+        "moved": false,
+        "static": false,
+        "isVisible": false
+      },
+      {
+        "w": 9,
+        "h": 7,
+        "x": 15,
+        "y": 28,
+        "i": "controller",
         "moved": false,
         "static": false,
         "isVisible": false

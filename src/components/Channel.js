@@ -18,11 +18,14 @@ class ChannelHeader extends React.Component {
         console.log('RENDER CHANNEL HEADER');
         const item = this.props.value;
         let channelHeader = "ChannelItemHeader " + item.type;
-        if(_.includes(item.name, "n")){
+        if(_.includes(item.name, "n") || _.includes(item.name, "v")){
             channelHeader = 'ChannelItemHeader NordTidal';
         }
-        else if(item.type === "GLOBAL"){
+        else if(item.type === "GLOBAL" || item.name === "a1" ){
             channelHeader = 'ChannelItemHeader GlobalTidal';
+        }
+        else if(item.name === "m1" ||item.name === "m2" || item.name === "m3"){
+            channelHeader = 'ChannelItemHeader Max';
         }
         else if(item.name === "do"){
             channelHeader = 'ChannelItemHeader DoTidal';
@@ -36,6 +39,7 @@ class ChannelHeader extends React.Component {
                     onKeyUp={this.handleControlEnter.bind(this)}
                     onClick={() => this.nameInputName.focus()}
                     onBlur = {() => this.nameInputName.value = ''}/>
+                    {this.props.channelStore.getActiveChannels.length < 5 &&
                 <div className={"ChannelItemHeaderButtons"}>
                     <button className={"Button "+ item.solo} title={'Solo'} onClick={() => 
                         this.props.channelStore.toggleSolo(item.name)}>S</button>
@@ -47,6 +51,7 @@ class ChannelHeader extends React.Component {
                   <button className={"Button"} title={'Delete'} onClick={() => 
                         this.props.channelStore.deleteChannel(item.name)}>X</button>
                 </div>
+                    }
             </div>
             <div className={"ChannelItemHeader"}>
                 <div className={"ChannelItemHeader-time"}>
@@ -72,8 +77,10 @@ class ChannelHeader extends React.Component {
                     <div className={"ChannelItemHeaderButtons"}>
                         <button className={"Button "+ item.gate} title={item.gate ? 'Pause': 'Play'}
                             onClick={() => (this.props.channelStore.toggleGate(item.name))}>{item.gate ? '●': '○'}</button>
+                            {this.props.channelStore.getActiveChannels.length < 5 &&
                         <button className={"Button"} title={'Reset Timer'}
                         onClick={() => (this.props.channelStore.resetTime(item.name))}>🡅</button>
+                            }
                     </div>
             </div>
           </div>

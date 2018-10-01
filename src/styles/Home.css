@@ -4,6 +4,7 @@
   --tidal-color: rgb(42, 85, 110);
   --nordtidal-color: rgb(109, 9, 9);
   --globaltidal-color: rgb(8, 39, 38);
+  --max-color: rgb(133, 146, 145);
   --dotidal-color: rgb(42, 89, 38);
   --cps-color: rgb(70, 117, 60);
   --sc-color: rgb(131, 57, 34);
@@ -519,7 +520,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
   margin: 0 2px 0 2px;
   line-height: 20px;
   min-height: 35px;
-  min-width: 75 !important;
+  min-width: 100px!important;
   width: 150px;
   padding: 0;
   z-index: 2;
@@ -527,6 +528,19 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 }
 
 .NordChannelItem {
+  padding-left: 2px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 2px 0 2px;
+  line-height: 20px;
+  min-height: 35px;
+  min-width: 150px !important;
+  width: 200px;
+  padding: 0;
+  z-index: 2;
+  transition: opacity 100ms ease-in-out;
+}
+.MaxChannelItem {
   padding-left: 2px;
   display: flex;
   flex-direction: column;
@@ -601,6 +615,7 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 .ChannelItemHeader-NameText {
   padding-left: 7px;
   font-size: 12px;
+  text-align: center;
   border: none;
   color: rgb(0, 0, 0);
   transition: all 500ms ease;
@@ -659,6 +674,10 @@ div.cm-s-_style_sc.CodeMirror-wrap {
 
 .ChannelItemHeader.Tidal {
   background: var(--tidal-color);
+}
+
+.ChannelItemHeader.Max {
+  background: var(--max-color);
 }
 
 .ChannelItemHeader.NordTidal {
