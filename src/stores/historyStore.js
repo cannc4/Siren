@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -11,6 +12,9 @@ import request from '../utils/request'
 const max_pattern_history = 10;
 
 class HistoryStore {
+    constructor() {
+        makeObservable(this);
+    }
 
     @observable channels_history = _.fill(Array(max_pattern_history), [])
 

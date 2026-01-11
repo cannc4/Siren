@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -15,6 +16,10 @@ import consoleStore from './consoleStore';
 import request from '../utils/request'
 
 class ChannelStore {
+    constructor() {
+        makeObservable(this);
+    }
+
     @observable channels = [{
         scene: 'default',
         activeSceneIndex: 0,

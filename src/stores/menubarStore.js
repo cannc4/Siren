@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
@@ -30,6 +31,7 @@ class MenubarStore {
 
     sc_log_socket = io('http://localhost:4002/');
     constructor() {
+        makeObservable(this);
         this.sc_log_socket.on('connect', (reason) => {
             this.server_info = 2;
         });

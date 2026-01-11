@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Route } from 'react-router-dom';
 
 import Home from './Home';
 import MenuBar from './MenuBar';
@@ -36,7 +35,7 @@ class App extends Component {
   }
 
   handleMenuAction = (action) => {
-    const { menubarStore, setupStore } = this.props;
+    const { setupStore } = this.props;
 
     switch (action) {
       case 'new-scene':
@@ -131,8 +130,8 @@ class App extends Component {
         )}
 
         {/* Main Application */}
-        <Route component={MenuBar} />
-        <Route component={Home} />
+        <MenuBar />
+        <Home />
 
         {/* Status Bar */}
         <StatusBar

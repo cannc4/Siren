@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
@@ -46,6 +47,7 @@ class RollStore {
     // }
 
     constructor() {
+        makeObservable(this);
         let ctx = this;
 
         // init tree

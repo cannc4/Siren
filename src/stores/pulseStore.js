@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 // import _ from 'lodash';
 import io from 'socket.io-client';
@@ -23,6 +24,7 @@ class PulseStore {
     link_pulse = io('http://localhost:4001/');
 
     constructor() {
+        makeObservable(this);
         const ctx = this;
         this.link_pulse.on('connect', (reason) => {
             console.log("Port 4001 Connected: ", reason);

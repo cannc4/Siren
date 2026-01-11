@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -13,6 +14,10 @@ import {
 
 class CellStore {
     @observable select_state = false;
+
+    constructor() {
+        makeObservable(this);
+    }
     @observable current_cell = [null, null];
     @observable init_selection_cell = [null, null];
     @observable last_selection_cell = [null, null];

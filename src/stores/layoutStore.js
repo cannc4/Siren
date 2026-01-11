@@ -1,7 +1,8 @@
 import {
   observable,
   action,
-  computed
+  computed,
+  makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -16,6 +17,7 @@ class LayoutStore {
   @observable customs;
 
   constructor() {
+    makeObservable(this);
     this.layouts = [];
     this.customs = [
       [],

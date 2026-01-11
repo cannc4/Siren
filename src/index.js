@@ -1,8 +1,8 @@
-import ReactDOM from 'react-dom';
-import promiseFinally from 'promise.prototype.finally';
 import React from 'react';
-import { HashRouter, Route } from 'react-router-dom';
-import { useStrict } from 'mobx';
+import { createRoot } from 'react-dom/client';
+import promiseFinally from 'promise.prototype.finally';
+import { HashRouter } from 'react-router-dom';
+import { configure } from 'mobx';
 import { Provider } from 'mobx-react';
 
 import './index.css';
@@ -47,12 +47,21 @@ const stores = {
 window.SIREN = stores;
 
 promiseFinally.shim();
-useStrict(false);
 
-ReactDOM.render((
+// MobX 6 configuration (replaces deprecated useStrict)
+configure({
+  enforceActions: 'never',
+  useProxies: 'ifavailable'
+});
+
+// React 18 createRoot API
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+root.render(
   <Provider {...stores}>
     <HashRouter>
       <App />
     </HashRouter>
   </Provider>
-), document.getElementById('root'));
+);

@@ -1,6 +1,7 @@
 import {
   observable,
-  action
+  action,
+  makeObservable
 } from 'mobx';
 
 // nodejs connections
@@ -11,6 +12,7 @@ class ConsoleStore {
   @observable tidal_text = '';
 
   constructor() {
+    makeObservable(this);
     this.load();
   }
 

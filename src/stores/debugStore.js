@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import io from 'socket.io-client';
 import _ from 'lodash';
@@ -12,6 +13,7 @@ class DebugStore {
     @observable msg = '';
 
     constructor() {
+        makeObservable(this);
         const ctx = this;
         this.sc_log.on('connect', (reason) => {
 

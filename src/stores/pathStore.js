@@ -1,6 +1,7 @@
 import {
   observable,
-  action
+  action,
+  makeObservable
 } from 'mobx';
 // import _ from 'lodash';
 
@@ -20,6 +21,7 @@ class PathStore {
   };
 
   constructor() {
+    makeObservable(this);
     this.load();
   }
 

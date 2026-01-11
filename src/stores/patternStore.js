@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -10,6 +11,10 @@ import _ from 'lodash';
 import sceneStore from './sceneStore'
 
 class PatternStore {
+    constructor() {
+        makeObservable(this);
+    }
+
     // reserved parameters for channels
     reserved_parameters = [{
             word: 't',

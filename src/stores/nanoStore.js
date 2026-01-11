@@ -1,5 +1,6 @@
 import {
-    action
+    action,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 import io from 'socket.io-client';
@@ -12,6 +13,7 @@ class NanoStore {
     nano = io('http://localhost:4005/');
 
     constructor() {
+        makeObservable(this);
         const ctx = this;
         ctx.nano.on('connect', (reason) => {
             console.log("KORG Socket Connected: ", reason);

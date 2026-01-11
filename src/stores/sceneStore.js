@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 
@@ -20,6 +21,7 @@ class SceneStore {
     @observable scene_mode = false;
 
     constructor() {
+        makeObservable(this);
         this.load();
     }
 

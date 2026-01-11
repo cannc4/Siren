@@ -1,7 +1,8 @@
 import {
     observable,
     action,
-    computed
+    computed,
+    makeObservable
 } from 'mobx';
 import _ from 'lodash';
 // nodejs connections
@@ -18,6 +19,7 @@ class GlobalStore {
     }]
 
     constructor() {
+       makeObservable(this);
        this.load();
     }
 
