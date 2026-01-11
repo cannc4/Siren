@@ -1,299 +1,313 @@
 #!/usr/bin/env node
 
 /**
- * Download Dependencies Script
+ * Download and Bundle Dependencies
  *
- * Downloads SuperCollider and portable GHC/Stack for bundling with Siren.
- * Run this before building the distributable.
+ * Downloads and extracts SuperCollider for bundling with Siren.
+ * For TidalCycles, we bundle GHCup and install on first run.
  */
 
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { execSync } = require('child_process');
-const os = require('os');
+const { execSync, spawn } = require('child_process');
 
-// Dependency versions
 const VERSIONS = {
-  supercollider: '3.13.0',
-  ghc: '9.4.8',
-  stack: '2.13.1',
-  cabal: '3.10.2.1'
+  supercollider: '3.13.0'
 };
 
-// Download URLs by platform
+// Direct download URLs for portable/extractable versions
 const DOWNLOADS = {
   darwin: {
     x64: {
-      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-macOS-x64.dmg`,
-      ghcup: 'https://downloads.haskell.org/~ghcup/x86_64-apple-darwin-ghcup'
+      // Use the signed release DMG
+      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-macOS-x64.dmg`
     },
     arm64: {
-      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-macOS-arm64.dmg`,
-      ghcup: 'https://downloads.haskell.org/~ghcup/aarch64-apple-darwin-ghcup'
+      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-macOS-arm64.dmg`
     }
   },
   win32: {
     x64: {
-      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-Windows-64bit.exe`,
-      ghcup: 'https://downloads.haskell.org/~ghcup/x86_64-mingw64-ghcup.exe'
+      // Windows ZIP for portable extraction
+      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-Windows-64bit-VS.zip`
     }
   },
   linux: {
     x64: {
-      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-Source.tar.bz2`,
-      ghcup: 'https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup'
+      // AppImage for portable Linux
+      supercollider: `https://github.com/supercollider/supercollider/releases/download/Version-${VERSIONS.supercollider}/SuperCollider-${VERSIONS.supercollider}-linux-jammy-gcc12-x64.AppImage`
     }
   }
 };
 
 const VENDOR_DIR = path.join(__dirname, '..', 'vendor');
 
-class DependencyDownloader {
-  constructor() {
-    this.platform = process.platform;
-    this.arch = process.arch;
-    this.vendorPath = path.join(VENDOR_DIR, this.platform, this.arch);
-  }
+async function downloadFile(url, destPath) {
+  return new Promise((resolve, reject) => {
+    console.log(`Downloading: ${url}`);
+    const file = fs.createWriteStream(destPath);
+    let redirects = 0;
 
-  async run() {
-    console.log('='.repeat(60));
-    console.log('Siren Dependency Downloader');
-    console.log('='.repeat(60));
-    console.log(`Platform: ${this.platform}`);
-    console.log(`Architecture: ${this.arch}`);
-    console.log(`Vendor directory: ${this.vendorPath}`);
-    console.log('');
+    const request = (reqUrl) => {
+      https.get(reqUrl, (response) => {
+        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+          if (++redirects > 5) return reject(new Error('Too many redirects'));
+          return request(response.headers.location);
+        }
+        if (response.statusCode !== 200) {
+          return reject(new Error(`HTTP ${response.statusCode}`));
+        }
 
-    // Create vendor directories
-    this.ensureDirectories();
+        const total = parseInt(response.headers['content-length'], 10);
+        let downloaded = 0;
 
-    // Check what we need to download
-    const downloads = DOWNLOADS[this.platform]?.[this.arch];
-
-    if (!downloads) {
-      console.error(`No downloads available for ${this.platform}-${this.arch}`);
-      console.log('');
-      console.log('Supported platforms:');
-      console.log('  - darwin-x64 (macOS Intel)');
-      console.log('  - darwin-arm64 (macOS Apple Silicon)');
-      console.log('  - win32-x64 (Windows 64-bit)');
-      console.log('  - linux-x64 (Linux 64-bit)');
-      process.exit(1);
-    }
-
-    console.log('The following components will be downloaded:');
-    console.log(`  - SuperCollider ${VERSIONS.supercollider}`);
-    console.log(`  - GHCup (for GHC ${VERSIONS.ghc} and Cabal)`);
-    console.log('');
-
-    try {
-      // Download and extract SuperCollider
-      await this.downloadSuperCollider(downloads.supercollider);
-
-      // Download GHCup
-      await this.downloadGhcup(downloads.ghcup);
-
-      // Create a README in vendor directory
-      this.createVendorReadme();
-
-      console.log('');
-      console.log('='.repeat(60));
-      console.log('Download complete!');
-      console.log('='.repeat(60));
-      console.log('');
-      console.log('Next steps:');
-      console.log('1. Run: npm run electron:build');
-      console.log('2. Find your distributable in the dist/ folder');
-
-    } catch (error) {
-      console.error('Download failed:', error.message);
-      process.exit(1);
-    }
-  }
-
-  ensureDirectories() {
-    const dirs = [
-      VENDOR_DIR,
-      this.vendorPath,
-      path.join(this.vendorPath, 'supercollider'),
-      path.join(this.vendorPath, 'haskell')
-    ];
-
-    for (const dir of dirs) {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-        console.log(`Created directory: ${dir}`);
-      }
-    }
-  }
-
-  async downloadSuperCollider(url) {
-    console.log('');
-    console.log('Downloading SuperCollider...');
-    console.log(`URL: ${url}`);
-
-    const scDir = path.join(this.vendorPath, 'supercollider');
-    const fileName = path.basename(url);
-    const downloadPath = path.join(scDir, fileName);
-
-    // Check if already downloaded
-    if (fs.existsSync(downloadPath)) {
-      console.log('SuperCollider already downloaded, skipping...');
-      return;
-    }
-
-    await this.downloadFile(url, downloadPath);
-
-    // Extract based on file type
-    if (fileName.endsWith('.dmg')) {
-      console.log('Note: DMG file downloaded. Manual extraction required:');
-      console.log(`  1. Mount: hdiutil attach "${downloadPath}"`);
-      console.log('  2. Copy SuperCollider.app to vendor/darwin/*/supercollider/');
-      console.log('  3. Unmount: hdiutil detach /Volumes/SuperCollider*');
-    } else if (fileName.endsWith('.exe')) {
-      console.log('Note: Installer downloaded. For portable extraction:');
-      console.log('  Consider using 7-Zip to extract the installer contents');
-    } else if (fileName.endsWith('.tar.bz2') || fileName.endsWith('.tar.gz')) {
-      console.log('Extracting archive...');
-      try {
-        execSync(`tar -xf "${downloadPath}" -C "${scDir}"`, { stdio: 'inherit' });
-        console.log('Extraction complete');
-      } catch (e) {
-        console.log('Note: Manual extraction may be required');
-      }
-    }
-  }
-
-  async downloadGhcup(url) {
-    console.log('');
-    console.log('Downloading GHCup...');
-    console.log(`URL: ${url}`);
-
-    const haskellDir = path.join(this.vendorPath, 'haskell');
-    const isWindows = this.platform === 'win32';
-    const fileName = isWindows ? 'ghcup.exe' : 'ghcup';
-    const downloadPath = path.join(haskellDir, fileName);
-
-    // Check if already downloaded
-    if (fs.existsSync(downloadPath)) {
-      console.log('GHCup already downloaded, skipping...');
-      return;
-    }
-
-    await this.downloadFile(url, downloadPath);
-
-    // Make executable on Unix
-    if (!isWindows) {
-      fs.chmodSync(downloadPath, 0o755);
-      console.log('Made ghcup executable');
-    }
-
-    console.log('');
-    console.log('Note: GHCup is a tool to install GHC and Cabal.');
-    console.log('For full Tidal support, users should run:');
-    console.log('  ./ghcup install ghc');
-    console.log('  ./ghcup install cabal');
-    console.log('  cabal install tidal');
-  }
-
-  downloadFile(url, destPath) {
-    return new Promise((resolve, reject) => {
-      const file = fs.createWriteStream(destPath);
-      let redirectCount = 0;
-      const maxRedirects = 5;
-
-      const doRequest = (reqUrl) => {
-        const protocol = reqUrl.startsWith('https') ? https : require('http');
-
-        protocol.get(reqUrl, (response) => {
-          // Handle redirects
-          if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-            redirectCount++;
-            if (redirectCount > maxRedirects) {
-              reject(new Error('Too many redirects'));
-              return;
-            }
-            console.log(`Redirecting to: ${response.headers.location}`);
-            doRequest(response.headers.location);
-            return;
+        response.on('data', (chunk) => {
+          downloaded += chunk.length;
+          if (total) {
+            const pct = Math.floor((downloaded / total) * 100);
+            process.stdout.write(`\rProgress: ${pct}% (${(downloaded / 1024 / 1024).toFixed(1)}MB)`);
           }
-
-          if (response.statusCode !== 200) {
-            reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
-            return;
-          }
-
-          const totalSize = parseInt(response.headers['content-length'], 10);
-          let downloadedSize = 0;
-          let lastProgress = 0;
-
-          response.on('data', (chunk) => {
-            downloadedSize += chunk.length;
-            if (totalSize) {
-              const progress = Math.floor((downloadedSize / totalSize) * 100);
-              if (progress >= lastProgress + 10) {
-                process.stdout.write(`\rProgress: ${progress}%`);
-                lastProgress = progress;
-              }
-            }
-          });
-
-          response.pipe(file);
-
-          file.on('finish', () => {
-            file.close();
-            console.log('\nDownload complete');
-            resolve();
-          });
-        }).on('error', (err) => {
-          fs.unlink(destPath, () => {});
-          reject(err);
         });
-      };
 
-      doRequest(url);
-    });
-  }
+        response.pipe(file);
+        file.on('finish', () => { file.close(); console.log('\nDone.'); resolve(); });
+      }).on('error', reject);
+    };
+    request(url);
+  });
+}
 
-  createVendorReadme() {
-    const readme = `# Siren Vendor Dependencies
+async function extractDMG(dmgPath, destDir) {
+  console.log('Extracting DMG (macOS)...');
+  const mountPoint = '/tmp/siren-sc-mount';
 
-This directory contains bundled dependencies for Siren.
+  try {
+    // Mount DMG
+    execSync(`hdiutil attach "${dmgPath}" -mountpoint "${mountPoint}" -nobrowse -quiet`);
 
-## Contents
+    // Find and copy SuperCollider.app
+    const scApp = path.join(mountPoint, 'SuperCollider.app');
+    if (fs.existsSync(scApp)) {
+      execSync(`cp -R "${scApp}" "${destDir}/"`);
+      console.log('Copied SuperCollider.app');
+    }
 
-- \`supercollider/\` - SuperCollider ${VERSIONS.supercollider}
-- \`haskell/\` - GHCup and Haskell tools
+    // Unmount
+    execSync(`hdiutil detach "${mountPoint}" -quiet`);
 
-## Platform: ${this.platform}-${this.arch}
-
-Generated on: ${new Date().toISOString()}
-
-## Notes
-
-For a fully functional installation, users may need to:
-
-1. **SuperCollider**: Install SuperDirt quark
-   - Open SuperCollider
-   - Run: \`Quarks.install("SuperDirt")\`
-   - Recompile class library
-
-2. **TidalCycles**: Install Tidal
-   - Run: \`cabal update && cabal install tidal\`
-
-## License
-
-SuperCollider: GPL v3+
-GHC/Cabal: BSD-style license
-`;
-
-    const readmePath = path.join(this.vendorPath, 'README.md');
-    fs.writeFileSync(readmePath, readme);
-    console.log('Created vendor README');
+    // Remove DMG to save space
+    fs.unlinkSync(dmgPath);
+    console.log('SuperCollider extracted successfully');
+    return true;
+  } catch (e) {
+    console.error('DMG extraction failed:', e.message);
+    try { execSync(`hdiutil detach "${mountPoint}" -quiet 2>/dev/null`); } catch {}
+    return false;
   }
 }
 
-// Run the downloader
-const downloader = new DependencyDownloader();
-downloader.run().catch(console.error);
+async function extractZip(zipPath, destDir) {
+  console.log('Extracting ZIP...');
+  try {
+    // Try unzip first, fall back to PowerShell on Windows
+    if (process.platform === 'win32') {
+      execSync(`powershell -command "Expand-Archive -Path '${zipPath}' -DestinationPath '${destDir}' -Force"`, { stdio: 'inherit' });
+    } else {
+      execSync(`unzip -o "${zipPath}" -d "${destDir}"`, { stdio: 'inherit' });
+    }
+    fs.unlinkSync(zipPath);
+    console.log('Extracted successfully');
+    return true;
+  } catch (e) {
+    console.error('ZIP extraction failed:', e.message);
+    return false;
+  }
+}
+
+async function setupLinuxAppImage(appImagePath, destDir) {
+  console.log('Setting up AppImage...');
+  try {
+    fs.chmodSync(appImagePath, 0o755);
+    // Move to final location
+    const finalPath = path.join(destDir, 'SuperCollider.AppImage');
+    fs.renameSync(appImagePath, finalPath);
+
+    // Create wrapper scripts
+    const sclangWrapper = `#!/bin/bash
+DIR="$(cd "$(dirname "$0")" && pwd)"
+"$DIR/SuperCollider.AppImage" --sclang "$@"
+`;
+    const scsynthWrapper = `#!/bin/bash
+DIR="$(cd "$(dirname "$0")" && pwd)"
+"$DIR/SuperCollider.AppImage" --scsynth "$@"
+`;
+    fs.writeFileSync(path.join(destDir, 'sclang'), sclangWrapper, { mode: 0o755 });
+    fs.writeFileSync(path.join(destDir, 'scsynth'), scsynthWrapper, { mode: 0o755 });
+    console.log('AppImage setup complete');
+    return true;
+  } catch (e) {
+    console.error('AppImage setup failed:', e.message);
+    return false;
+  }
+}
+
+async function downloadSuperCollider(platform, arch) {
+  const downloads = DOWNLOADS[platform]?.[arch];
+  if (!downloads?.supercollider) {
+    console.log(`No SuperCollider download for ${platform}-${arch}`);
+    return false;
+  }
+
+  const vendorPath = path.join(VENDOR_DIR, platform, arch, 'supercollider');
+  fs.mkdirSync(vendorPath, { recursive: true });
+
+  // Check if already extracted
+  const checkPaths = {
+    darwin: path.join(vendorPath, 'SuperCollider.app'),
+    win32: path.join(vendorPath, 'sclang.exe'),
+    linux: path.join(vendorPath, 'SuperCollider.AppImage')
+  };
+
+  if (fs.existsSync(checkPaths[platform])) {
+    console.log('SuperCollider already bundled, skipping...');
+    return true;
+  }
+
+  const url = downloads.supercollider;
+  const ext = path.extname(url);
+  const tempFile = path.join(vendorPath, `sc-download${ext}`);
+
+  await downloadFile(url, tempFile);
+
+  // Extract based on platform
+  if (platform === 'darwin') {
+    return extractDMG(tempFile, vendorPath);
+  } else if (platform === 'win32') {
+    return extractZip(tempFile, vendorPath);
+  } else if (platform === 'linux') {
+    return setupLinuxAppImage(tempFile, vendorPath);
+  }
+}
+
+function createTidalInstaller(platform, arch) {
+  // Create a first-run installer script for TidalCycles
+  const vendorPath = path.join(VENDOR_DIR, platform, arch);
+  fs.mkdirSync(vendorPath, { recursive: true });
+
+  const isWindows = platform === 'win32';
+  const scriptExt = isWindows ? '.ps1' : '.sh';
+  const scriptPath = path.join(vendorPath, `install-tidal${scriptExt}`);
+
+  const unixScript = `#!/bin/bash
+set -e
+
+echo "==================================="
+echo "TidalCycles Installer for Siren"
+echo "==================================="
+echo ""
+
+# Check for existing GHCup
+if command -v ghcup &> /dev/null; then
+    echo "GHCup found, using existing installation..."
+else
+    echo "Installing GHCup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh
+    source ~/.ghcup/env
+fi
+
+echo ""
+echo "Installing GHC and Cabal..."
+ghcup install ghc --set
+ghcup install cabal --set
+
+echo ""
+echo "Installing TidalCycles..."
+cabal update
+cabal install tidal --lib
+
+echo ""
+echo "==================================="
+echo "TidalCycles installed successfully!"
+echo "==================================="
+echo ""
+echo "Next: Install SuperDirt in SuperCollider:"
+echo "  1. Open SuperCollider"
+echo "  2. Run: Quarks.install(\\"SuperDirt\\")"
+echo "  3. Recompile class library (Cmd+Shift+L / Ctrl+Shift+L)"
+`;
+
+  const windowsScript = `# TidalCycles Installer for Siren (Windows)
+
+Write-Host "===================================" -ForegroundColor Cyan
+Write-Host "TidalCycles Installer for Siren" -ForegroundColor Cyan
+Write-Host "===================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Check for GHCup
+$ghcup = Get-Command ghcup -ErrorAction SilentlyContinue
+if (-not $ghcup) {
+    Write-Host "Installing GHCup..." -ForegroundColor Yellow
+    Set-ExecutionPolicy Bypass -Scope Process -Force
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+    Invoke-WebRequest https://www.haskell.org/ghcup/sh/bootstrap-haskell.ps1 -OutFile bootstrap-haskell.ps1
+    ./bootstrap-haskell.ps1 -InstallStack -Minimal
+    Remove-Item bootstrap-haskell.ps1
+
+    # Refresh PATH
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+}
+
+Write-Host ""
+Write-Host "Installing GHC and Cabal..." -ForegroundColor Yellow
+ghcup install ghc --set
+ghcup install cabal --set
+
+Write-Host ""
+Write-Host "Installing TidalCycles..." -ForegroundColor Yellow
+cabal update
+cabal install tidal --lib
+
+Write-Host ""
+Write-Host "===================================" -ForegroundColor Green
+Write-Host "TidalCycles installed successfully!" -ForegroundColor Green
+Write-Host "===================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "Next: Install SuperDirt in SuperCollider:" -ForegroundColor Cyan
+Write-Host '  1. Open SuperCollider'
+Write-Host '  2. Run: Quarks.install("SuperDirt")'
+Write-Host '  3. Recompile class library (Ctrl+Shift+L)'
+`;
+
+  fs.writeFileSync(scriptPath, isWindows ? windowsScript : unixScript, { mode: isWindows ? 0o644 : 0o755 });
+  console.log(`Created Tidal installer: ${scriptPath}`);
+}
+
+async function main() {
+  const platform = process.argv[2] || process.platform;
+  const arch = process.argv[3] || process.arch;
+
+  console.log('='.repeat(50));
+  console.log('Siren Dependency Bundler');
+  console.log('='.repeat(50));
+  console.log(`Platform: ${platform}-${arch}`);
+  console.log('');
+
+  // Download and extract SuperCollider
+  console.log('--- SuperCollider ---');
+  await downloadSuperCollider(platform, arch);
+
+  // Create TidalCycles installer script
+  console.log('');
+  console.log('--- TidalCycles ---');
+  createTidalInstaller(platform, arch);
+
+  console.log('');
+  console.log('='.repeat(50));
+  console.log('Bundling complete!');
+  console.log('='.repeat(50));
+  console.log('');
+  console.log('Run: npm run electron:build');
+}
+
+main().catch(console.error);
