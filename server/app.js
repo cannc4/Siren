@@ -985,6 +985,31 @@ const Siren = () => {
         paths: undefined
       });
   });
+
+  // Auto-detect paths for SuperCollider and TidalCycles
+  app.post('/detect-paths', async (req, reply) => {
+    try {
+      const PathDetector = require('./lib/pathDetector');
+      const detector = new PathDetector();
+      const detected = await detector.detectAll();
+
+      console.log(' ## -->   Detected paths:', detected);
+      reply.status(200).json(detected);
+    } catch (error) {
+      console.error(' ## -->   Path detection error:', error);
+      reply.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get system health status
+  app.get('/health', (req, reply) => {
+    reply.status(200).json({
+      status: 'ok',
+      sclang: SirenComm.siren_console && SirenComm.siren_console.sc ? 'running' : 'stopped',
+      ghci: SirenComm.siren_console && SirenComm.siren_console.repl ? 'running' : 'stopped'
+    });
+  });
+
   // Save Scenes
   app.post('/scenes', (req, reply) => {
     const {

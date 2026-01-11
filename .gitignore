@@ -1,8 +1,51 @@
+# Dependencies
 node_modules/
 deps/
+
+# Build outputs
 build/
-config/
+dist/
+*.asar
+
+# Vendor binaries (downloaded on demand)
+vendor/darwin/
+vendor/win32/
+vendor/linux/
+
+# Server build and runtime
 server/public/
 server/build/
+
+# User data (generated at runtime)
+server/save/paths.json
+server/save/recordings/*.json
+
+# Lock files
 package-lock.json
+yarn.lock
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Electron
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm

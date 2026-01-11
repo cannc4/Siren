@@ -1,83 +1,203 @@
 {
-  "name": "Siren",
-  "version": "0.6.0",
+  "name": "siren",
+  "version": "1.0.0",
   "productName": "Siren",
+  "description": "Live Coding Music Interface - A tracker-based sequencer for TidalCycles and SuperCollider",
   "private": true,
-  "homepage": "https://github.com/inceio/Siren",
+  "main": "electron/main.js",
+  "homepage": "https://github.com/cannc4/Siren",
   "license": "MIT",
+  "author": {
+    "name": "Siren Contributors",
+    "email": "siren@example.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cannc4/Siren.git"
+  },
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
-    "custom-react-scripts": "^0.2.2",
-    "electron-packager": "^12.1.0",
-    "eslint": "^5.3.0",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-node": "^7.0.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-react": "^7.10.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "gh-pages": "^1.2.0",
-    "mocha": "^5.2.0"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-standard": "^5.0.0",
+    "mocha": "^10.2.0",
+    "wait-on": "^7.2.0"
   },
   "dependencies": {
     "abletonlink": "0.0.7",
-    "autogypi": "^0.2.2",
-    "axios": "^0.17.1",
-    "babel-plugin-styled-components": "^1.5.1",
-    "better-queue": "^3.8.7",
-    "codemirror": "^5.37.0",
-    "concurrently": "^3.5.1",
-    "electron": "^1.8.6",
-    "electron-dl": "^1.12.0",
-    "express": "^4.16.2",
+    "axios": "^1.6.2",
+    "babel-plugin-styled-components": "^2.1.4",
+    "better-queue": "^3.8.12",
+    "codemirror": "^5.65.16",
+    "electron-is-dev": "^2.0.0",
+    "electron-log": "^5.0.3",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
+    "express": "^4.18.2",
+    "glob": "^10.3.10",
     "gl-react": "^3.15.0",
     "gl-react-dom": "^3.15.0",
     "history": "4.7.2",
-    "jsonfile": "^4.0.0",
+    "jsonfile": "^6.1.0",
     "keymaster": "^1.6.2",
-    "korg-nano-kontrol": "^0.2.9",
-    "marked": "^0.3.6",
-    "mathjs": "^4.2.2",
-    "midi": "^0.9.5",
-    "midi-parser-js": "^3.1.4",
-    "mobx": "^3.4.1",
-    "mobx-react": "^4.3.5",
+    "lodash": "^4.17.21",
+    "marked": "^11.1.1",
+    "mathjs": "^12.2.1",
+    "mobx": "^6.12.0",
+    "mobx-react": "^9.1.0",
     "nanotimer": "^0.3.15",
-    "nbind": "^0.3.14",
-    "node-gyp": "^3.6.2",
-    "osc": "^2.2.1",
-    "prismjs": "^1.14.0",
-    "promise.prototype.finally": "^3.0.0",
-    "prop-types": "^15.5.10",
-    "query-string": "5.0.0",
-    "react": "^16.3.2",
-    "react-app-rewire-mobx": "^1.0.8",
-    "react-app-rewired": "^1.5.2",
-    "react-codemirror2": "^3.0.7",
-    "react-contextmenu": "^2.9.2",
-    "react-dom": "^16.3.2",
-    "react-draggable": "^3.0.5",
-    "react-grid-layout": "^0.16.6",
-    "react-router-dom": "4.2.2",
-    "react-scripts": "^1.1.4",
-    "react-selectable": "^2.0.0",
-    "reactjs-popup": "^1.1.1",
-    "styled-components": "3.1.6",
-    "superagent": "^3.8.3",
-    "superagent-promise": "^1.1.0",
-    "supercolliderjs": "^0.14.2",
+    "osc": "^2.4.4",
+    "prismjs": "^1.29.0",
+    "prop-types": "^15.8.1",
+    "query-string": "^8.1.0",
+    "react": "^18.2.0",
+    "react-app-rewired": "^2.2.1",
+    "react-codemirror2": "^7.3.0",
+    "react-contextmenu": "^2.14.0",
+    "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.6",
+    "react-grid-layout": "^1.4.4",
+    "react-router-dom": "^6.21.1",
+    "react-scripts": "^5.0.1",
+    "reactjs-popup": "^2.0.6",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
+    "styled-components": "^6.1.6",
+    "supercolliderjs": "^1.0.0",
     "tree-model": "^1.0.7",
-    "wait-on": "^2.1.0"
+    "which": "^4.0.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
-    "buildelectron": "electron-packager . Siren --ignore=node_modules/electron-*",
+    "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "sirenc": "concurrently \"node server/start.js\" \"BROWSER=none react-app-rewired start\" \"wait-on http://localhost:3000 && electron main.js \"",
-    "electron": "electron main.js ",
-    "siren": "node server/start.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "server": "node server/start.js",
+    "dev": "concurrently \"npm run server\" \"cross-env BROWSER=none npm start\"",
+    "electron:dev": "concurrently \"npm run server\" \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:start": "electron .",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:linux": "npm run build && electron-builder --linux",
+    "electron:build:all": "npm run build && electron-builder --mac --win --linux",
+    "dist": "npm run electron:build",
+    "dist:all": "npm run electron:build:all",
+    "postinstall": "node scripts/postinstall.js",
+    "download:deps": "node scripts/download-dependencies.js"
+  },
+  "build": {
+    "appId": "com.siren.livecoding",
+    "productName": "Siren",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build-resources"
+    },
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "server/**/*",
+      "config/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor/${os}/${arch}",
+        "to": "vendor",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "config",
+        "to": "config",
+        "filter": ["**/*"]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "build-resources/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build-resources/entitlements.mac.plist",
+      "entitlementsInherit": "build-resources/entitlements.mac.plist"
+    },
+    "win": {
+      "icon": "build-resources/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "build-resources/icon.png",
+      "category": "Audio",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build-resources/icon.ico",
+      "uninstallerIcon": "build-resources/icon.ico",
+      "installerHeaderIcon": "build-resources/icon.ico"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Siren - Loading</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #e8e8e8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .logo {
+      font-size: 72px;
+      font-weight: 300;
+      letter-spacing: 16px;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #00d9ff, #00ff88, #00d9ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    .loader {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+    }
+
+    .loader-bar {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      border-radius: 2px;
+      animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    .status {
+      font-size: 12px;
+      color: #666;
+      min-height: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 8px 0;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .status-item:nth-child(1) { animation-delay: 0.3s; }
+    .status-item:nth-child(2) { animation-delay: 0.8s; }
+    .status-item:nth-child(3) { animation-delay: 1.3s; }
+    .status-item:nth-child(4) { animation-delay: 1.8s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .check {
+      color: #00ff88;
+    }
+
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(0, 217, 255, 0.3);
+      border-top-color: #00d9ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .version {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">SIREN</div>
+    <div class="subtitle">Live Coding Interface</div>
+
+    <div class="loader">
+      <div class="loader-bar"></div>
+    </div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="check">&#10003;</span>
+        <span>Loading configuration</span>
+      </div>
+      <div class="status-item">
+        <span class="check">&#10003;</span>
+        <span>Starting audio server</span>
+      </div>
+      <div class="status-item">
+        <div class="spinner"></div>
+        <span>Initializing SuperCollider</span>
+      </div>
+      <div class="status-item">
+        <div class="spinner"></div>
+        <span>Connecting TidalCycles</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="version">v1.0.0</div>
+</body>
+</html>
