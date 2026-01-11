@@ -1240,7 +1240,56 @@ const Siren = () => {
     });
   }
   
-  // TODO: FIX 
+  // Restart SuperCollider
+  app.post('/restart-sc', async (req, reply) => {
+    try {
+      console.log(' ## -->   Restarting SuperCollider...');
+      // Get current config
+      const config = require('jsonfile').readFileSync('./server/save/paths.json');
+      if (SirenComm.siren_console && SirenComm.siren_console.sc) {
+        // Quit existing SC
+        SirenComm.siren_console.sendSCLang('0.exit;');
+        // Wait a bit then reinitialize
+        setTimeout(() => {
+          SirenComm.siren_console.initSCSynth(config, reply);
+        }, 2000);
+      } else {
+        SirenComm.siren_console = new REPL();
+        SirenComm.siren_console.initSCSynth(config, reply);
+      }
+    } catch (error) {
+      console.error(' ## -->   SC restart error:', error);
+      reply.sendStatus(500);
+    }
+  });
+
+  // Restart TidalCycles
+  app.post('/restart-tidal', async (req, reply) => {
+    try {
+      console.log(' ## -->   Restarting TidalCycles...');
+      const config = require('jsonfile').readFileSync('./server/save/paths.json');
+      if (SirenComm.siren_console && SirenComm.siren_console.repl) {
+        // Kill existing GHCi
+        SirenComm.siren_console.repl.kill();
+        // Wait a bit then respawn
+        setTimeout(() => {
+          SirenComm.siren_console.doSpawn(config);
+          SirenComm.siren_console.initGHC(config);
+          reply.sendStatus(200);
+        }, 1000);
+      } else {
+        SirenComm.siren_console = new REPL();
+        SirenComm.siren_console.doSpawn(config);
+        SirenComm.siren_console.initGHC(config);
+        reply.sendStatus(200);
+      }
+    } catch (error) {
+      console.error(' ## -->   Tidal restart error:', error);
+      reply.sendStatus(500);
+    }
+  });
+
+  // TODO: FIX
   app.get('/quit', (req, reply) => {
     try {
       stopSiren(req, reply);

@@ -1,0 +1,27 @@
+{
+  "scenes": [
+    {
+      "name": "Default Scene",
+      "channels": []
+    }
+  ],
+  "active_s": 0,
+  "patterns": [
+    {
+      "name": "bd",
+      "text": "sound \"bd\"",
+      "params": ""
+    },
+    {
+      "name": "hh",
+      "text": "sound \"hh*4\"",
+      "params": ""
+    },
+    {
+      "name": "sn",
+      "text": "sound \"~ sn\"",
+      "params": ""
+    }
+  ],
+  "channels": []
+}

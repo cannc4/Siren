@@ -7,8 +7,7 @@ import { Provider } from 'mobx-react';
 
 import './index.css';
 
-import Home from './components/Home';
-import MenuBar from './components/MenuBar';
+import App from './components/App';
 
 import cellStore from './stores/cellStore';
 import channelStore from './stores/channelStore';
@@ -24,6 +23,7 @@ import patternStore from './stores/patternStore';
 import pulseStore from './stores/pulseStore';
 import rollStore from './stores/rollStore';
 import sceneStore from './stores/sceneStore';
+import setupStore from './stores/setupStore';
 
 const stores = {
   layoutStore,
@@ -39,7 +39,8 @@ const stores = {
   globalStore,
   cellStore,
   nanoStore,
-  debugStore
+  debugStore,
+  setupStore
 };
 
 // For easier debugging
@@ -51,10 +52,7 @@ useStrict(false);
 ReactDOM.render((
   <Provider {...stores}>
     <HashRouter>
-      <div>
-        <Route component={MenuBar} />
-        <Route component={Home} />
-      </div>
+      <App />
     </HashRouter>
   </Provider>
 ), document.getElementById('root'));

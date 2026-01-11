@@ -1,1 +1,4 @@
-{"sc":"","tidal":""}
+{
+  "sc": "// SuperCollider Console\n// Enter SC code here\n",
+  "tidal": "-- TidalCycles Console\n-- Enter Tidal code here\n"
+}
